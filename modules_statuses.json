@@ -1,0 +1,7 @@
+{
+    "Leads": true,
+    "Crm": true,
+    "Dashboards": true,
+    "Finance": true,
+    "Auth": true
+}
