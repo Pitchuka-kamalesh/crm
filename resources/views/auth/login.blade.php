@@ -981,6 +981,27 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                             </svg>
                         </button>
+
+                        <!-- Predefined Role Logins (From master.roles & master.login) -->
+                        <div style="margin-top: 1.15rem; padding-top: 0.85rem; border-top: 1px dashed rgba(255,255,255,0.15);">
+                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #94a3b8; margin-bottom: 0.5rem; text-align: center;">
+                                Predefined Roles in Database (One-Click Test)
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; justify-content: center;">
+                                <button type="button" onclick="setRolePhone('9391364210')" style="background: rgba(37,99,235,0.2); border: 1px solid #3b82f6; color: #bfdbfe; padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;" title="CRM DEAN: Ganesh kumar">
+                                    👑 CRM DEAN (9391364210)
+                                </button>
+                                <button type="button" onclick="setRolePhone('7075624098')" style="background: rgba(16,185,129,0.2); border: 1px solid #10b981; color: #a7f3d0; padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;" title="CRM Incharge: Kamalesh">
+                                    👑 CRM Incharge (7075624098)
+                                </button>
+                                <button type="button" onclick="setRolePhone('9912996788')" style="background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; color: #fde68a; padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;" title="Admin / Employee: Y.BHANUPRASAD">
+                                    💼 Admin/Employee (9912996788)
+                                </button>
+                                <button type="button" onclick="setRolePhone('7780579012')" style="background: rgba(139,92,246,0.2); border: 1px solid #8b5cf6; color: #ddd6fe; padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;" title="Registered Candidate">
+                                    🎓 Student (7780579012)
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- STEP 2 PANE: VERIFY OTP (Opens after mobile number is submitted!) -->
@@ -1068,6 +1089,11 @@
         otpInputEl.addEventListener('input', function() {
             this.value = this.value.replace(/\D/g, '').slice(0, 6);
         });
+
+        function setRolePhone(phone) {
+            phoneInputEl.value = phone;
+            submitPhoneStep();
+        }
 
         function submitPhoneStep(isResend = false) {
             const cleanPhone = phoneInputEl.value.replace(/\D/g, '').slice(0, 10);
