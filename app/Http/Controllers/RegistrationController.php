@@ -76,6 +76,7 @@ class RegistrationController extends Controller
         $request->validate([
             'applicant_name' => ['nullable', 'string', 'max:150'],
             'name'           => ['nullable', 'string', 'max:150'],
+            'email'          => ['nullable', 'email', 'max:150'],
             'mobile'         => ['required', 'string'],
             'campus_id'      => ['required'],
             'country_id'     => ['nullable', 'integer'],
@@ -91,7 +92,7 @@ class RegistrationController extends Controller
         if (strlen($cleanMobile) > 10) {
             $cleanMobile = substr($cleanMobile, -10);
         }
-        $email = $cleanMobile . '@student.vignan.ac.in';
+        $email = trim($request->input('email') ?: ($cleanMobile . '@student.vignan.ac.in'));
         $defaultPassword = 'password';
 
         // Campus info
@@ -125,17 +126,18 @@ class RegistrationController extends Controller
         try {
             $inserted = DB::selectOne("
                 INSERT INTO crm.student_registration (
-                    name, phoneno, campuscode, countryid, stateid, programlevel, programid, branchid,
+                    name, phoneno, emailid, campuscode, countryid, stateid, programlevel, programid, branchid,
                     ableto, std_status, stage1, stage2, stage3, stage4, stage5, stage6, stage7, stage8,
                     log_userid, log_ipaddress, log_timestamp
                 ) VALUES (
-                    :name, :phoneno, :campuscode, :countryid, :stateid, :programlevel, :programid, :branchid,
+                    :name, :phoneno, :emailid, :campuscode, :countryid, :stateid, :programlevel, :programid, :branchid,
                     :ableto, 'Applied', 'not_paid', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA',
                     'SELF_REGISTER', :ip, NOW()
                 ) RETURNING applinano
             ", [
                 'name'         => $applicantName,
                 'phoneno'      => $cleanMobile,
+                'emailid'      => $email,
                 'campuscode'   => $campusCode,
                 'countryid'    => $countryId,
                 'stateid'      => $stateId,

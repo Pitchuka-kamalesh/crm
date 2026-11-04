@@ -535,6 +535,16 @@
                            class="input-text-field">
                 </div>
 
+                <!-- Email ID -->
+                <div>
+                    <input type="email" 
+                           name="email" 
+                           value="{{ old('email') }}" 
+                           required 
+                           placeholder="Email ID" 
+                           class="input-text-field">
+                </div>
+
                 <!-- 3. select campus | select country | State (from wireframe) -->
                 <div class="form-row-3col">
                     <select name="campus_id" required class="select-field">
