@@ -201,6 +201,18 @@
             gap: 0.85rem;
         }
 
+        .form-row-3col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row-3col {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .input-text-field {
             width: 100%;
             padding: 0.78rem 1rem;
@@ -498,95 +510,74 @@
                 </div>
             @endif
 
-            <form action="{{ route('register.post') }}" method="POST" class="reg-form">
+            <form action="{{ route('register.post') }}" method="POST" class="reg-form" id="admissionRegisterForm">
                 @csrf
                 <input type="hidden" name="program_level" id="input_program_level" value="UG">
+                <input type="hidden" name="mobile" value="{{ $prefilledPhone }}">
 
-                <!-- Applicant Full Name -->
+                <!-- 1. Ph no: 9912996788 (from wireframe) -->
+                <div style="padding-bottom: 0.65rem; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 1.05rem; font-weight: 800; color: #0b1e42;">
+                        Ph no: <span style="color: #2563eb; font-family: monospace;">{{ $prefilledPhone }}</span>
+                    </span>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.2rem 0.65rem; border-radius: 9999px;">
+                        ✔ Verified
+                    </span>
+                </div>
+
+                <!-- 2. Name as per SSC (from wireframe) -->
                 <div>
                     <input type="text" 
                            name="applicant_name" 
                            value="{{ old('applicant_name') }}" 
                            required 
-                           placeholder="Applicant's Full Name - As Per SSC Records" 
+                           placeholder="Name as per SSC" 
                            class="input-text-field">
                 </div>
 
-                <!-- Email Address -->
-                <div>
-                    <input type="email" 
-                           name="email" 
-                           value="{{ old('email') }}" 
-                           required 
-                           placeholder="Enter Your e-mail address" 
-                           class="input-text-field">
-                </div>
-
-                <!-- Mobile Number -->
-                <div class="phone-group-wrap">
-                    <span class="phone-flag-box">
-                        <span style="font-size:1.1rem;">🇮🇳</span> +91
-                    </span>
-                    <input type="tel" 
-                           name="mobile" 
-                           id="reg_mobile"
-                           value="{{ old('mobile', $prefilledPhone) }}" 
-                           required 
-                           maxlength="10" 
-                           placeholder="Enter Mobile No." 
-                           oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
-                           class="input-text-field phone-with-flag">
-                </div>
-
-                <!-- Password and Confirm Password -->
-                <div class="form-row-2col">
-                    <input type="password" 
-                           name="password" 
-                           required 
-                           placeholder="Password (min 8 char)" 
-                           class="input-text-field">
-
-                    <input type="password" 
-                           name="password_confirmation" 
-                           required 
-                           placeholder="Confirm Password" 
-                           class="input-text-field">
-                </div>
-
-                <!-- Select Campus & State -->
-                <div class="form-row-2col">
+                <!-- 3. select campus | select country | State (from wireframe) -->
+                <div class="form-row-3col">
                     <select name="campus_id" required class="select-field">
+                        <option value="">select campus</option>
                         @foreach($campuses as $campus)
-                            <option value="{{ $campus->campus_id }}" {{ old('campus_id') == $campus->campus_id ? 'selected' : '' }}>
-                                {{ $campus->campus_short_name }} ({{ $campus->city }})
+                            <option value="{{ $campus->campus_id }}" {{ old('campus_id', 1) == $campus->campus_id ? 'selected' : '' }}>
+                                {{ $campus->campus_short_name }}
                             </option>
                         @endforeach
                     </select>
 
-                    <select name="state" class="select-field">
-                        <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Telangana">Telangana</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Other States">Other State / UT</option>
+                    <select name="country_id" id="country_select" required class="select-field" onchange="filterStates(this.value)">
+                        <option value="">select country</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country->country_id }}" {{ old('country_id', 1) == $country->country_id ? 'selected' : '' }}>
+                                {{ $country->country_name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="state_id" id="state_select" required class="select-field">
+                        <option value="">State</option>
+                        @foreach($states as $st)
+                            <option value="{{ $st->state_id }}" data-country="{{ $st->country_id }}" {{ old('state_id', 1) == $st->state_id ? 'selected' : '' }}>
+                                {{ $st->state_name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
-                <!-- Choose Program Level (Pills) -->
+                <!-- 4. Undergrade | PG | Doctoral (from wireframe) -->
                 <div class="level-section">
-                    <label class="level-label">Choose Program Level</label>
                     <div class="level-pills-row">
-                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">Undergraduate</button>
-                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">Postgraduate</button>
+                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">Undergrade</button>
+                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">PG</button>
                         <button type="button" class="level-pill-btn" onclick="selectProgramLevel('Doctoral', this)">Doctoral</button>
                     </div>
                 </div>
 
-                <!-- Course & Specialization -->
+                <!-- 5. select program | select Branch (from wireframe) -->
                 <div class="form-row-2col">
                     <select name="progid" id="course_select" required class="select-field" onchange="updateBranches(this.value)">
-                        <option value="">Select Course</option>
+                        <option value="">select program</option>
                         @foreach($programs as $prog)
                             <option value="{{ $prog->program_id }}" data-level="{{ $prog->program_level }}" {{ old('progid') == $prog->program_id ? 'selected' : '' }}>
                                 {{ $prog->program_short_name }} - {{ $prog->program_long_name }}
@@ -595,7 +586,7 @@
                     </select>
 
                     <select name="branch_id" id="branch_select" class="select-field">
-                        <option value="">Specialization</option>
+                        <option value="">select Branch</option>
                         @foreach($branches as $branch)
                             <option value="{{ $branch->branch_id }}" data-prog="{{ $branch->program_id }}" {{ old('branch_id') == $branch->branch_id ? 'selected' : '' }}>
                                 {{ $branch->branch_long_name }}
@@ -604,23 +595,17 @@
                     </select>
                 </div>
 
-                <!-- Captcha Mock Checkbox -->
-                <div class="captcha-card">
-                    <label class="captcha-checkbox-label">
-                        <input type="checkbox" name="captcha_verified" checked required>
-                        <span>I'm not a robot</span>
+                <!-- 6. [✓] Vignan able to use my data (from wireframe) -->
+                <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.35rem 0.2rem;">
+                    <input type="checkbox" name="ableto" id="ableto" value="1" checked required style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                    <label for="ableto" style="font-size: 0.88rem; font-weight: 600; color: #1e293b; cursor: pointer;">
+                        Vignan able to use my data
                     </label>
-                    <div class="captcha-badge-secure">
-                        <svg width="22" height="22" fill="none" stroke="#2563eb" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
-                        <span>SECURE</span>
-                    </div>
                 </div>
 
-                <!-- Submit Button -->
-                <button type="submit" class="btn-register-submit">
-                    <span>Register Now &rarr;</span>
+                <!-- 7. Register Button Save (from wireframe) -->
+                <button type="submit" class="btn-register-submit" id="btnSubmit">
+                    <span>Register Button Save</span>
                 </button>
 
                 <div class="login-back-link">
@@ -631,18 +616,19 @@
 
     </main>
 
-    <!-- Dynamic Course & Branch Scripts -->
+    <!-- Dynamic Course, Branch & State Scripts -->
     <script>
         const allPrograms = @json($programs);
         const allBranches = @json($branches);
+        const allStates   = @json($states);
 
         function selectProgramLevel(level, btnEl) {
             document.querySelectorAll('.level-pill-btn').forEach(b => b.classList.remove('pill-active'));
-            btnEl.classList.add('pill-active');
+            if (btnEl) btnEl.classList.add('pill-active');
             document.getElementById('input_program_level').value = level;
 
             const courseSelect = document.getElementById('course_select');
-            courseSelect.innerHTML = '<option value="">Select Course</option>';
+            courseSelect.innerHTML = '<option value="">select program</option>';
 
             const filterLevel = (level === 'Doctoral') ? ['PhD', 'Doctoral'] : [level];
             const filtered = allPrograms.filter(p => filterLevel.includes(p.program_level));
@@ -664,7 +650,7 @@
 
         function updateBranches(progId) {
             const branchSelect = document.getElementById('branch_select');
-            branchSelect.innerHTML = '<option value="">Specialization</option>';
+            branchSelect.innerHTML = '<option value="">select Branch</option>';
 
             if (!progId) return;
 
@@ -676,6 +662,7 @@
                     opt.textContent = b.branch_long_name;
                     branchSelect.appendChild(opt);
                 });
+                branchSelect.value = filtered[0].branch_id;
             } else {
                 const opt = document.createElement('option');
                 opt.value = 1;
@@ -684,11 +671,37 @@
             }
         }
 
-        // Initialize with default UG level
+        function filterStates(countryId) {
+            const stateSelect = document.getElementById('state_select');
+            if (!stateSelect) return;
+            const previousVal = stateSelect.value;
+            stateSelect.innerHTML = '<option value="">State</option>';
+
+            const filtered = allStates.filter(s => String(s.country_id) === String(countryId));
+            filtered.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.state_id;
+                opt.textContent = s.state_name;
+                stateSelect.appendChild(opt);
+            });
+
+            if (filtered.some(s => String(s.state_id) === String(previousVal))) {
+                stateSelect.value = previousVal;
+            } else if (filtered.length > 0) {
+                stateSelect.value = filtered[0].state_id;
+            }
+        }
+
+        // Initialize with default UG level & Country
         document.addEventListener('DOMContentLoaded', () => {
+            const countryEl = document.getElementById('country_select');
+            if (countryEl && countryEl.value) {
+                filterStates(countryEl.value);
+            }
+
             const currentLevel = document.getElementById('input_program_level').value || 'UG';
             const activeBtn = Array.from(document.querySelectorAll('.level-pill-btn'))
-                .find(b => b.textContent.toLowerCase().includes(currentLevel.toLowerCase()));
+                .find(b => b.textContent.toLowerCase().includes(currentLevel.toLowerCase()) || (currentLevel === 'UG' && b.textContent.toLowerCase().includes('undergrade')));
             if (activeBtn) {
                 selectProgramLevel(currentLevel, activeBtn);
             }

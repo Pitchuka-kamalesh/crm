@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -81,7 +82,10 @@ class LoginController extends Controller
             $sessionOtp = session('dev_otp');
             $sessionPhone = session('otp_phone');
 
-            $dbOtp = LoginOtp::where('identifier', $cleanPhone)
+            $dbOtp = LoginOtp::where(function ($q) use ($cleanPhone) {
+                    $q->where('identifier', $cleanPhone)
+                      ->orWhere('identifier', 'like', "%{$cleanPhone}");
+                })
                 ->where('otp_code', $otp)
                 ->where('is_used', false)
                 ->where('expires_at', '>=', now())
@@ -104,14 +108,44 @@ class LoginController extends Controller
             // Check if this mobile number has completed registration with their Name & Details
             $isFirstTime = false;
             if (!$user) {
-                $isFirstTime = true;
-            } else {
-                $studentRec = StudentRegistration::where('mobile', $cleanPhone)
-                    ->orWhere('register_no', $user->usercode)
-                    ->orWhere('application_no', $user->usercode)
-                    ->first();
-                if (!$studentRec || empty($studentRec->student_name) || str_starts_with($studentRec->student_name, 'Candidate ')) {
+                $crmStudent = null;
+                try {
+                    $crmStudent = DB::table('crm.student_registration')
+                        ->where('phoneno', $cleanPhone)
+                        ->orWhere('phoneno', 'like', "%{$cleanPhone}")
+                        ->first();
+                } catch (\Throwable $e) {}
+
+                $admStudent = null;
+                try {
+                    $admStudent = StudentRegistration::where('mobile', $cleanPhone)
+                        ->orWhere('mobile', 'like', "%{$cleanPhone}")
+                        ->first();
+                } catch (\Throwable $e) {}
+
+                if ((!$crmStudent || empty($crmStudent->name)) && (!$admStudent || empty($admStudent->student_name))) {
                     $isFirstTime = true;
+                }
+            } else {
+                $studentRec = null;
+                try {
+                    $studentRec = StudentRegistration::where('mobile', $cleanPhone)
+                        ->orWhere('register_no', $user->usercode)
+                        ->orWhere('application_no', $user->usercode)
+                        ->first();
+                } catch (\Throwable $e) {}
+
+                if (!$studentRec || empty($studentRec->student_name) || str_starts_with($studentRec->student_name, 'Candidate ')) {
+                    $crmStudent = null;
+                    try {
+                        $crmStudent = DB::table('crm.student_registration')
+                            ->where('phoneno', $cleanPhone)
+                            ->first();
+                    } catch (\Throwable $e) {}
+
+                    if (!$crmStudent || empty($crmStudent->name)) {
+                        $isFirstTime = true;
+                    }
                 }
             }
 
@@ -164,6 +198,9 @@ class LoginController extends Controller
         }
 
         // Authenticate user
+        if (!$user) {
+            $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawPhone) ?: $this->provisionCandidateStudent($cleanPhone);
+        }
         Auth::login($user);
         if ($request->hasSession()) {
             $request->session()->regenerate();
@@ -209,7 +246,8 @@ class LoginController extends Controller
 
         $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawPhone);
 
-        $targetUsercode = $user ? $user->usercode : ('APPLICANT_' . $cleanPhone);
+        // Foreign key fk_login_otp_usercode requires usercode to exist in master.login or be null.
+        $targetUsercode = $user ? $user->usercode : null;
         $targetName = $user ? $user->name : 'Prospective Applicant';
         $targetRole = $user ? $user->role_label : 'New Candidate';
 
@@ -246,7 +284,7 @@ class LoginController extends Controller
                     phone: $cleanPhone,
                     otp: $otp,
                     user: $targetName,
-                    registerNo: $targetUsercode,
+                    registerNo: $user ? $user->usercode : $cleanPhone,
                     ip: $request->ip()
                 );
             }
@@ -262,23 +300,29 @@ class LoginController extends Controller
                     phone: $cleanPhone,
                     otp: $otp,
                     user: $targetName,
-                    registerNo: $targetUsercode
+                    registerNo: $user ? $user->usercode : $cleanPhone
                 );
             }
         } catch (Exception $e) {
             Log::info('SMS dispatch info: ' . $e->getMessage());
         }
 
-        return response()->json([
+        $responseData = [
             'success' => true,
             'message' => "OTP sent successfully to +91 {$cleanPhone}.",
             'is_registered' => ($user !== null),
             'user' => [
                 'name' => $targetName,
-                'usercode' => $targetUsercode,
+                'usercode' => $targetUsercode ?? $cleanPhone,
                 'role' => $targetRole,
             ],
-        ]);
+        ];
+
+        if (config('app.debug')) {
+            $responseData['dev_otp'] = $otp;
+        }
+
+        return response()->json($responseData);
     }
 
     /**
@@ -335,27 +379,58 @@ class LoginController extends Controller
             // master.employees query skipped if error
         }
 
-        // Look up registered student
-        $student = StudentRegistration::where('mobile', $cleanPhone)
-            ->orWhere('mobile', 'like', "%{$cleanPhone}%")
-            ->orWhere('register_no', $rawPhone)
-            ->orWhere('application_no', $rawPhone)
-            ->first();
+        // Look up registered student in admissions.student_registrations
+        try {
+            $student = StudentRegistration::where('mobile', $cleanPhone)
+                ->orWhere('mobile', 'like', "%{$cleanPhone}%")
+                ->orWhere('register_no', $rawPhone)
+                ->orWhere('application_no', $rawPhone)
+                ->first();
 
-        if ($student) {
-            $userCode = $student->register_no ?: $student->application_no;
-            return User::firstOrCreate(
-                ['usercode' => $userCode],
-                [
-                    'phnno' => $cleanPhone ?: $student->mobile,
-                    'personalmail' => $student->personal_email,
-                    'user_type' => 1,
-                    'is_active' => true,
-                    'role_id' => 1,
-                    'pwd' => bcrypt('123456'),
-                    'log_timestamp' => now(),
-                ]
-            );
+            if ($student) {
+                $userCode = $student->register_no ?: $student->application_no;
+                return User::firstOrCreate(
+                    ['usercode' => $userCode],
+                    [
+                        'phnno' => $cleanPhone ?: $student->mobile,
+                        'personalmail' => $student->personal_email,
+                        'user_type' => 1,
+                        'is_active' => true,
+                        'role_id' => 1,
+                        'pwd' => bcrypt('123456'),
+                        'log_timestamp' => now(),
+                    ]
+                );
+            }
+        } catch (\Throwable $e) {
+            // admissions.student_registrations query skipped if error
+        }
+
+        // Look up registered student in crm.student_registration
+        try {
+            $crmStudent = DB::table('crm.student_registration')
+                ->where('phoneno', $cleanPhone)
+                ->orWhere('phoneno', 'like', "%{$cleanPhone}%")
+                ->orWhere('applinano', $rawPhone)
+                ->first();
+
+            if ($crmStudent && !empty($crmStudent->applinano)) {
+                return User::firstOrCreate(
+                    ['usercode' => $crmStudent->applinano],
+                    [
+                        'phnno' => $cleanPhone ?: $crmStudent->phoneno,
+                        'personalmail' => $crmStudent->emailid,
+                        'user_type' => 1,
+                        'is_active' => true,
+                        'role_id' => 1,
+                        'campus_id' => (string)($crmStudent->campuscode ?: '1'),
+                        'pwd' => bcrypt('123456'),
+                        'log_timestamp' => now(),
+                    ]
+                );
+            }
+        } catch (\Throwable $e) {
+            // crm.student_registration query skipped if error
         }
 
         return null;

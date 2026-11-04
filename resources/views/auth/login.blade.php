@@ -1114,6 +1114,9 @@
                 }
 
                 if (data && data.success) {
+                    if (data.dev_otp) {
+                        console.log('%c[DEV OTP CODE] ' + data.dev_otp, 'background: #2563eb; color: #fff; font-weight: bold; font-size: 13px; padding: 3px 6px; border-radius: 4px;');
+                    }
                     const msgText = document.getElementById('otp-sent-message');
                     if (msgText) {
                         msgText.textContent = '✔ Verification OTP sent to your WhatsApp / SMS.';
