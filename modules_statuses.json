@@ -3,5 +3,6 @@
     "Crm": true,
     "Dashboards": true,
     "Finance": true,
-    "Auth": true
+    "Auth": true,
+    "Sms": true
 }

@@ -35,4 +35,25 @@ return [
         ],
     ],
 
+    'smartping' => [
+        'url' => env('SMARTPING_API_URL', 'https://backend.api-wa.co/campaign/smartping/api/v2'),
+        'api_key' => env('SMARTPING_API_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhYTNjOTIwOTk0NDg2MTM0ZjNiZDE0ZiIsIm5hbWUiOiJWaWduYW4gVW5pdmVyc2l0eSBUZWNoIiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjZhYTNjOTIwOTk0NDg2MTM0ZjNiZDE0OCIsImFjdGl2ZVBsYW4iOiJQUk9fTU9OVEhMWSIsImlhdCI6MTc4OTExOTk3M30.nn4R60DwW9HbNBrpfjwJstXeephZrQssorJnQSsRaxg'),
+        'user_name' => env('SMARTPING_USER_NAME', 'Vignan University Tech'),
+        'source' => env('SMARTPING_SOURCE', 'new-landing-page form'),
+        'otp_campaign' => env('SMARTPING_OTP_CAMPAIGN', 'vimsgridonetimepp'),
+        'otp_mode' => env('SMARTPING_OTP_MODE', 'ONE_VAR'),
+        'admission_campaign' => env('SMARTPING_ADMISSION_CAMPAIGN', 'crmfirstinfo'),
+    ],
+
+    'jiocx_sms' => [
+        'url' => env('JIOCX_SMS_URL', 'https://smsapi.jiocx.com/apggw/vignans/sms/v1/send'),
+        'username' => env('JIOCX_SMS_USERNAME', 'jiocx-vignans'),
+        'password' => env('JIOCX_SMS_PASSWORD', ''),
+        'sender_id' => env('JIOCX_SMS_SENDER_ID', 'VIGNAN'),
+        'dlt_entity_id' => env('JIOCX_DLT_ENTITY_ID', '1101385640000011255'),
+        'template_otp' => env('JIOCX_TEMPLATE_ID_OTP', '1777179265526294215'),
+        'template_create_account' => env('JIOCX_DLT_TEMPLATE_ID_Create_Account'),
+        'template_admission' => env('JIOCX_DLT_TEMPLATE_ID_ADMISSION', '1777179354065677511'),
+    ],
+
 ];
