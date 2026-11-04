@@ -117,10 +117,36 @@ class User extends Authenticatable
         return $this->usercode;
     }
 
+    public function getActiveRoleId(): int
+    {
+        $sessionRole = session('user.role_id');
+        if (!empty($sessionRole)) {
+            return (int) $sessionRole;
+        }
+
+        if (!empty($this->role_id)) {
+            return (int) $this->role_id;
+        }
+
+        if ($this->employee && !empty($this->employee->role_id)) {
+            return (int) $this->employee->role_id;
+        }
+
+        return $this->user_type === 2 ? 1 : 5;
+    }
+
     public function getRoleLabelAttribute(): string
     {
+        $roleId = $this->getActiveRoleId();
+        try {
+            $role = \Illuminate\Support\Facades\DB::table('master.roles')->where('role_id', $roleId)->first();
+            if ($role && !empty($role->role_name)) {
+                return $role->role_name;
+            }
+        } catch (\Throwable $e) {}
+
         return match ($this->user_type) {
-            2 => 'Faculty / Staff',
+            2 => 'Employee',
             1 => 'Student',
             default => 'User',
         };

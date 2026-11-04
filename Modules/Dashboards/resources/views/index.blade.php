@@ -675,7 +675,7 @@
         $student = $user?->student ?? \App\Models\StudentRegistration::where('register_no', $user?->usercode)->orWhere('application_no', $user?->usercode)->first();
         $employee = $user?->employee;
         $displayName = $employee?->full_name ?? $student?->student_name ?? $user?->name ?? $user?->usercode;
-        $roleName = $user?->user_type === 2 ? 'Faculty / Staff' : 'Student Candidate';
+        $roleName = $user?->role_label ?? ($user?->user_type === 2 ? 'Employee' : 'Student Candidate');
         $appNo = $student?->application_no ?? ($employee ? 'EMP-' . $employee->emp_code : '2026-APP-' . ($user?->usercode ?? '001'));
         $regNo = $student?->register_no ?? $employee?->emp_code ?? $user?->usercode;
         $programCode = $student?->program?->program_short_name ?? ($student?->progid == 1 ? 'MBA' : ($student?->progid == 2 ? 'MCA' : ($student?->progid == 3 ? 'BBA' : ($student?->progid == 4 ? 'BCA' : ($employee ? 'Academic Affairs' : 'Degree')))));
@@ -707,6 +707,10 @@
                 <div class="user-avatar-circle">
                     {{ strtoupper(substr($displayName, 0, 1)) }}
                 </div>
+
+                <a href="{{ route('crm.index') }}" class="btn-signout" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;text-decoration:none;" title="CRM Executive Portal">
+                    <span>👑 CRM Portal</span>
+                </a>
 
                 <a href="{{ route('sms.index') }}" class="btn-signout" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;text-decoration:none;" title="SMS and WhatsApp Tracker">
                     <span>💬 SMS Tracker</span>

@@ -27,14 +27,44 @@ class LoginController extends Controller
     public function showLoginForm(): View|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('dashboards.index');
+            return redirect($this->getLandingUrlForUser(Auth::user()));
         }
 
-        // Fetch sample mobile numbers for test helper / demo buttons
-        $sampleUsers = User::whereNotNull('phnno')
-            ->where('is_active', true)
-            ->take(3)
-            ->get(['usercode', 'phnno', 'user_type']);
+        // Predefined roles & test logins from master.roles and master.login
+        $sampleUsers = [
+            [
+                'role' => 'CRM DEAN',
+                'role_id' => 3,
+                'name' => 'Ganesh kumar',
+                'usercode' => '03434',
+                'phone' => '9391364210',
+                'landing' => '/crms',
+            ],
+            [
+                'role' => 'CRM Incharge',
+                'role_id' => 2,
+                'name' => 'Kamalesh',
+                'usercode' => '03141',
+                'phone' => '7075624098',
+                'landing' => '/crms',
+            ],
+            [
+                'role' => 'Admin / Employee',
+                'role_id' => 1,
+                'name' => 'Y.BHANUPRASAD',
+                'usercode' => '02598',
+                'phone' => '9912996788',
+                'landing' => '/dashboards',
+            ],
+            [
+                'role' => 'Student Candidate',
+                'role_id' => 5,
+                'name' => 'Registered Candidate',
+                'usercode' => '20########',
+                'phone' => '7780579012',
+                'landing' => '/dashboards',
+            ],
+        ];
 
         return view('auth.login', compact('sampleUsers'));
     }
@@ -82,15 +112,17 @@ class LoginController extends Controller
             $sessionOtp = session('dev_otp');
             $sessionPhone = session('otp_phone');
 
-            $dbOtp = LoginOtp::where(function ($q) use ($cleanPhone) {
-                    $q->where('identifier', $cleanPhone)
-                      ->orWhere('identifier', 'like', "%{$cleanPhone}");
-                })
-                ->where('otp_code', $otp)
-                ->where('is_used', false)
-                ->where('expires_at', '>=', now())
-                ->latest('otp_id')
-                ->first();
+            $dbOtp = null;
+            try {
+                $dbOtp = LoginOtp::where(function ($q) use ($cleanPhone) {
+                        $q->where('identifier', $cleanPhone)
+                          ->orWhere('identifier', 'like', "%{$cleanPhone}");
+                    })
+                    ->where('otp_code', $otp)
+                    ->where('expires_at', '>=', now())
+                    ->latest('otp_id')
+                    ->first();
+            } catch (\Throwable $e) {}
 
             $isValid = ($dbOtp !== null) || ($sessionOtp && $otp === (string)$sessionOtp && $sessionPhone === $cleanPhone) || ($otp === '123456');
 
@@ -100,14 +132,30 @@ class LoginController extends Controller
                 ]);
             }
 
-            if ($dbOtp) {
-                $dbOtp->update(['is_used' => true]);
-            }
             session()->forget(['dev_otp', 'otp_phone']);
 
-            // Check if this mobile number has completed registration with their Name & Details
+            // Check if user is a predefined employee / staff or has a predefined role
+            $isPredefinedStaff = false;
+            if ($user && ($user->user_type == 2 || $user->employee !== null || in_array((int)$user->role_id, [1, 2, 3, 4]))) {
+                $isPredefinedStaff = true;
+            } else {
+                try {
+                    $empCount = DB::table('master.employees')
+                        ->where('phone_primary', $cleanPhone)
+                        ->orWhere('phone_secondary', $cleanPhone)
+                        ->orWhere('emp_code', $rawPhone)
+                        ->count();
+                    if ($empCount > 0) {
+                        $isPredefinedStaff = true;
+                    }
+                } catch (\Throwable $e) {}
+            }
+
+            // Predefined roles in the database must NEVER be redirected to registration!
             $isFirstTime = false;
-            if (!$user) {
+            if ($isPredefinedStaff) {
+                $isFirstTime = false;
+            } elseif (!$user) {
                 $crmStudent = null;
                 try {
                     $crmStudent = DB::table('crm.student_registration')
@@ -149,7 +197,7 @@ class LoginController extends Controller
                 }
             }
 
-            // On first mobile login: redirect student to the main registration page
+            // On first mobile login of prospective student: redirect student to the main registration page
             if ($isFirstTime) {
                 session(['verified_phone' => $cleanPhone]);
                 return redirect()->route('register', ['phone' => $cleanPhone])
@@ -199,24 +247,25 @@ class LoginController extends Controller
 
         // Authenticate user
         if (!$user) {
-            $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawPhone) ?: $this->provisionCandidateStudent($cleanPhone);
+            $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawPhone);
         }
-        Auth::login($user);
+
+        if (!$user) {
+            return back()->withInput()->withErrors([
+                'phone' => 'User account not found. Please register.',
+            ]);
+        }
+
+        Auth::login($user, $remember);
         if ($request->hasSession()) {
             $request->session()->regenerate();
         }
 
-        try {
-            $user->update([
-                'last_login_at' => now(),
-                'log_ipaddress' => $request->ip(),
-            ]);
-        } catch (Exception $e) {
-            Log::warning('Could not update last_login_at: ' . $e->getMessage());
-        }
+        // Direct to role-based landing page without updating any database tables
+        $landingUrl = $this->getLandingUrlForUser($user);
 
-        return redirect()->intended(route('dashboards.index'))
-            ->with('status', 'Welcome back, ' . $user->name . '!');
+        return redirect()->intended($landingUrl)
+            ->with('status', 'Welcome back, ' . $user->name . ' (' . $user->role_label . ')!');
     }
 
     /**
@@ -334,8 +383,59 @@ class LoginController extends Controller
         Auth::login($user);
         request()->session()->regenerate();
 
-        return redirect()->route('dashboards.index')
+        return redirect($this->getLandingUrlForUser($user))
             ->with('status', 'Signed in as ' . $user->name . ' (' . $user->role_label . ')');
+    }
+
+    /**
+     * Determine the role-appropriate landing page URL.
+     */
+    public function getLandingUrlForUser(User $user): string
+    {
+        $roleId = $user->getActiveRoleId();
+
+        // 1. CRM DEAN (role_id 3) & CRM Incharge (role_id 2) -> CRM Dashboard
+        if ($roleId === 2 || $roleId === 3) {
+            return route('crm.index');
+        }
+
+        // 2. Tele Caller (role_id 4) -> Leads Dashboard
+        if ($roleId === 4) {
+            return route('leads.index');
+        }
+
+        // 3. Employee / Admin (role_id 1 or user_type 2)
+        if ($user->user_type === 2 || $roleId === 1) {
+            return route('crm.index');
+        }
+
+        // 4. Default Student (role_id 5 or user_type 1) -> Student Admission Portal
+        return route('dashboards.index');
+    }
+
+    /**
+     * Switch active role in session without touching or modifying database tables.
+     */
+    public function switchRole(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'role_id' => ['required', 'integer', 'in:1,2,3,4,5'],
+        ]);
+
+        $roleId = (int) $request->input('role_id');
+        session(['user.role_id' => $roleId]);
+
+        $role = DB::table('master.roles')->where('role_id', $roleId)->first();
+        $roleName = $role ? $role->role_name : 'Role ' . $roleId;
+
+        $targetUrl = match ($roleId) {
+            2, 3 => route('crm.index'),
+            4 => route('leads.index'),
+            1 => route('crm.index'),
+            default => route('dashboards.index'),
+        };
+
+        return redirect($targetUrl)->with('status', "Switched active view to: {$roleName}");
     }
 
     /**
@@ -360,9 +460,10 @@ class LoginController extends Controller
                 ->first();
 
             if ($employee) {
-                return User::firstOrCreate(
-                    ['usercode' => $employee->emp_code],
-                    [
+                $user = User::where('usercode', $employee->emp_code)->first();
+                if (!$user) {
+                    $user = new User([
+                        'usercode' => $employee->emp_code,
                         'phnno' => $cleanPhone ?: $employee->phone_primary,
                         'officialmail' => $employee->ofc_mailid,
                         'personalmail' => $employee->personal_mailid,
@@ -370,10 +471,9 @@ class LoginController extends Controller
                         'is_active' => (bool)$employee->is_active,
                         'role_id' => $employee->role_id ?: 1,
                         'campus_id' => (string)($employee->campus_id ?: '1'),
-                        'pwd' => bcrypt('123456'),
-                        'log_timestamp' => now(),
-                    ]
-                );
+                    ]);
+                }
+                return $user;
             }
         } catch (\Throwable $e) {
             // master.employees query skipped if error
@@ -389,18 +489,18 @@ class LoginController extends Controller
 
             if ($student) {
                 $userCode = $student->register_no ?: $student->application_no;
-                return User::firstOrCreate(
-                    ['usercode' => $userCode],
-                    [
+                $user = User::where('usercode', $userCode)->first();
+                if (!$user) {
+                    $user = new User([
+                        'usercode' => $userCode,
                         'phnno' => $cleanPhone ?: $student->mobile,
                         'personalmail' => $student->personal_email,
                         'user_type' => 1,
                         'is_active' => true,
-                        'role_id' => 1,
-                        'pwd' => bcrypt('123456'),
-                        'log_timestamp' => now(),
-                    ]
-                );
+                        'role_id' => 5,
+                    ]);
+                }
+                return $user;
             }
         } catch (\Throwable $e) {
             // admissions.student_registrations query skipped if error
@@ -415,19 +515,19 @@ class LoginController extends Controller
                 ->first();
 
             if ($crmStudent && !empty($crmStudent->applinano)) {
-                return User::firstOrCreate(
-                    ['usercode' => $crmStudent->applinano],
-                    [
+                $user = User::where('usercode', $crmStudent->applinano)->first();
+                if (!$user) {
+                    $user = new User([
+                        'usercode' => $crmStudent->applinano,
                         'phnno' => $cleanPhone ?: $crmStudent->phoneno,
                         'personalmail' => $crmStudent->emailid,
                         'user_type' => 1,
                         'is_active' => true,
-                        'role_id' => 1,
+                        'role_id' => 5,
                         'campus_id' => (string)($crmStudent->campuscode ?: '1'),
-                        'pwd' => bcrypt('123456'),
-                        'log_timestamp' => now(),
-                    ]
-                );
+                    ]);
+                }
+                return $user;
             }
         } catch (\Throwable $e) {
             // crm.student_registration query skipped if error
@@ -437,47 +537,19 @@ class LoginController extends Controller
     }
 
     /**
-     * Provision candidate student in admissions.student_registrations and master.login.
+     * In-memory student representation without modifying database tables.
      */
     protected function provisionCandidateStudent(string $cleanPhone): User
     {
-        $appNo = 'VU2026-' . substr($cleanPhone, -6);
         $regNo = '261FA' . substr($cleanPhone, -5);
 
-        // Check or create student registration
-        $student = StudentRegistration::firstOrCreate(
-            ['mobile' => $cleanPhone],
-            [
-                'application_no' => $appNo,
-                'register_no'    => $regNo,
-                'student_name'   => 'Candidate ' . substr($cleanPhone, -4),
-                'dob'            => '2008-01-01',
-                'gender'         => 'Male',
-                'regulation'     => 'R25',
-                'admyear'        => 2026,
-                'adm_batch_code' => '2026-27',
-                'lock_status'    => 0,
-                'log_userid'     => $appNo,
-                'log_ipaddress'  => request()->ip(),
-                'log_timestamp'  => now(),
-            ]
-        );
-
-        $appNo = $student->application_no ?: $appNo;
-        $userCode = $student->register_no ?: $appNo;
-
-        // Create or find User in master.login
-        return User::firstOrCreate(
-            ['usercode' => $userCode],
-            [
-                'phnno'         => $cleanPhone,
-                'user_type'     => 1, // Student
-                'is_active'     => true,
-                'role_id'       => 1,
-                'pwd'           => bcrypt('123456'),
-                'log_timestamp' => now(),
-            ]
-        );
+        return new User([
+            'usercode'  => $regNo,
+            'phnno'     => $cleanPhone,
+            'user_type' => 1,
+            'is_active' => true,
+            'role_id'   => 5,
+        ]);
     }
 
     /**

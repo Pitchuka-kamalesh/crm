@@ -525,17 +525,7 @@
                     </span>
                 </div>
 
-                <!-- 2. Name as per SSC (from wireframe) -->
-                <div>
-                    <input type="text" 
-                           name="applicant_name" 
-                           value="{{ old('applicant_name') }}" 
-                           required 
-                           placeholder="Name as per SSC" 
-                           class="input-text-field">
-                </div>
-
-                <!-- 3. select campus | select country | State (from wireframe) -->
+                <!-- 2. select campus | select country | State (from wireframe) -->
                 <div class="form-row-3col">
                     <select name="campus_id" required class="select-field">
                         <option value="">select campus</option>
@@ -565,7 +555,7 @@
                     </select>
                 </div>
 
-                <!-- 4. Undergrade | PG | Doctoral (from wireframe) -->
+                <!-- 3. Undergrade | PG | Doctoral (from wireframe) -->
                 <div class="level-section">
                     <div class="level-pills-row">
                         <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">Undergrade</button>
@@ -574,7 +564,7 @@
                     </div>
                 </div>
 
-                <!-- 5. select program | select Branch (from wireframe) -->
+                <!-- 4. select program | select Branch (from wireframe) -->
                 <div class="form-row-2col">
                     <select name="progid" id="course_select" required class="select-field" onchange="updateBranches(this.value)">
                         <option value="">select program</option>
@@ -593,6 +583,26 @@
                             </option>
                         @endforeach
                     </select>
+                </div>
+
+                <!-- 5. Name as per SSC -->
+                <div>
+                    <input type="text" 
+                           name="applicant_name" 
+                           value="{{ old('applicant_name') }}" 
+                           required 
+                           placeholder="Name as per SSC" 
+                           class="input-text-field">
+                </div>
+
+                <!-- Email ID -->
+                <div>
+                    <input type="email" 
+                           name="email" 
+                           value="{{ old('email') }}" 
+                           required 
+                           placeholder="Email ID" 
+                           class="input-text-field">
                 </div>
 
                 <!-- 6. [✓] Vignan able to use my data (from wireframe) -->
