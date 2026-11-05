@@ -302,16 +302,12 @@ class LoginController extends Controller
             ], 422);
         }
         $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawPhone);
-        if(config('app.is_login_bypass') === true and config('app.env') === 'local'){
-            return $this->bypassLoginAndRedirectHome($user);
-        }
         // Foreign key fk_login_otp_usercode requires usercode to exist in master.login or be null.
         $targetUsercode = $user ? $user->usercode : null;
         $targetName = $user ? $user->name : 'Prospective Applicant';
         $targetRole = $user ? $user->role_label : 'New Candidate';
         // Generate 6-digit OTP
         $otp = (string) mt_rand(100000, 999999);
-
         try {
             LoginOtp::create([
                 'usercode' => $targetUsercode,
@@ -327,15 +323,17 @@ class LoginController extends Controller
         } catch (Exception $e) {
             Log::warning('Error inserting into master.login_otp: ' . $e->getMessage());
         }
-//        if(config('app.is_login_bypass') === true and config('app.env') === 'local'){
-//            return $this->bypassLoginAndRedirectHome($user);
-//        }
+        if(config('app.is_login_bypass') === true and config('app.env') === 'local'){
+            return $this->bypassLoginAndRedirectHome($cleanPhone);
+        }
         // Save in session for dev preview / instant autofill
         session([
             'dev_otp' => $otp,
             'otp_phone' => $cleanPhone,
         ]);
-
+//        if(config('app.is_login_bypass') === true and config('app.env') === 'local'){
+//            return $this->bypassLoginAndRedirectHome($user);
+//        }
         // 1. Dispatch OTP via SmartPing WhatsApp API
         try {
             if (class_exists(WhatsAppService::class)) {
@@ -574,16 +572,19 @@ class LoginController extends Controller
     /**
      * Dev-only: Bypass OTP, log the user in, and redirect to dashboards.index
      */
-    private function bypassLoginAndRedirectHome(User $user_valid):JsonResponse
+    private function bypassLoginAndRedirectHome(String $pnno):JsonResponse
     {
+//        $user_url ='/';
         // 1. Try to find the user
-        $user = $user_valid ?? \App\Models\User::first();
+        $user = $this->resolveUserByPhoneOrCode($pnno,$pnno);
         // 3. Log the user in
         if ($user) {
             \Illuminate\Support\Facades\Auth::login($user);
             request()->session()->regenerate();
+            $user_url = $this->getLandingUrlForUser($user);
+        }else{
+            $user_url = route('register');
         }
-        $user_url = $this->getLandingUrlForUser($user_valid);
         // 4. Return the redirect response
         return response()->json([
             'success' => true,
