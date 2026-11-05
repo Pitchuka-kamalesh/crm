@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Campus;
+use App\Models\Country;
+use App\Models\CrmStudentRegistration;
 use App\Models\Program;
+use App\Models\State;
 use App\Models\StudentRegistration;
 use App\Models\User;
 use App\Services\SmsService;
@@ -35,30 +38,25 @@ class RegistrationController extends Controller
             }
         }
 
-        $campuses = DB::table('master.campuses')
-            ->where('is_active', true)
+        $campuses = Campus::where('is_active', true)
             ->select('campus_id', 'campus_code', 'campus_short_name', 'campus_long_name')
             ->orderBy('campus_id')
             ->get();
 
-        $countries = DB::table('crm.countries')
-            ->select('country_id', 'country_code', 'country_name', 'country_phonecode')
+        $countries = Country::select('country_id', 'country_code', 'country_name', 'country_phonecode')
             ->orderBy('country_id')
             ->get();
 
-        $states = DB::table('crm.states')
-            ->select('state_id', 'state_code', 'state_name', 'country_id')
+        $states = State::select('state_id', 'state_code', 'state_name', 'country_id')
             ->orderBy('state_name')
             ->get();
 
-        $programs = DB::table('master.programs')
-            ->select('program_id', 'program_level', 'program_short_name', 'program_long_name')
+        $programs = Program::select('program_id', 'program_level', 'program_short_name', 'program_long_name')
             ->orderBy('program_level')
             ->orderBy('program_id')
             ->get();
 
-        $branches = DB::table('master.branches')
-            ->select('branch_id', 'program_id', 'branch_short_name', 'branch_long_name')
+        $branches = Branch::select('branch_id', 'program_id', 'branch_short_name', 'branch_long_name')
             ->orderBy('branch_long_name')
             ->get();
 
@@ -96,7 +94,7 @@ class RegistrationController extends Controller
         $defaultPassword = 'password';
 
         // Campus info
-        $campus = DB::table('master.campuses')->where('campus_id', $request->campus_id)->first();
+        $campus = Campus::where('campus_id', $request->campus_id)->first();
         $campusCode = $campus ? $campus->campus_code : 'VDM';
         $campusName = $campus ? $campus->campus_short_name : 'Vignan Main Campus (Vadlamudi)';
 
@@ -110,31 +108,19 @@ class RegistrationController extends Controller
         $ableTo = $request->boolean('ableto', true);
 
         // Program and branch names for notifications
-        $programName = DB::table('master.programs')
-            ->where('program_id', $progId)
+        $programName = Program::where('program_id', $progId)
             ->value('program_long_name') ?? 'Bachelor / Master Program';
 
         $branchName = 'General Core';
         if ($branchId) {
-            $branchName = DB::table('master.branches')
-                ->where('branch_id', $branchId)
+            $branchName = Branch::where('branch_id', $branchId)
                 ->value('branch_long_name') ?? 'General Core';
         }
 
-        // 1. Insert into crm.student_registration
+        // 1. Insert into crm.student_registration via Eloquent
         $appliNano = null;
         try {
-            $inserted = DB::selectOne("
-                INSERT INTO crm.student_registration (
-                    name, phoneno, emailid, campuscode, countryid, stateid, programlevel, programid, branchid,
-                    ableto, std_status, stage1, stage2, stage3, stage4, stage5, stage6, stage7, stage8,
-                    log_userid, log_ipaddress, log_timestamp
-                ) VALUES (
-                    :name, :phoneno, :emailid, :campuscode, :countryid, :stateid, :programlevel, :programid, :branchid,
-                    :ableto, 'Applied', 'not_paid', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA',
-                    'SELF_REGISTER', :ip, NOW()
-                ) RETURNING applinano
-            ", [
+            $crmRecord = CrmStudentRegistration::create([
                 'name'         => $applicantName,
                 'phoneno'      => $cleanMobile,
                 'emailid'      => $email,
@@ -144,30 +130,40 @@ class RegistrationController extends Controller
                 'programlevel' => $dbProgLevel,
                 'programid'    => $progId,
                 'branchid'     => $branchId,
-                'ableto'       => $ableTo ? 'true' : 'false',
-                'ip'           => $request->ip(),
+                'ableto'       => $ableTo,
+                'std_status'   => 'Applied',
+                'stage1'       => 'not_paid',
+                'stage2'       => 'NA',
+                'stage3'       => 'NA',
+                'stage4'       => 'NA',
+                'stage5'       => 'NA',
+                'stage6'       => 'NA',
+                'stage7'       => 'NA',
+                'stage8'       => 'NA',
+                'log_userid'   => 'SELF_REGISTER',
+                'log_ipaddress'=> $request->ip(),
+                'log_timestamp'=> now(),
             ]);
 
-            if ($inserted && isset($inserted->applinano)) {
-                $appliNano = $inserted->applinano;
+            if ($crmRecord && !empty($crmRecord->applinano)) {
+                $appliNano = $crmRecord->applinano;
             }
         } catch (Exception $e) {
-            Log::error('[RegistrationController] crm.student_registration error: ' . $e->getMessage());
+            Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
         }
 
         if (!$appliNano) {
             $appliNano = '20' . date('ymd') . mt_rand(100, 999);
         }
 
-        // 2. Insert into admissions.student_registrations
-        $programCode = DB::table('master.programs')
-            ->where('program_id', $progId)
+        // 2. Insert into admissions.student_registrations via Eloquent
+        $programCode = Program::where('program_id', $progId)
             ->value('program_seprt_code') ?? 'CK';
         $regNo = '261' . $programCode . mt_rand(10000, 99999);
         $enrollmentNo = 'Jan-26-' . Str::random(10);
 
         try {
-            DB::table('admissions.student_registrations')->updateOrInsert(
+            StudentRegistration::updateOrCreate(
                 ['application_no' => $appliNano],
                 [
                     'enrollment_no'  => $enrollmentNo,
@@ -255,8 +251,7 @@ class RegistrationController extends Controller
      */
     public function getBranches(int $programId): JsonResponse
     {
-        $branches = DB::table('master.branches')
-            ->where('program_id', $programId)
+        $branches = Branch::where('program_id', $programId)
             ->select('branch_id', 'branch_code', 'branch_short_name', 'branch_long_name')
             ->orderBy('branch_long_name')
             ->get();

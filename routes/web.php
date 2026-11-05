@@ -29,3 +29,17 @@ Route::get('/crm', [\Modules\Crm\Http\Controllers\CrmController::class, 'index']
 Route::get('/crm/index', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/stddata', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.stddata');
 Route::get('/crm/stdsearch', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.stdsearch');
+
+// Leads aliases matching master.menus controller_ref
+Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
+Route::get('/leads/allottedleads', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allotted');
+Route::get('/leads/leadsallocation', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allocation');
+
+// Finance aliases matching master.menus controller_ref
+Route::get('/finance/index', [\Modules\Finance\Http\Controllers\FinanceController::class, 'index'])->middleware('auth');
+Route::get('/finance/paiddetails', [\Modules\Finance\Http\Controllers\FinanceController::class, 'index'])->middleware('auth')->name('finance.paiddetails');
+
+// KPI aliases matching master.menus controller_ref
+Route::get('/kpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.index');
+Route::get('/kpi/index', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
+Route::get('/kpi/studentkpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.studentkpi');

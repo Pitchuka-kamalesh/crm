@@ -232,7 +232,7 @@ class CacheService
 
             $totalFirstYears = (clone $firstYearsQuery)->count();
 
-            $branchBreakdown = DB::table('users')
+            $branchBreakdown = User::query()
                 ->join('profiles', 'users.profile_id', '=', 'profiles.id')
                 ->leftJoin('departments', 'profiles.departments_id', '=', 'departments.code')
                 ->where('profiles.roles_id', 'stu')

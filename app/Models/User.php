@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -132,14 +133,28 @@ class User extends Authenticatable
             return (int) $this->employee->role_id;
         }
 
+        // Predefined staff role mapping without touching database tables
+        if ($this->usercode === '03141' || str_contains($this->officialmail ?? '', 'dean')) {
+            return 3; // CRM DEAN
+        }
+
+        if ($this->usercode === '03434' || str_contains($this->officialmail ?? '', 'mgt')) {
+            return 2; // CRM Incharge
+        }
+
         return $this->user_type === 2 ? 1 : 5;
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
 
     public function getRoleLabelAttribute(): string
     {
         $roleId = $this->getActiveRoleId();
         try {
-            $role = \Illuminate\Support\Facades\DB::table('master.roles')->where('role_id', $roleId)->first();
+            $role = Role::find($roleId);
             if ($role && !empty($role->role_name)) {
                 return $role->role_name;
             }
