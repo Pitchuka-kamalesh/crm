@@ -74,11 +74,17 @@ class LoginController extends Controller
      */
     public function login(Request $request): RedirectResponse
     {
-        $request->validate([
-            'phone' => ['required', 'string'],
-            'login_type' => ['nullable', 'string', 'in:password,otp'],
-        ]);
-
+        $request->validate(
+            [                                 // arg 1: rules
+                'phone' => ['required', 'digits:10', 'regex:/^[6-9][0-9]{9}$/'],
+                'login_type' => ['nullable', 'string', 'in:password,otp'],
+            ],
+            [                                 // arg 2: custom messages
+                'phone.required' => 'Mobile number is required.',
+                'phone.digits'   => 'Mobile number must contain exactly 10 digits.',
+                'phone.regex'    => 'Mobile number must start with 6, 7, 8, or 9.',
+            ]
+        );
         $rawPhone = trim($request->input('phone'));
         $cleanPhone = preg_replace('/\D/', '', $rawPhone);
         if (str_starts_with($cleanPhone, '91') && strlen($cleanPhone) > 10) {
@@ -274,7 +280,11 @@ class LoginController extends Controller
     public function sendOtp(Request $request): JsonResponse
     {
         $request->validate([
-            'phone' => ['required', 'string'],
+            'phone' => ['required', 'digits:10', 'regex:/^[6-9][0-9]{9}$/']
+        ],[                                 // arg 2: custom messages
+            'phone.required' => 'Mobile number is required.',
+            'phone.digits'   => 'Mobile number must contain exactly 10 digits.',
+            'phone.regex'    => 'Mobile number must start with 6, 7, 8, or 9.',
         ]);
 
         $rawPhone = trim($request->input('phone'));
@@ -285,21 +295,20 @@ class LoginController extends Controller
         if (strlen($cleanPhone) > 10) {
             $cleanPhone = substr($cleanPhone, 0, 10);
         }
-
         if (ctype_digit($rawPhone) && strlen($cleanPhone) !== 10) {
             return response()->json([
                 'success' => false,
                 'message' => 'Please enter a valid 10-digit mobile number.',
             ], 422);
         }
-
         $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawPhone);
-
+        if(config('app.is_login_bypass') === true and config('app.env') === 'local'){
+            return $this->bypassLoginAndRedirectHome($user);
+        }
         // Foreign key fk_login_otp_usercode requires usercode to exist in master.login or be null.
         $targetUsercode = $user ? $user->usercode : null;
         $targetName = $user ? $user->name : 'Prospective Applicant';
         $targetRole = $user ? $user->role_label : 'New Candidate';
-
         // Generate 6-digit OTP
         $otp = (string) mt_rand(100000, 999999);
 
@@ -318,7 +327,9 @@ class LoginController extends Controller
         } catch (Exception $e) {
             Log::warning('Error inserting into master.login_otp: ' . $e->getMessage());
         }
-
+//        if(config('app.is_login_bypass') === true and config('app.env') === 'local'){
+//            return $this->bypassLoginAndRedirectHome($user);
+//        }
         // Save in session for dev preview / instant autofill
         session([
             'dev_otp' => $otp,
@@ -366,10 +377,6 @@ class LoginController extends Controller
                 'role' => $targetRole,
             ],
         ];
-
-        if (config('app.debug')) {
-            $responseData['dev_otp'] = $otp;
-        }
 
         return response()->json($responseData);
     }
@@ -563,5 +570,26 @@ class LoginController extends Controller
 
         return redirect()->route('login')
             ->with('status', 'You have been signed out successfully.');
+    }
+    /**
+     * Dev-only: Bypass OTP, log the user in, and redirect to dashboards.index
+     */
+    private function bypassLoginAndRedirectHome(User $user_valid):JsonResponse
+    {
+        // 1. Try to find the user
+        $user = $user_valid ?? \App\Models\User::first();
+        // 3. Log the user in
+        if ($user) {
+            \Illuminate\Support\Facades\Auth::login($user);
+            request()->session()->regenerate();
+        }
+        $user_url = $this->getLandingUrlForUser($user_valid);
+        // 4. Return the redirect response
+        return response()->json([
+            'success' => true,
+            'bypass'  => true,
+            'redirect_url' => $user_url,
+            'message' => 'Dev Bypass: Logging you in...'
+        ]);
     }
 }

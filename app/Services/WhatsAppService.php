@@ -27,6 +27,7 @@ class WhatsAppService
         ?string $ip = null
     ): array {
         $cfg = config('services.smartping');
+        $app_name = config('app.name');
         $cleanPhone = $this->cleanDestination($phone);
 
         if (strlen($cleanPhone) !== 10) {
@@ -40,21 +41,26 @@ class WhatsAppService
 
         $apiUrl = $cfg['url'] ?? 'https://backend.api-wa.co/campaign/smartping/api/v2';
         $apiKey = $cfg['api_key'];
-        $campaign = $cfg['otp_campaign'] ?? 'vimsgridonetimepp';
+        $campaign = $cfg['otp_campaign'] ?? 'crmadm';
         $userName = $cfg['user_name'] ?? 'Vignan University Tech';
         $source = $cfg['source'] ?? 'new-landing-page form';
         $mode = strtoupper($cfg['otp_mode'] ?? 'ONE_VAR');
 
-        $var1OtpValue = "Welcome! Your VIMS Portal New OTP is: {$otp}";
-        $var2MatterText = 'Your Grid Value Reset OTP was processed successfully. Once reset, a PDF with your new Grid Values will be sent to your registered Vignan Outlook email. Please use the new values for future logins and follow the prescribed login steps.';
-        $messageText = "VIMS Portal Alert: {$var2MatterText} OTP: {$var1OtpValue}";
+//        dd($cfg);
+        $var1OtpValue = "Admission Portal login OTP is *{$otp}*";
+        $var2MatterText = match ($user) {
+            'admission' => 'Welcome to'.$app_name.' ! Please complete your basic details and proceed with the admission process.\n',
+
+            'crm' => 'Welcome to'.$app_name.'Please use this OTP to verify your employee account and proceed with the requested service.',
+            default => 'Please use this OTP to verify your account and complete the requested process.',
+        };
+        $messageText = "{$app_name} Alert: {$var2MatterText}  \nOTP: {$var1OtpValue}";
 
         $templateParams = match ($mode) {
-            'AUTH_OTP' => [$otp],
-            'TWO_VARS' => [$var1OtpValue, $var2MatterText],
-            default => [$var1OtpValue],
+            'ONE_VAR' => [$var1OtpValue],
+            'TWO_VARS' => [$messageText],
+            default => [$messageText]
         };
-
         $buttons = [];
         if ($mode === 'AUTH_OTP') {
             $buttons = [
