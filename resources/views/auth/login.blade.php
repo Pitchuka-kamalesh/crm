@@ -920,7 +920,7 @@
         <!-- Right Side: Clean White Login Card (Student Admission Access) -->
         <div class="login-card-wrapper">
             <div class="login-card">
-                
+
                 <!-- Card Header with Official Vignan Logo -->
                 <div class="card-logo-area">
                     <div class="crest-icon-box">
@@ -957,16 +957,16 @@
                             <label for="phone" class="form-label">Registered Mobile Number</label>
                             <div class="input-group">
                                 <span class="input-prefix">+91</span>
-                                <input type="tel" 
-                                       name="phone" 
-                                       id="phone" 
-                                       value="{{ old('phone') }}" 
-                                       required 
+                                <input type="tel"
+                                       name="phone"
+                                       id="phone"
+                                       value="{{ old('phone') }}"
+                                       required
                                        maxlength="10"
                                        inputmode="numeric"
                                        pattern="[0-9]{10}"
                                        autocomplete="tel"
-                                       placeholder="Enter 10-digit mobile number" 
+                                       placeholder="Enter 10-digit mobile number"
                                        oninput="this.value = this.value.replace(/\D/g, '').slice(0, 10)"
                                        onpaste="setTimeout(() => { this.value = this.value.replace(/\D/g, '').slice(0, 10); }, 0)"
                                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); submitPhoneStep(); }"
@@ -1000,13 +1000,13 @@
                                 </button>
                             </div>
                             <div class="input-group">
-                                <input type="text" 
-                                       name="otp" 
-                                       id="otp" 
+                                <input type="text"
+                                       name="otp"
+                                       id="otp"
                                        maxlength="6"
                                        inputmode="numeric"
                                        autocomplete="one-time-code"
-                                       placeholder="Enter 6-digit OTP" 
+                                       placeholder="Enter 6-digit OTP"
                                        class="input-control otp-input-field"
                                        oninput="this.value = this.value.replace(/\D/g, '').slice(0, 6)"
                                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); document.getElementById('btn-submit-login').click(); }">
@@ -1112,7 +1112,12 @@
                     alert(msg);
                     return;
                 }
-
+                if (data && data.bypass && data.redirect_url) {
+                    // Dev bypass is active! Redirect the browser manually.
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+                // 🚨 END OF BYPASS BLOCK 🚨
                 if (data && data.success) {
                     if (data.dev_otp) {
                         console.log('%c[DEV OTP CODE] ' + data.dev_otp, 'background: #2563eb; color: #fff; font-weight: bold; font-size: 13px; padding: 3px 6px; border-radius: 4px;');

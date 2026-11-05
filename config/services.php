@@ -40,7 +40,7 @@ return [
         'api_key' => env('SMARTPING_API_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhYTNjOTIwOTk0NDg2MTM0ZjNiZDE0ZiIsIm5hbWUiOiJWaWduYW4gVW5pdmVyc2l0eSBUZWNoIiwiYXBwTmFtZSI6IkFpU2Vuc3kiLCJjbGllbnRJZCI6IjZhYTNjOTIwOTk0NDg2MTM0ZjNiZDE0OCIsImFjdGl2ZVBsYW4iOiJQUk9fTU9OVEhMWSIsImlhdCI6MTc4OTExOTk3M30.nn4R60DwW9HbNBrpfjwJstXeephZrQssorJnQSsRaxg'),
         'user_name' => env('SMARTPING_USER_NAME', 'Vignan University Tech'),
         'source' => env('SMARTPING_SOURCE', 'new-landing-page form'),
-        'otp_campaign' => env('SMARTPING_OTP_CAMPAIGN', 'vimsgridonetimepp'),
+        'otp_campaign' => env('SMARTPING_OTP_CAMPAIGN', 'crmadm'),
         'otp_mode' => env('SMARTPING_OTP_MODE', 'ONE_VAR'),
         'admission_campaign' => env('SMARTPING_ADMISSION_CAMPAIGN', 'crmfirstinfo'),
     ],
