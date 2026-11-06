@@ -1,3 +1,11 @@
+<!-- Immediate Theme Preloader (Prevents Theme Flash) -->
+<script>
+    (function(){
+        document.documentElement.setAttribute('data-theme-color', localStorage.getItem('crm_theme_color') || 'red');
+        document.documentElement.setAttribute('data-theme-mode', localStorage.getItem('crm_theme_mode') || 'light');
+    })();
+</script>
+
 <!-- EXACT LMS/CRM PORTAL DARK SIDEBAR (MATCHING USER SCREENSHOT) -->
 <aside class="app-sidebar" id="appSidebar">
     <!-- 1. Top Brand Header -->
@@ -330,30 +338,57 @@
         @endif
     </div>
 
-    <!-- 4. Sidebar Footer with Sign Out -->
+    <!-- 4. Sidebar Footer (Appearance & Theme Controls - Matching Reference Image) -->
     <div class="sidebar-footer">
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="footer-logout-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                <span>Sign Out</span>
+        <div class="theme-section-title">APPEARANCE &amp; THEME</div>
+        <div class="theme-controls-capsule">
+            <!-- 4 Color Dots -->
+            <div class="theme-color-palette" role="radiogroup" aria-label="Color Palette">
+                <button type="button" class="theme-color-dot dot-red is-active" data-color="red" onclick="setAppThemeColor('red')" title="Red Theme" aria-label="Red Theme">
+                    <span class="theme-dot-check">✓</span>
+                </button>
+                <button type="button" class="theme-color-dot dot-blue" data-color="blue" onclick="setAppThemeColor('blue')" title="Blue Theme" aria-label="Blue Theme">
+                    <span class="theme-dot-check">✓</span>
+                </button>
+                <button type="button" class="theme-color-dot dot-green" data-color="green" onclick="setAppThemeColor('green')" title="Green Theme" aria-label="Green Theme">
+                    <span class="theme-dot-check">✓</span>
+                </button>
+                <button type="button" class="theme-color-dot dot-purple" data-color="purple" onclick="setAppThemeColor('purple')" title="Purple Theme" aria-label="Purple Theme">
+                    <span class="theme-dot-check">✓</span>
+                </button>
+            </div>
+
+            <!-- Divider Line -->
+            <div class="theme-capsule-divider"></div>
+
+            <!-- Light / Dark Mode Toggle -->
+            <button type="button" class="theme-mode-toggle" id="themeModeToggleBtn" onclick="toggleAppThemeMode()" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+                <div class="theme-mode-knob">
+                    <svg class="mode-icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4" fill="#f59e0b"></circle>
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path>
+                        <path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path>
+                        <path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                    <svg class="mode-icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="#93c5fd"></path>
+                    </svg>
+                </div>
             </button>
-        </form>
+        </div>
     </div>
 </aside>
 
-<!-- Interactive Accordion Script -->
+<!-- Interactive Accordion & Theme Management Scripts -->
 <script>
     function toggleAccordion(groupId) {
         const group = document.getElementById(groupId);
         if (!group) return;
-        const isOpen = group.classList.contains('open');
-        
-        // Optional: close siblings or keep multi-open
         group.classList.toggle('open');
     }
 
@@ -367,4 +402,60 @@
             }
         }
     }
+
+    // Appearance & Theme Management
+    (function() {
+        const DEFAULT_COLOR = 'red';
+        const DEFAULT_MODE = 'light';
+
+        function applyThemePreferences() {
+            const color = localStorage.getItem('crm_theme_color') || DEFAULT_COLOR;
+            const mode = localStorage.getItem('crm_theme_mode') || DEFAULT_MODE;
+            
+            document.documentElement.setAttribute('data-theme-color', color);
+            document.documentElement.setAttribute('data-theme-mode', mode);
+
+            // Update color dots UI
+            document.querySelectorAll('.theme-color-dot').forEach(dot => {
+                if (dot.getAttribute('data-color') === color) {
+                    dot.classList.add('is-active');
+                } else {
+                    dot.classList.remove('is-active');
+                }
+            });
+
+            // Update mode toggle UI
+            const toggleBtn = document.getElementById('themeModeToggleBtn');
+            if (toggleBtn) {
+                if (mode === 'dark') {
+                    toggleBtn.classList.add('is-dark');
+                } else {
+                    toggleBtn.classList.remove('is-dark');
+                }
+            }
+        }
+
+        window.setAppThemeColor = function(color) {
+            localStorage.setItem('crm_theme_color', color);
+            applyThemePreferences();
+        };
+
+        window.setAppThemeMode = function(mode) {
+            localStorage.setItem('crm_theme_mode', mode);
+            applyThemePreferences();
+        };
+
+        window.toggleAppThemeMode = function() {
+            const currentMode = document.documentElement.getAttribute('data-theme-mode') || DEFAULT_MODE;
+            const newMode = currentMode === 'dark' ? 'light' : 'dark';
+            window.setAppThemeMode(newMode);
+        };
+
+        // Run immediately
+        applyThemePreferences();
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyThemePreferences);
+        }
+    })();
 </script>

@@ -132,7 +132,7 @@
     .user-avatar-red {
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        background: linear-gradient(135deg, var(--theme-accent, #dc2626), var(--theme-accent-hover, #b91c1c));
         color: #ffffff;
         border-radius: 50%;
         display: flex;
@@ -141,8 +141,9 @@
         font-weight: 800;
         font-size: 0.88rem;
         line-height: 1;
-        box-shadow: 0 2px 5px rgba(220, 38, 38, 0.35);
+        box-shadow: 0 2px 5px var(--theme-accent-ring, rgba(220, 38, 38, 0.35));
         flex-shrink: 0;
+        transition: background 0.2s ease, box-shadow 0.2s ease;
     }
 
     .user-text-stack {
