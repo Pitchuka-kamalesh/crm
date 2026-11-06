@@ -655,7 +655,7 @@
         <div class="nav-inner">
             <a href="{{ route('sms.index') }}" class="brand-link">
                 <div class="brand-logo-box">
-                    <img src="/images/vignan-logo.png" alt="Vignan University">
+                    <img src="/images/vignan-shield-logo.png" alt="Vignan University">
                 </div>
                 <div class="brand-titles">
                     <span class="brand-main">Vignan University</span>
@@ -670,6 +670,7 @@
                     </svg>
                     <span>Back to Portal</span>
                 </a>
+                @include('layouts.role-switcher')
             </div>
         </div>
     </header>

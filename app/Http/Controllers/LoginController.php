@@ -585,7 +585,7 @@ class LoginController extends Controller
             request()->session()->regenerate();
             $user_url = $this->getLandingUrlForUser($user);
         }else{
-            $user_url = route('register');
+            $user_url = route('register',['phone' => $pnno]);
         }
         // 4. Return the redirect response
         return response()->json([
