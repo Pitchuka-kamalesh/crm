@@ -43,3 +43,12 @@ Route::get('/finance/paiddetails', [\Modules\Finance\Http\Controllers\FinanceCon
 Route::get('/kpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.index');
 Route::get('/kpi/index', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/kpi/studentkpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.studentkpi');
+
+// Student Admission Onboarding Step aliases matching master.menus controller_ref
+Route::get('/crm/stpstep2', fn() => redirect()->route('dashboards.index', ['step' => 2]))->middleware('auth');
+Route::get('/crm/stpstep3', fn() => redirect()->route('dashboards.index', ['step' => 3]))->middleware('auth');
+Route::get('/crm/stpstep4', fn() => redirect()->route('dashboards.index', ['step' => 4]))->middleware('auth');
+Route::get('/crm/stpstep5', fn() => redirect()->route('dashboards.index', ['step' => 5]))->middleware('auth');
+Route::get('/crm/stpstep6', fn() => redirect()->route('dashboards.index', ['step' => 6]))->middleware('auth');
+Route::get('/crm/stpstep7', fn() => redirect()->route('dashboards.index', ['step' => 7]))->middleware('auth');
+Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 8]))->middleware('auth');

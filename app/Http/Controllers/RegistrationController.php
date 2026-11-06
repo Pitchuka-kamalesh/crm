@@ -197,7 +197,7 @@ class RegistrationController extends Controller
                 'personalmail'   => $email,
                 'officialmail'   => $email,
                 'user_type'      => 1, // Student Candidate
-                'role_id'        => 1,
+                'role_id'        => 5, // Student role
                 'campus_id'      => (string) $request->campus_id,
                 'is_active'      => true,
                 'pwd'            => bcrypt($defaultPassword),
