@@ -356,7 +356,6 @@ class LoginController extends Controller
                 'message' => 'Please enter your registered mobile number or employee code.',
             ], 422);
         }
-
         if (strlen($cleanPhone) !== 10) {
             return response()->json([
                 'success' => false,
@@ -389,7 +388,12 @@ class LoginController extends Controller
             Log::warning('Error detecting/saving crm.leads in sendOtp: ' . $e->getMessage());
         }
 
-        $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawInput);
+        $user = null;
+        try {
+            $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawInput);
+        } catch (\Throwable $e) {
+            Log::warning('Error resolving user in sendOtp: ' . $e->getMessage());
+        }
 
         if ($user && !$user->is_active) {
             return response()->json([
@@ -407,9 +411,17 @@ class LoginController extends Controller
                 }
             } catch (\Throwable $e) {}
         }
-        $targetName = $user ? $user->name : ($employeeByCode ? $employeeByCode->emp_name : 'Prospective Applicant');
-        $targetRole = $user ? $user->role_label : 'New Candidate';
-
+        $targetName = 'Prospective Applicant';
+        $targetRole = 'New Candidate';
+        try {
+            if ($user) {
+                $targetName = $user->name;
+                $targetRole = $user->role_label;
+            } elseif ($employeeByCode) {
+                $targetName = $employeeByCode->emp_name;
+                $targetRole = 'Staff';
+            }
+        } catch (\Throwable $e) {}
         // Generate 6-digit OTP
         $otp = (string) mt_rand(100000, 999999);
         try {

@@ -6,30 +6,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class Wapplog extends Model
 {
-    protected $table = 'crm.wapplogs';
-    protected $primaryKey = 'waId';
-    public $timestamps = false;
+    protected $table = 'master.wapp_logs';
+    protected $primaryKey = 'id';
+    public $timestamps = true;
 
     protected $fillable = [
+        'channel',
         'wauser',
         'waregisterno',
         'wapptophone',
         'jiotraceid',
+        'template_name',
         'wapptext',
-        'datetime',
-        'ipaddr',
-        'status',
         'var1',
         'var2',
-        'var3',
-        'var4',
-        'var5',
+        'status',
+        'ipaddr',
+        'response_payload',
     ];
 
     protected function casts(): array
     {
         return [
-            'datetime' => 'datetime',
+            'response_payload' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 }

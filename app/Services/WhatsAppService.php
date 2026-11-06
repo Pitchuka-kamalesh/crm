@@ -234,25 +234,7 @@ class WhatsAppService
             Log::error("[WhatsAppService] Exception sending to {$phone}: " . $e->getMessage());
         }
 
-        // Record in crm.wapplogs
-        try {
-            Wapplog::create([
-                'wauser' => $user ?? 'SYSTEM_USER',
-                'waregisterno' => $registerNo ?? ($phone ?? ''),
-                'wapptophone' => $phone,
-                'jiotraceid' => $traceId ?? '',
-                'wapptext' => $messageText,
-                'datetime' => now(),
-                'ipaddr' => $ip ?? '127.0.0.1',
-                'status' => $status,
-                'var1' => $var1,
-                'var2' => $var2,
-            ]);
-        } catch (Exception $e) {
-            Log::warning('[WhatsAppService] Could not write to crm.wapplogs: ' . $e->getMessage());
-        }
-
-        // Record in master.communication_logs
+        // Record in master.wapp_logs
         try {
             $log = CommunicationLog::create([
                 'channel' => 'whatsapp',
@@ -277,7 +259,7 @@ class WhatsAppService
                 'data' => $responseBody,
             ];
         } catch (Exception $e) {
-            Log::warning('[WhatsAppService] Could not write to master.communication_logs: ' . $e->getMessage());
+            Log::warning('[WhatsAppService] Could not write to master.wapp_logs: ' . $e->getMessage());
 
             return [
                 'success' => ($status === 'SUBMITTED'),

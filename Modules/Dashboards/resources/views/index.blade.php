@@ -837,24 +837,32 @@
             </h1>
 
             <p class="welcome-subtitle">
-                Your 8-Stage Admission Onboarding Process for <strong>{{ $programName }}</strong> ({{ $branchName }}, Regulation {{ $regulation }}) is active. Complete each step below to finalize your academic enrollment and allotment order.
+                Your 8-Stage Admission Onboarding Process @if($programName)for <strong>{{ $programName }}</strong> @if($branchName)({{ $branchName }})@endif @endif is active. Complete each step below to finalize your admission.
             </p>
 
             <div class="meta-badges-cluster">
+                @if($appNo)
                 <span class="meta-badge">
                     <strong style="color:#ffffff;">Application No:</strong> {{ $appNo }}
                 </span>
+                @endif
+                @if($regNo)
                 <span class="meta-badge">
                     <strong style="color:#ffffff;">Register No:</strong> {{ $regNo }}
                 </span>
+                @endif
+                @if($programName)
                 <span class="meta-badge">
-                    <strong style="color:#ffffff;">Allocated Program:</strong> {{ $programName }}
+                    <strong style="color:#ffffff;">Program:</strong> {{ $programName }}
                 </span>
+                @endif
+                @if($campusName)
                 <span class="meta-badge">
                     <strong style="color:#ffffff;">Campus:</strong> {{ $campusName }}
                 </span>
-                <span class="meta-badge meta-badge-success">
-                    &bull; Admission Confirmed
+                @endif
+                <span class="meta-badge {{ ($crmStudent?->stage1 === 'paid') ? 'meta-badge-success' : 'meta-badge-warning' }}">
+                    &bull; {{ ($crmStudent?->stage1 === 'paid') ? 'Fee Paid' : ($crmStudent?->std_status ?: 'Fee Pending') }}
                 </span>
             </div>
         </section>
@@ -886,9 +894,9 @@
             <div class="stepper-header">
                 <div class="stepper-title-box">
                     <h2>
-                        <span>8-Step Admission Onboarding Process</span>
+                        <span>8-Stage Admission Onboarding Process</span>
                     </h2>
-                    <p>Click on any step below to view, complete, or update your candidate enrollment details</p>
+                    <p>Click on any stage below to view and proceed through your admission process</p>
                 </div>
                 <div class="stepper-progress-box">
                     <div class="progress-bar-track">
@@ -898,38 +906,22 @@
                 </div>
             </div>
 
-            <!-- 8 Steps Bar (Step 1 is Payment) -->
+            <!-- 8 Stages Bar -->
             <div class="stepper-nav-bar">
-                @php
-                    $stepIcons = [
-                        1 => '💳',
-                        2 => '📝',
-                        3 => '👤',
-                        4 => '👨‍👩‍👦',
-                        5 => '📍',
-                        6 => '🎓',
-                        7 => '📄',
-                        8 => '🏛️',
-                    ];
-                @endphp
-
                 @foreach($stages as $num => $stg)
                     @php
                         $isActive = ($activeStep === $num);
                         $isDone = ($stg['status'] === 'completed');
-                        $isLocked = ($num > ($maxAllowedStep ?? 1));
                     @endphp
-                    <a href="{{ $isLocked ? 'javascript:void(0)' : route('dashboards.index', ['step' => $num]) }}"
-                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }} {{ $isLocked ? 'is-locked' : '' }}"
-                       style="{{ $isLocked ? 'cursor: not-allowed; opacity: 0.55;' : '' }}"
-                       title="{{ $isLocked ? 'Step '.$num.' is locked until previous steps are completed' : 'Step '.$num.': '.$stg['title'] }}">
-                        <div class="step-circle" style="{{ $isLocked ? 'background:#e2e8f0; color:#94a3b8; border-color:#cbd5e1;' : '' }}">
-                            @if($isDone) ✓ @elseif($isLocked) 🔒 @else {{ $num }} @endif
+                    <a href="{{ route('dashboards.index', ['step' => $num]) }}"
+                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }}"
+                       title="Stage {{ $num }}">
+                        <div class="step-circle">
+                            @if($isDone) ✓ @else {{ $num }} @endif
                         </div>
-                        <span class="step-nav-name">{{ $stepIcons[$num] }} Step {{ $num }}</span>
-                        <span class="step-nav-sub" style="font-size:0.68rem; color:#64748b; margin-bottom:0.25rem;">{{ $stg['title'] }}</span>
-                        <span class="step-nav-badge {{ $isDone ? 'badge-done' : ($isActive ? 'badge-active' : 'badge-pending') }}">
-                            @if($isDone) Completed @elseif($isActive) Current @elseif($isLocked) Locked 🔒 @else Pending @endif
+                        <span class="step-nav-name">Stage {{ $num }}</span>
+                        <span class="step-nav-badge {{ $isDone ? 'badge-done' : 'badge-pending' }}">
+                            {{ $isDone ? 'Completed' : 'Not Completed' }}
                         </span>
                     </a>
                 @endforeach
@@ -939,99 +931,84 @@
         <!-- STEP CONTENT PANEL -->
         <section class="step-panel-card">
 
-            <!-- ================= STEP 1: FEE PAYMENT & PROVISIONAL ALLOTMENT ================= -->
+            <!-- ================= STAGE 1: FEE PAYMENT ================= -->
             @if($activeStep === 1)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 1 of 8 &bull; Admission Fee Payment &amp; Allotment
+                            Stage 1 of 8 &bull; Fee Payment
                         </div>
                         <h3>
-                            <span>💳 Step 1: Admission Fee Payment &amp; Provisional Allotment Order</span>
+                            <span>Stage 1: Fee Payment</span>
                         </h3>
-                        <p>Review your tuition fee breakdown, confirm admission fee payment, and download your official Allotment Order and Fee Payment Receipt.</p>
+                        <p>Complete your initial admission fee payment to proceed with the remaining onboarding stages.</p>
                     </div>
-                    <span class="step-header-tag" style="background:#10b981; border-color:#86efac; color:#ffffff;">✓ Allotment Confirmed</span>
+                    @if($crmStudent?->stage1 === 'paid')
+                        <span class="step-header-tag" style="background:#10b981; border-color:#86efac; color:#ffffff;">✓ Completed</span>
+                    @else
+                        <span class="step-header-tag" style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:#ffffff;">Not Completed</span>
+                    @endif
                 </div>
 
                 <div class="step-panel-body">
-                    <!-- FEE TABLE SUMMARY -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🧾 Academic Year 2026-27 Fee Breakdown</span>
-                        </div>
-                        <table class="fee-table">
-                            <thead>
-                                <tr>
-                                    <th>Fee Description</th>
-                                    <th>Category</th>
-                                    <th>Amount (INR)</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Application &amp; Processing Fee</td>
-                                    <td>One-Time</td>
-                                    <td>₹ 1,200</td>
-                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Admission &amp; Seat Confirmation Deposit</td>
-                                    <td>One-Time</td>
-                                    <td>₹ 25,000</td>
-                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Semester I Tuition &amp; Academic Fee</td>
-                                    <td>Semester I</td>
-                                    <td>₹ 50,000</td>
-                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Merit Scholarship Concession (VSAT 2026)</td>
-                                    <td>Waiver</td>
-                                    <td style="color:#10b981;">- ₹ 15,000</td>
-                                    <td><span class="step-nav-badge badge-done">Applied ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Total Net Fee Paid</strong></td>
-                                    <td><strong>Receipt #VU-2026-{{ substr($regNo, -5) }}</strong></td>
-                                    <td><strong style="color:#2563eb;">₹ 61,200</strong></td>
-                                    <td><span class="step-nav-badge badge-done">Confirmed ✓</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- FEE PAYMENT STATUS & ACTION -->
+                    <div class="section-box" style="text-align: center; padding: 2rem 1.5rem;">
+                        @if($crmStudent?->stage1 === 'paid')
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                            <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">Admission Fee Paid &amp; Confirmed</h3>
+                            <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Your stage 1 admission fee payment is verified in the database. You can download your official documents below.</p>
+                            <span class="step-nav-badge badge-done" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">Status: Completed ✓</span>
+                        @else
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💳</div>
+                            <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">Admission Fee Payment (Stage 1)</h3>
+                            <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Click the button below to complete Stage 1 payment.</p>
+                            <form action="{{ route('dashboards.save-step') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="step" value="1">
+                                <button type="submit" class="btn-step-next" style="display: inline-flex; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                    <span>💳 Pay Admission Fee (Stage 1)</span>
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </form>
+                        @endif
                     </div>
 
                     <!-- DOWNLOAD CARDS -->
                     <div class="section-box">
                         <div class="section-box-title">
-                            <span>📥 Official Admission Documents Download</span>
+                            <span>📥 Official Admission Documents</span>
                         </div>
                         <div class="form-grid-3">
                             <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
                                 <div style="font-size:2rem; margin-bottom:0.5rem;">📜</div>
                                 <h4 class="kyc-doc-title">Provisional Allotment Order</h4>
                                 <p class="kyc-doc-sub">Signed Dean Allotment Letter</p>
-                                <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
-                                    <span>Download PDF</span>
-                                </a>
+                                @if($crmStudent?->stage1 === 'paid')
+                                    <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
+                                        <span>Download PDF</span>
+                                    </a>
+                                @else
+                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.75rem; padding:0.5rem; background:#f8fafc; border-radius:6px;">Available after fee payment</div>
+                                @endif
                             </div>
 
                             <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
                                 <div style="font-size:2rem; margin-bottom:0.5rem;">🧾</div>
                                 <h4 class="kyc-doc-title">Official Fee Payment Receipt</h4>
                                 <p class="kyc-doc-sub">Vignan Accounts Verified Receipt</p>
-                                <a href="javascript:alert('Downloading Official Fee Payment Receipt (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
-                                    <span>Download Receipt</span>
-                                </a>
+                                @if($crmStudent?->stage1 === 'paid')
+                                    <a href="javascript:alert('Downloading Official Fee Payment Receipt (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
+                                        <span>Download Receipt</span>
+                                    </a>
+                                @else
+                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.75rem; padding:0.5rem; background:#f8fafc; border-radius:6px;">Available after fee payment</div>
+                                @endif
                             </div>
 
                             <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
                                 <div style="font-size:2rem; margin-bottom:0.5rem;">📅</div>
                                 <h4 class="kyc-doc-title">Campus Induction Schedule</h4>
-                                <p class="kyc-doc-sub">Orientation &amp; Hostel Move-in Guide</p>
+                                <p class="kyc-doc-sub">Orientation &amp; Move-in Guide</p>
                                 <a href="javascript:alert('Downloading Orientation & Campus Induction Schedule (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
                                     <span>Download Guide</span>
                                 </a>
@@ -1041,762 +1018,63 @@
 
                     <div class="step-footer-actions">
                         <div style="font-size:0.85rem; color:#64748b;">
-                            Step 1 status: <strong style="color:#10b981;">✓ Fee Payment Verified &amp; Confirmed in Database</strong>
+                            Stage 1 Status: <strong style="color: {{ $crmStudent?->stage1 === 'paid' ? '#10b981' : '#f59e0b' }};">{{ $crmStudent?->stage1 === 'paid' ? 'Completed' : 'Not Completed' }}</strong>
                         </div>
-                        <form action="{{ route('dashboards.save-step') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="1">
-                            <button type="submit" class="btn-step-next">
-                                <span>Proceed to Step 2: Basic Registration</span>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </button>
-                        </form>
+                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="text-decoration:none;">
+                            <span>Stage 2 &rarr;</span>
+                        </a>
                     </div>
                 </div>
 
-            <!-- ================= STEP 2: BASIC REGISTRATION DETAILS ================= -->
-            @elseif($activeStep === 2)
+            <!-- ================= STAGES 2 to 8 ================= -->
+            @else
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 2 of 8 &bull; Initial Admission Capture
+                            Stage {{ $activeStep }} of 8
                         </div>
                         <h3>
-                            <span>📝 Step 2: Basic Registration &amp; Program Selection</span>
+                            <span>Stage {{ $activeStep }}</span>
                         </h3>
-                        <p>Verified candidate registration details in Vignan University CRM database.</p>
+                        <p>Stage {{ $activeStep }} onboarding overview.</p>
                     </div>
-                    <span class="step-header-tag">✓ Completed on Registration</span>
+                    @if($stages[$activeStep]['status'] === 'completed')
+                        <span class="step-header-tag" style="background:#10b981; border-color:#86efac; color:#ffffff;">✓ Completed</span>
+                    @else
+                        <span class="step-header-tag" style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:#ffffff;">Not Completed</span>
+                    @endif
                 </div>
 
                 <div class="step-panel-body">
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>📌 Registered Candidate Summary</span>
+                    <div class="section-box" style="text-align: center; padding: 2.5rem 1.5rem;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">
+                            {{ $stages[$activeStep]['status'] === 'completed' ? '✅' : '⏳' }}
                         </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Candidate Name</label>
-                                <input type="text" value="{{ $displayName }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Primary Mobile</label>
-                                <input type="text" value="+91 {{ $user?->phnno }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Personal Email</label>
-                                <input type="text" value="{{ $student?->personal_email ?: ($crmStudent?->emailid ?: $user?->personalmail) }}" readonly class="field-input">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-3" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">Allocated Campus</label>
-                                <input type="text" value="{{ $campusName }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Allocated Program</label>
-                                <input type="text" value="{{ $programName }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Core Specialization Branch</label>
-                                <input type="text" value="{{ $branchName }}" readonly class="field-input">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-3" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">Registration No</label>
-                                <input type="text" value="{{ $regNo }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Application Nano No</label>
-                                <input type="text" value="{{ $appNo }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Admission Batch</label>
-                                <input type="text" value="Batch 2026 - 2027 (Regulation {{ $regulation }})" readonly class="field-input">
-                            </div>
-                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">
+                            Stage {{ $activeStep }} Status: {{ $stages[$activeStep]['status'] === 'completed' ? 'Completed' : 'Not Completed' }}
+                        </h3>
+                        <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.5rem;">
+                            @if($stages[$activeStep]['status'] === 'completed')
+                                This stage has been completed and recorded.
+                            @else
+                                This stage is currently not completed.
+                            @endif
+                        </p>
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev">
+                        <a href="{{ route('dashboards.index', ['step' => $activeStep - 1]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 1: Fee Payment</span>
+                            <span>&larr; Stage {{ $activeStep - 1 }}</span>
                         </a>
-                        <form action="{{ route('dashboards.save-step') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="2">
-                            <button type="submit" class="btn-step-next">
-                                <span>Proceed to Step 3: Personal Profile</span>
+                        @if($activeStep < 8)
+                            <a href="{{ route('dashboards.index', ['step' => $activeStep + 1]) }}" class="btn-step-next" style="text-decoration:none;">
+                                <span>Stage {{ $activeStep + 1 }} &rarr;</span>
                                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </button>
-                        </form>
+                            </a>
+                        @endif
                     </div>
                 </div>
-
-            <!-- ================= STEP 3: PERSONAL PROFILE & IDENTITY ================= -->
-            @elseif($activeStep === 3)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 3 of 8 &bull; Candidate Identification
-                        </div>
-                        <h3>
-                            <span>👤 Step 3: Personal Profile &amp; Identity</span>
-                        </h3>
-                        <p>Provide your official personal details, government identity numbers, and demographic records.</p>
-                    </div>
-                    <span class="step-header-tag">Step 3: Profile</span>
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="3">
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🆔 Personal &amp; Demographic Information</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Applicant's Full Name (As per SSC)</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="student_name" value="{{ old('student_name', $student?->student_name ?? $displayName) }}" required class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Date of Birth</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="date" name="dob" value="{{ old('dob', $student?->dob ? date('Y-m-d', strtotime($student->dob)) : '2008-05-15') }}" required class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Gender</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <select name="gender" class="field-select" required>
-                                    <option value="Male" {{ old('gender', $student?->gender ?? 'Male') === 'Male' ? 'selected' : '' }}>Male</option>
-                                    <option value="Female" {{ old('gender', $student?->gender) === 'Female' ? 'selected' : '' }}>Female</option>
-                                    <option value="Other" {{ old('gender', $student?->gender) === 'Other' ? 'selected' : '' }}>Other</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-3" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Aadhaar Card Number</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="aadhar_no" value="{{ old('aadhar_no', $student?->aadhar_no ?? '987654321012') }}" placeholder="12-digit Aadhaar number" maxlength="14" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Academic Bank of Credits (ABC ID)</span>
-                                </label>
-                                <input type="text" name="abc_id" value="{{ old('abc_id', $student?->abc_id ?? 'ABC-2026-90218') }}" placeholder="e.g. 12-digit ABC ID" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Blood Group</label>
-                                <select name="blood_group" class="field-select">
-                                    <option value="O+">O Positive (O+)</option>
-                                    <option value="A+">A Positive (A+)</option>
-                                    <option value="B+">B Positive (B+)</option>
-                                    <option value="AB+">AB Positive (AB+)</option>
-                                    <option value="O-">O Negative (O-)</option>
-                                    <option value="A-">A Negative (A-)</option>
-                                    <option value="B-">B Negative (B-)</option>
-                                    <option value="AB-">AB Negative (AB-)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-3" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">Community / Category</label>
-                                <select name="category" class="field-select">
-                                    <option value="OC">OC / General Category</option>
-                                    <option value="OBC">OBC (Other Backward Classes)</option>
-                                    <option value="EWS">EWS (Economically Weaker Section)</option>
-                                    <option value="SC">SC (Scheduled Caste)</option>
-                                    <option value="ST">ST (Scheduled Tribe)</option>
-                                </select>
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Religion</label>
-                                <input type="text" name="religion" value="Hindu" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Nationality</label>
-                                <input type="text" name="nationality" value="Indian" class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 2</span>
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 4: Parent Details</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STEP 4: PARENT & FAMILY DETAILS ================= -->
-            @elseif($activeStep === 4)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 4 of 8 &bull; Family Background
-                        </div>
-                        <h3>
-                            <span>👨‍👩‍👦 Step 4: Parent &amp; Guardian Information</span>
-                        </h3>
-                        <p>Fill in parent contact information, occupation, and annual family income details.</p>
-                    </div>
-                    <span class="step-header-tag">Step 4: Parents</span>
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="4">
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>👨 Father / Guardian Information</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Father's Full Name</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="father_name" value="N. Venkateswara Rao" required class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Father's Mobile Number</label>
-                                <input type="text" name="father_mobile" value="+91 9440123456" class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Father's Occupation</label>
-                                <input type="text" name="father_occ" value="Business / Agriculture" class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>👩 Mother Information</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Mother's Full Name</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="mother_name" value="N. Lakshmi Devi" required class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Mother's Mobile Number</label>
-                                <input type="text" name="mother_mobile" value="+91 9440654321" class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Mother's Occupation</label>
-                                <input type="text" name="mother_occ" value="Home Maker" class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>💰 Annual Family Income &amp; Emergency Contact</span>
-                        </div>
-                        <div class="form-grid-2">
-                            <div class="field-group">
-                                <label class="field-label">Annual Family Income</label>
-                                <select name="annual_income" class="field-select">
-                                    <option value="1_to_2_lakhs">₹1,00,000 - ₹2,50,000</option>
-                                    <option value="2_to_5_lakhs" selected>₹2,50,000 - ₹5,00,000</option>
-                                    <option value="5_to_8_lakhs">₹5,00,000 - ₹8,00,000</option>
-                                    <option value="above_8_lakhs">Above ₹8,00,000</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Emergency Guardian Contact</label>
-                                <input type="text" name="emergency_phone" value="+91 {{ $user?->phnno }}" class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 3</span>
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 5: Address Details</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STEP 5: ADDRESS & COMMUNICATION ================= -->
-            @elseif($activeStep === 5)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 5 of 8 &bull; Residence &amp; Location
-                        </div>
-                        <h3>
-                            <span>📍 Step 5: Communication &amp; Permanent Address</span>
-                        </h3>
-                        <p>Provide postal communication and domicile address records for dispatching university credentials.</p>
-                    </div>
-                    <span class="step-header-tag">Step 5: Address</span>
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="5">
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🏡 Permanent Residential Address</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Door / Flat / House No</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="door_no" value="D.No: 4-12/A" required class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Street / Colony / Landmark</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="street" value="Vignan Nagar, Main Road" required class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Village / Town / City</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="city" value="Vadlamudi" required class="field-input">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-3" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>District</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="district" value="Guntur" required class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>State</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="state" value="Andhra Pradesh" required class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Postal Pincode</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="pincode" value="522213" maxlength="6" required class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 4</span>
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 6: Academic Records</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STEP 6: ACADEMIC QUALIFICATIONS ================= -->
-            @elseif($activeStep === 6)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 6 of 8 &bull; Prior Education
-                        </div>
-                        <h3>
-                            <span>🎓 Step 6: Academic Qualifications (10th &amp; Intermediate / +2)</span>
-                        </h3>
-                        <p>Fill and verify your 10th Standard (SSC) and Intermediate (10+2) academic examination marks.</p>
-                    </div>
-                    <span class="step-header-tag">Step 6: Academics</span>
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="6">
-
-                    <!-- SECTION 1: 10TH STANDARD (SSC) -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>📘 10th Standard (SSC / Matriculation) Details</span>
-                            @if($edu10th)
-                                <span style="margin-left:auto; font-size:0.72rem; background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:0.15rem 0.6rem; border-radius:9999px;">✓ Saved</span>
-                            @endif
-                        </div>
-
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Board / Authority Name</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="ssc_board" value="{{ old('ssc_board', $edu10th?->board_university ?? 'State Board of Secondary Education, AP (BSEAP)') }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>School / Institution Name</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="ssc_school" value="{{ old('ssc_school', $edu10th?->institution_name ?? 'Z.P. High School') }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>SSC Hall Ticket / Roll Number</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="ssc_hallticket" value="{{ old('ssc_hallticket', $edu10th?->hall_ticket_no ?? '2401827491') }}" class="field-input">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-4" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">Year of Passing</label>
-                                <input type="number" name="ssc_year" min="2010" max="2026" value="{{ old('ssc_year', $edu10th?->year_of_passing ?? 2024) }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Marks Obtained</label>
-                                <input type="number" step="0.01" name="ssc_marks" value="{{ old('ssc_marks', $edu10th?->marks_obtained ?? 540) }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Max Marks</label>
-                                <input type="number" step="0.01" name="ssc_max_marks" value="{{ old('ssc_max_marks', $edu10th?->max_marks ?? 600) }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">CGPA / Grade Points</label>
-                                <input type="number" step="0.01" name="ssc_cgpa" value="{{ old('ssc_cgpa', $edu10th?->cgpa ?? 9.5) }}" class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SECTION 2: INTERMEDIATE (10+2) -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>📗 Intermediate / 12th (10+2) / Polytechnic Records</span>
-                            @if($eduInter)
-                                <span style="margin-left:auto; font-size:0.72rem; background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:0.15rem 0.6rem; border-radius:9999px;">✓ Saved</span>
-                            @endif
-                        </div>
-
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Board / Council Name</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="inter_board" value="{{ old('inter_board', $eduInter?->board_university ?? 'Board of Intermediate Education, AP (BIEAP)') }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Junior College / Institution Name</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="inter_college" value="{{ old('inter_college', $eduInter?->institution_name ?? 'Vignan Junior College') }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Stream / Group</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <select name="inter_stream" class="field-select">
-                                    <option value="MPC" {{ old('inter_stream', $eduInter?->study_mode ?? 'MPC') === 'MPC' ? 'selected' : '' }}>MPC (Maths, Physics, Chemistry)</option>
-                                    <option value="BiPC" {{ old('inter_stream', $eduInter?->study_mode) === 'BiPC' ? 'selected' : '' }}>BiPC (Biology, Physics, Chemistry)</option>
-                                    <option value="MEC" {{ old('inter_stream', $eduInter?->study_mode) === 'MEC' ? 'selected' : '' }}>MEC (Maths, Economics, Commerce)</option>
-                                    <option value="Diploma" {{ old('inter_stream', $eduInter?->study_mode) === 'Diploma' ? 'selected' : '' }}>Polytechnic Diploma</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-grid-4" style="margin-top: 1.25rem;">
-                            <div class="field-group">
-                                <label class="field-label">
-                                    <span>Inter Hall Ticket Number</span>
-                                    <span class="required-star">*</span>
-                                </label>
-                                <input type="text" name="inter_hallticket" value="{{ old('inter_hallticket', $eduInter?->hall_ticket_no ?? '2601928374') }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Year of Passing</label>
-                                <input type="number" name="inter_year" min="2010" max="2026" value="{{ old('inter_year', $eduInter?->year_of_passing ?? 2026) }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Marks Obtained</label>
-                                <input type="number" step="0.01" name="inter_marks" value="{{ old('inter_marks', $eduInter?->marks_obtained ?? 950) }}" class="field-input">
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Total / Max Marks</label>
-                                <input type="number" step="0.01" name="inter_max_marks" value="{{ old('inter_max_marks', $eduInter?->max_marks ?? 1000) }}" class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 5</span>
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 7: Document KYC</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STEP 7: DOCUMENT KYC UPLOAD ================= -->
-            @elseif($activeStep === 7)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 7 of 8 &bull; Certificate Verification
-                        </div>
-                        <h3>
-                            <span>📄 Step 7: Document &amp; Certificate KYC Upload</span>
-                        </h3>
-                        <p>Upload scans of your official academic marksheets and government identification for verification.</p>
-                    </div>
-                    <span class="step-header-tag">Step 7: KYC Upload</span>
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="7">
-
-                    <div class="kyc-docs-grid">
-                        <div class="kyc-doc-card">
-                            <div class="kyc-doc-top">
-                                <div class="kyc-doc-icon">📷</div>
-                                <span class="step-nav-badge badge-done">✓ Uploaded</span>
-                            </div>
-                            <div>
-                                <h4 class="kyc-doc-title">Passport Size Photograph</h4>
-                                <p class="kyc-doc-sub">Format: JPG, PNG (Max 2MB)</p>
-                            </div>
-                            <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                        </div>
-
-                        <div class="kyc-doc-card">
-                            <div class="kyc-doc-top">
-                                <div class="kyc-doc-icon">📜</div>
-                                <span class="step-nav-badge badge-done">✓ Uploaded</span>
-                            </div>
-                            <div>
-                                <h4 class="kyc-doc-title">10th Standard (SSC) Memo</h4>
-                                <p class="kyc-doc-sub">Official Board Marks Certificate</p>
-                            </div>
-                            <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                        </div>
-
-                        <div class="kyc-doc-card">
-                            <div class="kyc-doc-top">
-                                <div class="kyc-doc-icon">📑</div>
-                                <span class="step-nav-badge badge-done">✓ Uploaded</span>
-                            </div>
-                            <div>
-                                <h4 class="kyc-doc-title">Intermediate (10+2) Memo</h4>
-                                <p class="kyc-doc-sub">Board Marks / Hall Ticket Copy</p>
-                            </div>
-                            <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                        </div>
-
-                        <div class="kyc-doc-card">
-                            <div class="kyc-doc-top">
-                                <div class="kyc-doc-icon">📋</div>
-                                <span class="step-nav-badge badge-done">✓ Uploaded</span>
-                            </div>
-                            <div>
-                                <h4 class="kyc-doc-title">Transfer Certificate (TC)</h4>
-                                <p class="kyc-doc-sub">Issued by Junior College / School</p>
-                            </div>
-                            <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                        </div>
-
-                        <div class="kyc-doc-card">
-                            <div class="kyc-doc-top">
-                                <div class="kyc-doc-icon">💳</div>
-                                <span class="step-nav-badge badge-done">✓ Uploaded</span>
-                            </div>
-                            <div>
-                                <h4 class="kyc-doc-title">Aadhaar Card Copy</h4>
-                                <p class="kyc-doc-sub">Front &amp; Back Identity Verification</p>
-                            </div>
-                            <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                        </div>
-
-                        <div class="kyc-doc-card">
-                            <div class="kyc-doc-top">
-                                <div class="kyc-doc-icon">🏅</div>
-                                <span class="step-nav-badge badge-active">Optional</span>
-                            </div>
-                            <div>
-                                <h4 class="kyc-doc-title">Study &amp; Conduct Certificate</h4>
-                                <p class="kyc-doc-sub">From Class 6th to Intermediate</p>
-                            </div>
-                            <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 6</span>
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 8: Campus Life</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STEP 8: CAMPUS LIFE & SPECIALIZATION ================= -->
-            @elseif($activeStep === 8)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 8 of 8 &bull; Campus Options &amp; Branch Track
-                        </div>
-                        <h3>
-                            <span>🏛️ Step 8: Campus Life &amp; Specialization Preferences</span>
-                        </h3>
-                        <p>Configure your hostel accommodation, university bus routes, and elective specialization tracks.</p>
-                    </div>
-                    <span class="step-header-tag">Step 8: Campus Options</span>
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="8">
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🎓 Allocated Program &amp; Core Branch</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Degree Program</label>
-                                <input type="text" value="{{ $programName }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Allocated Core Branch</label>
-                                <input type="text" value="{{ $branchName }}" readonly class="field-input">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Elective Minor Specialization</label>
-                                <select name="specialization_track" class="field-select">
-                                    <option value="AI_ML">Artificial Intelligence &amp; Precision Farming</option>
-                                    <option value="IOT_AG">Smart IoT &amp; Farm Automation</option>
-                                    <option value="CORE" selected>Advanced Core Agriculture Honors</option>
-                                    <option value="DATA_SCI">Agricultural Data Science</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🏠 On-Campus Student Accommodation</span>
-                        </div>
-                        <div class="form-grid-2">
-                            <div class="field-group">
-                                <label class="field-label">Hostel Accommodation Choice</label>
-                                <select name="hostel_type" class="field-select">
-                                    <option value="AC">On-Campus AC Student Hostel (Twin Sharing)</option>
-                                    <option value="NON_AC" selected>On-Campus Non-AC Student Hostel (Triple Sharing)</option>
-                                    <option value="DAY_SCHOLAR">Day Scholar (Living at home / local residence)</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Dietary Preference</label>
-                                <select name="mess_type" class="field-select">
-                                    <option value="SOUTH_VEG">South Indian Vegetarian</option>
-                                    <option value="SOUTH_NON_VEG" selected>South Indian Non-Vegetarian</option>
-                                    <option value="NORTH_INDIAN">North Indian Special Mess</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🚌 University Transportation</span>
-                        </div>
-                        <div class="form-grid-2">
-                            <div class="field-group">
-                                <label class="field-label">University Shuttle Bus Pass</label>
-                                <select name="bus_required" class="field-select">
-                                    <option value="NO" selected>Not Required (Hosteler)</option>
-                                    <option value="GUNTUR">Guntur City Route (Pass: ₹28,000/yr)</option>
-                                    <option value="VIJAYAWADA">Vijayawada Route (Pass: ₹36,000/yr)</option>
-                                    <option value="TENALI">Tenali Route (Pass: ₹24,000/yr)</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Campus Facility Access</label>
-                                <input type="text" value="Central Library, Sports Complex, Gym &amp; Wi-Fi Included" readonly class="field-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 7]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 7</span>
-                        </a>
-                        <button type="submit" class="btn-step-next" style="background: linear-gradient(135deg, #059669, #10b981);">
-                            <span>✓ All Steps Completed - Finalize Admission</span>
-                        </button>
-                    </div>
-                </form>
             @endif
 
         </section>
