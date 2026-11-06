@@ -9,7 +9,7 @@ class CommunicationLog extends Model
 {
     use HasFactory;
 
-    protected $table = 'master.communication_logs';
+    protected $table = 'master.wapp_logs';
 
     protected $fillable = [
         'channel',
