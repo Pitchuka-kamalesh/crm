@@ -806,19 +806,18 @@
                     {{ strtoupper(substr($displayName, 0, 1)) }}
                 </div>
 
-                <a href="{{ route('crm.index') }}" class="btn-nav-action btn-crm-link" title="CRM Executive Portal">
-                    <span>👑 CRM Portal</span>
-                </a>
+                @if($user && ($user->user_type == 2 || in_array((int)$user->role_id, [1, 2, 3, 4])))
+                    <a href="{{ route('crm.index') }}" class="btn-nav-action btn-crm-link" title="CRM Executive Portal">
+                        <span>👑 CRM Portal</span>
+                    </a>
+                @endif
 
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn-nav-action btn-signout">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                        <span>Sign Out</span>
-                    </button>
-                </form>
+                <a href="{{ route('logout') }}" class="btn-nav-action btn-signout" style="text-decoration:none;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Sign Out</span>
+                </a>
             </div>
         </div>
     </nav>
@@ -899,18 +898,18 @@
                 </div>
             </div>
 
-            <!-- 8 Steps Bar -->
+            <!-- 8 Steps Bar (Step 1 is Payment) -->
             <div class="stepper-nav-bar">
                 @php
                     $stepIcons = [
-                        1 => '📝',
-                        2 => '👤',
-                        3 => '👨‍👩‍👦',
-                        4 => '📍',
-                        5 => '🎓',
-                        6 => '📄',
-                        7 => '🏛️',
-                        8 => '💳',
+                        1 => '💳',
+                        2 => '📝',
+                        3 => '👤',
+                        4 => '👨‍👩‍👦',
+                        5 => '📍',
+                        6 => '🎓',
+                        7 => '📄',
+                        8 => '🏛️',
                     ];
                 @endphp
 
@@ -918,17 +917,19 @@
                     @php
                         $isActive = ($activeStep === $num);
                         $isDone = ($stg['status'] === 'completed');
+                        $isLocked = ($num > ($maxAllowedStep ?? 1));
                     @endphp
-                    <a href="{{ route('dashboards.index', ['step' => $num]) }}"
-                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }}"
-                       title="Step {{ $num }}: {{ $stg['title'] }}">
-                        <div class="step-circle">
-                            @if($isDone) ✓ @else {{ $num }} @endif
+                    <a href="{{ $isLocked ? 'javascript:void(0)' : route('dashboards.index', ['step' => $num]) }}"
+                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }} {{ $isLocked ? 'is-locked' : '' }}"
+                       style="{{ $isLocked ? 'cursor: not-allowed; opacity: 0.55;' : '' }}"
+                       title="{{ $isLocked ? 'Step '.$num.' is locked until previous steps are completed' : 'Step '.$num.': '.$stg['title'] }}">
+                        <div class="step-circle" style="{{ $isLocked ? 'background:#e2e8f0; color:#94a3b8; border-color:#cbd5e1;' : '' }}">
+                            @if($isDone) ✓ @elseif($isLocked) 🔒 @else {{ $num }} @endif
                         </div>
                         <span class="step-nav-name">{{ $stepIcons[$num] }} Step {{ $num }}</span>
                         <span class="step-nav-sub" style="font-size:0.68rem; color:#64748b; margin-bottom:0.25rem;">{{ $stg['title'] }}</span>
                         <span class="step-nav-badge {{ $isDone ? 'badge-done' : ($isActive ? 'badge-active' : 'badge-pending') }}">
-                            @if($isDone) Completed @elseif($isActive) Current @else Pending @endif
+                            @if($isDone) Completed @elseif($isActive) Current @elseif($isLocked) Locked 🔒 @else Pending @endif
                         </span>
                     </a>
                 @endforeach
@@ -938,15 +939,130 @@
         <!-- STEP CONTENT PANEL -->
         <section class="step-panel-card">
 
-            <!-- ================= STEP 1: BASIC REGISTRATION DETAILS ================= -->
+            <!-- ================= STEP 1: FEE PAYMENT & PROVISIONAL ALLOTMENT ================= -->
             @if($activeStep === 1)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 1 of 8 &bull; Initial Admission Capture
+                            Step 1 of 8 &bull; Admission Fee Payment &amp; Allotment
                         </div>
                         <h3>
-                            <span>📝 Step 1: Basic Registration &amp; Program Selection</span>
+                            <span>💳 Step 1: Admission Fee Payment &amp; Provisional Allotment Order</span>
+                        </h3>
+                        <p>Review your tuition fee breakdown, confirm admission fee payment, and download your official Allotment Order and Fee Payment Receipt.</p>
+                    </div>
+                    <span class="step-header-tag" style="background:#10b981; border-color:#86efac; color:#ffffff;">✓ Allotment Confirmed</span>
+                </div>
+
+                <div class="step-panel-body">
+                    <!-- FEE TABLE SUMMARY -->
+                    <div class="section-box">
+                        <div class="section-box-title">
+                            <span>🧾 Academic Year 2026-27 Fee Breakdown</span>
+                        </div>
+                        <table class="fee-table">
+                            <thead>
+                                <tr>
+                                    <th>Fee Description</th>
+                                    <th>Category</th>
+                                    <th>Amount (INR)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Application &amp; Processing Fee</td>
+                                    <td>One-Time</td>
+                                    <td>₹ 1,200</td>
+                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Admission &amp; Seat Confirmation Deposit</td>
+                                    <td>One-Time</td>
+                                    <td>₹ 25,000</td>
+                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Semester I Tuition &amp; Academic Fee</td>
+                                    <td>Semester I</td>
+                                    <td>₹ 50,000</td>
+                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Merit Scholarship Concession (VSAT 2026)</td>
+                                    <td>Waiver</td>
+                                    <td style="color:#10b981;">- ₹ 15,000</td>
+                                    <td><span class="step-nav-badge badge-done">Applied ✓</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total Net Fee Paid</strong></td>
+                                    <td><strong>Receipt #VU-2026-{{ substr($regNo, -5) }}</strong></td>
+                                    <td><strong style="color:#2563eb;">₹ 61,200</strong></td>
+                                    <td><span class="step-nav-badge badge-done">Confirmed ✓</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- DOWNLOAD CARDS -->
+                    <div class="section-box">
+                        <div class="section-box-title">
+                            <span>📥 Official Admission Documents Download</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
+                                <div style="font-size:2rem; margin-bottom:0.5rem;">📜</div>
+                                <h4 class="kyc-doc-title">Provisional Allotment Order</h4>
+                                <p class="kyc-doc-sub">Signed Dean Allotment Letter</p>
+                                <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
+                                    <span>Download PDF</span>
+                                </a>
+                            </div>
+
+                            <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
+                                <div style="font-size:2rem; margin-bottom:0.5rem;">🧾</div>
+                                <h4 class="kyc-doc-title">Official Fee Payment Receipt</h4>
+                                <p class="kyc-doc-sub">Vignan Accounts Verified Receipt</p>
+                                <a href="javascript:alert('Downloading Official Fee Payment Receipt (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
+                                    <span>Download Receipt</span>
+                                </a>
+                            </div>
+
+                            <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
+                                <div style="font-size:2rem; margin-bottom:0.5rem;">📅</div>
+                                <h4 class="kyc-doc-title">Campus Induction Schedule</h4>
+                                <p class="kyc-doc-sub">Orientation &amp; Hostel Move-in Guide</p>
+                                <a href="javascript:alert('Downloading Orientation & Campus Induction Schedule (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
+                                    <span>Download Guide</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-footer-actions">
+                        <div style="font-size:0.85rem; color:#64748b;">
+                            Step 1 status: <strong style="color:#10b981;">✓ Fee Payment Verified &amp; Confirmed in Database</strong>
+                        </div>
+                        <form action="{{ route('dashboards.save-step') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="step" value="1">
+                            <button type="submit" class="btn-step-next">
+                                <span>Proceed to Step 2: Basic Registration</span>
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            <!-- ================= STEP 2: BASIC REGISTRATION DETAILS ================= -->
+            @elseif($activeStep === 2)
+                <div class="step-panel-header">
+                    <div>
+                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
+                            Step 2 of 8 &bull; Initial Admission Capture
+                        </div>
+                        <h3>
+                            <span>📝 Step 2: Basic Registration &amp; Program Selection</span>
                         </h3>
                         <p>Verified candidate registration details in Vignan University CRM database.</p>
                     </div>
@@ -1005,34 +1121,39 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <div style="font-size:0.85rem; color:#64748b;">
-                            Step 1 status: <strong style="color:#10b981;">✓ Successfully Verified in Database</strong>
-                        </div>
-                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next">
-                            <span>Proceed to Step 2: Personal Profile</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            <span>Back to Step 1: Fee Payment</span>
                         </a>
+                        <form action="{{ route('dashboards.save-step') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="step" value="2">
+                            <button type="submit" class="btn-step-next">
+                                <span>Proceed to Step 3: Personal Profile</span>
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-            <!-- ================= STEP 2: PERSONAL PROFILE & IDENTITY ================= -->
-            @elseif($activeStep === 2)
+            <!-- ================= STEP 3: PERSONAL PROFILE & IDENTITY ================= -->
+            @elseif($activeStep === 3)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 2 of 8 &bull; Candidate Identification
+                            Step 3 of 8 &bull; Candidate Identification
                         </div>
                         <h3>
-                            <span>👤 Step 2: Personal Profile &amp; Identity</span>
+                            <span>👤 Step 3: Personal Profile &amp; Identity</span>
                         </h3>
                         <p>Provide your official personal details, government identity numbers, and demographic records.</p>
                     </div>
-                    <span class="step-header-tag">Step 2: Profile</span>
+                    <span class="step-header-tag">Step 3: Profile</span>
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="2">
+                    <input type="hidden" name="step" value="3">
 
                     <div class="section-box">
                         <div class="section-box-title">
@@ -1124,35 +1245,35 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev">
+                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 1</span>
+                            <span>Back to Step 2</span>
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 3: Parent Details</span>
+                            <span>Save &amp; Continue to Step 4: Parent Details</span>
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STEP 3: PARENT & FAMILY DETAILS ================= -->
-            @elseif($activeStep === 3)
+            <!-- ================= STEP 4: PARENT & FAMILY DETAILS ================= -->
+            @elseif($activeStep === 4)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 3 of 8 &bull; Family Background
+                            Step 4 of 8 &bull; Family Background
                         </div>
                         <h3>
-                            <span>👨‍👩‍👦 Step 3: Parent &amp; Guardian Information</span>
+                            <span>👨‍👩‍👦 Step 4: Parent &amp; Guardian Information</span>
                         </h3>
                         <p>Fill in parent contact information, occupation, and annual family income details.</p>
                     </div>
-                    <span class="step-header-tag">Step 3: Parents</span>
+                    <span class="step-header-tag">Step 4: Parents</span>
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="3">
+                    <input type="hidden" name="step" value="4">
 
                     <div class="section-box">
                         <div class="section-box-title">
@@ -1222,35 +1343,35 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
+                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 2</span>
+                            <span>Back to Step 3</span>
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 4: Address Details</span>
+                            <span>Save &amp; Continue to Step 5: Address Details</span>
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STEP 4: ADDRESS & COMMUNICATION ================= -->
-            @elseif($activeStep === 4)
+            <!-- ================= STEP 5: ADDRESS & COMMUNICATION ================= -->
+            @elseif($activeStep === 5)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 4 of 8 &bull; Residence &amp; Location
+                            Step 5 of 8 &bull; Residence &amp; Location
                         </div>
                         <h3>
-                            <span>📍 Step 4: Communication &amp; Permanent Address</span>
+                            <span>📍 Step 5: Communication &amp; Permanent Address</span>
                         </h3>
                         <p>Provide postal communication and domicile address records for dispatching university credentials.</p>
                     </div>
-                    <span class="step-header-tag">Step 4: Address</span>
+                    <span class="step-header-tag">Step 5: Address</span>
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="4">
+                    <input type="hidden" name="step" value="5">
 
                     <div class="section-box">
                         <div class="section-box-title">
@@ -1306,35 +1427,35 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
+                        <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 3</span>
+                            <span>Back to Step 4</span>
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 5: Academic Records</span>
+                            <span>Save &amp; Continue to Step 6: Academic Records</span>
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STEP 5: ACADEMIC QUALIFICATIONS ================= -->
-            @elseif($activeStep === 5)
+            <!-- ================= STEP 6: ACADEMIC QUALIFICATIONS ================= -->
+            @elseif($activeStep === 6)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 5 of 8 &bull; Prior Education
+                            Step 6 of 8 &bull; Prior Education
                         </div>
                         <h3>
-                            <span>🎓 Step 5: Academic Qualifications (10th &amp; Intermediate / +2)</span>
+                            <span>🎓 Step 6: Academic Qualifications (10th &amp; Intermediate / +2)</span>
                         </h3>
                         <p>Fill and verify your 10th Standard (SSC) and Intermediate (10+2) academic examination marks.</p>
                     </div>
-                    <span class="step-header-tag">Step 5: Academics</span>
+                    <span class="step-header-tag">Step 6: Academics</span>
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="5">
+                    <input type="hidden" name="step" value="6">
 
                     <!-- SECTION 1: 10TH STANDARD (SSC) -->
                     <div class="section-box">
@@ -1461,35 +1582,35 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
+                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 4</span>
+                            <span>Back to Step 5</span>
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 6: Document KYC</span>
+                            <span>Save &amp; Continue to Step 7: Document KYC</span>
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STEP 6: DOCUMENT KYC UPLOAD ================= -->
-            @elseif($activeStep === 6)
+            <!-- ================= STEP 7: DOCUMENT KYC UPLOAD ================= -->
+            @elseif($activeStep === 7)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 6 of 8 &bull; Certificate Verification
+                            Step 7 of 8 &bull; Certificate Verification
                         </div>
                         <h3>
-                            <span>📄 Step 6: Document &amp; Certificate KYC Upload</span>
+                            <span>📄 Step 7: Document &amp; Certificate KYC Upload</span>
                         </h3>
                         <p>Upload scans of your official academic marksheets and government identification for verification.</p>
                     </div>
-                    <span class="step-header-tag">Step 6: KYC Upload</span>
+                    <span class="step-header-tag">Step 7: KYC Upload</span>
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="6">
+                    <input type="hidden" name="step" value="7">
 
                     <div class="kyc-docs-grid">
                         <div class="kyc-doc-card">
@@ -1566,35 +1687,35 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
+                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 5</span>
+                            <span>Back to Step 6</span>
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 7: Campus Life</span>
+                            <span>Save &amp; Continue to Step 8: Campus Life</span>
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STEP 7: CAMPUS LIFE & SPECIALIZATION ================= -->
-            @elseif($activeStep === 7)
+            <!-- ================= STEP 8: CAMPUS LIFE & SPECIALIZATION ================= -->
+            @elseif($activeStep === 8)
                 <div class="step-panel-header">
                     <div>
                         <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 7 of 8 &bull; Campus Options &amp; Branch Track
+                            Step 8 of 8 &bull; Campus Options &amp; Branch Track
                         </div>
                         <h3>
-                            <span>🏛️ Step 7: Campus Life &amp; Specialization Preferences</span>
+                            <span>🏛️ Step 8: Campus Life &amp; Specialization Preferences</span>
                         </h3>
                         <p>Configure your hostel accommodation, university bus routes, and elective specialization tracks.</p>
                     </div>
-                    <span class="step-header-tag">Step 7: Campus Options</span>
+                    <span class="step-header-tag">Step 8: Campus Options</span>
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="7">
+                    <input type="hidden" name="step" value="8">
 
                     <div class="section-box">
                         <div class="section-box-title">
@@ -1667,131 +1788,15 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Back to Step 6</span>
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Continue to Step 8: Fee &amp; Allotment</span>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STEP 8: FEE PAYMENT & PROVISIONAL ALLOTMENT ================= -->
-            @elseif($activeStep === 8)
-                <div class="step-panel-header">
-                    <div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color:#bfdbfe; margin-bottom:0.2rem;">
-                            Step 8 of 8 &bull; Final Admission Stage
-                        </div>
-                        <h3>
-                            <span>💳 Step 8: Admission Fee &amp; Provisional Allotment Order</span>
-                        </h3>
-                        <p>Review your tuition fee breakdown, download your official Allotment Order and Fee Payment Receipt.</p>
-                    </div>
-                    <span class="step-header-tag" style="background:#10b981; border-color:#86efac; color:#ffffff;">✓ Allotment Confirmed</span>
-                </div>
-
-                <div class="step-panel-body">
-                    <!-- FEE TABLE SUMMARY -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>🧾 Academic Year 2026-27 Fee Breakdown</span>
-                        </div>
-                        <table class="fee-table">
-                            <thead>
-                                <tr>
-                                    <th>Fee Description</th>
-                                    <th>Category</th>
-                                    <th>Amount (INR)</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Application &amp; Processing Fee</td>
-                                    <td>One-Time</td>
-                                    <td>₹ 1,200</td>
-                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Admission &amp; Seat Confirmation Deposit</td>
-                                    <td>One-Time</td>
-                                    <td>₹ 25,000</td>
-                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Semester I Tuition &amp; Academic Fee</td>
-                                    <td>Semester I</td>
-                                    <td>₹ 50,000</td>
-                                    <td><span class="step-nav-badge badge-done">Paid ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Merit Scholarship Concession (VSAT 2026)</td>
-                                    <td>Waiver</td>
-                                    <td style="color:#10b981;">- ₹ 15,000</td>
-                                    <td><span class="step-nav-badge badge-done">Applied ✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Total Net Fee Paid</strong></td>
-                                    <td><strong>Receipt #VU-2026-{{ substr($regNo, -5) }}</strong></td>
-                                    <td><strong style="color:#2563eb;">₹ 61,200</strong></td>
-                                    <td><span class="step-nav-badge badge-done">Confirmed ✓</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- DOWNLOAD CARDS -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>📥 Official Admission Documents Download</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
-                                <div style="font-size:2rem; margin-bottom:0.5rem;">📜</div>
-                                <h4 class="kyc-doc-title">Provisional Allotment Order</h4>
-                                <p class="kyc-doc-sub">Signed Dean Allotment Letter</p>
-                                <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
-                                    <span>Download PDF</span>
-                                </a>
-                            </div>
-
-                            <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
-                                <div style="font-size:2rem; margin-bottom:0.5rem;">🧾</div>
-                                <h4 class="kyc-doc-title">Official Fee Payment Receipt</h4>
-                                <p class="kyc-doc-sub">Vignan Accounts Verified Receipt</p>
-                                <a href="javascript:alert('Downloading Official Fee Payment Receipt (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
-                                    <span>Download Receipt</span>
-                                </a>
-                            </div>
-
-                            <div class="kyc-doc-card" style="text-align:center; padding:1.5rem;">
-                                <div style="font-size:2rem; margin-bottom:0.5rem;">📅</div>
-                                <h4 class="kyc-doc-title">Campus Induction Schedule</h4>
-                                <p class="kyc-doc-sub">Orientation &amp; Hostel Move-in Guide</p>
-                                <a href="javascript:alert('Downloading Orientation & Campus Induction Schedule (PDF)...')" class="btn-step-next" style="margin-top:0.75rem; justify-content:center; text-decoration:none;">
-                                    <span>Download Guide</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 7]) }}" class="btn-step-prev">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                             <span>Back to Step 7</span>
                         </a>
-                        <form action="{{ route('dashboards.save-step') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="step" value="8">
-                            <button type="submit" class="btn-step-next" style="background: linear-gradient(135deg, #059669, #10b981);">
-                                <span>✓ All Steps Completed - Finalize Admission</span>
-                            </button>
-                        </form>
+                        <button type="submit" class="btn-step-next" style="background: linear-gradient(135deg, #059669, #10b981);">
+                            <span>✓ All Steps Completed - Finalize Admission</span>
+                        </button>
                     </div>
-                </div>
+                </form>
             @endif
 
         </section>
@@ -1810,5 +1815,38 @@
         </div>
     </footer>
 
+    <!-- Silent Autosave on Blur / Change (No intimate message as requested) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token() }}';
+            const forms = document.querySelectorAll('.step-panel-body');
+
+            forms.forEach(function(form) {
+                form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), select, textarea').forEach(function(el) {
+                    const autoSave = function() {
+                        const fieldName = el.name;
+                        if (!fieldName || fieldName === '_token' || fieldName === 'step') return;
+                        const fieldValue = el.value;
+
+                        fetch('{{ route("dashboards.autosave") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                field: fieldName,
+                                value: fieldValue
+                            })
+                        }).catch(() => {}); // Intentionally silent: no toast or notification message
+                    };
+
+                    el.addEventListener('blur', autoSave);
+                    el.addEventListener('change', autoSave);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
