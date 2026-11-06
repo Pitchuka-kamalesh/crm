@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CommunicationLog;
+use App\Models\Wapplog;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -231,6 +232,24 @@ class WhatsAppService
             $status = 'EXCEPTION';
             $responseBody = ['error' => $e->getMessage()];
             Log::error("[WhatsAppService] Exception sending to {$phone}: " . $e->getMessage());
+        }
+
+        // Record in crm.wapplogs
+        try {
+            Wapplog::create([
+                'wauser' => $user ?? 'SYSTEM_USER',
+                'waregisterno' => $registerNo ?? ($phone ?? ''),
+                'wapptophone' => $phone,
+                'jiotraceid' => $traceId ?? '',
+                'wapptext' => $messageText,
+                'datetime' => now(),
+                'ipaddr' => $ip ?? '127.0.0.1',
+                'status' => $status,
+                'var1' => $var1,
+                'var2' => $var2,
+            ]);
+        } catch (Exception $e) {
+            Log::warning('[WhatsAppService] Could not write to crm.wapplogs: ' . $e->getMessage());
         }
 
         // Record in master.communication_logs

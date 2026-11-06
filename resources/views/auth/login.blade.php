@@ -954,7 +954,7 @@
                     <!-- STEP 1 PANE: ENTER REGISTERED MOBILE NUMBER -->
                     <div id="step-phone-pane" class="step-pane step-active">
                         <div class="form-group">
-                            <label for="phone" class="form-label">Registered Mobile Number</label>
+                            <label for="phone" class="form-label">Registered Mobile Number / Employee Code</label>
                             <div class="input-group">
                                 <span class="input-prefix">+91</span>
                                 <input type="tel"
@@ -964,15 +964,15 @@
                                        required
                                        maxlength="10"
                                        inputmode="numeric"
-                                       pattern="[0-9]{10}"
+                                       pattern="[0-9]{5,10}"
                                        autocomplete="tel"
-                                       placeholder="Enter 10-digit mobile number"
+                                       placeholder="Enter 10-digit mobile or employee code"
                                        oninput="this.value = this.value.replace(/\D/g, '').slice(0, 10)"
                                        onpaste="setTimeout(() => { this.value = this.value.replace(/\D/g, '').slice(0, 10); }, 0)"
                                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); submitPhoneStep(); }"
                                        class="input-control input-with-prefix">
                             </div>
-                            <p class="field-hint">Enter your 10-digit number. We'll send an OTP to verify your identity.</p>
+                            <p class="field-hint">Enter your 10-digit mobile number or employee code. We'll send an OTP to verify your identity.</p>
                         </div>
 
                         <button type="button" id="btn-get-otp" class="btn-submit" onclick="submitPhoneStep()" style="margin-top: 1.25rem;">
@@ -1072,8 +1072,8 @@
         function submitPhoneStep(isResend = false) {
             const cleanPhone = phoneInputEl.value.replace(/\D/g, '').slice(0, 10);
 
-            if (cleanPhone.length !== 10) {
-                alert('Please enter a valid 10-digit registered mobile number.');
+            if (cleanPhone.length !== 10 && (cleanPhone.length < 4 || cleanPhone.length > 7)) {
+                alert('Please enter a valid 10-digit registered mobile number or employee code.');
                 phoneInputEl.focus();
                 return;
             }
@@ -1193,9 +1193,9 @@
             const cleanPhone = phoneInputEl.value.replace(/\D/g, '').slice(0, 10);
             const cleanOtp = otpInputEl.value.replace(/\D/g, '').slice(0, 6);
 
-            if (cleanPhone.length !== 10) {
+            if (cleanPhone.length !== 10 && (cleanPhone.length < 4 || cleanPhone.length > 7)) {
                 e.preventDefault();
-                alert('Please enter a valid 10-digit mobile number.');
+                alert('Please enter a valid 10-digit mobile number or employee code.');
                 goToStepPhone();
                 return false;
             }

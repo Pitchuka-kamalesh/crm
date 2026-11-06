@@ -96,17 +96,32 @@ class DashboardsController extends Controller
                 ->get();
         } catch (\Throwable $e) {}
 
-        // Calculate stage statuses from crmStudent
+        // Calculate stage statuses from crmStudent (Step 1 is Payment as requested)
         $stages = [
-            1 => ['title' => 'Registration', 'desc' => 'Basic Application Info', 'status' => 'completed'],
-            2 => ['title' => 'Personal Profile', 'desc' => 'Identity & Category', 'status' => ($student?->dob && $student?->aadhar_no) ? 'completed' : 'in_progress'],
-            3 => ['title' => 'Parent & Family', 'desc' => 'Guardian Contact', 'status' => ($crmStudent?->stage3 === 'paid') ? 'completed' : 'pending'],
-            4 => ['title' => 'Address Details', 'desc' => 'Permanent & Current', 'status' => ($crmStudent?->stage4 === 'paid') ? 'completed' : 'pending'],
-            5 => ['title' => 'Academic Records', 'desc' => '10th & Intermediate', 'status' => ($edu10th && $eduInter) ? 'completed' : 'pending'],
-            6 => ['title' => 'Document KYC', 'desc' => 'Certificates Upload', 'status' => ($documents->count() >= 4) ? 'completed' : 'pending'],
-            7 => ['title' => 'Campus & Branch', 'desc' => 'Course & Hostel Life', 'status' => ($crmStudent?->stage7 === 'paid' || $branch) ? 'completed' : 'pending'],
-            8 => ['title' => 'Fee & Allotment', 'desc' => 'Allotment Order', 'status' => ($crmStudent?->stage8 === 'paid') ? 'completed' : 'pending'],
+            1 => ['title' => 'Fee Payment', 'desc' => 'Fee & Allotment Order', 'status' => ($crmStudent?->stage8 === 'paid' || $crmStudent?->stage1 === 'paid') ? 'completed' : 'pending'],
+            2 => ['title' => 'Registration', 'desc' => 'Basic Application Info', 'status' => 'completed'],
+            3 => ['title' => 'Personal Profile', 'desc' => 'Identity & Category', 'status' => ($student?->dob && $student?->aadhar_no) ? 'completed' : 'in_progress'],
+            4 => ['title' => 'Parent & Family', 'desc' => 'Guardian Contact', 'status' => ($crmStudent?->stage3 === 'paid') ? 'completed' : 'pending'],
+            5 => ['title' => 'Address Details', 'desc' => 'Permanent & Current', 'status' => ($crmStudent?->stage4 === 'paid') ? 'completed' : 'pending'],
+            6 => ['title' => 'Academic Records', 'desc' => '10th & Intermediate', 'status' => ($edu10th && $eduInter) ? 'completed' : 'pending'],
+            7 => ['title' => 'Document KYC', 'desc' => 'Certificates Upload', 'status' => ($documents->count() >= 4) ? 'completed' : 'pending'],
+            8 => ['title' => 'Campus & Branch', 'desc' => 'Course & Specialization', 'status' => ($crmStudent?->stage7 === 'paid' || $branch) ? 'completed' : 'pending'],
         ];
+
+        // Enforce sequential filling: step N is only accessible when previous steps (1 to N-1) are filled
+        $maxAllowedStep = 1;
+        for ($s = 1; $s <= 7; $s++) {
+            if ($stages[$s]['status'] === 'completed') {
+                $maxAllowedStep = $s + 1;
+            } else {
+                break;
+            }
+        }
+
+        // Restrict active step to maximum allowed sequential step
+        if ($activeStep > $maxAllowedStep) {
+            $activeStep = $maxAllowedStep;
+        }
 
         // Overall progress percentage
         $completedCount = 0;
@@ -133,6 +148,7 @@ class DashboardsController extends Controller
             'campusName',
             'regulation',
             'activeStep',
+            'maxAllowedStep',
             'stages',
             'completedCount',
             'progressPercent'
@@ -170,12 +186,30 @@ class DashboardsController extends Controller
         $appNo = $student?->application_no ?? ($crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP'))));
         $regNo = $student?->register_no ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
 
-        $step = (int) $request->input('step', 2);
+        $step = (int) $request->input('step', 1);
         $nextStep = min(8, $step + 1);
 
         try {
-            // STEP 2: Personal Profile
-            if ($step === 2) {
+            // STEP 1: Admission Fee Payment & Provisional Allotment (First step as requested)
+            if ($step === 1) {
+                if ($crmStudent) {
+                    $crmStudent->update(['stage1' => 'paid', 'stage8' => 'paid']);
+                }
+                $nextStep = 2;
+                $msg = 'Step 1: Admission Fee Payment confirmed & Allotment Order issued!';
+            }
+
+            // STEP 2: Basic Registration & Program Selection
+            elseif ($step === 2) {
+                if ($crmStudent) {
+                    $crmStudent->update(['stage1' => 'paid']);
+                }
+                $nextStep = 3;
+                $msg = 'Step 2: Basic Registration details verified!';
+            }
+
+            // STEP 3: Personal Profile & Identity
+            elseif ($step === 3) {
                 $request->validate([
                     'student_name' => ['nullable', 'string', 'max:150'],
                     'dob'          => ['nullable', 'date'],
@@ -202,27 +236,30 @@ class DashboardsController extends Controller
                     $crmStudent->update(['stage2' => 'paid']);
                 }
 
-                $msg = 'Step 2: Personal Profile & Identity details saved successfully!';
+                $nextStep = 4;
+                $msg = 'Step 3: Personal Profile & Identity details saved successfully!';
             }
 
-            // STEP 3: Parent & Family Details
-            elseif ($step === 3) {
+            // STEP 4: Parent & Family Details
+            elseif ($step === 4) {
                 if ($crmStudent) {
                     $crmStudent->update(['stage3' => 'paid']);
                 }
-                $msg = 'Step 3: Parent & Family Contact Information saved successfully!';
+                $nextStep = 5;
+                $msg = 'Step 4: Parent & Family Contact Information saved successfully!';
             }
 
-            // STEP 4: Address Details
-            elseif ($step === 4) {
+            // STEP 5: Address Details
+            elseif ($step === 5) {
                 if ($crmStudent) {
                     $crmStudent->update(['stage4' => 'paid']);
                 }
-                $msg = 'Step 4: Communication & Permanent Address details saved successfully!';
+                $nextStep = 6;
+                $msg = 'Step 5: Communication & Permanent Address details saved successfully!';
             }
 
-            // STEP 5: Academic Records (10th & Intermediate)
-            elseif ($step === 5) {
+            // STEP 6: Academic Records (10th & Intermediate)
+            elseif ($step === 6) {
                 // 10th
                 if ($request->filled('ssc_board') || $request->filled('ssc_school') || $request->filled('ssc_hallticket')) {
                     $sscData = [
@@ -301,12 +338,12 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $crmStudent->update(['stage5' => 'paid']);
                 }
-
-                $msg = 'Step 5: Academic Qualification Records (10th & Intermediate) saved successfully!';
+                $nextStep = 7;
+                $msg = 'Step 6: Academic Qualification Records (10th & Intermediate) saved successfully!';
             }
 
-            // STEP 6: Document KYC Upload
-            elseif ($step === 6) {
+            // STEP 7: Document KYC Upload
+            elseif ($step === 7) {
                 // Record verified KYC certificates
                 $docTypes = [
                     'PHOTO' => 'Passport Size Photograph',
@@ -338,28 +375,20 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $crmStudent->update(['stage6' => 'paid']);
                 }
-
-                $msg = 'Step 6: Document & KYC Certificate Records updated successfully!';
+                $nextStep = 8;
+                $msg = 'Step 7: Document & KYC Certificate Records updated successfully!';
             }
 
-            // STEP 7: Campus Life & Specialization Preferences
-            elseif ($step === 7) {
+            // STEP 8: Campus Life & Specialization Preferences
+            elseif ($step === 8) {
                 if ($crmStudent) {
                     $crmStudent->update([
                         'ableto' => $request->boolean('hostel_required', true),
                         'stage7' => 'paid',
                     ]);
                 }
-                $msg = 'Step 7: Campus Life, Accommodation & Branch Preferences saved!';
-            }
-
-            // STEP 8: Admission Fee & Allotment
-            elseif ($step === 8) {
-                if ($crmStudent) {
-                    $crmStudent->update(['stage8' => 'paid']);
-                }
                 $nextStep = 8;
-                $msg = 'Step 8: Official Admission Fee Paid & Allotment Order Confirmed!';
+                $msg = 'Step 8: Campus Life, Accommodation & Branch Preferences saved!';
             } else {
                 $msg = 'Step information updated successfully!';
             }
@@ -379,7 +408,81 @@ class DashboardsController extends Controller
      */
     public function saveEducation(Request $request): RedirectResponse
     {
-        $request->merge(['step' => 5]);
+        $request->merge(['step' => 6]);
         return $this->saveStep($request);
+    }
+
+    /**
+     * Silent autosave on blur / change for any student dashboard input.
+     */
+    public function autosave(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = Auth::user();
+        $usercode = $user?->usercode ?? '';
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+
+        $student = StudentRegistration::where('register_no', $usercode)
+            ->orWhere('application_no', $usercode)
+            ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                $q->orWhere('mobile', $cleanPhone)->orWhere('mobile', 'like', "%{$cleanPhone}%");
+            })
+            ->first();
+
+        $crmStudent = CrmStudentRegistration::where('applinano', $usercode)
+            ->when($student, function ($q) use ($student) {
+                $q->orWhere('applinano', $student->application_no);
+            })
+            ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+            })
+            ->first();
+
+        $fieldName = (string)$request->input('field', '');
+        $fieldValue = $request->input('value');
+        $data = $request->except(['_token', 'field', 'value']);
+        if (!empty($fieldName)) {
+            $data[$fieldName] = $fieldValue;
+        }
+
+        try {
+            if ($student) {
+                $studentUpdates = [];
+                foreach (['student_name', 'dob', 'gender', 'aadhar_no', 'abc_id', 'personal_email'] as $col) {
+                    if (isset($data[$col])) {
+                        $studentUpdates[$col] = $data[$col];
+                    }
+                }
+                if (!empty($studentUpdates)) {
+                    $studentUpdates['log_ipaddress'] = $request->ip();
+                    $studentUpdates['log_timestamp'] = now();
+                    $student->update($studentUpdates);
+                }
+            }
+
+            if ($crmStudent) {
+                $crmUpdates = [];
+                if (isset($data['student_name']) || isset($data['name'])) {
+                    $crmUpdates['name'] = $data['student_name'] ?? $data['name'];
+                }
+                if (isset($data['personal_email']) || isset($data['email'])) {
+                    $crmUpdates['emailid'] = $data['personal_email'] ?? $data['email'];
+                }
+                if (isset($data['hostel_required'])) {
+                    $crmUpdates['ableto'] = (bool)$data['hostel_required'];
+                }
+                if (!empty($crmUpdates)) {
+                    $crmUpdates['log_ipaddress'] = $request->ip();
+                    $crmUpdates['log_timestamp'] = now();
+                    $crmStudent->update($crmUpdates);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[DashboardsController] autosave error: ' . $e->getMessage());
+        }
+
+        return response()->json(['success' => true]);
     }
 }

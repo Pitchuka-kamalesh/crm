@@ -715,6 +715,39 @@
             if (activeBtn) {
                 selectProgramLevel(currentLevel, activeBtn);
             }
+
+            // Silent Auto-save on blur / change (No intimate message as requested)
+            const form = document.getElementById('admissionRegisterForm');
+            if (form) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const mobileVal = '{{ $prefilledPhone }}';
+
+                const silentAutosave = function(fieldEl) {
+                    const fieldName = fieldEl.name;
+                    if (!fieldName || fieldName === '_token') return;
+                    const fieldValue = fieldEl.value;
+                    if (fieldValue === undefined || fieldValue === null || fieldValue === '') return;
+
+                    fetch('{{ route("register.autosave") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            mobile: mobileVal,
+                            field: fieldName,
+                            value: fieldValue
+                        })
+                    }).catch(() => {}); // Intentionally silent: no alerts, toasts, or popup messages
+                };
+
+                form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function(el) {
+                    el.addEventListener('blur', function() { silentAutosave(this); });
+                    el.addEventListener('change', function() { silentAutosave(this); });
+                });
+            }
         });
     </script>
 </body>
