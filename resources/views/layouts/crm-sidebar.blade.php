@@ -3,6 +3,9 @@
     (function(){
         document.documentElement.setAttribute('data-theme-color', localStorage.getItem('crm_theme_color') || 'red');
         document.documentElement.setAttribute('data-theme-mode', localStorage.getItem('crm_theme_mode') || 'light');
+        if (localStorage.getItem('crm_sidebar_collapsed') === '1') {
+            document.documentElement.classList.add('sidebar-is-collapsed');
+        }
     })();
 </script>
 
@@ -445,6 +448,8 @@
         const sidebar = document.getElementById('appSidebar');
         if (!sidebar) return;
         const isCollapsed = sidebar.classList.toggle('collapsed');
+        document.documentElement.classList.toggle('sidebar-is-collapsed', isCollapsed);
+        document.body.classList.toggle('sidebar-is-collapsed', isCollapsed);
         localStorage.setItem('crm_sidebar_collapsed', isCollapsed ? '1' : '0');
     };
 
@@ -518,6 +523,8 @@
         if (localStorage.getItem('crm_sidebar_collapsed') === '1') {
             const sidebar = document.getElementById('appSidebar');
             if (sidebar) sidebar.classList.add('collapsed');
+            document.documentElement.classList.add('sidebar-is-collapsed');
+            document.body.classList.add('sidebar-is-collapsed');
         }
 
         // Run immediately

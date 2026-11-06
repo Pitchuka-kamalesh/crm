@@ -582,15 +582,15 @@ body {
     box-shadow: 0 0 6px #ffffff !important;
 }
 
-/* Topbar Toggle Sidebar Hamburger Button (Top 3 lines) */
+/* Topbar Toggle Sidebar Hamburger Button (Top 3 lines) - HIDDEN when sidebar is open */
 .topbar-toggle-sidebar-btn {
+    display: none !important;
     background: transparent;
     border: none;
     color: var(--text-slate, #334155);
     cursor: pointer;
     padding: 6px;
     border-radius: 8px;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     margin: 0;
@@ -610,6 +610,13 @@ body {
 [data-theme-mode="dark"] .topbar-toggle-sidebar-btn:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
+}
+
+/* ONLY AFTER CLOSING SIDEBAR: SHOW THOSE 3 LINES AT TOP LEFT! */
+.app-sidebar.collapsed ~ .app-main .topbar-toggle-sidebar-btn,
+body.sidebar-is-collapsed .topbar-toggle-sidebar-btn,
+html.sidebar-is-collapsed .topbar-toggle-sidebar-btn {
+    display: inline-flex !important;
 }
 
 /* 4. Sidebar Footer (Appearance & Theme Controls - Matching Reference Image) */
