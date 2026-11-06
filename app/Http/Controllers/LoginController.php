@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CrmStudentRegistration;
 use App\Models\Employee;
 use App\Models\LoginOtp;
+use App\Models\Role;
 use App\Models\StudentRegistration;
 use App\Models\User;
 use App\Services\ActivityLogger;
@@ -146,8 +148,7 @@ class LoginController extends Controller
                 $isPredefinedStaff = true;
             } else {
                 try {
-                    $empCount = DB::table('master.employees')
-                        ->where('phone_primary', $cleanPhone)
+                    $empCount = Employee::where('phone_primary', $cleanPhone)
                         ->orWhere('phone_secondary', $cleanPhone)
                         ->orWhere('emp_code', $rawPhone)
                         ->count();
@@ -164,8 +165,7 @@ class LoginController extends Controller
             } elseif (!$user) {
                 $crmStudent = null;
                 try {
-                    $crmStudent = DB::table('crm.student_registration')
-                        ->where('phoneno', $cleanPhone)
+                    $crmStudent = CrmStudentRegistration::where('phoneno', $cleanPhone)
                         ->orWhere('phoneno', 'like', "%{$cleanPhone}")
                         ->first();
                 } catch (\Throwable $e) {}
@@ -192,8 +192,7 @@ class LoginController extends Controller
                 if (!$studentRec || empty($studentRec->student_name) || str_starts_with($studentRec->student_name, 'Candidate ')) {
                     $crmStudent = null;
                     try {
-                        $crmStudent = DB::table('crm.student_registration')
-                            ->where('phoneno', $cleanPhone)
+                        $crmStudent = CrmStudentRegistration::where('phoneno', $cleanPhone)
                             ->first();
                     } catch (\Throwable $e) {}
 
@@ -399,22 +398,26 @@ class LoginController extends Controller
     {
         $roleId = $user->getActiveRoleId();
 
-        // 1. CRM DEAN (role_id 3) & CRM Incharge (role_id 2) -> CRM Dashboard
+        // 1. Student Candidate (user_type 1 or role_id 5) -> Student Admission Portal
+        if ($user->user_type === 1 || $roleId === 5) {
+            return route('dashboards.index');
+        }
+
+        // 2. CRM DEAN (role_id 3) & CRM Incharge (role_id 2) -> CRM Dashboard
         if ($roleId === 2 || $roleId === 3) {
             return route('crm.index');
         }
 
-        // 2. Tele Caller (role_id 4) -> Leads Dashboard
+        // 3. Tele Caller (role_id 4) -> Leads Dashboard
         if ($roleId === 4) {
             return route('leads.index');
         }
 
-        // 3. Employee / Admin (role_id 1 or user_type 2)
+        // 4. Employee / Admin (role_id 1 or user_type 2)
         if ($user->user_type === 2 || $roleId === 1) {
             return route('crm.index');
         }
 
-        // 4. Default Student (role_id 5 or user_type 1) -> Student Admission Portal
         return route('dashboards.index');
     }
 
@@ -430,7 +433,7 @@ class LoginController extends Controller
         $roleId = (int) $request->input('role_id');
         session(['user.role_id' => $roleId]);
 
-        $role = DB::table('master.roles')->where('role_id', $roleId)->first();
+        $role = Role::find($roleId);
         $roleName = $role ? $role->role_name : 'Role ' . $roleId;
 
         $targetUrl = match ($roleId) {
@@ -513,8 +516,7 @@ class LoginController extends Controller
 
         // Look up registered student in crm.student_registration
         try {
-            $crmStudent = DB::table('crm.student_registration')
-                ->where('phoneno', $cleanPhone)
+            $crmStudent = CrmStudentRegistration::where('phoneno', $cleanPhone)
                 ->orWhere('phoneno', 'like', "%{$cleanPhone}%")
                 ->orWhere('applinano', $rawPhone)
                 ->first();

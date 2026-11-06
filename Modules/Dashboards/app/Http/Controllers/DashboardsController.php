@@ -135,9 +135,7 @@ class DashboardsController extends Controller
             if ($request->filled('abc_id')) $studentUpdate['abc_id'] = $request->abc_id;
             if ($request->filled('personal_email')) $studentUpdate['personal_email'] = $request->personal_email;
 
-            DB::table('admissions.student_registrations')
-                ->where('application_no', $student->application_no)
-                ->update($studentUpdate);
+            $student->update($studentUpdate);
         } else {
             // Create student registration record
             $student = StudentRegistration::create([
