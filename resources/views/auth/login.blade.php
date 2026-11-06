@@ -1119,27 +1119,20 @@
                 }
                 // 🚨 END OF BYPASS BLOCK 🚨
                 if (data && data.success) {
-                    if (data.dev_otp) {
-                        console.log('%c[DEV OTP CODE] ' + data.dev_otp, 'background: #2563eb; color: #fff; font-weight: bold; font-size: 13px; padding: 3px 6px; border-radius: 4px;');
-                    }
+                    const displayPhone = (data && data.phone) ? data.phone : cleanPhone;
                     const msgText = document.getElementById('otp-sent-message');
                     if (msgText) {
-                        if (data.dev_otp) {
-                            msgText.innerHTML = '✔ OTP sent to WhatsApp / SMS.<br><div style="margin-top:6px; font-weight:700; color:#1e40af; background:#eff6ff; padding:5px 10px; border-radius:6px; border:1px solid #bfdbfe; font-size:0.85rem; display:inline-block;">Your OTP is: <span style="letter-spacing:2px; font-size:1rem; color:#2563eb;">' + data.dev_otp + '</span></div>';
-                        } else {
-                            msgText.textContent = '✔ Verification OTP sent to your WhatsApp / SMS.';
-                        }
+                        msgText.textContent = '✔ OTP sent to ' + displayPhone + ' WhatsApp / SMS.';
                     }
 
                     // Transition to Step 2 (OTP Screen)
                     goToStepOtp();
 
-                    // Autofill if dev_otp is provided
-                    if (data.dev_otp) {
-                        const otpInput = document.getElementById('otp');
-                        if (otpInput) {
-                            otpInput.value = data.dev_otp;
-                        }
+                    // Ensure OTP field is empty (no autofill) and focused
+                    const otpInput = document.getElementById('otp');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        setTimeout(() => otpInput.focus(), 150);
                     }
 
                     // Start 60s countdown
