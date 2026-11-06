@@ -57,13 +57,19 @@
                 4 => route('leads.allotted'),
                 default => route('crm.alias', ['tab' => 'overview']),
             };
-            $isDashboardActive = ($activeTab ?? 'overview') === 'overview' && !request()->routeIs('leads.*') && !request()->routeIs('finance.*') && !request()->routeIs('sms.*');
-            if ($roleId == 4 && request()->routeIs('leads.allotted')) {
-                $isDashboardActive = true;
+            $currentTab = $activeTab ?? request()->query('tab', '');
+            $isDashboardActive = ($currentTab === 'overview' || empty($currentTab)) 
+                && !request()->routeIs('leads.*') 
+                && !request()->routeIs('finance.*') 
+                && !request()->routeIs('sms.*')
+                && !request()->routeIs('kpi.*')
+                && !request()->routeIs('crm.std*');
+            if ($roleId == 4) {
+                $isDashboardActive = request()->routeIs('leads.allotted') && empty($currentTab);
             }
         @endphp
 
-        <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard" style="{{ $isDashboardActive ? '' : 'background: rgba(255,255,255,0.06); box-shadow: none; color: #cbd5e1;' }}">
+        <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
             <svg viewBox="0 0 24 24">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
@@ -384,24 +390,87 @@
     </div>
 </aside>
 
-<!-- Interactive Accordion & Theme Management Scripts -->
+<!-- Interactive Accordion, Sidebar Toggle & Theme Management Scripts -->
 <script>
     function toggleAccordion(groupId) {
-        const group = document.getElementById(groupId);
-        if (!group) return;
-        group.classList.toggle('open');
-    }
+        const targetGroup = document.getElementById(groupId);
+        if (!targetGroup) return;
 
-    function toggleSidebarMenu() {
-        const sidebar = document.getElementById('appSidebar');
-        if (sidebar) {
-            if (sidebar.style.display === 'none') {
-                sidebar.style.display = 'flex';
-            } else {
-                sidebar.classList.toggle('collapsed');
+        const isAlreadyOpen = targetGroup.classList.contains('open');
+
+        // 1. Clear active from all headers and dashboard button
+        document.querySelectorAll('.app-sidebar .accordion-header').forEach(h => {
+            h.classList.remove('active');
+        });
+        const dashboardBtn = document.getElementById('nav-btn-dashboard');
+        if (dashboardBtn) {
+            dashboardBtn.classList.remove('active');
+        }
+
+        // 2. Clear active from all submenu links
+        document.querySelectorAll('.app-sidebar .submenu-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // 3. Close all groups
+        document.querySelectorAll('.app-sidebar .accordion-group').forEach(group => {
+            group.classList.remove('open');
+        });
+
+        // 4. Open ONLY targeted group & make ONLY its header active & glow
+        if (!isAlreadyOpen) {
+            targetGroup.classList.add('open');
+            const header = targetGroup.querySelector('.accordion-header');
+            if (header) {
+                header.classList.add('active');
             }
         }
     }
+
+    function selectDashboardNav(event) {
+        // Clear active from all accordion headers & close all accordion groups
+        document.querySelectorAll('.app-sidebar .accordion-header').forEach(h => {
+            h.classList.remove('active');
+        });
+        document.querySelectorAll('.app-sidebar .submenu-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        document.querySelectorAll('.app-sidebar .accordion-group').forEach(group => {
+            group.classList.remove('open');
+        });
+
+        // ONLY dashboard glows
+        const dashboardBtn = document.getElementById('nav-btn-dashboard');
+        if (dashboardBtn) {
+            dashboardBtn.classList.add('active');
+        }
+    }
+
+    // Top 3 lines hamburger toggle: smoothly closes/opens sidebar
+    window.toggleSidebarMenu = function() {
+        const sidebar = document.getElementById('appSidebar');
+        if (!sidebar) return;
+        const isCollapsed = sidebar.classList.toggle('collapsed');
+        localStorage.setItem('crm_sidebar_collapsed', isCollapsed ? '1' : '0');
+    };
+
+    // Submenu click listener: only clicked submenu link glows, rest do not
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('.app-sidebar .submenu-link');
+        if (link) {
+            document.querySelectorAll('.app-sidebar .submenu-link').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.app-sidebar .accordion-header').forEach(h => h.classList.remove('active'));
+            const dashboardBtn = document.getElementById('nav-btn-dashboard');
+            if (dashboardBtn) dashboardBtn.classList.remove('active');
+
+            link.classList.add('active');
+            // Keep parent accordion open
+            const parentGroup = link.closest('.accordion-group');
+            if (parentGroup) {
+                parentGroup.classList.add('open');
+            }
+        }
+    });
 
     // Appearance & Theme Management
     (function() {
@@ -450,6 +519,12 @@
             const newMode = currentMode === 'dark' ? 'light' : 'dark';
             window.setAppThemeMode(newMode);
         };
+
+        // Apply sidebar collapsed preference if saved
+        if (localStorage.getItem('crm_sidebar_collapsed') === '1') {
+            const sidebar = document.getElementById('appSidebar');
+            if (sidebar) sidebar.classList.add('collapsed');
+        }
 
         // Run immediately
         applyThemePreferences();
