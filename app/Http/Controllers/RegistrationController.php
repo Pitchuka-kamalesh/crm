@@ -9,7 +9,6 @@ use App\Models\CrmStudentRegistration;
 use App\Models\Lead;
 use App\Models\Program;
 use App\Models\State;
-use App\Models\StudentRegistration;
 use App\Models\User;
 use App\Services\SmsService;
 use App\Services\WhatsAppService;
@@ -118,10 +117,23 @@ class RegistrationController extends Controller
                 ->value('branch_long_name') ?? 'General Core';
         }
 
-        // 1. Insert into crm.student_registration via Eloquent
+        // 1. Generate unique application number from crm sequence
         $appliNano = null;
         try {
+            $seqRow = DB::selectOne("SELECT nextval('crm.student_registration_applinano_seq'::regclass)::text as applinano");
+            if ($seqRow && !empty($seqRow->applinano) && !str_contains($seqRow->applinano, '#')) {
+                $appliNano = $seqRow->applinano;
+            }
+        } catch (\Throwable $e) {}
+
+        if (!$appliNano) {
+            $appliNano = '20' . date('ymd') . mt_rand(100, 999);
+        }
+
+        // 2. Insert into crm.student_registration via Eloquent
+        try {
             $crmRecord = CrmStudentRegistration::create([
+                'applinano'    => $appliNano,
                 'name'         => $applicantName,
                 'phoneno'      => $cleanMobile,
                 'emailid'      => $email,
@@ -145,49 +157,8 @@ class RegistrationController extends Controller
                 'log_ipaddress'=> $request->ip(),
                 'log_timestamp'=> now(),
             ]);
-
-            if ($crmRecord && !empty($crmRecord->applinano)) {
-                $appliNano = $crmRecord->applinano;
-            }
         } catch (Exception $e) {
             Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
-        }
-
-        if (!$appliNano) {
-            $appliNano = '20' . date('ymd') . mt_rand(100, 999);
-        }
-
-        // 2. Insert into admissions.student_registrations via Eloquent
-        $programCode = Program::where('program_id', $progId)
-            ->value('program_seprt_code') ?? 'CK';
-        $regNo = '261' . $programCode . mt_rand(10000, 99999);
-        $enrollmentNo = 'Jan-26-' . Str::random(10);
-
-        try {
-            StudentRegistration::updateOrCreate(
-                ['application_no' => $appliNano],
-                [
-                    'enrollment_no'  => $enrollmentNo,
-                    'register_no'    => $regNo,
-                    'student_name'   => $applicantName,
-                    'personal_email' => $email,
-                    'ofc_mail'       => $email,
-                    'mobile'         => $cleanMobile,
-                    'regulation'     => 'R25',
-                    'progid'         => $progId,
-                    'electiveid'     => $branchId ?: 1,
-                    'admyear'        => 2026,
-                    'adm_batch_code' => 'JANUARY_2026',
-                    'std_type'       => 'Regular',
-                    'std_status'     => 'Applied',
-                    'lock_status'    => 0,
-                    'log_userid'     => 'SELF_REGISTER',
-                    'log_ipaddress'  => $request->ip(),
-                    'log_timestamp'  => now(),
-                ]
-            );
-        } catch (Exception $e) {
-            Log::warning('[RegistrationController] admissions notice: ' . $e->getMessage());
         }
 
         // 3. Create or update user account in master.login
@@ -359,56 +330,6 @@ class RegistrationController extends Controller
             }
         } catch (\Throwable $e) {
             Log::warning('[Autosave] crm.student_registration error: ' . $e->getMessage());
-        }
-
-        // 3. Update admissions.student_registrations
-        try {
-            $admStudent = StudentRegistration::where('mobile', $cleanMobile)->first();
-            if (!$admStudent && isset($crmStudent) && $crmStudent) {
-                $programCode = Program::where('program_id', $crmStudent->programid)->value('program_seprt_code') ?? 'CK';
-                $regNo = '261' . $programCode . mt_rand(10000, 99999);
-                $admStudent = StudentRegistration::create([
-                    'application_no' => $crmStudent->applinano,
-                    'register_no'    => $regNo,
-                    'enrollment_no'  => 'Jan-26-' . Str::random(10),
-                    'student_name'   => $crmStudent->name,
-                    'personal_email' => $crmStudent->emailid,
-                    'ofc_mail'       => $crmStudent->emailid,
-                    'mobile'         => $cleanMobile,
-                    'regulation'     => 'R25',
-                    'progid'         => $crmStudent->programid ?: 1,
-                    'electiveid'     => $crmStudent->branchid ?: 11,
-                    'admyear'        => 2026,
-                    'adm_batch_code' => 'JANUARY_2026',
-                    'std_type'       => 'Regular',
-                    'std_status'     => 'Applied',
-                    'log_userid'     => 'AUTOSAVE',
-                    'log_ipaddress'  => $request->ip(),
-                    'log_timestamp'  => now(),
-                ]);
-            } elseif ($admStudent) {
-                $admUpdates = [];
-                if (isset($data['applicant_name']) || isset($data['name'])) {
-                    $admUpdates['student_name'] = trim($data['applicant_name'] ?? $data['name']);
-                }
-                if (isset($data['email'])) {
-                    $admUpdates['personal_email'] = trim($data['email']);
-                    $admUpdates['ofc_mail'] = trim($data['email']);
-                }
-                if (isset($data['progid'])) {
-                    $admUpdates['progid'] = (int)$data['progid'];
-                }
-                if (isset($data['branch_id'])) {
-                    $admUpdates['electiveid'] = (int)$data['branch_id'];
-                }
-                if (!empty($admUpdates)) {
-                    $admUpdates['log_ipaddress'] = $request->ip();
-                    $admUpdates['log_timestamp'] = now();
-                    $admStudent->update($admUpdates);
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::warning('[Autosave] admissions.student_registrations error: ' . $e->getMessage());
         }
 
         return response()->json(['success' => true]);

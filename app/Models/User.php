@@ -94,28 +94,32 @@ class User extends Authenticatable
 
     public function student(): HasOne
     {
-        return $this->hasOne(StudentRegistration::class, 'register_no', 'usercode');
+        return $this->hasOne(CrmStudentRegistration::class, 'applinano', 'usercode');
     }
 
     public function getNameAttribute(): string
     {
-        if ($this->user_type === 2 && $this->employee) {
-            return $this->employee->full_name;
+        try {
+            if ($this->user_type === 2 && $this->employee) {
+                return $this->employee->full_name;
+            }
+
+            if ($this->user_type === 1) {
+                if ($this->student && !empty($this->student->name)) {
+                    return $this->student->name;
+                }
+                $crmStudent = CrmStudentRegistration::where('applinano', $this->usercode)
+                    ->orWhere('phoneno', $this->phnno)
+                    ->first();
+                if ($crmStudent && !empty($crmStudent->name)) {
+                    return $crmStudent->name;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Gracefully fallback
         }
 
-        if ($this->user_type === 1) {
-            if ($this->student) {
-                return $this->student->student_name;
-            }
-            $student = StudentRegistration::where('register_no', $this->usercode)
-                ->orWhere('application_no', $this->usercode)
-                ->first();
-            if ($student) {
-                return $student->student_name;
-            }
-        }
-
-        return $this->usercode;
+        return $this->usercode ?: 'Applicant';
     }
 
     public function getActiveRoleId(): int
@@ -129,9 +133,11 @@ class User extends Authenticatable
             return (int) $this->role_id;
         }
 
-        if ($this->employee && !empty($this->employee->role_id)) {
-            return (int) $this->employee->role_id;
-        }
+        try {
+            if ($this->employee && !empty($this->employee->role_id)) {
+                return (int) $this->employee->role_id;
+            }
+        } catch (\Throwable $e) {}
 
         // Predefined staff role mapping without touching database tables
         if ($this->usercode === '03141' || str_contains($this->officialmail ?? '', 'dean')) {
