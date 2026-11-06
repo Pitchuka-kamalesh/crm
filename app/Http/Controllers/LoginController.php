@@ -503,13 +503,13 @@ class LoginController extends Controller
         $responseData = [
             'success' => true,
             'message' => "OTP sent successfully to +91 {$cleanPhone}.",
+            'phone' => $cleanPhone,
             'is_registered' => ($user !== null),
             'user' => [
                 'name' => $targetName,
                 'usercode' => $targetUsercode ?? $cleanPhone,
                 'role' => $targetRole,
             ],
-            'dev_otp' => config('app.debug') ? $otp : null,
         ];
 
         return response()->json($responseData);
