@@ -330,22 +330,8 @@
         @endif
     </div>
 
-    <!-- 4. Sidebar Footer with View Switcher & Logout -->
+    <!-- 4. Sidebar Footer with Sign Out -->
     <div class="sidebar-footer">
-        @if(isset($availableRoles) && $availableRoles->isNotEmpty() && in_array($roleId, [1, 2, 3]))
-            <form action="{{ route('role.switch') }}" method="POST">
-                @csrf
-                <div class="footer-role-label">Preview Role (Session):</div>
-                <select name="role_id" class="footer-role-select" onchange="this.form.submit()">
-                    @foreach($availableRoles as $r)
-                        <option value="{{ $r->role_id }}" {{ $roleId == $r->role_id ? 'selected' : '' }}>
-                            {{ $r->role_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-        @endif
-
         <form action="{{ route('logout') }}" method="POST">
             @csrf
             <button type="submit" class="footer-logout-btn">

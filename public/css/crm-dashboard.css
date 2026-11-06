@@ -413,6 +413,61 @@ body {
     gap: 0.5rem;
 }
 
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.top-role-switch-form {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.top-role-switch-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.15s ease;
+}
+
+.top-role-switch-pill:hover {
+    border-color: #2563eb;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+}
+
+.top-role-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.top-role-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.top-role-select {
+    border: none;
+    background: transparent;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f172a;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+    padding-right: 0.25rem;
+}
+
 .btn-header-action {
     display: inline-flex;
     align-items: center;
