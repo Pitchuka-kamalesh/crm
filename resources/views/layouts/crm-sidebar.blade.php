@@ -67,7 +67,7 @@
             <!-- ================= ROLE 3 (CRM DEAN) & ROLE 2 (CRM INCHARGE) ================= -->
             
             <!-- SECTION 1: CRM / MANAGE (Collapsible Dropdown with Chevron) -->
-            @php $isCrmOpen = in_array($activeTab ?? '', ['stddata', 'stdsearch']) || request()->routeIs('crm.std*'); @endphp
+            @php $isCrmOpen = in_array($activeTab ?? '', ['stddata', 'stdsearch', 'couponinfo', 'employeelist']) || request()->routeIs('crm.std*', 'crm.couponinfo', 'crm.employeelist', 'crm.enquirylist', 'crm.registerlist'); @endphp
             <div class="accordion-group {{ $isCrmOpen ? 'open' : '' }}" id="group-crm">
                 <button type="button" class="accordion-header {{ $isCrmOpen ? 'active' : '' }}" onclick="toggleAccordion('group-crm')">
                     <div class="header-left">
@@ -87,10 +87,16 @@
                 </button>
                 <div class="accordion-body">
                     <a href="{{ route('crm.stddata', ['tab' => 'stddata']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stddata' ? 'active' : '' }}">
-                        Student data
+                        Enquiry list
                     </a>
                     <a href="{{ route('crm.stdsearch', ['tab' => 'stdsearch']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stdsearch' ? 'active' : '' }}">
-                        Student search
+                        Register list
+                    </a>
+                    <a href="{{ route('crm.couponinfo', ['tab' => 'couponinfo']) }}" class="submenu-link {{ ($activeTab ?? '') === 'couponinfo' ? 'active' : '' }}">
+                        Coupon info
+                    </a>
+                    <a href="{{ route('crm.employeelist', ['tab' => 'employeelist']) }}" class="submenu-link {{ ($activeTab ?? '') === 'employeelist' ? 'active' : '' }}">
+                        Employee list
                     </a>
                 </div>
             </div>
@@ -258,7 +264,7 @@
         @else
             <!-- ================= ROLE 1 (EMPLOYEE / ADMIN) ================= -->
             <!-- SECTION 1: STUDENT REGISTRY -->
-            @php $isEmpCrmOpen = in_array($activeTab ?? '', ['stddata', 'stdsearch']) || request()->routeIs('crm.std*'); @endphp
+            @php $isEmpCrmOpen = in_array($activeTab ?? '', ['stddata', 'stdsearch', 'couponinfo', 'employeelist']) || request()->routeIs('crm.std*', 'crm.couponinfo', 'crm.employeelist', 'crm.enquirylist', 'crm.registerlist'); @endphp
             <div class="accordion-group {{ $isEmpCrmOpen ? 'open' : '' }}" id="group-emp-crm">
                 <button type="button" class="accordion-header {{ $isEmpCrmOpen ? 'active' : '' }}" onclick="toggleAccordion('group-emp-crm')">
                     <div class="header-left">
@@ -276,10 +282,16 @@
                 </button>
                 <div class="accordion-body">
                     <a href="{{ route('crm.stddata', ['tab' => 'stddata']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stddata' ? 'active' : '' }}">
-                        Student data
+                        Enquiry list
                     </a>
                     <a href="{{ route('crm.stdsearch', ['tab' => 'stdsearch']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stdsearch' ? 'active' : '' }}">
-                        Student search
+                        Register list
+                    </a>
+                    <a href="{{ route('crm.couponinfo', ['tab' => 'couponinfo']) }}" class="submenu-link {{ ($activeTab ?? '') === 'couponinfo' ? 'active' : '' }}">
+                        Coupon info
+                    </a>
+                    <a href="{{ route('crm.employeelist', ['tab' => 'employeelist']) }}" class="submenu-link {{ ($activeTab ?? '') === 'employeelist' ? 'active' : '' }}">
+                        Employee list
                     </a>
                 </div>
             </div>

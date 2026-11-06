@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Campus;
 use App\Models\CommunicationLog;
 use App\Models\CrmStudentRegistration;
+use App\Models\Employee;
 use App\Models\MenuAccessRole;
 use App\Models\Program;
 use App\Models\Role;
@@ -30,8 +31,10 @@ class CrmController extends Controller
         $activeTab = $request->query('tab');
         if (!$activeTab) {
             $activeTab = match ($currentRoute) {
-                'crm.stddata' => 'stddata',
-                'crm.stdsearch' => 'stdsearch',
+                'crm.stddata', 'crm.enquirylist' => 'stddata',
+                'crm.stdsearch', 'crm.registerlist' => 'stdsearch',
+                'crm.couponinfo' => 'couponinfo',
+                'crm.employeelist' => 'employeelist',
                 'kpi.index', 'kpi.studentkpi' => 'kpi',
                 default => 'overview',
             };
@@ -88,19 +91,65 @@ class CrmController extends Controller
 
         // Search and full student data for stddata & stdsearch views
         $searchQuery = trim($request->input('q', ''));
+        $filterPhone = trim($request->input('phone', ''));
+        $filterStatus = trim($request->input('status', ''));
+        $filterDate = trim($request->input('date', ''));
+
         $allStudents = collect();
         try {
             $query = StudentRegistration::query();
             if ($searchQuery) {
-                $query->where('student_name', 'like', "%{$searchQuery}%")
-                    ->orWhere('application_no', 'like', "%{$searchQuery}%")
-                    ->orWhere('mobile', 'like', "%{$searchQuery}%")
-                    ->orWhere('register_no', 'like', "%{$searchQuery}%");
+                $query->where(function ($q) use ($searchQuery) {
+                    $q->where('student_name', 'like', "%{$searchQuery}%")
+                        ->orWhere('application_no', 'like', "%{$searchQuery}%")
+                        ->orWhere('mobile', 'like', "%{$searchQuery}%")
+                        ->orWhere('register_no', 'like', "%{$searchQuery}%");
+                });
             }
-            $allStudents = $query->take(50)->get();
-            if ($allStudents->isEmpty() && !$searchQuery) {
-                $allStudents = CrmStudentRegistration::take(50)->get();
+            if ($filterPhone) {
+                $query->where('mobile', 'like', "%{$filterPhone}%");
             }
+            if ($filterStatus && strtolower($filterStatus) !== 'all') {
+                $query->where('std_status', 'like', "%{$filterStatus}%");
+            }
+            if ($filterDate) {
+                $query->whereDate('log_timestamp', $filterDate);
+            }
+            $allStudents = $query->latest('log_timestamp')->take(100)->get();
+
+            if ($allStudents->isEmpty() && !$searchQuery && !$filterPhone && !$filterStatus && !$filterDate) {
+                $allStudents = CrmStudentRegistration::latest('log_timestamp')->take(100)->get();
+            } elseif ($allStudents->isEmpty()) {
+                $crmQuery = CrmStudentRegistration::query();
+                if ($searchQuery) {
+                    $crmQuery->where(function ($q) use ($searchQuery) {
+                        $q->where('name', 'like', "%{$searchQuery}%")
+                            ->orWhere('applinano', 'like', "%{$searchQuery}%")
+                            ->orWhere('phoneno', 'like', "%{$searchQuery}%");
+                    });
+                }
+                if ($filterPhone) {
+                    $crmQuery->where('phoneno', 'like', "%{$filterPhone}%");
+                }
+                if ($filterStatus && strtolower($filterStatus) !== 'all') {
+                    $crmQuery->where('std_status', 'like', "%{$filterStatus}%");
+                }
+                if ($filterDate) {
+                    $crmQuery->whereDate('log_timestamp', $filterDate);
+                }
+                $crmResults = $crmQuery->latest('log_timestamp')->take(100)->get();
+                if ($crmResults->isNotEmpty()) {
+                    $allStudents = $crmResults;
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // Distinct available statuses for Enquiry list filter dropdown
+        $availableStatuses = collect(['Applied', 'Registered', 'Verified', 'Pending', 'Fee Paid', 'Callback']);
+        try {
+            $dbStatuses = StudentRegistration::whereNotNull('std_status')->distinct()->pluck('std_status');
+            $crmDbStatuses = CrmStudentRegistration::whereNotNull('std_status')->distinct()->pluck('std_status');
+            $availableStatuses = $availableStatuses->merge($dbStatuses)->merge($crmDbStatuses)->unique()->filter()->values();
         } catch (\Throwable $e) {}
 
         // Campuses and Programs for Employee / Dean views
@@ -131,6 +180,18 @@ class CrmController extends Controller
             $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
         } catch (\Throwable $e) {}
 
+        // Available employees for enquiry allotment
+        $employees = collect();
+        try {
+            $employees = Employee::where('is_active', 1)->orderBy('full_name')->get();
+            if ($employees->isEmpty()) {
+                $employees = Employee::all();
+            }
+        } catch (\Throwable $e) {}
+
+        // Session-backed lead assignments (Read-only DB safe)
+        $leadAssignments = session()->get('lead_assignments', []);
+
         return view('crm::index', compact(
             'user',
             'roleId',
@@ -148,8 +209,74 @@ class CrmController extends Controller
             'branches',
             'availableRoles',
             'roleMenus',
-            'searchQuery'
+            'searchQuery',
+            'filterPhone',
+            'filterStatus',
+            'filterDate',
+            'availableStatuses',
+            'employees',
+            'leadAssignments'
         ));
+    }
+
+    /**
+     * Allot admission enquiries to an employee (Saved in session, read-only DB safe).
+     */
+    public function allotLeads(Request $request)
+    {
+        $employeeName = trim($request->input('employee_name', ''));
+        $allotMode = trim($request->input('allot_mode', 'single'));
+        $appliNo = trim($request->input('application_no', ''));
+        $date = trim($request->input('allot_date', ''));
+        $count = (int)$request->input('allot_count', 0);
+
+        if (!$employeeName) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Please select an employee'], 422);
+            }
+            return redirect()->back()->with('error', 'Please select an employee');
+        }
+
+        $assignments = session()->get('lead_assignments', []);
+        $allottedAt = now()->format('d M Y, h:i A');
+
+        if ($allotMode === 'single' && $appliNo) {
+            $assignments[$appliNo] = [
+                'employee' => $employeeName,
+                'mode' => 'Single',
+                'allotted_at' => $allottedAt,
+            ];
+        } else {
+            // Bulk / mode assignment
+            $assignments['_last_bulk'] = [
+                'employee' => $employeeName,
+                'mode' => ucfirst($allotMode),
+                'date' => $date,
+                'count' => $count,
+                'allotted_at' => $allottedAt,
+            ];
+            if ($appliNo) {
+                $assignments[$appliNo] = [
+                    'employee' => $employeeName,
+                    'mode' => ucfirst($allotMode),
+                    'allotted_at' => $allottedAt,
+                ];
+            }
+        }
+
+        session()->put('lead_assignments', $assignments);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'employee' => $employeeName,
+                'mode' => $allotMode,
+                'allotted_at' => $allottedAt,
+                'assignments' => $assignments,
+            ]);
+        }
+
+        return redirect()->back()->with('status', "Enquiries successfully allotted to {$employeeName}!");
     }
 
     /**

@@ -28,7 +28,14 @@ Route::post('/switch-role', [LoginController::class, 'switchRole'])->middleware(
 Route::get('/crm', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.alias');
 Route::get('/crm/index', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/stddata', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.stddata');
+Route::get('/crm/enquiry-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.enquirylist');
 Route::get('/crm/stdsearch', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.stdsearch');
+Route::get('/crm/register-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.registerlist');
+Route::get('/crm/coupon-info', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.couponinfo');
+Route::get('/crm/couponinfo', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
+Route::get('/crm/employee-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.employeelist');
+Route::get('/crm/employeelist', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
+Route::post('/crm/allot-leads', [\Modules\Crm\Http\Controllers\CrmController::class, 'allotLeads'])->middleware('auth')->name('crm.allot');
 
 // Leads aliases matching master.menus controller_ref
 Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
