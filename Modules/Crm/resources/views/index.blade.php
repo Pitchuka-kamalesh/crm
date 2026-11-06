@@ -35,12 +35,6 @@
             </div>
 
             <div class="top-bar-right">
-                <a href="{{ route('sms.index') }}" class="btn-header-action" title="Communication Gateway Tracker">
-                    <span>💬 Gateway Logs</span>
-                </a>
-                <a href="{{ route('crm.alias', ['tab' => 'stdsearch']) }}" class="btn-header-action" title="Register List & Tracking">
-                    <span>📋 Register List</span>
-                </a>
                 @include('layouts.role-switcher')
             </div>
         </header>
@@ -54,7 +48,8 @@
                 </div>
             @endif
 
-            <!-- ROLE-SPECIFIC METRIC CARDS -->
+            <!-- ROLE-SPECIFIC METRIC CARDS (DASHBOARD ONLY) -->
+            @if(($activeTab ?? 'overview') === 'overview' || empty($activeTab))
             <div class="metrics-grid">
                 @if($roleId == 3)
                     <!-- CRM DEAN METRICS -->
@@ -162,18 +157,12 @@
                     </div>
                 @endif
             </div>
+            @endif
 
             <!-- TABS ROUTING & CONTENT VIEWS -->
             @if(($activeTab ?? '') === 'stddata')
                 <!-- TAB: ENQUIRY LIST -->
                 <div class="content-card">
-                    <div class="card-header-bar">
-                        <div>
-                            <div class="card-title">📋 Admission Enquiry List (master.menus: CRMM0002)</div>
-                            <div class="card-subtitle">Comprehensive applicant enquiries & leads across Admissions & CRM schemas</div>
-                        </div>
-                    </div>
-
                     <!-- 3 LIVE FILTERS: PHONE NUMBER, STATUS, DATE -->
                     <div class="enquiry-filter-toolbar">
                         <div class="filter-inputs-row">
@@ -369,13 +358,6 @@
             @elseif(($activeTab ?? '') === 'stdsearch')
                 <!-- TAB: REGISTER LIST (STUDENT TRACKING) -->
                 <div class="content-card">
-                    <div class="card-header-bar">
-                        <div>
-                            <div class="card-title">📋 Register List &amp; Student Tracking (master.menus: CRMM0003)</div>
-                            <div class="card-subtitle">Comprehensive student admission progress and stage-wise tracking across Step 1 to Step 6</div>
-                        </div>
-                    </div>
-
                     <!-- Search Toolbar with Tracking Legend -->
                     <div style="padding: 1.25rem 1.5rem; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <form method="GET" action="{{ route('crm.stdsearch') }}" style="display: flex; gap: 0.75rem; flex: 1; max-width: 580px;">
@@ -487,13 +469,6 @@
             @elseif(($activeTab ?? '') === 'couponinfo')
                 <!-- TAB: COUPON INFO (PAYMENT & COUPON TRACKING) -->
                 <div class="content-card">
-                    <div class="card-header-bar">
-                        <div>
-                            <div class="card-title">🎟️ Coupon Information &amp; Payment Tracking (master.menus: CRMM0004)</div>
-                            <div class="card-subtitle">Official applicant fee payments, coupon deductions, and transaction reconciliation</div>
-                        </div>
-                    </div>
-
                     <!-- Search Toolbar with Live Search -->
                     <div style="padding: 1.25rem 1.5rem; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div style="display: flex; gap: 0.75rem; flex: 1; max-width: 580px;">
@@ -616,13 +591,6 @@
             @elseif(($activeTab ?? '') === 'employeelist')
                 <!-- TAB: EMPLOYEE LIST (STAFF DIRECTORY) -->
                 <div class="content-card">
-                    <div class="card-header-bar">
-                        <div>
-                            <div class="card-title">👥 University Staff &amp; Employee Directory (master.employees)</div>
-                            <div class="card-subtitle">Official VFSTR admissions officers, counseling team, telecallers, and administrative incharge profiles</div>
-                        </div>
-                    </div>
-
                     <!-- Metric Cards for Employees -->
                     <div class="employee-metrics-strip">
                         <div class="emp-metric-card">
@@ -685,10 +653,7 @@
                                     <th>Employee Name</th>
                                     <th>Official Email</th>
                                     <th>Phone Number</th>
-                                    <th>Designation &amp; Department</th>
-                                    <th>Cadre Type</th>
                                     <th>Campus</th>
-                                    <th>Status</th>
                                     <th style="text-align: center;">Action</th>
                                 </tr>
                             </thead>
@@ -788,19 +753,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 0.84rem;">{{ $designation }}</div>
-                                            <div style="font-size: 0.72rem; color: #64748b;">{{ $department }}</div>
-                                        </td>
-                                        <td>
-                                            <span class="badge-status badge-paid">{{ $empType }}</span>
-                                        </td>
-                                        <td>
                                             <span style="font-size: 0.8rem; color: #334155; font-weight: 600;">Vadlamudi</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge-status badge-verified">
-                                                <span class="live-pulse-dot" style="width: 6px; height: 6px;"></span> Active
-                                            </span>
                                         </td>
                                         <td style="text-align: center;">
                                             <button type="button" 
@@ -813,7 +766,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                                        <td colspan="6" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
                                             No employee records found in the database.
                                         </td>
                                     </tr>
