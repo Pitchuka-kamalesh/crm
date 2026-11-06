@@ -31,10 +31,10 @@
             </div>
 
             <div class="top-bar-right">
-                @include('layouts.role-switcher')
                 <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="btn-header-action" title="View Paid Details">
                     <span>🧾 Paid Details (FINA0002)</span>
                 </a>
+                @include('layouts.role-switcher')
             </div>
         </header>
 

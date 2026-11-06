@@ -37,10 +37,10 @@
             </div>
 
             <div class="top-bar-right">
-                @include('layouts.role-switcher')
                 <a href="{{ route('sms.index') }}" class="btn-header-action" title="Send SMS / WhatsApp Alert">
                     <span>💬 Send SMS / WhatsApp</span>
                 </a>
+                @include('layouts.role-switcher')
             </div>
         </header>
 

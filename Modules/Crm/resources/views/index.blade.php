@@ -39,13 +39,13 @@
             </div>
 
             <div class="top-bar-right">
-                @include('layouts.role-switcher')
                 <a href="{{ route('sms.index') }}" class="btn-header-action" title="Communication Gateway Tracker">
                     <span>💬 Gateway Logs</span>
                 </a>
                 <a href="{{ route('crm.alias', ['tab' => 'stdsearch']) }}" class="btn-header-action" title="Quick Search">
                     <span>🔍 Search Students</span>
                 </a>
+                @include('layouts.role-switcher')
             </div>
         </header>
 
