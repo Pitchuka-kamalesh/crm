@@ -24,11 +24,12 @@
         1 => '💼',
         5 => '🎓',
     ];
+    $isStudent = ($currentUser && ($currentUser->user_type == 1 || (int)$currentUser->role_id === 5 || (int)$activeRoleId === 5));
 @endphp
 
 <!-- EXACT USER PROFILE & ROLE SWITCHER PILL (MATCHING USER SCREENSHOT) -->
 <div class="user-role-dropdown-wrapper" id="userRoleDropdownWrapper">
-    <button type="button" class="user-profile-pill-btn" id="userProfilePillBtn" onclick="toggleUserRoleMenu(event)" aria-expanded="false" title="Switch Role / Account Details">
+    <button type="button" class="user-profile-pill-btn" id="userProfilePillBtn" onclick="toggleUserRoleMenu(event)" aria-expanded="false" title="{{ $isStudent ? 'Student Account Profile' : 'Switch Role / Account Details' }}">
         <!-- Red Circular Avatar with User Initial -->
         <div class="user-avatar-red">
             {{ $userInitial }}
@@ -48,48 +49,56 @@
 
     <!-- Floating Dropdown Popover Menu -->
     <div class="user-role-dropdown-card" id="userRoleDropdownCard">
-        <div class="role-dropdown-header">
-            <span class="role-dropdown-label">SWITCH ACTIVE ROLE</span>
-            <span class="role-dropdown-hint">Select a role to preview portal view</span>
-        </div>
+        @if($isStudent)
+            <div class="role-dropdown-header">
+                <span class="role-dropdown-label">STUDENT ACCOUNT</span>
+                <span class="role-dropdown-hint">{{ $currentUser->usercode }} &bull; {{ $userNameDisplay }}</span>
+            </div>
+            <div style="padding: 0.85rem 1.15rem; font-size: 0.8rem; color: #64748b; line-height: 1.45; background: #f8fafc; border-radius: 8px; margin: 0.5rem 0.75rem;">
+                🎓 <strong>Student Admission Portal</strong><br>
+                Role switching is not permitted for student accounts.
+            </div>
+        @else
+            <div class="role-dropdown-header">
+                <span class="role-dropdown-label">SWITCH ACTIVE ROLE</span>
+                <span class="role-dropdown-hint">Select a role to preview portal view</span>
+            </div>
 
-        <!-- Available Roles List -->
-        <div class="role-dropdown-items-list">
-            @foreach($allRolesList as $r)
-                @php
-                    $rId = (int)$r->role_id;
-                    $isCurrent = ((int)$activeRoleId === $rId);
-                    $icon = $roleIcons[$rId] ?? '👤';
-                @endphp
-                <form action="{{ route('role.switch') }}" method="POST" class="role-switch-item-form">
-                    @csrf
-                    <input type="hidden" name="role_id" value="{{ $rId }}">
-                    <button type="submit" class="role-menu-item {{ $isCurrent ? 'is-active-role' : '' }}">
-                        <span class="role-menu-icon">{{ $icon }}</span>
-                        <span class="role-menu-text">{{ $r->role_name }}</span>
-                        @if($isCurrent)
-                            <span class="role-check-mark">✓</span>
-                        @endif
-                    </button>
-                </form>
-            @endforeach
-        </div>
+            <!-- Available Roles List -->
+            <div class="role-dropdown-items-list">
+                @foreach($allRolesList as $r)
+                    @php
+                        $rId = (int)$r->role_id;
+                        $isCurrent = ((int)$activeRoleId === $rId);
+                        $icon = $roleIcons[$rId] ?? '👤';
+                    @endphp
+                    <form action="{{ route('role.switch') }}" method="POST" class="role-switch-item-form">
+                        @csrf
+                        <input type="hidden" name="role_id" value="{{ $rId }}">
+                        <button type="submit" class="role-menu-item {{ $isCurrent ? 'is-active-role' : '' }}">
+                            <span class="role-menu-icon">{{ $icon }}</span>
+                            <span class="role-menu-text">{{ $r->role_name }}</span>
+                            @if($isCurrent)
+                                <span class="role-check-mark">✓</span>
+                            @endif
+                        </button>
+                    </form>
+                @endforeach
+            </div>
+        @endif
 
         <div class="role-dropdown-divider"></div>
 
-        <!-- Logout Action (Included as requested: "include logout init") -->
+        <!-- Logout Action (GET request as requested: "logout was been return in the post request change to that i need the get request") -->
         <div class="role-dropdown-footer">
-            <form action="{{ route('logout') }}" method="POST" style="margin: 0; width: 100%;">
-                @csrf
-                <button type="submit" class="role-menu-logout-btn">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    <span>Sign Out</span>
-                </button>
-            </form>
+            <a href="{{ route('logout') }}" class="role-menu-logout-btn" style="text-decoration: none; width: 100%;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>Sign Out</span>
+            </a>
         </div>
     </div>
 </div>

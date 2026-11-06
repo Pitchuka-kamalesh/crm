@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Campus;
 use App\Models\Country;
 use App\Models\CrmStudentRegistration;
+use App\Models\Lead;
 use App\Models\Program;
 use App\Models\State;
 use App\Models\StudentRegistration;
@@ -260,5 +261,156 @@ class RegistrationController extends Controller
             'success'  => true,
             'branches' => $branches,
         ]);
+    }
+
+    /**
+     * Automatically save/update student field on blur/change without user notification.
+     */
+    public function autosave(Request $request): JsonResponse
+    {
+        $cleanMobile = preg_replace('/\D/', '', $request->input('mobile') ?: (Auth::user()?->phnno ?? session('verified_phone', '')));
+        if (str_starts_with($cleanMobile, '91') && strlen($cleanMobile) > 10) {
+            $cleanMobile = substr($cleanMobile, -10);
+        }
+        if (strlen($cleanMobile) > 10) {
+            $cleanMobile = substr($cleanMobile, -10);
+        }
+
+        if (empty($cleanMobile) || strlen($cleanMobile) !== 10) {
+            return response()->json(['success' => false, 'message' => 'Valid mobile required'], 422);
+        }
+
+        $fieldName = (string) $request->input('field', '');
+        $fieldValue = $request->input('value');
+
+        $data = $request->except(['_token', 'mobile', 'field', 'value']);
+        if (!empty($fieldName)) {
+            $data[$fieldName] = $fieldValue;
+        }
+
+        // 1. Detect or create in crm.leads
+        try {
+            Lead::firstOrCreate(
+                ['phoneno' => (int)$cleanMobile],
+                [
+                    'phnostatus' => 'Registration in progress',
+                    'enquirydate' => now()->toDateString(),
+                    'log_userid' => 'AUTOSAVE',
+                    'log_ipaddress' => $request->ip(),
+                    'log_timestamp' => now(),
+                ]
+            );
+        } catch (\Throwable $e) {}
+
+        // 2. Find or create in crm.student_registration
+        try {
+            $crmStudent = CrmStudentRegistration::where('phoneno', $cleanMobile)->first();
+            if (!$crmStudent) {
+                $appliNano = '20' . date('ymd') . mt_rand(100, 999);
+                $crmStudent = CrmStudentRegistration::create([
+                    'applinano'    => $appliNano,
+                    'phoneno'      => $cleanMobile,
+                    'name'         => $data['applicant_name'] ?? ($data['name'] ?? 'Candidate ' . substr($cleanMobile, -4)),
+                    'emailid'      => $data['email'] ?? ($cleanMobile . '@student.vignan.ac.in'),
+                    'campuscode'   => $data['campus_code'] ?? 'VDM',
+                    'countryid'    => isset($data['country_id']) ? (int)$data['country_id'] : 1,
+                    'stateid'      => isset($data['state_id']) ? (int)$data['state_id'] : 1,
+                    'programlevel' => $data['program_level'] ?? 'UG',
+                    'programid'    => isset($data['progid']) ? (int)$data['progid'] : 1,
+                    'branchid'     => isset($data['branch_id']) ? (int)$data['branch_id'] : 11,
+                    'std_status'   => 'Applied',
+                    'stage1'       => 'not_paid',
+                    'log_userid'   => 'AUTOSAVE',
+                    'log_ipaddress'=> $request->ip(),
+                    'log_timestamp'=> now(),
+                ]);
+            } else {
+                $crmUpdates = [];
+                if (isset($data['applicant_name']) || isset($data['name'])) {
+                    $crmUpdates['name'] = trim($data['applicant_name'] ?? $data['name']);
+                }
+                if (isset($data['email'])) {
+                    $crmUpdates['emailid'] = trim($data['email']);
+                }
+                if (isset($data['campus_id'])) {
+                    $cmp = Campus::where('campus_id', $data['campus_id'])->first();
+                    if ($cmp) $crmUpdates['campuscode'] = $cmp->campus_code;
+                }
+                if (isset($data['country_id'])) {
+                    $crmUpdates['countryid'] = (int)$data['country_id'];
+                }
+                if (isset($data['state_id'])) {
+                    $crmUpdates['stateid'] = (int)$data['state_id'];
+                }
+                if (isset($data['program_level'])) {
+                    $crmUpdates['programlevel'] = ($data['program_level'] === 'Doctoral') ? 'PhD' : $data['program_level'];
+                }
+                if (isset($data['progid'])) {
+                    $crmUpdates['programid'] = (int)$data['progid'];
+                }
+                if (isset($data['branch_id'])) {
+                    $crmUpdates['branchid'] = (int)$data['branch_id'];
+                }
+                if (!empty($crmUpdates)) {
+                    $crmUpdates['log_ipaddress'] = $request->ip();
+                    $crmUpdates['log_timestamp'] = now();
+                    $crmStudent->update($crmUpdates);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[Autosave] crm.student_registration error: ' . $e->getMessage());
+        }
+
+        // 3. Update admissions.student_registrations
+        try {
+            $admStudent = StudentRegistration::where('mobile', $cleanMobile)->first();
+            if (!$admStudent && isset($crmStudent) && $crmStudent) {
+                $programCode = Program::where('program_id', $crmStudent->programid)->value('program_seprt_code') ?? 'CK';
+                $regNo = '261' . $programCode . mt_rand(10000, 99999);
+                $admStudent = StudentRegistration::create([
+                    'application_no' => $crmStudent->applinano,
+                    'register_no'    => $regNo,
+                    'enrollment_no'  => 'Jan-26-' . Str::random(10),
+                    'student_name'   => $crmStudent->name,
+                    'personal_email' => $crmStudent->emailid,
+                    'ofc_mail'       => $crmStudent->emailid,
+                    'mobile'         => $cleanMobile,
+                    'regulation'     => 'R25',
+                    'progid'         => $crmStudent->programid ?: 1,
+                    'electiveid'     => $crmStudent->branchid ?: 11,
+                    'admyear'        => 2026,
+                    'adm_batch_code' => 'JANUARY_2026',
+                    'std_type'       => 'Regular',
+                    'std_status'     => 'Applied',
+                    'log_userid'     => 'AUTOSAVE',
+                    'log_ipaddress'  => $request->ip(),
+                    'log_timestamp'  => now(),
+                ]);
+            } elseif ($admStudent) {
+                $admUpdates = [];
+                if (isset($data['applicant_name']) || isset($data['name'])) {
+                    $admUpdates['student_name'] = trim($data['applicant_name'] ?? $data['name']);
+                }
+                if (isset($data['email'])) {
+                    $admUpdates['personal_email'] = trim($data['email']);
+                    $admUpdates['ofc_mail'] = trim($data['email']);
+                }
+                if (isset($data['progid'])) {
+                    $admUpdates['progid'] = (int)$data['progid'];
+                }
+                if (isset($data['branch_id'])) {
+                    $admUpdates['electiveid'] = (int)$data['branch_id'];
+                }
+                if (!empty($admUpdates)) {
+                    $admUpdates['log_ipaddress'] = $request->ip();
+                    $admUpdates['log_timestamp'] = now();
+                    $admStudent->update($admUpdates);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[Autosave] admissions.student_registrations error: ' . $e->getMessage());
+        }
+
+        return response()->json(['success' => true]);
     }
 }
