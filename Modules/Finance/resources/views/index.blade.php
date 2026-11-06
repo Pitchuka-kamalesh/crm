@@ -32,6 +32,9 @@
                         <line x1="4" y1="18" x2="20" y2="18"/>
                     </svg>
                 </button>
+                <div class="topbar-brand-logo">
+                    <img src="/images/vignan-shield-logo.png" alt="Vignan Logo" class="topbar-logo-img">
+                </div>
                 <div class="page-title">
                     <span>💳 University Admissions Finance & Fee Collection Portal</span>
                 </div>
