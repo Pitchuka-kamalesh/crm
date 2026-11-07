@@ -95,21 +95,25 @@ class SmsService
             Log::error('[SmsService] SMS send failed', ['to' => $cleanTo, 'error' => $e->getMessage()]);
         }
 
-        // Record in communication logs table
+        // Record in communication logs table (guarantees single record per phone number for sms channel)
         try {
-            CommunicationLog::create([
-                'channel' => 'sms',
-                'wauser' => $user ?? 'SYSTEM_USER',
-                'waregisterno' => $registerNo ?? '',
-                'wapptophone' => $cleanTo,
-                'jiotraceid' => $traceId,
-                'template_name' => $templateId,
-                'wapptext' => $body,
-                'var1' => $cleanTo,
-                'status' => $status,
-                'ipaddr' => request()?->ip() ?? '127.0.0.1',
-                'response_payload' => is_array($data) ? $data : ['response' => $data],
-            ]);
+            CommunicationLog::updateOrCreate(
+                [
+                    'wapptophone' => $cleanTo,
+                    'channel'     => 'sms',
+                ],
+                [
+                    'wauser'           => $user ?? 'SYSTEM_USER',
+                    'waregisterno'     => $registerNo ?? '',
+                    'jiotraceid'       => $traceId,
+                    'template_name'    => $templateId,
+                    'wapptext'         => $body,
+                    'var1'             => $cleanTo,
+                    'status'           => $status,
+                    'ipaddr'           => request()?->ip() ?? '127.0.0.1',
+                    'response_payload' => is_array($data) ? $data : ['response' => $data],
+                ]
+            );
         } catch (\Throwable $e) {
             Log::warning('[SmsService] Could not write SMS communication log: ' . $e->getMessage());
         }

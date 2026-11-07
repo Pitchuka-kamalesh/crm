@@ -440,25 +440,6 @@ class LoginController extends Controller
             Log::warning('Error inserting into master.login_otp: ' . $e->getMessage());
         }
 
-        // Record in crm.wapplogs
-        $traceId = 'TRC' . time() . mt_rand(100, 999);
-        try {
-            Wapplog::create([
-                'wauser' => $targetName,
-                'waregisterno' => $user ? $user->usercode : $cleanPhone,
-                'wapptophone' => $cleanPhone,
-                'jiotraceid' => $traceId,
-                'wapptext' => "Admission Portal login OTP is {$otp}",
-                'datetime' => now(),
-                'ipaddr' => $request->ip() ?: '127.0.0.1',
-                'status' => 'SUBMITTED',
-                'var1' => $otp,
-                'var2' => 'Admission Portal Login OTP',
-            ]);
-        } catch (Exception $e) {
-            Log::warning('Error inserting into crm.wapplogs in sendOtp: ' . $e->getMessage());
-        }
-
         if (config('app.is_login_bypass') === true && config('app.env') === 'local') {
             return $this->bypassLoginAndRedirectHome($cleanPhone);
         }

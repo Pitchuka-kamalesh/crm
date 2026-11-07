@@ -747,6 +747,22 @@
                     el.addEventListener('blur', function() { silentAutosave(this); });
                     el.addEventListener('change', function() { silentAutosave(this); });
                 });
+
+                // Prevent double form submission
+                let isSubmitting = false;
+                form.addEventListener('submit', function(e) {
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    isSubmitting = true;
+                    const btn = document.getElementById('btnSubmit');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.7';
+                        btn.innerHTML = '<span>Saving Registration...</span>';
+                    }
+                });
             }
         });
     </script>

@@ -86,9 +86,25 @@ class RegistrationController extends Controller
         ]);
 
         $applicantName = trim($request->input('applicant_name') ?: $request->input('name') ?: 'Applicant');
-        $cleanMobile = preg_replace('/\D/', '', $request->input('mobile') ?: $request->input('phone') ?: '');
+        $rawMobile = (string)($request->input('mobile') ?: $request->input('phone') ?: '');
+        $cleanMobile = preg_replace('/\D/', '', $rawMobile);
+        if (str_starts_with($cleanMobile, '91') && strlen($cleanMobile) > 10) {
+            $cleanMobile = substr($cleanMobile, -10);
+        }
         if (strlen($cleanMobile) > 10) {
             $cleanMobile = substr($cleanMobile, -10);
+        }
+
+        if (empty($cleanMobile) || strlen($cleanMobile) !== 10) {
+            return back()->withInput()->withErrors([
+                'mobile' => 'Mobile number must contain exactly 10 digits.',
+            ]);
+        }
+
+        if (!in_array($cleanMobile[0], ['6', '7', '8', '9'])) {
+            return back()->withInput()->withErrors([
+                'mobile' => 'Mobile number must start with 6, 7, 8, or 9.',
+            ]);
         }
         $email = trim($request->input('email') ?: ($cleanMobile . '@student.vignan.ac.in'));
         $defaultPassword = 'password';
@@ -117,46 +133,74 @@ class RegistrationController extends Controller
                 ->value('branch_long_name') ?? 'General Core';
         }
 
-        // 1. Generate unique application number from crm sequence
-        $appliNano = null;
+        // 1. Check if student registration already exists for this phone number
+        $crmRecord = null;
         try {
-            $seqRow = DB::selectOne("SELECT nextval('crm.student_registration_applinano_seq'::regclass)::text as applinano");
-            if ($seqRow && !empty($seqRow->applinano) && !str_contains($seqRow->applinano, '#')) {
-                $appliNano = $seqRow->applinano;
-            }
+            $crmRecord = CrmStudentRegistration::where('phoneno', $cleanMobile)->first();
         } catch (\Throwable $e) {}
 
-        if (!$appliNano) {
-            $appliNano = '20' . date('ymd') . mt_rand(100, 999);
+        $appliNano = null;
+        if ($crmRecord && !empty($crmRecord->applinano)) {
+            $appliNano = $crmRecord->applinano;
+        } else {
+            // Generate unique application number from official crm sequence
+            try {
+                $seqRow = DB::selectOne("SELECT nextval('crm.student_registration_applinano_seq'::regclass)::text as applinano");
+                if ($seqRow && !empty($seqRow->applinano) && !str_contains($seqRow->applinano, '#')) {
+                    $appliNano = $seqRow->applinano;
+                }
+            } catch (\Throwable $e) {}
+
+            if (!$appliNano) {
+                $appliNano = '20' . date('ymd') . mt_rand(100, 999);
+            }
         }
 
-        // 2. Insert into crm.student_registration via Eloquent
+        // 2. Insert or update crm.student_registration via Eloquent (guarantees single record per student)
         try {
-            $crmRecord = CrmStudentRegistration::create([
-                'applinano'    => $appliNano,
-                'name'         => $applicantName,
-                'phoneno'      => $cleanMobile,
-                'emailid'      => $email,
-                'campuscode'   => $campusCode,
-                'countryid'    => $countryId,
-                'stateid'      => $stateId,
-                'programlevel' => $dbProgLevel,
-                'programid'    => $progId,
-                'branchid'     => $branchId,
-                'ableto'       => $ableTo,
-                'std_status'   => 'Applied',
-                'stage1'       => 'not_paid',
-                'stage2'       => 'NA',
-                'stage3'       => 'NA',
-                'stage4'       => 'NA',
-                'stage5'       => 'NA',
-                'stage6'       => 'NA',
-                'stage7'       => 'NA',
-                'stage8'       => 'NA',
-                'log_userid'   => 'SELF_REGISTER',
-                'log_ipaddress'=> $request->ip(),
-                'log_timestamp'=> now(),
-            ]);
+            if ($crmRecord) {
+                $crmRecord->update([
+                    'name'         => $applicantName,
+                    'emailid'      => $email,
+                    'campuscode'   => $campusCode,
+                    'countryid'    => $countryId,
+                    'stateid'      => $stateId,
+                    'programlevel' => $dbProgLevel,
+                    'programid'    => $progId,
+                    'branchid'     => $branchId,
+                    'ableto'       => $ableTo,
+                    'std_status'   => 'Applied',
+                    'log_userid'   => 'SELF_REGISTER',
+                    'log_ipaddress'=> $request->ip(),
+                    'log_timestamp'=> now(),
+                ]);
+            } else {
+                $crmRecord = CrmStudentRegistration::create([
+                    'applinano'    => $appliNano,
+                    'name'         => $applicantName,
+                    'phoneno'      => $cleanMobile,
+                    'emailid'      => $email,
+                    'campuscode'   => $campusCode,
+                    'countryid'    => $countryId,
+                    'stateid'      => $stateId,
+                    'programlevel' => $dbProgLevel,
+                    'programid'    => $progId,
+                    'branchid'     => $branchId,
+                    'ableto'       => $ableTo,
+                    'std_status'   => 'Applied',
+                    'stage1'       => 'not_paid',
+                    'stage2'       => 'NA',
+                    'stage3'       => 'NA',
+                    'stage4'       => 'NA',
+                    'stage5'       => 'NA',
+                    'stage6'       => 'NA',
+                    'stage7'       => 'NA',
+                    'stage8'       => 'NA',
+                    'log_userid'   => 'SELF_REGISTER',
+                    'log_ipaddress'=> $request->ip(),
+                    'log_timestamp'=> now(),
+                ]);
+            }
         } catch (Exception $e) {
             Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
         }
@@ -247,8 +291,8 @@ class RegistrationController extends Controller
             $cleanMobile = substr($cleanMobile, -10);
         }
 
-        if (empty($cleanMobile) || strlen($cleanMobile) !== 10) {
-            return response()->json(['success' => false, 'message' => 'Valid mobile required'], 422);
+        if (empty($cleanMobile) || strlen($cleanMobile) !== 10 || !in_array($cleanMobile[0], ['6', '7', '8', '9'])) {
+            return response()->json(['success' => false, 'message' => 'Valid 10-digit mobile number starting with 6, 7, 8, or 9 required'], 422);
         }
 
         $fieldName = (string) $request->input('field', '');
@@ -273,29 +317,10 @@ class RegistrationController extends Controller
             );
         } catch (\Throwable $e) {}
 
-        // 2. Find or create in crm.student_registration
+        // 2. Only update crm.student_registration if an official record already exists
         try {
             $crmStudent = CrmStudentRegistration::where('phoneno', $cleanMobile)->first();
-            if (!$crmStudent) {
-                $appliNano = '20' . date('ymd') . mt_rand(100, 999);
-                $crmStudent = CrmStudentRegistration::create([
-                    'applinano'    => $appliNano,
-                    'phoneno'      => $cleanMobile,
-                    'name'         => $data['applicant_name'] ?? ($data['name'] ?? 'Candidate ' . substr($cleanMobile, -4)),
-                    'emailid'      => $data['email'] ?? ($cleanMobile . '@student.vignan.ac.in'),
-                    'campuscode'   => $data['campus_code'] ?? 'VDM',
-                    'countryid'    => isset($data['country_id']) ? (int)$data['country_id'] : 1,
-                    'stateid'      => isset($data['state_id']) ? (int)$data['state_id'] : 1,
-                    'programlevel' => $data['program_level'] ?? 'UG',
-                    'programid'    => isset($data['progid']) ? (int)$data['progid'] : 1,
-                    'branchid'     => isset($data['branch_id']) ? (int)$data['branch_id'] : 11,
-                    'std_status'   => 'Applied',
-                    'stage1'       => 'not_paid',
-                    'log_userid'   => 'AUTOSAVE',
-                    'log_ipaddress'=> $request->ip(),
-                    'log_timestamp'=> now(),
-                ]);
-            } else {
+            if ($crmStudent) {
                 $crmUpdates = [];
                 if (isset($data['applicant_name']) || isset($data['name'])) {
                     $crmUpdates['name'] = trim($data['applicant_name'] ?? $data['name']);
