@@ -34,37 +34,37 @@ class LoginController extends Controller
             return redirect($this->getLandingUrlForUser(Auth::user()));
         }
 
-        // Predefined roles & test logins from master.roles and master.login
+        // Roles & test logins strictly matching master.login and master.employees
         $sampleUsers = [
+            [
+                'role' => 'Tele Caller',
+                'role_id' => 4,
+                'name' => 'Y.BHANUPRASAD',
+                'usercode' => '02598',
+                'phone' => '9912996788',
+                'landing' => '/leads',
+            ],
             [
                 'role' => 'CRM DEAN',
                 'role_id' => 3,
-                'name' => 'Ganesh kumar',
-                'usercode' => '03434',
-                'phone' => '9391364210',
-                'landing' => '/crms',
-            ],
-            [
-                'role' => 'CRM Incharge',
-                'role_id' => 2,
                 'name' => 'Kamalesh',
                 'usercode' => '03141',
                 'phone' => '7075624098',
                 'landing' => '/crms',
             ],
             [
-                'role' => 'Admin / Employee',
-                'role_id' => 1,
-                'name' => 'Y.BHANUPRASAD',
-                'usercode' => '02598',
-                'phone' => '9912996788',
-                'landing' => '/dashboards',
+                'role' => 'CRM Incharge',
+                'role_id' => 2,
+                'name' => 'Ganesh kumar',
+                'usercode' => '03434',
+                'phone' => '9391364210',
+                'landing' => '/crms',
             ],
             [
                 'role' => 'Student Candidate',
                 'role_id' => 5,
                 'name' => 'Registered Candidate',
-                'usercode' => '20########',
+                'usercode' => '20261106333',
                 'phone' => '7780579012',
                 'landing' => '/dashboards',
             ],

@@ -41,36 +41,35 @@ class LeadsController extends Controller
         $leadsQuery = CrmStudentRegistration::with(['program', 'branch']);
         if ($searchQuery) {
             $leadsQuery->where(function ($q) use ($searchQuery) {
-                $q->where('name', 'like', "%{$searchQuery}%")
-                  ->orWhere('phoneno', 'like', "%{$searchQuery}%")
-                  ->orWhere('applinano', 'like', "%{$searchQuery}%")
-                  ->orWhere('emailid', 'like', "%{$searchQuery}%");
+                $q->where('name', 'ilike', "%{$searchQuery}%")
+                  ->orWhere('phoneno', 'ilike', "%{$searchQuery}%")
+                  ->orWhere('applinano', 'ilike', "%{$searchQuery}%")
+                  ->orWhere('emailid', 'ilike', "%{$searchQuery}%");
             });
         }
         if ($statusFilter !== 'all') {
             $leadsQuery->where('std_status', $statusFilter);
         }
 
-        $leads = $leadsQuery->latest('log_timestamp')->take(50)->get();
+        // 25 records per page with query strings preserved
+        $leads = $leadsQuery->orderBy('log_timestamp', 'desc')->paginate(25)->withQueryString();
 
-        // If CRM student registration has few records, also incorporate admissions records as leads
-        if ($leads->isEmpty()) {
-            $admQuery = StudentRegistration::with('program');
-            if ($searchQuery) {
-                $admQuery->where(function ($q) use ($searchQuery) {
-                    $q->where('student_name', 'like', "%{$searchQuery}%")
-                      ->orWhere('mobile', 'like', "%{$searchQuery}%")
-                      ->orWhere('application_no', 'like', "%{$searchQuery}%");
-                });
-            }
-            $leads = $admQuery->latest('log_timestamp')->take(50)->get();
+        // If CRM student registration is empty, fallback to crm.leads (actual DB leads table)
+        if ($leads->isEmpty() && !$searchQuery && $statusFilter === 'all') {
+            $rawLeadsQuery = \App\Models\Lead::query();
+            $leads = $rawLeadsQuery->orderBy('log_timestamp', 'desc')->paginate(25)->withQueryString();
         }
 
         // Telecaller metrics
-        $totalAllotted = max($leads->count(), 12);
+        $totalAllotted = CrmStudentRegistration::count();
         $callsMadeToday = 14;
-        $followupsScheduled = 6;
-        $converted = 3;
+        $followupsScheduled = CrmStudentRegistration::where('std_status', 'Follow-up')->count() ?: 6;
+        $converted = CrmStudentRegistration::whereIn('std_status', ['Fee Paid', 'Registered'])->count() ?: 3;
+
+        // If AJAX request (Live Search / Filtering), return the table rows partial
+        if ($request->ajax()) {
+            return view('leads::partials.leads_table', compact('leads'));
+        }
 
         // Staff / Callers list for Allocation
         $telecallers = Employee::take(10)->get();
@@ -99,6 +98,80 @@ class LeadsController extends Controller
             'searchQuery',
             'statusFilter'
         ));
+    }
+
+    /**
+     * Update Stage Status (Stage 1 to 8) for a student registration from Telecaller wizard.
+     */
+    public function updateStage(Request $request, string $applinano)
+    {
+        $request->validate([
+            'stage' => ['required', 'string', 'regex:/^stage[1-8]$/'],
+            'status' => ['required', 'string', 'in:completed,in_progress,not_started,locked,not_paid,paid,approved,rejected'],
+            'remarks' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $stageCol = $request->input('stage');
+        $stageStatus = $request->input('status');
+        $remarks = $request->input('remarks');
+
+        $student = CrmStudentRegistration::where('applinano', $applinano)->first();
+        if ($student) {
+            $student->{$stageCol} = $stageStatus;
+            if ($request->has('remarks')) {
+                $student->remarks = $remarks;
+            }
+            $student->log_userid = auth()->user()->usercode ?? '02598';
+            $student->log_ipaddress = $request->ip() ?: '127.0.0.1';
+            $student->log_timestamp = now();
+            $student->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => strtoupper($stageCol) . ' updated to ' . $stageStatus,
+                'stage' => $stageCol,
+                'status' => $stageStatus,
+                'remarks' => $student->remarks,
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Candidate record not found.'], 404);
+    }
+
+    /**
+     * Update Lead Call Status / Disposition.
+     */
+    public function updateStatus(Request $request, string $applinano)
+    {
+        $request->validate([
+            'status' => ['required', 'string', 'max:50'],
+        ]);
+
+        $status = $request->input('status');
+
+        $student = CrmStudentRegistration::where('applinano', $applinano)->first();
+        if ($student) {
+            $student->std_status = $status;
+            $student->log_userid = auth()->user()->usercode ?? '02598';
+            $student->log_ipaddress = $request->ip() ?: '127.0.0.1';
+            $student->log_timestamp = now();
+            $student->save();
+        }
+
+        // Also sync with crm.leads table if matching
+        if ($student && !empty($student->phoneno)) {
+            \App\Models\Lead::where('phoneno', $student->phoneno)->update([
+                'phnostatus' => $status,
+                'log_userid' => auth()->user()->usercode ?? '02598',
+                'log_timestamp' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead status updated to ' . $status,
+            'status' => $status,
+        ]);
     }
 
     /**
