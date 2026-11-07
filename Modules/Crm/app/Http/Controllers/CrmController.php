@@ -96,61 +96,64 @@ class CrmController extends Controller
         $filterDate = trim($request->input('date', ''));
 
         $allStudents = collect();
+        // 1. Fetch from crm.student_registration (Core CRM table)
         try {
-            $query = StudentRegistration::query();
+            $crmQuery = CrmStudentRegistration::with(['program', 'branch']);
             if ($searchQuery) {
-                $query->where(function ($q) use ($searchQuery) {
-                    $q->where('student_name', 'like', "%{$searchQuery}%")
-                        ->orWhere('application_no', 'like', "%{$searchQuery}%")
-                        ->orWhere('mobile', 'like', "%{$searchQuery}%")
-                        ->orWhere('register_no', 'like', "%{$searchQuery}%");
+                $crmQuery->where(function ($q) use ($searchQuery) {
+                    $q->where('name', 'like', "%{$searchQuery}%")
+                        ->orWhere('applinano', 'like', "%{$searchQuery}%")
+                        ->orWhere('phoneno', 'like', "%{$searchQuery}%");
                 });
             }
             if ($filterPhone) {
-                $query->where('mobile', 'like', "%{$filterPhone}%");
+                $crmQuery->where('phoneno', 'like', "%{$filterPhone}%");
             }
             if ($filterStatus && strtolower($filterStatus) !== 'all') {
-                $query->where('std_status', 'like', "%{$filterStatus}%");
+                $crmQuery->where('std_status', 'like', "%{$filterStatus}%");
             }
             if ($filterDate) {
-                $query->whereDate('log_timestamp', $filterDate);
+                $crmQuery->whereDate('log_timestamp', $filterDate);
             }
-            $allStudents = $query->latest('log_timestamp')->take(100)->get();
+            $allStudents = $crmQuery->latest('log_timestamp')->take(100)->get();
+        } catch (\Throwable $e) {}
 
-            if ($allStudents->isEmpty() && !$searchQuery && !$filterPhone && !$filterStatus && !$filterDate) {
-                $allStudents = CrmStudentRegistration::latest('log_timestamp')->take(100)->get();
-            } elseif ($allStudents->isEmpty()) {
-                $crmQuery = CrmStudentRegistration::query();
+        // 2. If CRM table has no records matching filters, check admissions.student_registrations
+        if ($allStudents->isEmpty()) {
+            try {
+                $query = StudentRegistration::query();
                 if ($searchQuery) {
-                    $crmQuery->where(function ($q) use ($searchQuery) {
-                        $q->where('name', 'like', "%{$searchQuery}%")
-                            ->orWhere('applinano', 'like', "%{$searchQuery}%")
-                            ->orWhere('phoneno', 'like', "%{$searchQuery}%");
+                    $query->where(function ($q) use ($searchQuery) {
+                        $q->where('student_name', 'like', "%{$searchQuery}%")
+                            ->orWhere('application_no', 'like', "%{$searchQuery}%")
+                            ->orWhere('mobile', 'like', "%{$searchQuery}%")
+                            ->orWhere('register_no', 'like', "%{$searchQuery}%");
                     });
                 }
                 if ($filterPhone) {
-                    $crmQuery->where('phoneno', 'like', "%{$filterPhone}%");
+                    $query->where('mobile', 'like', "%{$filterPhone}%");
                 }
                 if ($filterStatus && strtolower($filterStatus) !== 'all') {
-                    $crmQuery->where('std_status', 'like', "%{$filterStatus}%");
+                    $query->where('std_status', 'like', "%{$filterStatus}%");
                 }
                 if ($filterDate) {
-                    $crmQuery->whereDate('log_timestamp', $filterDate);
+                    $query->whereDate('log_timestamp', $filterDate);
                 }
-                $crmResults = $crmQuery->latest('log_timestamp')->take(100)->get();
-                if ($crmResults->isNotEmpty()) {
-                    $allStudents = $crmResults;
-                }
-            }
-        } catch (\Throwable $e) {}
+                $allStudents = $query->latest('log_timestamp')->take(100)->get();
+            } catch (\Throwable $e) {}
+        }
 
         // Distinct available statuses for Enquiry list filter dropdown
         $availableStatuses = collect(['Applied', 'Registered', 'Verified', 'Pending', 'Fee Paid', 'Callback']);
         try {
-            $dbStatuses = StudentRegistration::whereNotNull('std_status')->distinct()->pluck('std_status');
             $crmDbStatuses = CrmStudentRegistration::whereNotNull('std_status')->distinct()->pluck('std_status');
-            $availableStatuses = $availableStatuses->merge($dbStatuses)->merge($crmDbStatuses)->unique()->filter()->values();
+            $availableStatuses = $availableStatuses->merge($crmDbStatuses);
         } catch (\Throwable $e) {}
+        try {
+            $dbStatuses = StudentRegistration::whereNotNull('std_status')->distinct()->pluck('std_status');
+            $availableStatuses = $availableStatuses->merge($dbStatuses);
+        } catch (\Throwable $e) {}
+        $availableStatuses = $availableStatuses->unique()->filter()->values();
 
         // Campuses and Programs for Employee / Dean views
         $campuses = collect();

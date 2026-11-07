@@ -292,8 +292,13 @@
                                             <div style="font-size: 0.8rem; color: #475569;">{{ $std->personal_email ?? $std->emailid ?? 'N/A' }}</div>
                                         </td>
                                         <td>
-                                            <div>{{ $std->program?->program_short_name ?? 'B.Tech' }}</div>
-                                            <div style="font-size: 0.72rem; color: #64748b;">Regulation: {{ $std->regulation ?? 'R25' }}</div>
+                                            <div style="font-weight: 600; color: #0f172a;">{{ $std->program?->program_short_name ?? 'B.Tech' }}</div>
+                                            @php
+                                                $branchLabel = $std->branch?->branch_short_name ?? $std->branch?->branch_long_name;
+                                            @endphp
+                                            @if(!empty($branchLabel))
+                                                <div style="font-size: 0.72rem; color: #64748b;">{{ $branchLabel }}</div>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge-status {{ $badgeClass }}">{{ $rawStatus }}</span>
@@ -1108,8 +1113,8 @@
                     <strong class="cell-val" id="wizProgram">B.Tech (CSE)</strong>
                 </div>
                 <div class="info-cell">
-                    <span class="cell-label">Academic Batch / Regulation:</span>
-                    <span class="cell-val" id="wizRegulation">2026-2027 (Regulation: R25)</span>
+                    <span class="cell-label">Academic Batch:</span>
+                    <span class="cell-val" id="wizRegulation">Academic Batch 2026-2027</span>
                 </div>
             </div>
 
@@ -1500,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setTxt('wizPhone', data.phone ? ('+91 ' + data.phone) : '+91 7780579012');
         setTxt('wizEmail', data.email || 'N/A');
         setTxt('wizProgram', (data.program || 'B.Tech') + ' (Engineering)');
-        setTxt('wizRegulation', 'Academic Batch 2026-2027 (' + (data.regulation || 'R25') + ')');
+        setTxt('wizRegulation', 'Academic Batch 2026-2027');
         setTxt('wizBaseFee', data.base_fee || '2,000.00');
         setTxt('wizDefaultCoupon', data.default_coupon || 'VIGNAN2026');
         setTxt('wizDefaultDiscount', data.default_discount || '500.00');
