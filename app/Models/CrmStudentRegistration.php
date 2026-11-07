@@ -34,6 +34,7 @@ class CrmStudentRegistration extends Model
         'stage7',
         'stage8',
         'std_status',
+        'remarks',
         'log_userid',
         'log_ipaddress',
         'log_timestamp',

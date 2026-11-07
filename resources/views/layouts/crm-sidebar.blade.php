@@ -66,13 +66,17 @@
             }
         @endphp
 
-        <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
-            <svg viewBox="0 0 24 24">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            <span>Dashboard</span>
-        </a>
+        @if($roleId == 4)
+            {{-- For Role 4 (Tele Caller), Dashboard is removed per user request --}}
+        @else
+            <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+        @endif
 
         @if($roleId == 3 || $roleId == 2)
             <!-- ================= ROLE 3 (CRM DEAN) & ROLE 2 (CRM INCHARGE) ================= -->
@@ -216,16 +220,15 @@
             </div>
 
         @elseif($roleId == 4)
-            <!-- ================= ROLE 4 (TELE CALLER) ================= -->
-            <!-- SECTION 1: LEADS (Collapsible Dropdown with Chevron) -->
+            <!-- ================= ROLE 4 (TELE CALLER) STRICTLY FROM master.menu_access_roles ================= -->
+            <!-- 1. Leads (LEADS0001, controller_ref: leads/index) -->
             <div class="accordion-group open" id="group-telecaller-leads">
                 <button type="button" class="accordion-header active" onclick="toggleAccordion('group-telecaller-leads')">
                     <div class="header-left">
-                        <!-- Manage / 4-Squares Grid SVG (Matching Screenshot) -->
                         <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <circle cx="12" cy="12" r="10"/>
-                            <circle cx="12" cy="12" r="6"/>
-                            <circle cx="12" cy="12" r="2"/>
+                            <circle cx="12" cy="6"/>
+                            <circle cx="12" cy="2"/>
                         </svg>
                         <span>Leads</span>
                     </div>
@@ -234,40 +237,23 @@
                     </svg>
                 </button>
                 <div class="accordion-body">
-                    <a href="{{ route('leads.allotted', ['tab' => 'allotted']) }}" class="submenu-link {{ ($activeTab ?? 'allotted') === 'allotted' ? 'active' : '' }}">
+                    <!-- SUBMENU: Allotted Leads (LEADS0002, controller_ref: leads/allottedleads) -->
+                    <a href="{{ route('leads.allotted') }}" class="submenu-link {{ request()->routeIs('leads.*') || ($activeTab ?? '') === 'allotted' ? 'active' : '' }}">
                         Allotted Leads
-                    </a>
-                    <a href="{{ route('leads.index', ['tab' => 'all']) }}" class="submenu-link {{ ($activeTab ?? '') === 'all' ? 'active' : '' }}">
-                        Calling Queue
                     </a>
                 </div>
             </div>
 
             <div class="sidebar-divider"></div>
 
-            <!-- SECTION 2: FOLLOW-UPS -->
-            <div class="accordion-group" id="group-telecaller-followups">
-                <a href="{{ route('leads.index', ['tab' => 'callbacks', 'status' => 'callback']) }}" class="accordion-header {{ ($activeTab ?? '') === 'callbacks' ? 'active' : '' }}" style="text-decoration: none;">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>Scheduled Callbacks</span>
-                    </div>
-                </a>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- SECTION 3: COMMUNICATIONS -->
-            <div class="accordion-group" id="group-telecaller-comm">
+            <!-- 2. SMS Tracker (SMS0001, controller_ref: sms/index) -->
+            <div class="accordion-group {{ request()->routeIs('sms.*') ? 'open' : '' }}" id="group-telecaller-sms">
                 <a href="{{ route('sms.index') }}" class="accordion-header {{ request()->routeIs('sms.*') ? 'active' : '' }}" style="text-decoration: none;">
                     <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                        <span>SMS / WhatsApp</span>
+                        <span>SMS Tracker</span>
                     </div>
                 </a>
             </div>

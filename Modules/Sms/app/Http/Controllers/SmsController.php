@@ -21,8 +21,13 @@ class SmsController extends Controller
         $channel = $request->input('channel');
         $status = $request->input('status');
         $search = $request->input('search');
+        $timeFilter = $request->input('time', 'all');
 
         $query = CommunicationLog::query()->latest('id');
+
+        if ($timeFilter === 'today') {
+            $query->whereDate('created_at', today());
+        }
 
         if (!empty($channel) && $channel !== 'all') {
             $query->where('channel', $channel);
@@ -41,14 +46,30 @@ class SmsController extends Controller
             });
         }
 
-        $logs = $query->paginate(25)->withQueryString();
+        // 10 records per page so pagination is immediately accessible and visible
+        $logs = $query->paginate(10)->withQueryString();
 
-        // Metrics for summary cards
+        // Metrics for summary cards (with Today metrics)
         $totalLogs = CommunicationLog::count();
         $totalWhatsapp = CommunicationLog::where('channel', 'whatsapp')->count();
         $totalSms = CommunicationLog::where('channel', 'sms')->count();
         $totalSuccess = CommunicationLog::whereIn('status', ['SUBMITTED', 'DELIVERED', 'SENT'])->count();
-        $totalFailed = CommunicationLog::where('status', 'FAILED')->orWhere('status', 'like', 'HTTP%')->count();
+        $totalFailed = CommunicationLog::where(function ($q) {
+            $q->where('status', 'FAILED')
+                ->orWhere('status', 'like', 'HTTP%')
+                ->orWhere('status', 'like', '%EXCEPTION%');
+        })->count();
+
+        // Today Reports metrics
+        $todayDispatched = CommunicationLog::whereDate('created_at', today())->count();
+        $todaySuccess = CommunicationLog::whereDate('created_at', today())->whereIn('status', ['SUBMITTED', 'DELIVERED', 'SENT'])->count();
+        $todayFailed = CommunicationLog::whereDate('created_at', today())->where(function($q) {
+            $q->where('status', 'FAILED')->orWhere('status', 'like', 'HTTP%')->orWhere('status', 'like', '%EXCEPTION%');
+        })->count();
+
+        $user = auth()->user();
+        $roleId = $user ? $user->getActiveRoleId() : 4;
+        $roleName = $user ? $user->role_label : 'Tele Caller';
 
         return view('sms::index', compact(
             'logs',
@@ -57,9 +78,16 @@ class SmsController extends Controller
             'totalSms',
             'totalSuccess',
             'totalFailed',
+            'todayDispatched',
+            'todaySuccess',
+            'todayFailed',
             'channel',
             'status',
-            'search'
+            'search',
+            'timeFilter',
+            'user',
+            'roleId',
+            'roleName'
         ));
     }
 
