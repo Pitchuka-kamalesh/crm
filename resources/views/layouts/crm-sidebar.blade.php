@@ -1,4 +1,4 @@
-<!-- Immediate Theme Preloader (Prevents Theme Flash) -->
+    <!-- Immediate Theme Preloader (Prevents Theme Flash) -->
 <script>
     (function(){
         document.documentElement.setAttribute('data-theme-color', localStorage.getItem('crm_theme_color') || 'red');

@@ -2,13 +2,13 @@
     <table class="tele-table">
         <thead>
             <tr>
-                <th>Candidate Info</th>
+                <th>Candidate Details</th>
                 <th>Contact</th>
-                <th>Program & Campus</th>
+                <th>Program &amp; Campus</th>
                 <th>Admission Progress</th>
-                <th>Call Status</th>
-                <th>Direct Contact</th>
-                <th style="text-align: right;">Assessment</th>
+                <th>Counseling Status</th>
+                <th>Direct Connect</th>
+                <th style="text-align: right;">Assessment Wizard</th>
             </tr>
         </thead>
         <tbody id="teleTableBody">
@@ -18,7 +18,10 @@
                     $leadName = $lead->name ?? $lead->student_name ?? 'Candidate';
                     $leadPhone = $lead->phoneno ?? $lead->mobile ?? '';
                     $leadEmail = $lead->emailid ?? $lead->personal_email ?? 'N/A';
-                    $leadProgram = $lead->program?->program_short_name ?? 'B.Tech';
+                    $progShort = $lead->program?->program_short_name ?? $lead->programlevel ?? 'B.Tech';
+                    $branchShort = $lead->branch?->branch_short_name ? ' (' . strtoupper($lead->branch->branch_short_name) . ')' : '';
+                    $leadProgram = $progShort . $branchShort;
+                    $leadCampus = $lead->campus?->campus_short_name ?? 'Vadlamudi';
                     $leadStatus = $lead->std_status ?? $lead->phnostatus ?? 'Interested';
 
                     // Compute progress
@@ -36,7 +39,7 @@
                 <tr>
                     <td>
                         <div class="candidate-title">{{ $leadName }}</div>
-                        <div class="candidate-sub">App: {{ $leadAppNo }}</div>
+                        <div class="candidate-sub">App: {{ $leadAppNo }}@if(!empty($lead->state?->state_name)) • {{ $lead->state->state_name }}@endif</div>
                     </td>
                     <td>
                         <div class="lead-detail-primary">+91 {{ $leadPhone }}</div>
@@ -44,7 +47,7 @@
                     </td>
                     <td>
                         <div class="lead-detail-primary">{{ $leadProgram }}</div>
-                        <div style="font-size: 0.72rem; color: #64748b;">Campus: Vadlamudi</div>
+                        <div style="font-size: 0.72rem; color: #64748b;">Campus: {{ $leadCampus }}</div>
                     </td>
                     <td>
                         <div class="stage-meter-badge {{ $completedCount === 8 ? 'is-completed-full' : '' }}">

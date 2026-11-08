@@ -17,6 +17,7 @@ Route::get('/register', [RegistrationController::class, 'show'])->name('register
 Route::post('/register', [RegistrationController::class, 'store'])->name('register.post');
 Route::post('/register/autosave', [RegistrationController::class, 'autosave'])->name('register.autosave');
 Route::get('/api/programs/{id}/branches', [RegistrationController::class, 'getBranches'])->name('api.programs.branches');
+Route::get('/api/districts/{stateId}', [RegistrationController::class, 'getDistricts'])->name('api.districts.by-state');
 
 // Dashboard shortcut & Role Switching
 Route::get('/dashboard', function () {
@@ -37,6 +38,7 @@ Route::get('/crm/couponinfo', [\Modules\Crm\Http\Controllers\CrmController::clas
 Route::get('/crm/employee-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.employeelist');
 Route::get('/crm/employeelist', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::post('/crm/allot-leads', [\Modules\Crm\Http\Controllers\CrmController::class, 'allotLeads'])->middleware('auth')->name('crm.allot');
+Route::post('/crm/coupons/generate-personal', [\Modules\Crm\Http\Controllers\CrmController::class, 'generatePersonalCoupon'])->middleware('auth')->name('crm.coupons.generate-personal');
 
 // Leads aliases matching master.menus controller_ref
 Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
@@ -44,6 +46,7 @@ Route::get('/leads/allottedleads', [\Modules\Leads\Http\Controllers\LeadsControl
 Route::get('/leads/leadsallocation', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allocation');
 
 // Finance aliases matching master.menus controller_ref
+Route::get('/finance', [\Modules\Finance\Http\Controllers\FinanceController::class, 'index'])->middleware('auth')->name('finance.index');
 Route::get('/finance/index', [\Modules\Finance\Http\Controllers\FinanceController::class, 'index'])->middleware('auth');
 Route::get('/finance/paiddetails', [\Modules\Finance\Http\Controllers\FinanceController::class, 'index'])->middleware('auth')->name('finance.paiddetails');
 
@@ -60,3 +63,8 @@ Route::get('/crm/stpstep5', fn() => redirect()->route('dashboards.index', ['step
 Route::get('/crm/stpstep6', fn() => redirect()->route('dashboards.index', ['step' => 6]))->middleware('auth');
 Route::get('/crm/stpstep7', fn() => redirect()->route('dashboards.index', ['step' => 7]))->middleware('auth');
 Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 8]))->middleware('auth');
+
+// PayU Gateway Integration Routes
+Route::post('/payu/initiate', [\App\Http\Controllers\PayUController::class, 'initiate'])->middleware('auth')->name('payu.initiate');
+Route::match(['get', 'post'], '/payu/response', [\App\Http\Controllers\PayUController::class, 'handleResponse'])->name('payu.response');
+

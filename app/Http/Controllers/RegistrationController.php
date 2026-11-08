@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Campus;
 use App\Models\Country;
 use App\Models\CrmStudentRegistration;
+use App\Models\District;
 use App\Models\Lead;
 use App\Models\Program;
 use App\Models\State;
@@ -51,6 +52,10 @@ class RegistrationController extends Controller
             ->orderBy('state_name')
             ->get();
 
+        $districts = District::select('DISTRICT_ID', 'DISTRICT_CODE', 'DISTRICT_NAME', 'STATE_ID', 'COUNTRY_ID')
+            ->orderBy('DISTRICT_NAME')
+            ->get();
+
         $programs = Program::select('program_id', 'program_level', 'program_short_name', 'program_long_name')
             ->orderBy('program_level')
             ->orderBy('program_id')
@@ -60,7 +65,7 @@ class RegistrationController extends Controller
             ->orderBy('branch_long_name')
             ->get();
 
-        return view('auth.register', compact('campuses', 'countries', 'states', 'programs', 'branches', 'prefilledPhone'));
+        return view('auth.register', compact('campuses', 'countries', 'states', 'districts', 'programs', 'branches', 'prefilledPhone'));
     }
 
     /**
@@ -222,6 +227,25 @@ class RegistrationController extends Controller
             ]
         );
 
+        // 3b. Sync lead entry into crm.leads
+        try {
+            $phoneInt = (int) $cleanMobile;
+            $applinoInt = is_numeric($appliNano) ? (int) $appliNano : null;
+            Lead::updateOrCreate(
+                ['phoneno' => $phoneInt],
+                [
+                    'applino'       => $applinoInt,
+                    'phnostatus'    => 'Registered',
+                    'enquirydate'   => now()->toDateString(),
+                    'log_userid'    => 'SELF_REGISTER',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp' => now(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::info('[RegistrationController] Lead sync notice: ' . $e->getMessage());
+        }
+
         // 4. Dispatch WhatsApp & SMS (if configured)
         try {
             $whatsAppService->sendAdmissionInfo(
@@ -275,6 +299,23 @@ class RegistrationController extends Controller
         return response()->json([
             'success'  => true,
             'branches' => $branches,
+        ]);
+    }
+
+    /**
+     * API to dynamically fetch districts for a selected state from crm.district.
+     */
+    public function getDistricts(int $stateId): JsonResponse
+    {
+        $districts = District::where('STATE_ID', $stateId)
+            ->where('LOCK_STATUS', 0)
+            ->select('DISTRICT_ID', 'DISTRICT_CODE', 'DISTRICT_NAME', 'STATE_ID')
+            ->orderBy('DISTRICT_NAME')
+            ->get();
+
+        return response()->json([
+            'success'   => true,
+            'districts' => $districts,
         ]);
     }
 

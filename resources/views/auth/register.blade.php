@@ -207,6 +207,24 @@
             gap: 0.85rem;
         }
 
+        .form-row-4col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row-4col {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-row-4col {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 600px) {
             .form-row-3col {
                 grid-template-columns: 1fr;
@@ -525,8 +543,8 @@
                     </span>
                 </div>
 
-                <!-- 2. select campus | select country | State (from wireframe) -->
-                <div class="form-row-3col">
+                <!-- 2. select campus | select country | State | District (dynamically populated from DB) -->
+                <div class="form-row-4col">
                     <select name="campus_id" required class="select-field">
                         <option value="">select campus</option>
                         @foreach($campuses as $campus)
@@ -545,11 +563,20 @@
                         @endforeach
                     </select>
 
-                    <select name="state_id" id="state_select" required class="select-field">
+                    <select name="state_id" id="state_select" required class="select-field" onchange="filterDistricts(this.value)">
                         <option value="">State</option>
                         @foreach($states as $st)
                             <option value="{{ $st->state_id }}" data-country="{{ $st->country_id }}" {{ old('state_id', 1) == $st->state_id ? 'selected' : '' }}>
                                 {{ $st->state_name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="district_id" id="district_select" class="select-field">
+                        <option value="">select District</option>
+                        @foreach($districts as $dst)
+                            <option value="{{ $dst->DISTRICT_ID }}" data-state="{{ $dst->STATE_ID }}" {{ old('district_id', 1) == $dst->DISTRICT_ID ? 'selected' : '' }}>
+                                {{ $dst->DISTRICT_NAME }}
                             </option>
                         @endforeach
                     </select>
@@ -626,11 +653,12 @@
 
     </main>
 
-    <!-- Dynamic Course, Branch & State Scripts -->
+    <!-- Dynamic Course, Branch, State & District Scripts -->
     <script>
-        const allPrograms = @json($programs);
-        const allBranches = @json($branches);
-        const allStates   = @json($states);
+        const allPrograms  = @json($programs);
+        const allBranches  = @json($branches);
+        const allStates    = @json($states);
+        const allDistricts = @json($districts);
 
         function selectProgramLevel(level, btnEl) {
             document.querySelectorAll('.level-pill-btn').forEach(b => b.classList.remove('pill-active'));
@@ -681,6 +709,27 @@
             }
         }
 
+        function filterDistricts(stateId) {
+            const districtSelect = document.getElementById('district_select');
+            if (!districtSelect) return;
+            const previousVal = districtSelect.value;
+            districtSelect.innerHTML = '<option value="">select District</option>';
+
+            const filtered = allDistricts.filter(d => String(d.STATE_ID) === String(stateId));
+            filtered.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.DISTRICT_ID;
+                opt.textContent = d.DISTRICT_NAME;
+                districtSelect.appendChild(opt);
+            });
+
+            if (filtered.some(d => String(d.DISTRICT_ID) === String(previousVal))) {
+                districtSelect.value = previousVal;
+            } else if (filtered.length > 0) {
+                districtSelect.value = filtered[0].DISTRICT_ID;
+            }
+        }
+
         function filterStates(countryId) {
             const stateSelect = document.getElementById('state_select');
             if (!stateSelect) return;
@@ -700,12 +749,21 @@
             } else if (filtered.length > 0) {
                 stateSelect.value = filtered[0].state_id;
             }
+
+            filterDistricts(stateSelect.value);
         }
 
-        // Initialize with default UG level & Country
+        // Initialize with default UG level, Country & State
         document.addEventListener('DOMContentLoaded', () => {
             const countryEl = document.getElementById('country_select');
             if (countryEl && countryEl.value) {
+                filterStates(countryEl.value);
+            } else {
+                const stateEl = document.getElementById('state_select');
+                if (stateEl && stateEl.value) {
+                    filterDistricts(stateEl.value);
+                }
+            }
                 filterStates(countryEl.value);
             }
 

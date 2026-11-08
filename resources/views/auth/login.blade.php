@@ -1122,18 +1122,11 @@
                     const displayPhone = (data && data.phone) ? data.phone : cleanPhone;
                     const msgText = document.getElementById('otp-sent-message');
                     if (msgText) {
-                        msgText.textContent = '✔ OTP sent to ' + displayPhone + ' WhatsApp / SMS.';
+                        msgText.textContent = '✔ Verification OTP sent to ' + displayPhone + ' WhatsApp / SMS.';
                     }
 
                     // Transition to Step 2 (OTP Screen)
                     goToStepOtp();
-
-                    // Ensure OTP field is empty (no autofill) and focused
-                    const otpInput = document.getElementById('otp');
-                    if (otpInput) {
-                        otpInput.value = '';
-                        setTimeout(() => otpInput.focus(), 150);
-                    }
 
                     // Start 60s countdown
                     startResendCountdown(60);
@@ -1175,6 +1168,10 @@
         function resetButtons() {
             btnGetOtpText.textContent = 'Get OTP';
             btnGetOtp.disabled = false;
+            const submitText = document.getElementById('submit-btn-text');
+            if (submitText) {
+                submitText.textContent = 'Access Admission Portal';
+            }
         }
 
         function startResendCountdown(seconds) {
@@ -1216,12 +1213,13 @@
             return true;
         }
 
-        // If returned back with errors or old phone, auto-open OTP step
-        @if($errors->any() || old('phone'))
-            const prevPhone = '{{ old("phone") }}';
-            if (prevPhone && prevPhone.length === 10) {
-                goToStepOtp(prevPhone);
-            }
+        // If returned back with errors or old phone, auto-open appropriate step
+        @if($errors->any() && old('phone'))
+            @if($errors->has('otp'))
+                goToStepOtp();
+            @else
+                goToStepPhone();
+            @endif
         @endif
     </script>
 </body>

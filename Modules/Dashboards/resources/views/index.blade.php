@@ -959,14 +959,57 @@
                             <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Your stage 1 admission fee payment is verified in the database. You can download your official documents below.</p>
                             <span class="step-nav-badge badge-done" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">Status: Completed ✓</span>
                         @else
+                            @php
+                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '20261106333';
+                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, 25000.00);
+                            @endphp
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💳</div>
                             <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">Admission Fee Payment (Stage 1)</h3>
-                            <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Click the button below to complete Stage 1 payment.</p>
-                            <form action="{{ route('dashboards.save-step') }}" method="POST">
+                            <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Complete your initial Stage 1 seat confirmation fee payment securely via the PayU Gateway.</p>
+
+                            <!-- PayU Fee Summary Box with Concessions -->
+                            <div style="max-width: 440px; margin: 0 auto 1.5rem auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; text-align: left;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: #475569; margin-bottom: 0.5rem;">
+                                    <span>Base Admission Fee:</span>
+                                    <strong style="color: #0f172a;">₹ 25,000.00</strong>
+                                </div>
+
+                                @if($feeBreakdown['def_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: #059669; margin-bottom: 0.4rem;">
+                                        <span>Early Bird Concession (<code>{{ $feeBreakdown['def_coupon'] }}</code>):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['def_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                @if($feeBreakdown['per_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: #059669; margin-bottom: 0.4rem;">
+                                        <span>Incharge Personal Concession (<code>{{ $feeBreakdown['per_coupon'] }}</code>):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                @if($feeBreakdown['total_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #047857; margin-bottom: 0.5rem; background: rgba(16, 185, 129, 0.08); padding: 4px 8px; border-radius: 6px;">
+                                        <span style="font-weight: 700;">Total Concession Deducted:</span>
+                                        <strong style="color: #047857;">- ₹ {{ number_format($feeBreakdown['total_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; margin-bottom: 0.5rem;">
+                                    <span>Payment Gateway:</span>
+                                    <span style="font-weight: 700; color: #10b981;">PayU Secure Hosted</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.5rem; border-top: 1px dashed #cbd5e1; align-items: center;">
+                                    <span style="font-weight: 800; font-size: 0.92rem; color: #0f172a;">Net Fee Payable:</span>
+                                    <span style="font-size: 1.25rem; font-weight: 800; color: #059669;">₹ {{ number_format($feeBreakdown['net_payable'], 2) }}</span>
+                                </div>
+                            </div>
+
+                            <form action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
                                 @csrf
-                                <input type="hidden" name="step" value="1">
-                                <button type="submit" class="btn-step-next" style="display: inline-flex; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                                    <span>💳 Pay Admission Fee (Stage 1)</span>
+                                <input type="hidden" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
+                                <button type="submit" class="btn-step-next" style="display: inline-flex; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 12px 28px; font-size: 0.95rem;">
+                                    <span>💳 Pay ₹{{ number_format($feeBreakdown['net_payable']) }} via PayU Gateway</span>
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </button>
                             </form>

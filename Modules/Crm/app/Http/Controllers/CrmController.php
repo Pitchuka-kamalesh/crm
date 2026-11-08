@@ -195,6 +195,16 @@ class CrmController extends Controller
         // Session-backed lead assignments (Read-only DB safe)
         $leadAssignments = session()->get('lead_assignments', []);
 
+        // Fetch coupon batches and personal coupons from finance.couponinfo
+        $couponBatches = collect();
+        $personalCoupons = collect();
+        $payDetails = collect();
+        try {
+            $couponBatches = \Illuminate\Support\Facades\DB::table('finance.couponinfo')->where('coupontype', 'DEFAULT')->orderBy('id', 'asc')->get();
+            $personalCoupons = \Illuminate\Support\Facades\DB::table('finance.couponinfo')->where('coupontype', 'PERSONAL')->get()->keyBy('applino');
+            $payDetails = \Illuminate\Support\Facades\DB::table('finance.paydetails')->get()->keyBy('applino');
+        } catch (\Throwable $e) {}
+
         return view('crm::index', compact(
             'user',
             'roleId',
@@ -218,8 +228,33 @@ class CrmController extends Controller
             'filterDate',
             'availableStatuses',
             'employees',
-            'leadAssignments'
+            'leadAssignments',
+            'couponBatches',
+            'personalCoupons',
+            'payDetails'
         ));
+    }
+
+    /**
+     * Generate personal coupon for a student based on application number.
+     * Extracts last 8 digits (e.g. 61106333 from 20261106333) and registers the discount.
+     */
+    public function generatePersonalCoupon(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->validate([
+            'applino' => 'required|string',
+            'discount_amount' => 'required|numeric|min:1',
+        ]);
+
+        $applino = trim($request->input('applino'));
+        $discount = (float) $request->input('discount_amount', 5000.00);
+        $user = Auth::user();
+        $usercode = $user?->usercode ?? '03141';
+
+        $res = \App\Services\CouponService::generatePersonalCoupon($applino, $discount, $usercode, $request->ip() ?? '127.0.0.1');
+
+        return redirect()->route('crm.couponinfo', ['tab' => 'couponinfo'])
+            ->with('status', $res['message']);
     }
 
     /**
