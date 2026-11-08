@@ -451,6 +451,222 @@
             .hero-headline {
                 font-size: 2.2rem;
             }
+            .watermark-bg {
+                display: none;
+            }
+        }
+
+        /* Background Watermark (Ultra-crisp Vector, Zero Pixelation) */
+        .watermark-bg {
+            position: fixed;
+            top: 48%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+            width: min(540px, 46vw);
+            height: min(620px, 55vh);
+            background-image: url('/images/vignan-shield-vector.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.055;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+
+        /* Hero Brand Emblem (Logo above Headline) */
+        .hero-brand-emblem {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.45rem 1rem 0.45rem 0.55rem;
+            background: rgba(37, 99, 235, 0.06);
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            border-radius: 9999px;
+            width: fit-content;
+            margin-bottom: 0.5rem;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+
+        .hero-emblem-logo {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+            image-rendering: -webkit-optimize-contrast;
+            filter: drop-shadow(0 3px 8px rgba(37, 99, 235, 0.3));
+        }
+
+        .hero-emblem-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+        }
+
+        .hero-emblem-pill {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #1d4ed8;
+            letter-spacing: 0.04em;
+        }
+
+        .hero-emblem-university {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
+            color: #334155;
+        }
+
+        .theme-toggle-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            transform: scale(1.05);
+        }
+
+        /* ========================================================
+           DARK THEME SUPPORT (Crisp, High Contrast, No Pixelation)
+           ======================================================== */
+        body.dark-theme {
+            background: #0b1120;
+            color: #f8fafc;
+        }
+
+        body.dark-theme .top-navbar {
+            background: #0f172a;
+            border-bottom-color: #1e293b;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+        }
+
+        body.dark-theme .brand-logo-area span[style*="color:#0b1e42"],
+        body.dark-theme .brand-title {
+            color: #f8fafc !important;
+        }
+
+        body.dark-theme .brand-logo-area span[style*="color:#2563eb"],
+        body.dark-theme .brand-sub {
+            color: #60a5fa !important;
+        }
+
+        body.dark-theme .theme-toggle-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #fbbf24;
+        }
+
+        body.dark-theme .theme-toggle-btn:hover {
+            background: #334155;
+        }
+
+        body.dark-theme .watermark-bg {
+            opacity: 0.085;
+            filter: drop-shadow(0 0 60px rgba(96, 165, 250, 0.4)) brightness(1.25);
+        }
+
+        body.dark-theme .hero-brand-emblem {
+            background: rgba(30, 58, 138, 0.28);
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        body.dark-theme .hero-emblem-pill {
+            color: #60a5fa;
+        }
+
+        body.dark-theme .hero-emblem-university {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .hero-headline {
+            color: #f8fafc;
+        }
+
+        body.dark-theme .hero-headline span {
+            color: #60a5fa;
+        }
+
+        body.dark-theme .hero-subtitle {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .accred-badge {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .registration-card {
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.65);
+        }
+
+        body.dark-theme .card-header-title {
+            color: #f8fafc;
+        }
+
+        body.dark-theme .input-text-field,
+        body.dark-theme .select-field {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+
+        body.dark-theme .input-text-field:focus,
+        body.dark-theme .select-field:focus {
+            border-color: #3b82f6;
+            background: #0f172a;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        body.dark-theme .level-section {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        body.dark-theme .level-pill-btn {
+            background: transparent;
+            color: #94a3b8;
+            border-color: transparent;
+        }
+
+        body.dark-theme .level-pill-btn.pill-active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+
+        body.dark-theme label[for="ableto"] {
+            color: #cbd5e1;
+        }
+
+        body.dark-theme .login-back-link {
+            color: #94a3b8;
+        }
+
+        body.dark-theme .login-back-link a {
+            color: #60a5fa;
+        }
+
+        body.dark-theme .btn-apply-nav {
+            background: #2563eb;
+        }
+
+        body.dark-theme .btn-apply-nav:hover {
+            background: #1d4ed8;
         }
     </style>
 </head>
@@ -467,25 +683,34 @@
                 </div>
             </a>
 
-            <nav class="nav-menu-links">
-                <a href="/" class="nav-item-link">Home</a>
-                <a href="/" class="nav-item-link">Programs</a>
-                <a href="/" class="nav-item-link">Process</a>
-                <a href="/" class="nav-item-link">Testimonials</a>
-                <a href="/" class="nav-item-link">Contact</a>
-            </nav>
-
-            <a href="{{ route('login') }}" class="btn-apply-nav">
-                <span>Sign In Portal &rarr;</span>
-            </a>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light / Dark Mode">
+                    <span id="themeToggleIcon">🌙</span>
+                </button>
+                <a href="{{ route('login') }}" class="btn-apply-nav">
+                    <span>Sign In Portal &rarr;</span>
+                </a>
+            </div>
         </div>
     </header>
 
+    <!-- Background Watermark Layer (Ultra-sharp Vector, Zero Pixelation) -->
+    <div class="watermark-bg" aria-hidden="true"></div>
+
     <!-- Page Content -->
-    <main class="page-wrapper">
+    <main class="page-wrapper" style="position:relative; z-index:1;">
 
         <!-- Left Hero Area -->
         <section class="hero-left">
+            <!-- Official Shield Emblem & Badge (Image 2) -->
+            <div class="hero-brand-emblem">
+                <img src="/images/vignan-shield-clean.png" alt="Vignan's University" class="hero-emblem-logo">
+                <div class="hero-emblem-info">
+                    <span class="hero-emblem-pill">OFFICIAL ADMISSIONS 2026&ndash;27</span>
+                    <span class="hero-emblem-university">Vignan's Foundation for Science, Technology &amp; Research</span>
+                </div>
+            </div>
+
             <h1 class="hero-headline">
                 Empower as <br>leader at <br><span>Vignan's University</span>
             </h1>
@@ -604,7 +829,11 @@
 
                     <select name="branch_id" id="branch_select" class="select-field">
                         <option value="">select Branch</option>
-                        @foreach($branches as $branch)
+                        @php
+                            $initProgId = old('progid', 1);
+                            $initBranches = $branches->where('program_id', $initProgId)->where('lock_status', 0)->unique('branch_long_name');
+                        @endphp
+                        @foreach($initBranches as $branch)
                             <option value="{{ $branch->branch_id }}" data-prog="{{ $branch->program_id }}" {{ old('branch_id') == $branch->branch_id ? 'selected' : '' }}>
                                 {{ $branch->branch_long_name }}
                             </option>
@@ -632,17 +861,17 @@
                            class="input-text-field">
                 </div>
 
-                <!-- 6. [✓] Vignan able to use my data (from wireframe) -->
+                <!-- 6. Consent & Authorization -->
                 <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.35rem 0.2rem;">
                     <input type="checkbox" name="ableto" id="ableto" value="1" checked required style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                     <label for="ableto" style="font-size: 0.88rem; font-weight: 600; color: #1e293b; cursor: pointer;">
-                        Vignan able to use my data
+                        I authorize Vignan University to contact me &amp; use my data
                     </label>
                 </div>
 
-                <!-- 7. Register Button Save (from wireframe) -->
+                <!-- 7. Submit Register Button -->
                 <button type="submit" class="btn-register-submit" id="btnSubmit">
-                    <span>Register Button Save</span>
+                    <span>Register Now &rarr;</span>
                 </button>
 
                 <div class="login-back-link">
@@ -688,19 +917,30 @@
 
         function updateBranches(progId) {
             const branchSelect = document.getElementById('branch_select');
+            if (!branchSelect) return;
+            const previousVal = branchSelect.value;
             branchSelect.innerHTML = '<option value="">select Branch</option>';
 
             if (!progId) return;
 
-            const filtered = allBranches.filter(b => String(b.program_id) === String(progId));
+            const filtered = allBranches.filter(b => String(b.program_id) === String(progId) && Number(b.lock_status ?? 0) === 0);
+            const seen = new Set();
             if (filtered.length > 0) {
                 filtered.forEach(b => {
-                    const opt = document.createElement('option');
-                    opt.value = b.branch_id;
-                    opt.textContent = b.branch_long_name;
-                    branchSelect.appendChild(opt);
+                    const nameKey = (b.branch_long_name || '').trim().toLowerCase();
+                    if (nameKey && !seen.has(nameKey)) {
+                        seen.add(nameKey);
+                        const opt = document.createElement('option');
+                        opt.value = b.branch_id;
+                        opt.textContent = b.branch_long_name;
+                        branchSelect.appendChild(opt);
+                    }
                 });
-                branchSelect.value = filtered[0].branch_id;
+                if (filtered.some(b => String(b.branch_id) === String(previousVal))) {
+                    branchSelect.value = previousVal;
+                } else if (branchSelect.options.length > 1) {
+                    branchSelect.selectedIndex = 1;
+                }
             } else {
                 const opt = document.createElement('option');
                 opt.value = 1;
@@ -753,7 +993,7 @@
             filterDistricts(stateSelect.value);
         }
 
-        // Initialize with default UG level, Country & State
+        // Initialize with default UG level, Country, State & Branch
         document.addEventListener('DOMContentLoaded', () => {
             const countryEl = document.getElementById('country_select');
             if (countryEl && countryEl.value) {
@@ -764,15 +1004,19 @@
                     filterDistricts(stateEl.value);
                 }
             }
-                filterStates(countryEl.value);
-            }
 
-            const currentLevel = document.getElementById('input_program_level').value || 'UG';
+            const currentLevel = document.getElementById('input_program_level')?.value || 'UG';
             const activeBtn = Array.from(document.querySelectorAll('.level-pill-btn'))
                 .find(b => b.textContent.toLowerCase().includes(currentLevel.toLowerCase()) || (currentLevel === 'UG' && b.textContent.toLowerCase().includes('undergrade')));
             if (activeBtn) {
                 selectProgramLevel(currentLevel, activeBtn);
+            } else {
+                const courseSelect = document.getElementById('course_select');
+                if (courseSelect && courseSelect.value) {
+                    updateBranches(courseSelect.value);
+                }
             }
+        });
 
             // Silent Auto-save on blur / change (No intimate message as requested)
             const form = document.getElementById('admissionRegisterForm');
@@ -823,6 +1067,30 @@
                 });
             }
         });
+
+        // Theme Switcher (Light / Dark Mode with LocalStorage & Preference Detection)
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('portal_theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+        }
+
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById('themeToggleIcon');
+            if (icon) {
+                icon.textContent = isDark ? '☀️' : '🌙';
+            }
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('portal_theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const shouldBeDark = saved === 'dark' || (!saved && prefersDark);
+            if (shouldBeDark) {
+                document.body.classList.add('dark-theme');
+            }
+            updateThemeIcon(shouldBeDark);
+        })();
     </script>
 </body>
 </html>

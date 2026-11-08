@@ -61,7 +61,8 @@ class RegistrationController extends Controller
             ->orderBy('program_id')
             ->get();
 
-        $branches = Branch::select('branch_id', 'program_id', 'branch_short_name', 'branch_long_name')
+        $branches = Branch::where('lock_status', 0)
+            ->select('branch_id', 'program_id', 'branch_short_name', 'branch_long_name', 'lock_status')
             ->orderBy('branch_long_name')
             ->get();
 
@@ -292,6 +293,7 @@ class RegistrationController extends Controller
     public function getBranches(int $programId): JsonResponse
     {
         $branches = Branch::where('program_id', $programId)
+            ->where('lock_status', 0)
             ->select('branch_id', 'branch_code', 'branch_short_name', 'branch_long_name')
             ->orderBy('branch_long_name')
             ->get();

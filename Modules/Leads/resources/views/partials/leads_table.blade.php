@@ -19,8 +19,8 @@
                     $leadPhone = $lead->phoneno ?? $lead->mobile ?? '';
                     $leadEmail = $lead->emailid ?? $lead->personal_email ?? 'N/A';
                     $progShort = $lead->program?->program_short_name ?? $lead->programlevel ?? 'B.Tech';
-                    $branchShort = $lead->branch?->branch_short_name ? ' (' . strtoupper($lead->branch->branch_short_name) . ')' : '';
-                    $leadProgram = $progShort . $branchShort;
+                    $branchLabel = $lead->branch?->branch_long_name ?? $lead->branch?->branch_short_name ?? '';
+                    $leadProgram = $branchLabel ? "{$progShort} - {$branchLabel}" : $progShort;
                     $leadCampus = $lead->campus?->campus_short_name ?? 'Vadlamudi';
                     $leadStatus = $lead->std_status ?? $lead->phnostatus ?? 'Interested';
 

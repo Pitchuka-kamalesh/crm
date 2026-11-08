@@ -34,3 +34,4 @@ class District extends Model
         return $this->belongsTo(Country::class, 'COUNTRY_ID', 'country_id');
     }
 }
+

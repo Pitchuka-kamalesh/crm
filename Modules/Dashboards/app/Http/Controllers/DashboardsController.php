@@ -49,7 +49,7 @@ class DashboardsController extends Controller
 
         $appNo = $crmStudent?->applinano ?: ($usercode ?: '');
         $regNo = ($crmStudent?->std_status === 'Admitted' || $crmStudent?->stage1 === 'paid') ? ($crmStudent?->applinano ?: '') : '';
-        $displayName = $crmStudent?->name ?: ($user?->name ?: 'Applicant');
+        $displayName = trim((string) ($crmStudent?->name ?: ($user?->name ?: 'Applicant')));
 
         // Always display Candidate / Student role
         $roleName = ($user?->role_id === 5 || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
@@ -77,7 +77,51 @@ class DashboardsController extends Controller
         // Uploaded KYC documents
         $documents = collect();
 
-        // Calculate stage statuses strictly from crmStudent DB columns (all default to pending unless explicitly marked completed/paid)
+        // 8-Stage Metadata definitions
+        $stageMeta = [
+            1 => [
+                'title' => 'Fee Payment',
+                'subtitle' => 'Seat Confirmation & Fee Payment',
+                'icon' => '💳',
+            ],
+            2 => [
+                'title' => 'Personal Profile',
+                'subtitle' => 'Candidate Bio & Contact Information',
+                'icon' => '👤',
+            ],
+            3 => [
+                'title' => 'Academic Records',
+                'subtitle' => '10th SSC & Intermediate Details',
+                'icon' => '🎓',
+            ],
+            4 => [
+                'title' => 'Certificates & KYC',
+                'subtitle' => 'Document Verification & Uploads',
+                'icon' => '📄',
+            ],
+            5 => [
+                'title' => 'Family Details',
+                'subtitle' => 'Parent & Guardian Information',
+                'icon' => '👨‍👩‍👧',
+            ],
+            6 => [
+                'title' => 'Seat Allotment',
+                'subtitle' => 'Campus & Branch Allotment Details',
+                'icon' => '🏛️',
+            ],
+            7 => [
+                'title' => 'Tuition Structure',
+                'subtitle' => 'Fee Breakdown & Concessions',
+                'icon' => '💰',
+            ],
+            8 => [
+                'title' => 'Provisional ID',
+                'subtitle' => 'Digital Admission Pass & Order',
+                'icon' => '🪪',
+            ],
+        ];
+
+        // Calculate stage statuses strictly from crmStudent DB columns
         $stages = [];
         for ($i = 1; $i <= 8; $i++) {
             $col = 'stage' . $i;
@@ -86,7 +130,9 @@ class DashboardsController extends Controller
             $isCompleted = ($i === 1) ? ($val === 'paid') : ($val === 'completed' || $val === 'paid');
 
             $stages[$i] = [
-                'title' => 'Stage ' . $i,
+                'title' => $stageMeta[$i]['title'],
+                'subtitle' => $stageMeta[$i]['subtitle'],
+                'icon' => $stageMeta[$i]['icon'],
                 'status' => $isCompleted ? 'completed' : 'pending',
                 'db_field' => $col,
                 'db_value' => $val ?: ($i === 1 ? 'not_paid' : 'NA'),

@@ -294,10 +294,10 @@
                                         <td>
                                             <div style="font-weight: 600; color: #0f172a;">{{ $std->program?->program_short_name ?? 'B.Tech' }}</div>
                                             @php
-                                                $branchLabel = $std->branch?->branch_short_name ?? $std->branch?->branch_long_name;
+                                                $branchLabel = $std->branch?->branch_long_name ?? $std->branch?->branch_short_name;
                                             @endphp
                                             @if(!empty($branchLabel))
-                                                <div style="font-size: 0.72rem; color: #64748b;">{{ strtoupper($branchLabel) }}</div>
+                                                <div style="font-size: 0.72rem; color: #64748b; font-weight: 500;">{{ $branchLabel }}</div>
                                             @endif
                                         </td>
                                         <td>
