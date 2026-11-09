@@ -56,4 +56,10 @@ return [
         'template_admission' => env('JIOCX_DLT_TEMPLATE_ID_ADMISSION', '1777179354065677511'),
     ],
 
+    'payu' => [
+        'key' => env('PAYU_KEY', 'TrOeqi'),
+        'salt' => env('PAYU_SALT', 'oUwlPbUgo653mTYzLfv2flsuCRdYqfkv'),
+        'env_prod' => (int) env('PAYU_ENV_PROD', 0),
+    ],
+
 ];

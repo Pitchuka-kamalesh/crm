@@ -198,13 +198,24 @@
         .form-row-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.85rem;
+            gap: 0.75rem;
+        }
+
+        .form-row-2col .select-field {
+            font-size: 0.84rem;
+            padding: 0.76rem 2.25rem 0.76rem 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row-2col {
+                grid-template-columns: 1fr;
+            }
         }
 
         .form-row-3col {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 0.85rem;
+            gap: 0.75rem;
         }
 
         @media (max-width: 600px) {
@@ -213,27 +224,71 @@
             }
         }
 
+        .form-row-4col {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.55rem;
+        }
+
+        .form-row-4col .select-field {
+            font-size: 0.80rem;
+            font-weight: 600;
+            padding: 0.72rem 1.65rem 0.72rem 0.65rem;
+            background-position: right 0.45rem center;
+            background-size: 0.82rem;
+            letter-spacing: -0.01em;
+        }
+
+        @media (max-width: 900px) {
+            .form-row-4col {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+            .form-row-4col .select-field {
+                font-size: 0.85rem;
+                padding: 0.76rem 2.25rem 0.76rem 0.85rem;
+                background-position: right 0.75rem center;
+                background-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-row-4col {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .input-text-field {
             width: 100%;
-            padding: 0.78rem 1rem;
-            border: 1px solid #94a3b8;
-            border-radius: 8px;
+            padding: 0.76rem 0.95rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
             font-size: 0.88rem;
+            font-weight: 500;
             color: #0f172a;
             font-family: inherit;
+            background: #f8fafc;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-text-field:hover {
+            border-color: #94a3b8;
             background: #ffffff;
-            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
         }
 
         .input-text-field:focus {
             outline: none;
             border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .input-text-field::placeholder {
-            color: #64748b;
+            color: #94a3b8;
             font-size: 0.86rem;
+            font-weight: 400;
         }
 
         .phone-group-wrap {
@@ -262,19 +317,252 @@
 
         .select-field {
             width: 100%;
-            padding: 0.78rem 1rem;
-            border: 1px solid #94a3b8;
-            border-radius: 8px;
-            font-size: 0.88rem;
+            padding: 0.76rem 2.25rem 0.76rem 0.85rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-weight: 600;
             color: #0f172a;
             font-family: inherit;
-            background: #ffffff;
+            background-color: #f8fafc;
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
+            background-position: right 0.75rem center;
+            background-size: 0.95rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .select-field:hover {
+            border-color: #94a3b8;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #2563eb;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .select-field option {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #0f172a;
+            background-color: #ffffff;
+            padding: 10px 14px;
+        }
+
+        .select-field option:hover,
+        .select-field option:focus,
+        .select-field option:checked {
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* ========================================================
+           MODERN CUSTOM DROPDOWN UI (Replaces Raw Native OS Menu)
+           ======================================================== */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-container.is-open {
+            z-index: 999;
+        }
+
+        .custom-select-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.76rem 0.95rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: #0f172a;
+            font-family: inherit;
+            background-color: #f8fafc;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            text-align: left;
+        }
+
+        .custom-select-trigger:hover {
+            border-color: #94a3b8;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+        }
+
+        .custom-select-container.is-open .custom-select-trigger,
+        .custom-select-trigger:focus {
+            outline: none;
+            border-color: #2563eb;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-select-trigger.field-error {
+            border: 2px solid #ef4444 !important;
+            background: #fff5f5 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        .custom-select-value {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-select-value.is-placeholder {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .custom-select-arrow {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+            color: #2563eb;
+            transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-select-container.is-open .custom-select-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* 4-column compact triggers */
+        .form-row-4col .custom-select-trigger {
+            font-size: 0.80rem;
+            font-weight: 600;
+            padding: 0.72rem 0.6rem;
+            letter-spacing: -0.01em;
+        }
+
+        .form-row-4col .custom-select-arrow {
+            width: 0.85rem;
+            height: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .form-row-4col .custom-select-trigger {
+                font-size: 0.85rem;
+                padding: 0.76rem 0.95rem;
+            }
+            .form-row-4col .custom-select-arrow {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        /* Floating Custom Dropdown Menu Card */
+        .custom-select-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 100%;
+            width: max-content;
+            max-width: min(380px, 92vw);
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.14), 0 6px 14px -3px rgba(15, 23, 42, 0.07);
+            padding: 0.4rem;
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+        }
+
+        .form-row-2col .custom-select-dropdown {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .custom-select-container.is-open .custom-select-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Sleek Modern Scrollbar */
+        .custom-select-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-select-dropdown::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .custom-select-dropdown::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
+
+        .custom-select-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Custom Dropdown Option Items */
+        .custom-select-option {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: #1e293b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            line-height: 1.35;
+        }
+
+        .custom-select-option:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 600;
+            transform: translateX(2px);
+        }
+
+        .custom-select-option.is-selected {
+            background-color: #2563eb;
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+
+        .custom-select-option.is-placeholder {
+            color: #94a3b8;
+            font-style: italic;
+            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 0.25rem;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .custom-select-option.is-placeholder:hover {
+            background-color: #f8fafc;
+            color: #64748b;
+            transform: none;
         }
 
         /* Choose Program Level Tabs */
@@ -433,6 +721,96 @@
             .hero-headline {
                 font-size: 2.2rem;
             }
+            .watermark-bg {
+                display: none;
+            }
+        }
+
+        /* Background Watermark (Ultra-crisp Vector, Zero Pixelation) */
+        .watermark-bg {
+            position: fixed;
+            top: 48%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+            width: min(540px, 46vw);
+            height: min(620px, 55vh);
+            background-image: url('/images/vignan-shield-vector.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.055;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+
+        /* Hero Headline with Side Logo (Parallely Matched to Full 3 Rows) */
+        .hero-headline-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .hero-side-logo {
+            height: 176px;
+            width: auto;
+            max-width: 160px;
+            object-fit: contain;
+            flex-shrink: 0;
+            image-rendering: -webkit-optimize-contrast;
+            filter: drop-shadow(0 6px 20px rgba(37, 99, 235, 0.25));
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 900px) {
+            .hero-headline-wrap {
+                gap: 1.15rem;
+            }
+            .hero-side-logo {
+                height: 130px;
+                max-width: 120px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-headline-wrap {
+                gap: 0.85rem;
+            }
+            .hero-side-logo {
+                height: 95px;
+                max-width: 85px;
+            }
+        }
+
+        /* Form Validation Styles */
+        .field-error {
+            border: 2px solid #ef4444 !important;
+            background: #fff5f5 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        .field-error-msg {
+            color: #dc2626;
+            font-size: 0.74rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .field-error-msg.visible {
+            display: block;
+        }
+
+        .validation-alert {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 0.7rem 0.95rem;
+            border-radius: 10px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            margin-bottom: 0.85rem;
+            display: none;
         }
     </style>
 </head>
@@ -449,28 +827,28 @@
                 </div>
             </a>
 
-            <nav class="nav-menu-links">
-                <a href="/" class="nav-item-link">Home</a>
-                <a href="/" class="nav-item-link">Programs</a>
-                <a href="/" class="nav-item-link">Process</a>
-                <a href="/" class="nav-item-link">Testimonials</a>
-                <a href="/" class="nav-item-link">Contact</a>
-            </nav>
-
-            <a href="{{ route('login') }}" class="btn-apply-nav">
-                <span>Sign In Portal &rarr;</span>
-            </a>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <a href="{{ route('login') }}" class="btn-apply-nav">
+                    <span>Sign In Portal &rarr;</span>
+                </a>
+            </div>
         </div>
     </header>
 
+    <!-- Background Watermark Layer (Ultra-sharp Vector, Zero Pixelation) -->
+    <div class="watermark-bg" aria-hidden="true"></div>
+
     <!-- Page Content -->
-    <main class="page-wrapper">
+    <main class="page-wrapper" style="position:relative; z-index:1;">
 
         <!-- Left Hero Area -->
         <section class="hero-left">
-            <h1 class="hero-headline">
-                Empower as <br>leader at <br><span>Vignan's University</span>
-            </h1>
+            <div class="hero-headline-wrap">
+                <img src="/images/vignan-shield-clean.png" alt="Vignan's University" class="hero-side-logo">
+                <h1 class="hero-headline">
+                    Empower as <br>leader at <br><span>Vignan's University</span>
+                </h1>
+            </div>
 
             <p class="hero-subtitle">
                 Join a legacy of academic excellence, cutting-edge research, state-of-the-art innovation centers, and top-tier placements across multinational leaders.
@@ -496,6 +874,8 @@
         <section class="registration-card">
             <h2 class="card-header-title">Registration Form</h2>
 
+            <div class="validation-alert" id="clientValidationAlert"></div>
+
             @if(session('status'))
                 <div class="status-alert">
                     &bull; {{ session('status') }}
@@ -510,7 +890,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('register.post') }}" method="POST" class="reg-form" id="admissionRegisterForm">
+            <form action="{{ route('register.post') }}" method="POST" class="reg-form" id="admissionRegisterForm" novalidate>
                 @csrf
                 <input type="hidden" name="program_level" id="input_program_level" value="UG">
                 <input type="hidden" name="mobile" value="{{ $prefilledPhone }}">
@@ -525,8 +905,8 @@
                     </span>
                 </div>
 
-                <!-- 2. select campus | select country | State (from wireframe) -->
-                <div class="form-row-3col">
+                <!-- 2. select campus | select country | State | District (dynamically populated from DB) -->
+                <div class="form-row-4col">
                     <select name="campus_id" required class="select-field">
                         <option value="">select campus</option>
                         @foreach($campuses as $campus)
@@ -545,11 +925,20 @@
                         @endforeach
                     </select>
 
-                    <select name="state_id" id="state_select" required class="select-field">
+                    <select name="state_id" id="state_select" required class="select-field" onchange="filterDistricts(this.value)">
                         <option value="">State</option>
                         @foreach($states as $st)
                             <option value="{{ $st->state_id }}" data-country="{{ $st->country_id }}" {{ old('state_id', 1) == $st->state_id ? 'selected' : '' }}>
                                 {{ $st->state_name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="district_id" id="district_select" required class="select-field">
+                        <option value="">select District</option>
+                        @foreach($districts as $dst)
+                            <option value="{{ $dst->DISTRICT_ID }}" data-state="{{ $dst->STATE_ID }}" {{ old('district_id', 1) == $dst->DISTRICT_ID ? 'selected' : '' }}>
+                                {{ $dst->DISTRICT_NAME }}
                             </option>
                         @endforeach
                     </select>
@@ -575,9 +964,13 @@
                         @endforeach
                     </select>
 
-                    <select name="branch_id" id="branch_select" class="select-field">
+                    <select name="branch_id" id="branch_select" required class="select-field">
                         <option value="">select Branch</option>
-                        @foreach($branches as $branch)
+                        @php
+                            $initProgId = old('progid');
+                            $initBranches = $initProgId ? $branches->where('program_id', $initProgId)->where('lock_status', 0)->unique('branch_long_name') : collect();
+                        @endphp
+                        @foreach($initBranches as $branch)
                             <option value="{{ $branch->branch_id }}" data-prog="{{ $branch->program_id }}" {{ old('branch_id') == $branch->branch_id ? 'selected' : '' }}>
                                 {{ $branch->branch_long_name }}
                             </option>
@@ -605,17 +998,17 @@
                            class="input-text-field">
                 </div>
 
-                <!-- 6. [✓] Vignan able to use my data (from wireframe) -->
+                <!-- 6. Consent & Authorization -->
                 <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.35rem 0.2rem;">
                     <input type="checkbox" name="ableto" id="ableto" value="1" checked required style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                     <label for="ableto" style="font-size: 0.88rem; font-weight: 600; color: #1e293b; cursor: pointer;">
-                        Vignan able to use my data
+                        I authorize Vignan University to contact me &amp; use my data
                     </label>
                 </div>
 
-                <!-- 7. Register Button Save (from wireframe) -->
+                <!-- 7. Submit Register Button -->
                 <button type="submit" class="btn-register-submit" id="btnSubmit">
-                    <span>Register Button Save</span>
+                    <span>Register Now &rarr;</span>
                 </button>
 
                 <div class="login-back-link">
@@ -626,18 +1019,20 @@
 
     </main>
 
-    <!-- Dynamic Course, Branch & State Scripts -->
+    <!-- Dynamic Course, Branch, State & District Scripts -->
     <script>
-        const allPrograms = @json($programs);
-        const allBranches = @json($branches);
-        const allStates   = @json($states);
+        const allPrograms  = @json($programs);
+        const allBranches  = @json($branches);
+        const allStates    = @json($states);
+        const allDistricts = @json($districts);
 
-        function selectProgramLevel(level, btnEl) {
+        function selectProgramLevel(level, btnEl, preserveVal = false) {
             document.querySelectorAll('.level-pill-btn').forEach(b => b.classList.remove('pill-active'));
             if (btnEl) btnEl.classList.add('pill-active');
             document.getElementById('input_program_level').value = level;
 
             const courseSelect = document.getElementById('course_select');
+            const previousCourseVal = preserveVal ? courseSelect.value : '';
             courseSelect.innerHTML = '<option value="">select program</option>';
 
             const filterLevel = (level === 'Doctoral') ? ['PhD', 'Doctoral'] : [level];
@@ -650,34 +1045,73 @@
                 courseSelect.appendChild(opt);
             });
 
-            if (filtered.length > 0) {
-                courseSelect.value = filtered[0].program_id;
-                updateBranches(filtered[0].program_id);
+            // Do NOT auto-select the first program by default! Leave on "select program"
+            if (previousCourseVal && filtered.some(p => String(p.program_id) === String(previousCourseVal))) {
+                courseSelect.value = previousCourseVal;
+                updateBranches(previousCourseVal, preserveVal);
             } else {
-                updateBranches('');
+                courseSelect.value = '';
+                updateBranches('', false);
             }
         }
 
-        function updateBranches(progId) {
+        function updateBranches(progId, preserveVal = false) {
             const branchSelect = document.getElementById('branch_select');
+            if (!branchSelect) return;
+            const previousVal = preserveVal ? branchSelect.value : '';
             branchSelect.innerHTML = '<option value="">select Branch</option>';
 
-            if (!progId) return;
+            if (!progId) {
+                branchSelect.value = '';
+                return;
+            }
 
-            const filtered = allBranches.filter(b => String(b.program_id) === String(progId));
+            const filtered = allBranches.filter(b => String(b.program_id) === String(progId) && Number(b.lock_status ?? 0) === 0);
+            const seen = new Set();
             if (filtered.length > 0) {
                 filtered.forEach(b => {
-                    const opt = document.createElement('option');
-                    opt.value = b.branch_id;
-                    opt.textContent = b.branch_long_name;
-                    branchSelect.appendChild(opt);
+                    const nameKey = (b.branch_long_name || '').trim().toLowerCase();
+                    if (nameKey && !seen.has(nameKey)) {
+                        seen.add(nameKey);
+                        const opt = document.createElement('option');
+                        opt.value = b.branch_id;
+                        opt.textContent = b.branch_long_name;
+                        branchSelect.appendChild(opt);
+                    }
                 });
-                branchSelect.value = filtered[0].branch_id;
+                // Keep "select Branch" prompt selected! Do NOT auto-select index 1
+                if (previousVal && filtered.some(b => String(b.branch_id) === String(previousVal))) {
+                    branchSelect.value = previousVal;
+                } else {
+                    branchSelect.value = '';
+                }
             } else {
                 const opt = document.createElement('option');
                 opt.value = 1;
                 opt.textContent = 'General / Core Track';
                 branchSelect.appendChild(opt);
+                branchSelect.value = '';
+            }
+        }
+
+        function filterDistricts(stateId) {
+            const districtSelect = document.getElementById('district_select');
+            if (!districtSelect) return;
+            const previousVal = districtSelect.value;
+            districtSelect.innerHTML = '<option value="">select District</option>';
+
+            const filtered = allDistricts.filter(d => String(d.STATE_ID) === String(stateId));
+            filtered.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.DISTRICT_ID;
+                opt.textContent = d.DISTRICT_NAME;
+                districtSelect.appendChild(opt);
+            });
+
+            if (filtered.some(d => String(d.DISTRICT_ID) === String(previousVal))) {
+                districtSelect.value = previousVal;
+            } else if (filtered.length > 0) {
+                districtSelect.value = filtered[0].DISTRICT_ID;
             }
         }
 
@@ -700,21 +1134,37 @@
             } else if (filtered.length > 0) {
                 stateSelect.value = filtered[0].state_id;
             }
+
+            filterDistricts(stateSelect.value);
         }
 
-        // Initialize with default UG level & Country
+        // Initialize with default UG level, Country, State & Branch
         document.addEventListener('DOMContentLoaded', () => {
             const countryEl = document.getElementById('country_select');
             if (countryEl && countryEl.value) {
                 filterStates(countryEl.value);
+            } else {
+                const stateEl = document.getElementById('state_select');
+                if (stateEl && stateEl.value) {
+                    filterDistricts(stateEl.value);
+                }
             }
 
-            const currentLevel = document.getElementById('input_program_level').value || 'UG';
+            const currentLevel = document.getElementById('input_program_level')?.value || 'UG';
             const activeBtn = Array.from(document.querySelectorAll('.level-pill-btn'))
                 .find(b => b.textContent.toLowerCase().includes(currentLevel.toLowerCase()) || (currentLevel === 'UG' && b.textContent.toLowerCase().includes('undergrade')));
+            const oldProgId = '{{ old("progid", "") }}';
             if (activeBtn) {
-                selectProgramLevel(currentLevel, activeBtn);
+                selectProgramLevel(currentLevel, activeBtn, Boolean(oldProgId));
+            } else {
+                const courseSelect = document.getElementById('course_select');
+                if (courseSelect && courseSelect.value) {
+                    updateBranches(courseSelect.value, Boolean(oldProgId));
+                }
             }
+
+            // Initialize Modern Custom Dropdown UI
+            initCustomSelects();
 
             // Silent Auto-save on blur / change (No intimate message as requested)
             const form = document.getElementById('admissionRegisterForm');
@@ -748,9 +1198,119 @@
                     el.addEventListener('change', function() { silentAutosave(this); });
                 });
 
-                // Prevent double form submission
+                function showClientError(msg, fieldEl) {
+                    const alertBox = document.getElementById('clientValidationAlert');
+                    if (alertBox) {
+                        alertBox.textContent = '⚠️ ' + msg;
+                        alertBox.style.display = 'block';
+                        alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                    if (fieldEl) {
+                        fieldEl.classList.add('field-error');
+                        const container = fieldEl.closest('.custom-select-container');
+                        if (container) {
+                            const trigger = container.querySelector('.custom-select-trigger');
+                            if (trigger) trigger.classList.add('field-error');
+                            trigger.focus();
+                        } else {
+                            fieldEl.focus();
+                        }
+                    }
+                }
+
+                function clearClientErrors() {
+                    const alertBox = document.getElementById('clientValidationAlert');
+                    if (alertBox) {
+                        alertBox.style.display = 'none';
+                        alertBox.textContent = '';
+                    }
+                    form.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+                    document.querySelectorAll('.custom-select-trigger.field-error').forEach(el => el.classList.remove('field-error'));
+                }
+
+                // Auto-clear validation errors on input/change
+                form.querySelectorAll('input, select').forEach(el => {
+                    el.addEventListener('input', function() {
+                        this.classList.remove('field-error');
+                        const alertBox = document.getElementById('clientValidationAlert');
+                        if (alertBox) alertBox.style.display = 'none';
+                    });
+                    el.addEventListener('change', function() {
+                        this.classList.remove('field-error');
+                        const alertBox = document.getElementById('clientValidationAlert');
+                        if (alertBox) alertBox.style.display = 'none';
+                    });
+                });
+
+                // Form validation & submission control
                 let isSubmitting = false;
                 form.addEventListener('submit', function(e) {
+                    clearClientErrors();
+
+                    const campus = form.querySelector('[name="campus_id"]');
+                    if (!campus || !campus.value) {
+                        e.preventDefault();
+                        showClientError('Please select a campus to continue.', campus);
+                        return false;
+                    }
+
+                    const country = document.getElementById('country_select');
+                    if (!country || !country.value) {
+                        e.preventDefault();
+                        showClientError('Please select a country.', country);
+                        return false;
+                    }
+
+                    const state = document.getElementById('state_select');
+                    if (!state || !state.value) {
+                        e.preventDefault();
+                        showClientError('Please select a state.', state);
+                        return false;
+                    }
+
+                    const district = document.getElementById('district_select');
+                    if (!district || !district.value) {
+                        e.preventDefault();
+                        showClientError('Please select a district.', district);
+                        return false;
+                    }
+
+                    const course = document.getElementById('course_select');
+                    if (!course || !course.value) {
+                        e.preventDefault();
+                        showClientError('Please select an academic program.', course);
+                        return false;
+                    }
+
+                    const branch = document.getElementById('branch_select');
+                    if (branch && branch.options.length > 1 && !branch.value) {
+                        e.preventDefault();
+                        showClientError('Please select a branch or specialization.', branch);
+                        return false;
+                    }
+
+                    const applicantName = form.querySelector('[name="applicant_name"]');
+                    if (!applicantName || !applicantName.value.trim() || applicantName.value.trim().length < 2) {
+                        e.preventDefault();
+                        showClientError('Please enter your full name as per SSC (minimum 2 characters).', applicantName);
+                        return false;
+                    }
+
+                    const email = form.querySelector('[name="email"]');
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!email || !email.value.trim() || !emailRegex.test(email.value.trim())) {
+                        e.preventDefault();
+                        showClientError('Please enter a valid email address (e.g., student@example.com).', email);
+                        return false;
+                    }
+
+                    const consent = document.getElementById('ableto');
+                    if (consent && !consent.checked) {
+                        e.preventDefault();
+                        showClientError('Please check the authorization box to proceed.', consent);
+                        return false;
+                    }
+
                     if (isSubmitting) {
                         e.preventDefault();
                         return false;
@@ -765,6 +1325,171 @@
                 });
             }
         });
+
+        // ========================================================
+        // Modern Custom Dropdown UI Engine
+        // ========================================================
+        function initCustomSelects() {
+            document.querySelectorAll('select.select-field').forEach(selectEl => {
+                if (selectEl.dataset.customInit) {
+                    syncCustomSelect(selectEl);
+                    return;
+                }
+                selectEl.dataset.customInit = 'true';
+
+                // Hide native select accessibility-friendly
+                selectEl.style.position = 'absolute';
+                selectEl.style.width = '1px';
+                selectEl.style.height = '1px';
+                selectEl.style.opacity = '0';
+                selectEl.style.pointerEvents = 'none';
+
+                // Container
+                const container = document.createElement('div');
+                container.className = 'custom-select-container';
+                selectEl.parentNode.insertBefore(container, selectEl);
+                container.appendChild(selectEl);
+
+                // Trigger Button
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'custom-select-trigger';
+                trigger.innerHTML = `
+                    <span class="custom-select-value"></span>
+                    <svg class="custom-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                `;
+                container.appendChild(trigger);
+
+                // Dropdown Menu Card
+                const dropdown = document.createElement('div');
+                dropdown.className = 'custom-select-dropdown';
+                container.appendChild(dropdown);
+
+                // Toggle menu on click
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = container.classList.contains('is-open');
+                    document.querySelectorAll('.custom-select-container.is-open').forEach(c => c.classList.remove('is-open'));
+                    if (!isOpen) {
+                        container.classList.add('is-open');
+                        const selectedItem = dropdown.querySelector('.is-selected');
+                        if (selectedItem) {
+                            selectedItem.scrollIntoView({ block: 'nearest' });
+                        }
+                    }
+                });
+
+                // Populate initial options
+                syncCustomSelect(selectEl);
+
+                // Watch for value changes
+                selectEl.addEventListener('change', () => {
+                    updateTriggerLabel(selectEl, container);
+                    syncCustomSelect(selectEl);
+                });
+
+                // Observe DOM option changes (e.g. program level or state filtering)
+                const observer = new MutationObserver(() => {
+                    syncCustomSelect(selectEl);
+                });
+                observer.observe(selectEl, { childList: true });
+            });
+        }
+
+        function updateTriggerLabel(selectEl, container) {
+            const trigger = container.querySelector('.custom-select-trigger');
+            const valueSpan = container.querySelector('.custom-select-value');
+            if (!trigger || !valueSpan) return;
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            if (selectedOption && selectEl.value !== '') {
+                valueSpan.textContent = selectedOption.textContent.trim();
+                valueSpan.classList.remove('is-placeholder');
+            } else {
+                valueSpan.textContent = (selectEl.options[0]?.textContent || 'Select...').trim();
+                valueSpan.classList.add('is-placeholder');
+            }
+
+            if (selectEl.classList.contains('field-error')) {
+                trigger.classList.add('field-error');
+            } else {
+                trigger.classList.remove('field-error');
+            }
+        }
+
+        function syncCustomSelect(selectEl) {
+            const container = selectEl.closest('.custom-select-container');
+            if (!container) return;
+            const dropdown = container.querySelector('.custom-select-dropdown');
+            if (!dropdown) return;
+
+            dropdown.innerHTML = '';
+            Array.from(selectEl.options).forEach((opt) => {
+                const item = document.createElement('div');
+                item.className = 'custom-select-option';
+                item.dataset.value = opt.value;
+                item.textContent = opt.textContent;
+
+                if (opt.value === '') {
+                    item.classList.add('is-placeholder');
+                }
+                if (String(opt.value) === String(selectEl.value) && selectEl.value !== '') {
+                    item.classList.add('is-selected');
+                }
+
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectEl.value = opt.value;
+                    container.classList.remove('is-open');
+                    selectEl.classList.remove('field-error');
+                    updateTriggerLabel(selectEl, container);
+
+                    // Dispatch events
+                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Trigger inline onchange if defined
+                    if (typeof selectEl.onchange === 'function') {
+                        selectEl.onchange();
+                    }
+                });
+
+                dropdown.appendChild(item);
+            });
+
+            updateTriggerLabel(selectEl, container);
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-select-container.is-open').forEach(c => c.classList.remove('is-open'));
+        });
+
+        // Close dropdown on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.custom-select-container.is-open').forEach(c => c.classList.remove('is-open'));
+            }
+        });
+
+        // Synchronize side logo height to precisely match the 3 rows of headline text
+        function syncLogoHeight() {
+            const headline = document.querySelector('.hero-headline');
+            const logo = document.querySelector('.hero-side-logo');
+            if (headline && logo) {
+                const h = headline.offsetHeight;
+                if (h > 60) {
+                    logo.style.height = h + 'px';
+                }
+            }
+        }
+        window.addEventListener('resize', syncLogoHeight);
+        window.addEventListener('load', syncLogoHeight);
+        document.addEventListener('DOMContentLoaded', syncLogoHeight);
+        setTimeout(syncLogoHeight, 50);
+        setTimeout(syncLogoHeight, 300);
     </script>
 </body>
 </html>

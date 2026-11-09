@@ -26,5 +26,10 @@ class State extends Model
     {
         return $this->belongsTo(Country::class, 'country_id', 'country_id');
     }
+
+    public function districts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(District::class, 'STATE_ID', 'state_id');
+    }
 }
 

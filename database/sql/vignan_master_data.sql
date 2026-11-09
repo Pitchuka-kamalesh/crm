@@ -35,11 +35,11 @@ INSERT INTO master.programs VALUES (5, '1', 'Diploma', 'E', 3, 'Diploma', 'Diplo
 INSERT INTO master.programs VALUES (6, '1', 'PHD', 'G', 3, 'PhD', 'PHD', 'Regular', 'G', 'PHD', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (7, '1', 'BBM', 'H', 3, 'UG', 'BBM', 'Regular', 'H', 'BBM', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (8, '1', 'B.A (Hons.)', 'I', 3, 'UG', 'B.A (Hons.)', 'Regular', 'I', 'B.A (Hons.)', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
-INSERT INTO master.programs VALUES (9, '1', 'Bachelor of Computer Application', 'J', 3, 'UG', 'Bachelor of Computer Application', 'Regular', 'J', 'BCA', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
+INSERT INTO master.programs VALUES (9, '1', 'Bachelor of Computer Application', 'J', 3, 'UG', 'Bachelor of Computer Applications', 'Regular', 'J', 'BCA', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (10, '1', 'Bachelor of Business Administration', 'K', 3, 'UG', 'Bachelor of Business Administration', 'Regular', 'K', 'BBA', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (11, '1', 'Bachelor of Science', 'M', 3, 'UG', 'Bachelor of Science', 'Regular', 'M', 'BSC', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (12, '1', 'Bachelor of Pharmacy', 'N', 4, 'UG', 'Bachelor of Pharmacy', 'Regular', 'N', 'B.Pharmacy', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
-INSERT INTO master.programs VALUES (13, '1', 'MASTER OF PHARMACY', 'P', 2, 'PG', 'MASTER OF PHARMACY', 'Regular', 'P', 'M.PHARM', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
+INSERT INTO master.programs VALUES (13, '1', 'Master of Pharmacy', 'P', 2, 'PG', 'Master of Pharmacy', 'Regular', 'P', 'M.Pharm', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (14, '1', 'phd full time', 'P1', 3, 'PhD', 'phd full time', 'Regular', 'P1', 'phd full time', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (15, '1', 'phd part time', 'P2', 4, 'PhD', 'phd part time', 'Regular', 'P2', 'phd part time', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (16, '1', 'Master of Arts', 'Q', 2, 'PG', 'Master of Arts', 'Regular', 'Q', 'M.A', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
@@ -48,8 +48,8 @@ INSERT INTO master.programs VALUES (18, '1', 'Master of Science', 'S', 2, 'PG', 
 INSERT INTO master.programs VALUES (19, '1', 'ITEP', 'T', 4, 'UG', 'ITEP', 'Regular', 'T', 'ITEP', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (20, '1', 'B.A (LLB)', 'U', 5, 'Integrated', 'B.A (LLB)', 'Regular', 'U', 'B.A (LLB)', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (21, '1', 'B.B.A (LLB)', 'V', 5, 'Integrated', 'B.B.A (LLB)', 'Regular', 'V', 'B.B.A (LLB)', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
-INSERT INTO master.programs VALUES (22, '1', 'BACHELOR OF SCIENCE (HONS.)', 'W', 3, 'UG', 'BACHELOR OF SCIENCE (HONS.)', 'Regular', 'W', 'B.SC.HONS.', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
-INSERT INTO master.programs VALUES (23, '1', 'DOCTOR OF PHARMACY', 'X', 6, 'PG', 'DOCTOR OF PHARMACY', 'Regular', 'X', 'PHARM.D', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
+INSERT INTO master.programs VALUES (22, '1', 'Bachelor of Science (Hons.)', 'W', 3, 'UG', 'Bachelor of Science (Hons.)', 'Regular', 'W', 'B.Sc. (Hons.)', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
+INSERT INTO master.programs VALUES (23, '1', 'Doctor of Pharmacy (Pharm.D)', 'X', 6, 'PG', 'Doctor of Pharmacy (Pharm.D)', 'Regular', 'X', 'Pharm.D', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 INSERT INTO master.programs VALUES (24, '1', 'B.Com', 'Y', 3, 'UG', 'B.Com', 'Regular', 'Y', 'B.Com', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:00.997394');
 
 
@@ -204,25 +204,25 @@ INSERT INTO master.branches VALUES (5, 1, '1', 'A-05', 'ece', 'Electronics and C
 INSERT INTO master.branches VALUES (6, 1, '1', 'A-06', 'eee', 'Electrical and Electronics Engineering', 'A06', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (7, 1, '1', 'A-07', 'it', 'Information technology', 'A07', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (8, 1, '1', 'A-08', 'mech', 'Mechanical Engineering', 'A08', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (9, 1, '1', 'A-10', 'AME', 'AUTOMOBILE ENGINEERING', 'A10', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (10, 1, '1', 'A-11', 'TT', 'TEXTILE TECHNOLOGY', 'A11', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (9, 1, '1', 'A-10', 'AME', 'Automobile Engineering', 'A10', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (10, 1, '1', 'A-11', 'TT', 'Textile Technology', 'A11', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (11, 1, '1', 'A-12', 'AG', 'Agriculture Engineering', 'A12', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (12, 1, '1', 'A-13', 'ECM', 'Electronics and Computer Engineering', 'A13', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (13, 1, '1', 'A-14', 'BI', 'Bioinformatics', 'A14', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (14, 1, '1', 'A-15', 'FT', 'Food Technology', 'A15', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (15, 1, '1', 'A-16', 'BM', 'Bio. Medical Engineering', 'A16', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (15, 1, '1', 'A-16', 'BM', 'Biomedical Engineering', 'A16', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (16, 1, '1', 'A-17', 'PE', 'Petroleum Engineering', 'A17', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (17, 1, '1', 'A-18', 'AIANDML', 'CSE- ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING', 'A18', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (18, 1, '1', 'A-19', 'CSECS', 'CSE- CYBER SECURITY', 'A19', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (19, 1, '1', 'A-20', 'CSBS', 'COMPUTER SCIENCE AND BUSINESS SYSTEMS', 'A20', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (20, 1, '1', 'A-21', 'RA', 'ROBOTICS AND AUTOMATION', 'A21', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (21, 1, '1', 'A-22', 'TT2', 'TEXTILE TECHNOLOGY', 'A22', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (17, 1, '1', 'A-18', 'AIANDML', 'CSE - Artificial Intelligence & Machine Learning', 'A18', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (18, 1, '1', 'A-19', 'CSECS', 'CSE - Cyber Security', 'A19', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (19, 1, '1', 'A-20', 'CSBS', 'Computer Science & Business Systems', 'A20', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (20, 1, '1', 'A-21', 'RA', 'Robotics & Automation', 'A21', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (21, 1, '1', 'A-22', 'TT2', 'Textile Technology', 'A22', 2024, 1, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (22, 1, '1', 'A-23', 'DS', 'Data Science', 'A23', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (23, 1, '1', 'A-24', 'CSEIOT', 'CSE-Internet Of Things', 'A24', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (24, 1, '1', 'A-25', 'ECEVLSI', 'ECE-VLSI', 'A25', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
-INSERT INTO master.branches VALUES (25, 1, '1', 'A-26', 'TechText', 'TECHNICAL TEXITILES', 'A26', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (23, 1, '1', 'A-24', 'CSEIOT', 'CSE - Internet of Things', 'A24', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (24, 1, '1', 'A-25', 'ECEVLSI', 'ECE - VLSI Design', 'A25', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
+INSERT INTO master.branches VALUES (25, 1, '1', 'A-26', 'TechText', 'Technical Textiles', 'A26', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:12.028608');
 INSERT INTO master.branches VALUES (26, 2, '1', 'B-01', 'biotech', 'Biotechnology and Bioprocess Engineering', 'B01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (27, 2, '1', 'B-02', 'chem', 'Chemical Enginneering', 'B02', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (27, 2, '1', 'B-02', 'chem', 'Chemical Engineering', 'B02', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (28, 2, '1', 'B-03', 'csp', 'Communication and Signal Processing', 'B03', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (29, 2, '1', 'B-04', 'cse', 'Computer Science & Engineering', 'B04', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (30, 2, '1', 'B-05', 'decs', 'Digital Electronics and Communication System', 'B05', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
@@ -234,52 +234,52 @@ INSERT INTO master.branches VALUES (35, 2, '1', 'B-10', 'ped', 'Power Electronic
 INSERT INTO master.branches VALUES (36, 2, '1', 'B-11', 'VLSI', 'Very Large Scale Integration (VLSI)', 'B11', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (37, 2, '1', 'B-12', 'FT', 'Food Processing Technology', 'B12', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (38, 2, '1', 'B-13', 'ps', 'Power Systems', 'B13', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (39, 2, '1', 'B-14', 'cad', 'cad/cam/cae', 'B14', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (40, 2, '1', 'B-15', 'civil', 'civil Engineering', 'B15', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (41, 2, '1', 'B-16', 'cnis', 'Computer networks & information security', 'B16', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (39, 2, '1', 'B-14', 'cad', 'CAD / CAM / CAE', 'B14', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (40, 2, '1', 'B-15', 'civil', 'Civil Engineering', 'B15', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (41, 2, '1', 'B-16', 'cnis', 'Computer Networks & Information Security', 'B16', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (42, 2, '1', 'B-17', 'te', 'Thermal Engineering', 'B17', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (43, 2, '1', 'B-18', 'ML', 'machine learning', 'B18', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (43, 2, '1', 'B-18', 'ML', 'Machine Learning', 'B18', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (44, 2, '1', 'B-19', 'dcn', 'Data Communication & Networking', 'B19', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (45, 2, '1', 'B-20', 'pe', 'Petroleum Engineering', 'B20', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (46, 2, '1', 'B-21', 'FM', 'Farm Machinery', 'B21', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (47, 2, '1', 'B-22', 'ipm', 'Image Processing & Machine Vision', 'B22', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (48, 2, '1', 'B-23', 'ds', 'Data Science', 'B23', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (49, 2, '1', 'B-24', 'IOT', 'IOT', 'B24', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (50, 2, '1', 'B-25', 'EVT', 'Electrical Vehicle Technology', 'B25', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (50, 2, '1', 'B-25', 'EVT', 'Electric Vehicle Technology', 'B25', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (51, 2, '1', 'B-26', 'AIANDDS', 'Artificial Intelligence and Data Science', 'B26', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
-INSERT INTO master.branches VALUES (52, 2, '1', 'B-27', 'SM', 'Smart Manufacuring', 'B27', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
+INSERT INTO master.branches VALUES (52, 2, '1', 'B-27', 'SM', 'Smart Manufacturing', 'B27', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (53, 2, '1', 'B-28', 'AEV', 'Autonomous Electric Vehicles', 'B28', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (54, 2, '1', 'B-29', 'SSC', 'Sustainable Smart Construction', 'B29', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:27.492926');
 INSERT INTO master.branches VALUES (55, 3, '1', 'C-04', 'FINANCE', 'Finance', 'C04', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
 INSERT INTO master.branches VALUES (56, 3, '1', 'C-03', 'MR', 'Marketing', 'C03', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (57, 3, '1', 'C-02', 'HR', 'Human Resourse', 'C02', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (57, 3, '1', 'C-02', 'HR', 'Human Resources', 'C02', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
 INSERT INTO master.branches VALUES (58, 3, '1', 'C-01', 'mba', 'Master of Business Administration', 'C01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
 INSERT INTO master.branches VALUES (59, 4, '1', 'D-01', 'mca', 'Master of Computer Applications', 'D01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (60, 5, '1', 'E-08', 'DMECH', 'Mechanical', 'E08', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (61, 5, '1', 'E-07', 'DAIML', 'Artificial Intelligence and Machine Learning', 'E07', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (62, 5, '1', 'E-06', 'DEEE', 'EEE', 'E06', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (63, 5, '1', 'E-05', 'DECE', 'ELECTRONICS & COMMUNICATION ENGINEERING', 'E05', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (64, 5, '1', 'E-04', 'DCSE', 'COMPUTER SCIENCE & ENGINEERING', 'E04', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (65, 7, '1', 'H-01', 'BBM', 'BACHELOR OF BUSINESS MANAGEMENT', 'H01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (60, 5, '1', 'E-08', 'DMECH', 'Mechanical Engineering', 'E08', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (61, 5, '1', 'E-07', 'DAIML', 'Artificial Intelligence & Machine Learning', 'E07', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (62, 5, '1', 'E-06', 'DEEE', 'Electrical & Electronics Engineering', 'E06', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (63, 5, '1', 'E-05', 'DECE', 'Electronics & Communication Engineering', 'E05', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (64, 5, '1', 'E-04', 'DCSE', 'Computer Science & Engineering', 'E04', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (65, 7, '1', 'H-01', 'BBM', 'Bachelor of Business Management', 'H01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
 INSERT INTO master.branches VALUES (66, 8, '1', 'I-01', 'B.A Hons', 'B.A (Hons.) Political Science', 'I01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (67, 9, '1', 'J-01', 'BCA', 'BCA', 'J01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (68, 10, '1', 'K-01', 'BBA', 'BACHELOR OF BUSINESS ADMINISTRATION', 'K01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (69, 12, '1', 'N-01', 'B.Pharm', 'BPharmacy', 'N01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (70, 13, '1', 'P-01', 'M.PHARM', 'MASTER OF PHARMACY', 'P01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
-INSERT INTO master.branches VALUES (71, 6, '1', 'G-01', 'biotech', 'biotech', 'G01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (72, 6, '1', 'G-02', 'chem', 'Chemical', 'G02', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (73, 6, '1', 'G-03', 'civil', 'civil', 'G03', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (74, 6, '1', 'G-04', 'cse', 'computer science engineering', 'G04', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (75, 6, '1', 'G-05', 'ece', 'Electronics and communications engineering', 'G05', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (76, 6, '1', 'G-06', 'eee', 'electrical and electronics engineering', 'G06', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (77, 6, '1', 'G-07', 'it', 'information technology', 'G07', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (78, 6, '1', 'G-08', 'me', 'mechanical engineering', 'G08', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (79, 6, '1', 'G-12', 'Mgnt', 'Management', 'G12', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (80, 6, '1', 'G-30', 'Physics', 'physics', 'G30', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (81, 6, '1', 'G-31', 'Chemistry', 'chemistry', 'G31', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (67, 9, '1', 'J-01', 'BCA', 'Bachelor of Computer Applications', 'J01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (68, 10, '1', 'K-01', 'BBA', 'Bachelor of Business Administration', 'K01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (69, 12, '1', 'N-01', 'B.Pharm', 'Bachelor of Pharmacy', 'N01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (70, 13, '1', 'P-01', 'M.Pharm', 'Master of Pharmacy', 'P01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:38.314739');
+INSERT INTO master.branches VALUES (71, 6, '1', 'G-01', 'Biotech', 'Biotechnology', 'G01', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (72, 6, '1', 'G-02', 'Chemical', 'Chemical Engineering', 'G02', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (73, 6, '1', 'G-03', 'Civil', 'Civil Engineering', 'G03', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (74, 6, '1', 'G-04', 'CSE', 'Computer Science & Engineering', 'G04', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (75, 6, '1', 'G-05', 'ECE', 'Electronics & Communication Engineering', 'G05', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (76, 6, '1', 'G-06', 'EEE', 'Electrical & Electronics Engineering', 'G06', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (77, 6, '1', 'G-07', 'IT', 'Information Technology', 'G07', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (78, 6, '1', 'G-08', 'Mechanical', 'Mechanical Engineering', 'G08', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (79, 6, '1', 'G-12', 'Management', 'Management Studies', 'G12', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (80, 6, '1', 'G-30', 'Physics', 'Physics', 'G30', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (81, 6, '1', 'G-31', 'Chemistry', 'Chemistry', 'G31', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
 INSERT INTO master.branches VALUES (82, 6, '1', 'G-32', 'Maths', 'Mathematics', 'G32', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
 INSERT INTO master.branches VALUES (83, 6, '1', 'G-33', 'English', 'English', 'G33', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
-INSERT INTO master.branches VALUES (84, 6, '1', 'G-35', 'MCA', 'Computer Application', 'G35', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
+INSERT INTO master.branches VALUES (84, 6, '1', 'G-35', 'MCA', 'Computer Applications', 'G35', 2024, 0, '02598', '192.168.111.111', '2026-11-01 06:48:46.824392');
 
 
 --
@@ -322,14 +322,13 @@ INSERT INTO master.menus VALUES (104, 'CRMM0002', 1, 'Student data', 'crm/stddat
 INSERT INTO master.menus VALUES (105, 'CRMM0003', 1, 'Student search', 'crm/stdsearch', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (107, 'LEADS0002', 2, 'Allotted Leads', 'leads/allottedleads', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
 INSERT INTO master.menus VALUES (106, 'FINA0002', 3, 'Paid details', 'finance/paiddetails', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
-INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'pay fee', 'finance/payfee', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
-INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'STEP2', 'crm/stpstep2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'STEP3', 'crm/stpstep3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'STEP4', 'crm/stpstep4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'STEP5', 'crm/stpstep5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (114, 'CRMM0008', 1, 'STEP6', 'crm/stpstep6', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (115, 'CRMM0009', 1, 'STEP7', 'crm/stpstep7', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'Fee Payment', 'step1', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
+INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'Personal Profile', 'step2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Info', 'step3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Application Download', 'step4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'VSAT Result', 'step5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (116, 'LEADS0003', 2, 'Leads Allocation', 'leads/leadsallocation', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
+INSERT INTO master.menus VALUES (117, 'KPII0003', 4, 'SMS Tracker', 'sms/index', 'fa fa-envelope-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 
 
 --
@@ -347,33 +346,45 @@ INSERT INTO master.roles VALUES (4, '1', 1, 'Tele Caller', 1, '02598', '192.168.
 -- Data for Name: menu_access_roles; Type: TABLE DATA; Schema: master; Owner: postgres
 --
 
+INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 1, '1', 1, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 1, '1', 2, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 1, '1', 3, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 1, '1', 4, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0002', 107, 1, '1', 5, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 1, '1', 6, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 1, '1', 7, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 1, '1', 8, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 1, '1', 9, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 1, '1', 10, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('KPII0003', 117, 1, '1', 11, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
 INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 2, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.131559');
 INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 2, '1', 2, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.137995');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 2, '1', 3, 3, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 2, '1', 3, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
 INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 2, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.140713');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 2, '1', 5, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
 INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 2, '1', 6, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.143081');
 INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 2, '1', 7, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.144316');
 INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 2, '1', 8, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.145942');
 INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 2, '1', 9, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
+INSERT INTO master.menu_access_roles VALUES ('KPII0003', 117, 2, '1', 10, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
 INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 3, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.131559');
 INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 3, '1', 2, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.137995');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 3, '1', 3, 3, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 3, '1', 3, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
 INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 3, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.140713');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 3, '1', 5, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
 INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 3, '1', 6, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.143081');
 INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 3, '1', 7, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.144316');
 INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 3, '1', 8, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.145942');
 INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 3, '1', 9, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
-INSERT INTO master.menu_access_roles VALUES ('FINA0003', 109, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0004', 110, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.293256');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0005', 111, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.294182');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0006', 112, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.295253');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0007', 113, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.296468');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0008', 114, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.297772');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0009', 115, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
+INSERT INTO master.menu_access_roles VALUES ('KPII0003', 117, 3, '1', 10, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
 INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 4, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0002', 107, 4, '1', 1, 2, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 2, '1', 5, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 3, '1', 5, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0002', 107, 4, '1', 2, 2, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
+INSERT INTO master.menu_access_roles VALUES ('KPII0003', 117, 4, '1', 3, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('FINA0003', 109, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0004', 110, 5, '1', 2, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.293256');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0005', 111, 5, '1', 3, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.294182');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0006', 112, 5, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.295253');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0007', 113, 5, '1', 5, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.296468');
 
 
 --
@@ -419,6 +430,96 @@ SELECT pg_catalog.setval('master.programs_program_id_seq', 24, true);
 
 SELECT pg_catalog.setval('master.roles_role_id_seq', 1, false);
 
+
+ALTER TABLE crm.student_registration DROP CONSTRAINT IF EXISTS pk_student_registration;
+ALTER TABLE crm.student_registration ADD CONSTRAINT pk_student_registration_composite PRIMARY KEY (applinano, phoneno);
+
+CREATE TABLE IF NOT EXISTS crm.student_personal_info (
+    crmid VARCHAR(50) PRIMARY KEY,
+    applino VARCHAR(20) NOT NULL,
+    phoneno VARCHAR(20) NOT NULL,
+    dob DATE,
+    gender VARCHAR(20),
+    parent_name VARCHAR(255),
+    parentphono VARCHAR(20),
+    caste_category VARCHAR(50),
+    referedby VARCHAR(255),
+    referedempcode VARCHAR(50),
+    country VARCHAR(100),
+    state VARCHAR(100),
+    district VARCHAR(100),
+    city_mandal VARCHAR(100),
+    village VARCHAR(100),
+    pincode VARCHAR(10),
+    log_userid VARCHAR(50), 
+    log_ipaddress VARCHAR(255),
+    log_timestamp TIMESTAMP DEFAULT now(),
+    CONSTRAINT fk_student_info_registration 
+        FOREIGN KEY (applino, phoneno) 
+        REFERENCES crm.student_registration (applinano, phoneno) 
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS crm.student_academic_details (
+    crmid VARCHAR(50), 
+    applino VARCHAR(20) NOT NULL,
+    phoneno VARCHAR(20) NOT NULL,
+    progmid VARCHAR(50),
+    branchid INT4,
+
+    tenth_school_name VARCHAR(255),
+    tenth_study_board VARCHAR(100),
+    tenth_school_city VARCHAR(100),
+    tenth_school_district VARCHAR(100),
+    tenth_roll_no VARCHAR(50),
+    tenth_passed_year INT4,
+    tenth_marks_type VARCHAR(50),
+    tenth_marks NUMERIC(5,2),
+    tenth_cgpa NUMERIC(4,2),
+
+    pu2_college_name VARCHAR(255),
+    pu2_study_board VARCHAR(100),
+    pu2_college_city VARCHAR(100),
+    pu2_college_district VARCHAR(100),
+    pu2_roll_no VARCHAR(50),
+    pu2_passed_year INT4,
+    pu2_marks_type VARCHAR(50),
+    pu2_marks NUMERIC(5,2),
+    pu2_cgpa NUMERIC(4,2),
+    pu2_current_status VARCHAR(100),
+
+    ug_college_name VARCHAR(255),
+    ug_university_board VARCHAR(100),
+    ug_college_city VARCHAR(100),
+    ug_college_district VARCHAR(100),
+    ug_roll_no VARCHAR(50),
+    ug_passed_year INT4,
+    ug_marks_type VARCHAR(50),
+    ug_marks NUMERIC(5,2),
+    ug_cgpa NUMERIC(4,2),
+    ug_current_status VARCHAR(100),
+
+    pg_college_name VARCHAR(255),
+    pg_university_board VARCHAR(100),
+    pg_college_city VARCHAR(100),
+    pg_college_district VARCHAR(100),
+    pg_roll_no VARCHAR(50),
+    pg_passed_year INT4,
+    pg_marks_type VARCHAR(50),
+    pg_marks NUMERIC(5,2),
+    pg_cgpa NUMERIC(4,2),
+    pg_current_status VARCHAR(100),
+
+    log_userid VARCHAR(50),
+    log_datetime TIMESTAMP DEFAULT now(),
+    log_ipaddress VARCHAR(255),
+
+    CONSTRAINT pk_student_academic PRIMARY KEY (applino, phoneno),
+    CONSTRAINT fk_academic_registration 
+        FOREIGN KEY (applino, phoneno) 
+        REFERENCES crm.student_registration (applinano, phoneno) 
+        ON DELETE CASCADE
+);
 
 --
 -- PostgreSQL database dump complete

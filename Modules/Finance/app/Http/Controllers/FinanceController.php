@@ -33,8 +33,16 @@ class FinanceController extends Controller
         }
 
         // Paid details & financial records from students
-        $totalRegistered = StudentRegistration::count();
-        $totalCrmStudents = CrmStudentRegistration::count();
+        $totalCrmStudents = 0;
+        try {
+            $totalCrmStudents = CrmStudentRegistration::count();
+        } catch (\Throwable $e) {}
+
+        $totalRegistered = 0;
+        try {
+            $totalRegistered = StudentRegistration::count();
+        } catch (\Throwable $e) {}
+
         $totalApplications = max($totalRegistered, $totalCrmStudents);
 
         // Calculate sample financial figures based on registered candidates
@@ -44,9 +52,15 @@ class FinanceController extends Controller
         $totalAdmFeesCollected = $totalApplications * $admissionFeePerHead;
         $totalRevenue = $totalAppFeesCollected + $totalAdmFeesCollected;
 
-        $paidStudents = StudentRegistration::take(25)->get();
+        $paidStudents = collect();
+        try {
+            $paidStudents = CrmStudentRegistration::with(['program', 'branch'])->take(25)->get();
+        } catch (\Throwable $e) {}
+
         if ($paidStudents->isEmpty()) {
-            $paidStudents = CrmStudentRegistration::take(25)->get();
+            try {
+                $paidStudents = StudentRegistration::take(25)->get();
+            } catch (\Throwable $e) {}
         }
 
         // Available roles for preview switcher

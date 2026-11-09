@@ -353,19 +353,37 @@
         }
 
         .tele-status-select {
-            padding: 0.32rem 0.65rem;
+            padding: 0.38rem 1.85rem 0.38rem 0.75rem;
             border: 1.5px solid var(--card-border);
-            border-radius: 0.45rem;
+            border-radius: 0.5rem;
             font-size: 0.78rem;
             font-weight: 600;
             background: #ffffff;
             color: var(--text-heading);
             cursor: pointer;
             outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.65rem center;
+            background-size: 13px 13px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: all 0.15s ease;
+        }
+        .tele-status-select:hover {
+            border-color: #cbd5e1;
+            background-color: #f8fafc;
         }
         .tele-status-select:focus {
             border-color: var(--theme-accent, #2563eb);
             box-shadow: 0 0 0 3px var(--theme-accent-ring, rgba(37, 99, 235, 0.15));
+            background-color: #ffffff;
+        }
+        .tele-status-select option {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 6px 10px;
         }
 
         /* ================= POPUP WIZARD MODAL ================= */
@@ -816,8 +834,14 @@
         }
 
         [data-theme-mode="dark"] .tele-status-select {
-            background: #0f172a;
+            background-color: #0f172a;
             border-color: #334155;
+            color: #f8fafc;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        [data-theme-mode="dark"] .tele-status-select option {
+            background: #0f172a;
             color: #f8fafc;
         }
 

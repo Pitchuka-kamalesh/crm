@@ -1,4 +1,4 @@
-<!-- Immediate Theme Preloader (Prevents Theme Flash) -->
+    <!-- Immediate Theme Preloader (Prevents Theme Flash) -->
 <script>
     (function(){
         document.documentElement.setAttribute('data-theme-color', localStorage.getItem('crm_theme_color') || 'red');
@@ -48,13 +48,10 @@
 
     <!-- 3. Navigation Menu List -->
     <div class="sidebar-menu-container">
-        <!-- PROMINENT GREEN ACTIVE PILL: DASHBOARD (MATCHING SCREENSHOT) -->
         @php
-            $dashboardRoute = match($roleId) {
-                4 => route('leads.allotted'),
-                default => route('crm.alias', ['tab' => 'overview']),
-            };
             $currentTab = $activeTab ?? request()->query('tab', '');
+            $currentPath = trim(request()->path(), '/');
+
             $isDashboardActive = ($currentTab === 'overview' || empty($currentTab)) 
                 && !request()->routeIs('leads.*') 
                 && !request()->routeIs('finance.*') 
@@ -64,11 +61,115 @@
             if ($roleId == 4) {
                 $isDashboardActive = request()->routeIs('leads.allotted') && empty($currentTab);
             }
+
+            $roleMenus = $roleMenus ?? \App\Models\MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
+
+            // Strictly group menus into Main (mposition = 1) and Sub (mposition = 2)
+            $menuGroups = [];
+            $currentMainId = null;
+
+            foreach ($roleMenus as $access) {
+                $menu = $access->menu;
+                if (!$menu) continue;
+
+                if ((int)$access->mposition === 1) {
+                    $currentMainId = $menu->menu_id;
+                    $menuGroups[$currentMainId] = [
+                        'main' => $menu,
+                        'access' => $access,
+                        'submenus' => [],
+                    ];
+                } elseif ((int)$access->mposition === 2) {
+                    $parentId = $menu->parent_menu_id ?: $currentMainId;
+                    if ($parentId && isset($menuGroups[$parentId])) {
+                        $menuGroups[$parentId]['submenus'][] = [
+                            'menu' => $menu,
+                            'access' => $access,
+                        ];
+                    } else {
+                        $keys = array_keys($menuGroups);
+                        if (!empty($keys)) {
+                            $lastKey = end($keys);
+                            $menuGroups[$lastKey]['submenus'][] = [
+                                'menu' => $menu,
+                                'access' => $access,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $resolveMenuUrl = function($controllerRef) {
+                if (preg_match('/step\D*(\d+)/i', $controllerRef, $matches)) {
+                    return route('dashboards.index', ['step' => (int)$matches[1]]);
+                }
+                if (str_starts_with($controllerRef, 'dashboards?step=')) {
+                    $step = (int)str_replace('dashboards?step=', '', $controllerRef);
+                    return route('dashboards.index', ['step' => $step]);
+                }
+                return match($controllerRef) {
+                    'crm/stddata' => route('crm.stddata', ['tab' => 'stddata']),
+                    'crm/stdsearch' => route('crm.stdsearch', ['tab' => 'stdsearch']),
+                    'crm/index' => route('crm.alias', ['tab' => 'overview']),
+                    'leads/allottedleads' => route('leads.allotted'),
+                    'leads/leadsallocation' => route('leads.allocation', ['tab' => 'allocation']),
+                    'leads/index' => route('leads.index'),
+                    'finance/paiddetails' => route('finance.paiddetails', ['tab' => 'paiddetails']),
+                    'finance/payfee' => route('dashboards.index', ['step' => 1]),
+                    'finance/index' => route('finance.index'),
+                    'kpi/studentkpi' => route('kpi.studentkpi', ['tab' => 'studentkpi']),
+                    'kpi/index' => route('kpi.index', ['tab' => 'kpi']),
+                    'sms/index' => route('sms.index'),
+                    default => url('/' . ltrim($controllerRef, '/')),
+                };
+            };
+
+            $isSubActiveCheck = function($controllerRef) use ($currentPath, $currentTab) {
+                if (preg_match('/step\D*(\d+)/i', $controllerRef, $matches)) {
+                    $stepNum = (int)$matches[1];
+                    return (request()->routeIs('dashboards.*') && request()->query('step', 1) == $stepNum) || $currentPath === 'step' . $stepNum;
+                }
+                return match($controllerRef) {
+                    'crm/stddata' => $currentTab === 'stddata' || request()->routeIs('crm.stddata') || $currentPath === 'crm/stddata',
+                    'crm/stdsearch' => $currentTab === 'stdsearch' || request()->routeIs('crm.stdsearch') || $currentPath === 'crm/stdsearch',
+                    'leads/allottedleads' => request()->routeIs('leads.allotted') || str_contains($currentPath, 'allotted'),
+                    'leads/leadsallocation' => request()->routeIs('leads.allocation') || str_contains($currentPath, 'allocation'),
+                    'finance/paiddetails' => request()->routeIs('finance.paiddetails') || str_contains($currentPath, 'paiddetails'),
+                    'finance/payfee' => str_contains($currentPath, 'payfee'),
+                    'kpi/studentkpi' => request()->routeIs('kpi.studentkpi') || $currentTab === 'studentkpi' || str_contains($currentPath, 'studentkpi'),
+                    default => $currentPath === trim($controllerRef, '/'),
+                };
+            };
+
+            $getMenuSvgIcon = function($iconName, $menuCode) {
+                if (str_starts_with($menuCode, 'DASH')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+                }
+                if (str_starts_with($menuCode, 'CRM')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+                }
+                if (str_starts_with($menuCode, 'LEADS')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="6"/><circle cx="12" cy="2"/></svg>';
+                }
+                if (str_starts_with($menuCode, 'FINA')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="21" x2="21" y2="21"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>';
+                }
+                if (str_contains((string)$iconName, 'envelope') || str_starts_with($menuCode, 'SMS')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+                }
+                if (str_starts_with($menuCode, 'KPI')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>';
+                }
+                return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/></svg>';
+            };
         @endphp
 
-        @if($roleId == 4)
-            {{-- For Role 4 (Tele Caller), Dashboard is removed per user request --}}
-        @else
+        <!-- DYNAMIC ROLE-BASED MENUS (Strictly from database master.menus & master.menu_access_roles) -->
+        @if($roleId != 4)
+            <!-- PROMINENT ACTIVE PILL: DASHBOARD -->
+            @php
+                $dashboardRoute = route('crm.alias', ['tab' => 'overview']);
+            @endphp
             <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
                 <svg viewBox="0 0 24 24">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -78,265 +179,66 @@
             </a>
         @endif
 
-        @if($roleId == 3 || $roleId == 2)
-            <!-- ================= ROLE 3 (CRM DEAN) & ROLE 2 (CRM INCHARGE) ================= -->
-            
-            <!-- SECTION 1: CRM / MANAGE (Collapsible Dropdown with Chevron) -->
-            @php $isCrmOpen = in_array($activeTab ?? '', ['stddata', 'stdsearch', 'couponinfo', 'employeelist']) || request()->routeIs('crm.std*', 'crm.couponinfo', 'crm.employeelist', 'crm.enquirylist', 'crm.registerlist'); @endphp
-            <div class="accordion-group {{ $isCrmOpen ? 'open' : '' }}" id="group-crm">
-                <button type="button" class="accordion-header {{ $isCrmOpen ? 'active' : '' }}" onclick="toggleAccordion('group-crm')">
-                    <div class="header-left">
-                        <!-- Manage / 4-Squares Grid SVG (Matching Screenshot) -->
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="14" width="7" height="7" rx="1"/>
-                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+        @foreach($menuGroups as $mainId => $group)
+            @php
+                $main = $group['main'];
+                $hasSubmenus = !empty($group['submenus']);
+                $isGroupOpen = false;
+                if ($hasSubmenus) {
+                    foreach ($group['submenus'] as $subItem) {
+                        if ($isSubActiveCheck($subItem['menu']->controller_ref)) {
+                            $isGroupOpen = true;
+                            break;
+                        }
+                    }
+                } else {
+                    $isGroupOpen = ($currentPath === trim($main->controller_ref, '/'));
+                }
+                $mainUrl = $resolveMenuUrl($main->controller_ref);
+            @endphp
+
+            @if($hasSubmenus)
+                <!-- ACCORDION MAIN MENU (mposition = 1 with submenus mposition = 2) -->
+                <div class="accordion-group {{ $isGroupOpen ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
+                    <button type="button" class="accordion-header {{ $isGroupOpen ? 'active' : '' }}" onclick="toggleAccordion('group-{{ strtolower($main->menu_code) }}')">
+                        <div class="header-left">
+                            {!! $getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
+                            <span>{{ $main->menu_name }}</span>
+                        </div>
+                        <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
                         </svg>
-                        <span>CRM</span>
+                    </button>
+                    <div class="accordion-body">
+                        @foreach($group['submenus'] as $subItem)
+                            @php
+                                $sub = $subItem['menu'];
+                                $subUrl = $resolveMenuUrl($sub->controller_ref);
+                                $isSubActive = $isSubActiveCheck($sub->controller_ref);
+                            @endphp
+                            <a href="{{ $subUrl }}" class="submenu-link {{ $isSubActive ? 'active' : '' }}">
+                                {{ $sub->menu_name }}
+                            </a>
+                        @endforeach
                     </div>
-                    <!-- Chevron Down SVG (Matching Screenshot) -->
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <a href="{{ route('crm.stddata', ['tab' => 'stddata']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stddata' ? 'active' : '' }}">
-                        Enquiry list
-                    </a>
-                    <a href="{{ route('crm.stdsearch', ['tab' => 'stdsearch']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stdsearch' ? 'active' : '' }}">
-                        Register list
-                    </a>
-                    <a href="{{ route('crm.couponinfo', ['tab' => 'couponinfo']) }}" class="submenu-link {{ ($activeTab ?? '') === 'couponinfo' ? 'active' : '' }}">
-                        Coupon info
-                    </a>
-                    <a href="{{ route('crm.employeelist', ['tab' => 'employeelist']) }}" class="submenu-link {{ ($activeTab ?? '') === 'employeelist' ? 'active' : '' }}">
-                        Employee list
+                </div>
+            @else
+                <!-- DIRECT MAIN MENU LINK (mposition = 1 without submenus) -->
+                @php
+                    $isMainActive = ($currentPath === trim($main->controller_ref, '/'));
+                @endphp
+                <div class="accordion-group {{ $isMainActive ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
+                    <a href="{{ $mainUrl }}" class="accordion-header {{ $isMainActive ? 'active' : '' }}" style="text-decoration: none;">
+                        <div class="header-left">
+                            {!! $getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
+                            <span>{{ $main->menu_name }}</span>
+                        </div>
                     </a>
                 </div>
-            </div>
+            @endif
 
             <div class="sidebar-divider"></div>
-
-            <!-- SECTION 2: LEADS (Collapsible Dropdown with Chevron) -->
-            @php $isLeadsOpen = request()->routeIs('leads.*') || in_array($activeTab ?? '', ['allocation', 'allotted', 'callbacks']); @endphp
-            <div class="accordion-group {{ $isLeadsOpen ? 'open' : '' }}" id="group-leads">
-                <button type="button" class="accordion-header {{ $isLeadsOpen ? 'active' : '' }}" onclick="toggleAccordion('group-leads')">
-                    <div class="header-left">
-                        <!-- Target / Leads SVG -->
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10"/>
-                            <circle cx="12" cy="12" r="6"/>
-                            <circle cx="12" cy="12" r="2"/>
-                        </svg>
-                        <span>Leads</span>
-                    </div>
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" class="submenu-link {{ ($activeTab ?? '') === 'allocation' ? 'active' : '' }}">
-                        Leads Allocation
-                    </a>
-                    <a href="{{ route('leads.index') }}" class="submenu-link {{ request()->routeIs('leads.index') && ($activeTab ?? '') !== 'allocation' ? 'active' : '' }}">
-                        Leads Directory
-                    </a>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- SECTION 3: FINANCE (Collapsible Dropdown with Chevron) -->
-            @php $isFinOpen = request()->routeIs('finance.*') || in_array($activeTab ?? '', ['paiddetails']); @endphp
-            <div class="accordion-group {{ $isFinOpen ? 'open' : '' }}" id="group-finance">
-                <button type="button" class="accordion-header {{ $isFinOpen ? 'active' : '' }}" onclick="toggleAccordion('group-finance')">
-                    <div class="header-left">
-                        <!-- Building / Civil Services Bank SVG (Matching Screenshot) -->
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <line x1="3" y1="21" x2="21" y2="21"/>
-                            <line x1="6" y1="18" x2="6" y2="11"/>
-                            <line x1="10" y1="18" x2="10" y2="11"/>
-                            <line x1="14" y1="18" x2="14" y2="11"/>
-                            <line x1="18" y1="18" x2="18" y2="11"/>
-                            <polygon points="12 2 20 7 4 7"/>
-                        </svg>
-                        <span>Finance</span>
-                    </div>
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="submenu-link {{ ($activeTab ?? '') === 'paiddetails' ? 'active' : '' }}">
-                        Paid details
-                    </a>
-                    <a href="{{ route('finance.index') }}" class="submenu-link {{ request()->routeIs('finance.index') && ($activeTab ?? '') !== 'paiddetails' ? 'active' : '' }}">
-                        Fee Overview
-                    </a>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- SECTION 4: KPI (Collapsible Dropdown with Chevron) -->
-            @php $isKpiOpen = in_array($activeTab ?? '', ['kpi', 'studentkpi']) || request()->routeIs('kpi.*'); @endphp
-            <div class="accordion-group {{ $isKpiOpen ? 'open' : '' }}" id="group-kpi">
-                <button type="button" class="accordion-header {{ $isKpiOpen ? 'active' : '' }}" onclick="toggleAccordion('group-kpi')">
-                    <div class="header-left">
-                        <!-- Graduation / Academics SVG (Matching Screenshot) -->
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                        </svg>
-                        <span>KPI</span>
-                    </div>
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <a href="{{ route('kpi.studentkpi', ['tab' => 'studentkpi']) }}" class="submenu-link {{ ($activeTab ?? '') === 'studentkpi' ? 'active' : '' }}">
-                        student KPI
-                    </a>
-                    <a href="{{ route('kpi.index', ['tab' => 'kpi']) }}" class="submenu-link {{ ($activeTab ?? '') === 'kpi' ? 'active' : '' }}">
-                        KPI Overview
-                    </a>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- SECTION 5: COMMUNICATIONS -->
-            <div class="accordion-group" id="group-comm">
-                <a href="{{ route('sms.index') }}" class="accordion-header {{ request()->routeIs('sms.*') ? 'active' : '' }}" style="text-decoration: none;">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span>Communications</span>
-                    </div>
-                </a>
-            </div>
-
-        @elseif($roleId == 4)
-            <!-- ================= ROLE 4 (TELE CALLER) STRICTLY FROM master.menu_access_roles ================= -->
-            <!-- 1. Leads (LEADS0001, controller_ref: leads/index) -->
-            <div class="accordion-group open" id="group-telecaller-leads">
-                <button type="button" class="accordion-header active" onclick="toggleAccordion('group-telecaller-leads')">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10"/>
-                            <circle cx="12" cy="6"/>
-                            <circle cx="12" cy="2"/>
-                        </svg>
-                        <span>Leads</span>
-                    </div>
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <!-- SUBMENU: Allotted Leads (LEADS0002, controller_ref: leads/allottedleads) -->
-                    <a href="{{ route('leads.allotted') }}" class="submenu-link {{ request()->routeIs('leads.*') || ($activeTab ?? '') === 'allotted' ? 'active' : '' }}">
-                        Allotted Leads
-                    </a>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- 2. SMS Tracker (SMS0001, controller_ref: sms/index) -->
-            <div class="accordion-group {{ request()->routeIs('sms.*') ? 'open' : '' }}" id="group-telecaller-sms">
-                <a href="{{ route('sms.index') }}" class="accordion-header {{ request()->routeIs('sms.*') ? 'active' : '' }}" style="text-decoration: none;">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span>SMS Tracker</span>
-                    </div>
-                </a>
-            </div>
-
-        @else
-            <!-- ================= ROLE 1 (EMPLOYEE / ADMIN) ================= -->
-            <!-- SECTION 1: STUDENT REGISTRY -->
-            @php $isEmpCrmOpen = in_array($activeTab ?? '', ['stddata', 'stdsearch', 'couponinfo', 'employeelist']) || request()->routeIs('crm.std*', 'crm.couponinfo', 'crm.employeelist', 'crm.enquirylist', 'crm.registerlist'); @endphp
-            <div class="accordion-group {{ $isEmpCrmOpen ? 'open' : '' }}" id="group-emp-crm">
-                <button type="button" class="accordion-header {{ $isEmpCrmOpen ? 'active' : '' }}" onclick="toggleAccordion('group-emp-crm')">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="14" width="7" height="7" rx="1"/>
-                            <rect x="3" y="14" width="7" height="7" rx="1"/>
-                        </svg>
-                        <span>Manage</span>
-                    </div>
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <a href="{{ route('crm.stddata', ['tab' => 'stddata']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stddata' ? 'active' : '' }}">
-                        Enquiry list
-                    </a>
-                    <a href="{{ route('crm.stdsearch', ['tab' => 'stdsearch']) }}" class="submenu-link {{ ($activeTab ?? '') === 'stdsearch' ? 'active' : '' }}">
-                        Register list
-                    </a>
-                    <a href="{{ route('crm.couponinfo', ['tab' => 'couponinfo']) }}" class="submenu-link {{ ($activeTab ?? '') === 'couponinfo' ? 'active' : '' }}">
-                        Coupon info
-                    </a>
-                    <a href="{{ route('crm.employeelist', ['tab' => 'employeelist']) }}" class="submenu-link {{ ($activeTab ?? '') === 'employeelist' ? 'active' : '' }}">
-                        Employee list
-                    </a>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- SECTION 2: ACADEMICS (Degree Programs & Branches) -->
-            @php $isEmpAcadOpen = in_array($activeTab ?? '', ['programs', 'branches', 'campuses']); @endphp
-            <div class="accordion-group {{ $isEmpAcadOpen ? 'open' : '' }}" id="group-emp-academics">
-                <button type="button" class="accordion-header {{ $isEmpAcadOpen ? 'active' : '' }}" onclick="toggleAccordion('group-emp-academics')">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                        </svg>
-                        <span>Academics</span>
-                    </div>
-                    <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-                <div class="accordion-body">
-                    <a href="{{ route('crm.alias', ['tab' => 'programs']) }}" class="submenu-link {{ ($activeTab ?? '') === 'programs' ? 'active' : '' }}">
-                        Degree Programs
-                    </a>
-                    <a href="{{ route('crm.alias', ['tab' => 'branches']) }}" class="submenu-link {{ ($activeTab ?? '') === 'branches' ? 'active' : '' }}">
-                        Academic Branches
-                    </a>
-                    <a href="{{ route('crm.alias', ['tab' => 'campuses']) }}" class="submenu-link {{ ($activeTab ?? '') === 'campuses' ? 'active' : '' }}">
-                        Campuses
-                    </a>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- SECTION 3: COMMUNICATIONS -->
-            <div class="accordion-group" id="group-emp-comm">
-                <a href="{{ route('sms.index') }}" class="accordion-header {{ request()->routeIs('sms.*') ? 'active' : '' }}" style="text-decoration: none;">
-                    <div class="header-left">
-                        <svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span>Communications</span>
-                    </div>
-                </a>
-            </div>
-        @endif
+        @endforeach
     </div>
 
     <!-- 4. Sidebar Footer (Appearance & Theme Controls - Matching Reference Image) -->

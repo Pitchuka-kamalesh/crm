@@ -294,10 +294,10 @@
                                         <td>
                                             <div style="font-weight: 600; color: #0f172a;">{{ $std->program?->program_short_name ?? 'B.Tech' }}</div>
                                             @php
-                                                $branchLabel = $std->branch?->branch_short_name ?? $std->branch?->branch_long_name;
+                                                $branchLabel = $std->branch?->branch_long_name ?? $std->branch?->branch_short_name;
                                             @endphp
                                             @if(!empty($branchLabel))
-                                                <div style="font-size: 0.72rem; color: #64748b;">{{ $branchLabel }}</div>
+                                                <div style="font-size: 0.72rem; color: #64748b; font-weight: 500;">{{ $branchLabel }}</div>
                                             @endif
                                         </td>
                                         <td>
@@ -473,7 +473,62 @@
 
             @elseif(($activeTab ?? '') === 'couponinfo')
                 <!-- TAB: COUPON INFO (PAYMENT & COUPON TRACKING) -->
+
+                <!-- 1. EARLY BIRD COUPON TIERS STATUS STRIP (finance.couponinfo) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    @php
+                        $tiers = [
+                            ['code' => '27EARLYB100', 'name' => 'Tier 1 (First 100 Members)', 'range' => '0 - 100', 'total' => 100, 'discount' => 5000],
+                            ['code' => '27EARLYB200', 'name' => 'Tier 2 (Next 200 Members)', 'range' => '100 - 300', 'total' => 200, 'discount' => 3000],
+                            ['code' => '27EARLYB500', 'name' => 'Tier 3 (Next 500 Members)', 'range' => '300 - 800', 'total' => 500, 'discount' => 2000],
+                            ['code' => '27EARLYB50',  'name' => 'Tier 4 (Reserve 50 Members)', 'range' => '800 - 850', 'total' => 50, 'discount' => 1000],
+                        ];
+                    @endphp
+
+                    @foreach($tiers as $t)
+                        @php
+                            $batchObj = $couponBatches->firstWhere('couponsno', $t['code']);
+                            $curr = $batchObj ? $batchObj->coupcurrcount : 0;
+                            $tot = $batchObj ? $batchObj->coupcount : $t['total'];
+                            $isComplete = ($curr >= $tot);
+                            $isActive = !$isComplete && ($loop->first || ($tiers[$loop->index - 1] ?? null) && ($couponBatches->firstWhere('couponsno', $tiers[$loop->index - 1]['code'])->coupcurrcount ?? 0) >= ($couponBatches->firstWhere('couponsno', $tiers[$loop->index - 1]['code'])->coupcount ?? 1));
+                        @endphp
+                        <div style="background: #ffffff; border: 1.5px solid {{ $isActive ? '#10b981' : ($isComplete ? '#cbd5e1' : '#e2e8f0') }}; border-radius: 12px; padding: 1rem; position: relative; box-shadow: {{ $isActive ? '0 4px 12px rgba(16, 185, 129, 0.15)' : 'none' }};">
+                            @if($isActive)
+                                <span style="position: absolute; top: 8px; right: 8px; background: #10b981; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">● ACTIVE</span>
+                            @elseif($isComplete)
+                                <span style="position: absolute; top: 8px; right: 8px; background: #94a3b8; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">COMPLETED</span>
+                            @else
+                                <span style="position: absolute; top: 8px; right: 8px; background: #e2e8f0; color: #64748b; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">UPCOMING</span>
+                            @endif
+
+                            <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">{{ $t['name'] }}</div>
+                            <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 4px 0; font-family: 'JetBrains Mono', monospace;">{{ $t['code'] }}</div>
+                            <div style="font-size: 0.8rem; color: #059669; font-weight: 700; margin-bottom: 6px;">- ₹ {{ number_format($t['discount']) }} Concession</div>
+                            
+                            <!-- Progress Bar -->
+                            <div style="height: 6px; background: #f1f5f9; border-radius: 999px; overflow: hidden; margin-top: 6px;">
+                                <div style="height: 100%; width: {{ $tot > 0 ? min(100, round(($curr / $tot) * 100)) : 0 }}%; background: {{ $isComplete ? '#94a3b8' : '#10b981' }};"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;">
+                                <span>Claimed: <strong>{{ $curr }}</strong> / {{ $tot }}</span>
+                                <span>Members: {{ $t['range'] }}</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- 2. COUPON MANAGEMENT & APPLICANTS LEDGER -->
                 <div class="content-card">
+                    <div class="card-header-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <div class="card-title">🎟️ Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</div>
+                            <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Generate Personal Coupons from Last 8 Digits</div>
+                        </div>
+                        <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; cursor: pointer;">
+                            + 🎟️ Generate Personal Coupon (Last 8 Digits)
+                        </button>
+                    </div>
                     <!-- Search Toolbar with Live Search -->
                     <div style="padding: 1.25rem 1.5rem; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div style="display: flex; gap: 0.75rem; flex: 1; max-width: 580px;">
@@ -488,7 +543,8 @@
 
                         <div class="tracking-legend">
                             <span class="legend-item"><span class="legend-dot dot-done"></span> Paid &amp; Verified</span>
-                            <span class="legend-item" style="color: #059669; font-weight: 700;">Default Coupon: VIGNAN2026 (-₹ 500)</span>
+                            <span class="legend-item" style="color: #059669; font-weight: 700;">Default Coupon: 27EARLYB100 (-₹ 5,000)</span>
+                            <span class="legend-item" style="color: #6366f1; font-weight: 700;">Personal: Last 8 Digits (-₹ 5,000)</span>
                         </div>
                     </div>
 
@@ -497,18 +553,19 @@
                             <thead>
                                 <tr>
                                     <th>Application Number</th>
-                                    <th>Paid</th>
+                                    <th>Payment Status</th>
                                     <th>Default Coupon</th>
-                                    <th>Personal Coupon</th>
-                                    <th>Paid Amount</th>
+                                    <th>Personal Coupon (Last 8 Digits)</th>
+                                    <th>Fee Payable &amp; Paid</th>
                                     <th>Date Time</th>
-                                    <th style="text-align: center;">Action</th>
+                                    <th style="text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($allStudents as $idx => $std)
                                     @php
                                         $appliNo = $std->application_no ?? $std->applinano ?? ('20' . str_pad($idx + 10001, 8, '0', STR_PAD_LEFT));
+                                        $last8 = strlen($appliNo) >= 8 ? substr($appliNo, -8) : $appliNo;
                                         $candidateName = $std->student_name ?? $std->name ?? 'Candidate';
                                         $phone = $std->mobile ?? $std->phoneno ?? '';
                                         $email = $std->personal_email ?? $std->emailid ?? ($phone ? $phone . '@student.vignan.ac.in' : 'student@vignan.ac.in');
@@ -517,16 +574,24 @@
                                         $timestamp = $std->log_timestamp;
                                         $dateTimeFormatted = $timestamp ? \Carbon\Carbon::parse($timestamp)->format('d M Y, h:i A') : now()->format('d M Y, h:i A');
 
-                                        $defaultCoupon = 'VIGNAN2026';
-                                        $defaultDiscount = 500.00;
-                                        $personalCoupon = 'PERS-' . strtoupper(substr(md5($appliNo), 0, 6));
-                                        $personalDiscount = 300.00;
-                                        $baseFee = 2000.00;
+                                        // Lookup real payment details or calculate
+                                        $payRecord = $payDetails->get($appliNo);
+                                        $persCouponObj = $personalCoupons->get($appliNo) ?? $personalCoupons->firstWhere('couponsno', $last8);
+
+                                        $defaultCoupon = $payRecord?->defcoupon ?? '27EARLYB100';
+                                        $defaultDiscount = (float) ($payRecord?->defcouponamount ?? 5000.00);
+
+                                        $personalCoupon = $payRecord?->percoupon ?? ($persCouponObj ? $persCouponObj->couponsno : null);
+                                        $personalDiscount = (float) ($payRecord?->percouponamount ?? ($persCouponObj ? $persCouponObj->discountamount : 0.00));
+
+                                        $baseFee = (float) ($payRecord?->feepayable ?? 25000.00);
                                         $totalDiscount = $defaultDiscount + $personalDiscount;
-                                        $paidAmount = $baseFee - $totalDiscount;
+                                        $paidAmount = $payRecord?->paidamount ?? max(0, $baseFee - $totalDiscount);
+
+                                        $isPaid = ($std->stage1 === 'paid' || ($payRecord && $payRecord->txnstatus === 'success'));
                                         $receiptNo = 'REC-2026-' . str_pad($idx + 101, 5, '0', STR_PAD_LEFT);
-                                        $transactionId = 'TXN-VU-' . strtoupper(substr(sha1($appliNo), 0, 10));
-                                        $bankRef = 'PAY_' . strtoupper(substr(md5($appliNo . 'vignan'), 0, 10));
+                                        $transactionId = $payRecord?->txncrmid ?? ('TXN-VU-' . strtoupper(substr(sha1($appliNo), 0, 10)));
+                                        $bankRef = $payRecord?->txnpayuid ?? ('PAY_' . strtoupper(substr(md5($appliNo . 'vignan'), 0, 10)));
 
                                         $paymentPayload = [
                                             'appli_no' => $appliNo,
@@ -542,43 +607,71 @@
                                             'base_fee' => number_format($baseFee, 2),
                                             'default_coupon' => $defaultCoupon,
                                             'default_discount' => number_format($defaultDiscount, 2),
-                                            'personal_coupon' => $personalCoupon,
+                                            'personal_coupon' => $personalCoupon ?: 'None Assigned',
                                             'personal_discount' => number_format($personalDiscount, 2),
                                             'total_discount' => number_format($totalDiscount, 2),
                                             'paid_amount' => number_format($paidAmount, 2),
-                                            'payment_mode' => 'Online Gateway (Razorpay / SBI e-Pay)',
-                                            'status' => 'PAID / SUCCESSFUL',
+                                            'payment_mode' => $payRecord?->paytype ?? 'PayU Online Gateway',
+                                            'status' => $isPaid ? 'PAID / SUCCESSFUL' : 'PENDING',
                                         ];
                                     @endphp
-                                    <tr class="coupon-track-row" data-search="{{ strtolower($appliNo . ' ' . $candidateName . ' ' . $defaultCoupon . ' ' . $personalCoupon) }}">
+                                    <tr class="coupon-track-row" data-search="{{ strtolower($appliNo . ' ' . $candidateName . ' ' . $defaultCoupon . ' ' . ($personalCoupon ?? '')) }}">
                                         <td>
                                             <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
                                             <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">{{ $candidateName }}</div>
+                                            <div style="font-size: 0.70rem; color: #94a3b8;">Last 8: <code>{{ $last8 }}</code></div>
                                         </td>
                                         <td>
-                                            <span class="badge-status badge-paid">✓ Paid</span>
+                                            @if($isPaid)
+                                                <span class="badge-status badge-paid">✓ Paid (PayU)</span>
+                                            @else
+                                                <span class="badge-status" style="background: #fef3c7; color: #d97706; border: 1px solid #fde68a;">Pending</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="coupon-tag-badge">{{ $defaultCoupon }}</span>
+                                            <span class="coupon-tag-badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid #a7f3d0;">{{ $defaultCoupon }}</span>
                                             <div style="font-size: 0.72rem; color: #059669; font-weight: 700; margin-top: 0.2rem;">- ₹ {{ number_format($defaultDiscount, 0) }}</div>
                                         </td>
                                         <td>
-                                            <span class="coupon-tag-badge badge-personal-tag">{{ $personalCoupon }}</span>
-                                            <div style="font-size: 0.72rem; color: #059669; font-weight: 700; margin-top: 0.2rem;">- ₹ {{ number_format($personalDiscount, 0) }}</div>
+                                            @if($personalCoupon)
+                                                <span class="coupon-tag-badge badge-personal-tag" style="background: rgba(99, 102, 241, 0.1); color: #6366f1; border: 1px solid #c7d2fe;">
+                                                    {{ $personalCoupon }}
+                                                </span>
+                                                <div style="font-size: 0.72rem; color: #6366f1; font-weight: 700; margin-top: 0.2rem;">- ₹ {{ number_format($personalDiscount, 0) }}</div>
+                                            @else
+                                                <button type="button" 
+                                                        onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $last8 }}')"
+                                                        style="background: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;">
+                                                    + Assign ({{ $last8 }})
+                                                </button>
+                                            @endif
                                         </td>
                                         <td>
-                                            <strong style="color: #059669; font-family: 'JetBrains Mono', monospace; font-size: 0.92rem;">₹ {{ number_format($paidAmount, 2) }}</strong>
+                                            <div style="font-size: 0.78rem; color: #64748b;">Fee: ₹ {{ number_format($baseFee, 0) }}</div>
+                                            <div style="font-size: 0.74rem; color: #059669; font-weight: 600;">Discounts: -₹ {{ number_format($totalDiscount, 0) }}</div>
+                                            <strong style="color: #059669; font-family: 'JetBrains Mono', monospace; font-size: 0.92rem;">Net: ₹ {{ number_format($paidAmount, 2) }}</strong>
                                         </td>
                                         <td>
                                             <span style="font-size: 0.82rem; color: #334155; font-weight: 600;">{{ $dateTimeFormatted }}</span>
                                         </td>
                                         <td style="text-align: center;">
-                                            <button type="button" 
-                                                    class="btn-action-sm btn-verify" 
-                                                    onclick='openPaymentWizard(@json($paymentPayload))' 
-                                                    title="View Payment Breakdown &amp; Receipt Wizard">
-                                                <span>💳</span> Payment Info
-                                            </button>
+                                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                                <button type="button" 
+                                                        class="btn-action-sm btn-verify" 
+                                                        onclick='openPaymentWizard(@json($paymentPayload))' 
+                                                        title="View Payment Breakdown &amp; Receipt Wizard">
+                                                    <span>💳</span> Receipt
+                                                </button>
+                                                @if(!$personalCoupon)
+                                                    <button type="button" 
+                                                            class="btn-action-sm" 
+                                                            onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $last8 }}')"
+                                                            style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe;"
+                                                            title="Generate Personal Coupon">
+                                                        🎟️
+                                                    </button>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -592,6 +685,101 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- 3. CRM INCHARGE PERSONAL COUPON GENERATION MODAL -->
+                <div class="modal-backdrop" id="personalCouponModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem;">
+                    <div style="background: #ffffff; border-radius: 16px; max-width: 520px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; overflow: hidden;">
+                        <div style="padding: 1.25rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                <span>🎟️</span> Generate Personal Coupon (CRM Incharge)
+                            </div>
+                            <button type="button" onclick="closePersonalCouponModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+                        </div>
+
+                        <form action="{{ route('crm.coupons.generate-personal') }}" method="POST">
+                            @csrf
+                            <div style="padding: 1.5rem;">
+                                <div style="margin-bottom: 1.25rem;">
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; text-transform: uppercase;">
+                                        Candidate Application Number *
+                                    </label>
+                                    <input type="text" 
+                                           id="modalAppliNo" 
+                                           name="applino" 
+                                           class="form-input" 
+                                           placeholder="e.g. 20261106333" 
+                                           oninput="updateModalLast8(this.value)"
+                                           required 
+                                           style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">
+                                </div>
+
+                                <div style="margin-bottom: 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
+                                    <div style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code (Auto-Derived Last 8 Digits):</div>
+                                    <div id="modalCouponPreview" style="font-size: 1.15rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+                                        61106333
+                                    </div>
+                                    <div style="font-size: 0.70rem; color: #60a5fa; margin-top: 2px;">
+                                        This coupon code will be tied to this candidate in <code>finance.couponinfo</code>.
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 1.25rem;">
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; text-transform: uppercase;">
+                                        Concession / Discount Amount (₹) *
+                                    </label>
+                                    <input type="number" 
+                                           name="discount_amount" 
+                                           class="form-input" 
+                                           placeholder="e.g. 5000" 
+                                           value="5000" 
+                                           min="100" 
+                                           max="25000" 
+                                           step="100" 
+                                           required 
+                                           style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-weight: 700; color: #059669;">
+                                </div>
+
+                                <div style="font-size: 0.78rem; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                                    ℹ️ When candidate pays at Stage 1, this personal discount (-₹5,000) will combine with the active early bird tier (<code>27EARLYB100</code>: -₹5,000) for a total discount of <strong>₹10,000</strong>!
+                                </div>
+                            </div>
+
+                            <div style="padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                                <button type="button" onclick="closePersonalCouponModal()" style="padding: 8px 16px; border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; cursor: pointer; font-weight: 600;">Cancel</button>
+                                <button type="submit" style="padding: 8px 18px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                                    Save &amp; Generate Coupon
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    function openPersonalCouponModal(appliNo = '', last8 = '') {
+                        const modal = document.getElementById('personalCouponModal');
+                        if (!modal) return;
+                        modal.style.display = 'flex';
+                        const input = document.getElementById('modalAppliNo');
+                        if (input) {
+                            input.value = appliNo || '20261106333';
+                            updateModalLast8(input.value);
+                        }
+                    }
+
+                    function closePersonalCouponModal() {
+                        const modal = document.getElementById('personalCouponModal');
+                        if (modal) modal.style.display = 'none';
+                    }
+
+                    function updateModalLast8(val) {
+                        val = val.trim();
+                        const last8 = val.length >= 8 ? val.slice(-8) : val;
+                        const preview = document.getElementById('modalCouponPreview');
+                        if (preview) {
+                            preview.textContent = last8 || '--------';
+                        }
+                    }
+                </script>
 
             @elseif(($activeTab ?? '') === 'employeelist')
                 <!-- TAB: EMPLOYEE LIST (STAFF DIRECTORY) -->
@@ -972,10 +1160,10 @@
                     </label>
                     <div class="select-wrapper-custom">
                         <select id="assignAllotModeSelect" class="form-control-custom" onchange="onAllotModeChange(this.value)" required>
-                            <option value="datewise">datewise</option>
-                            <option value="first 50">first 50</option>
-                            <option value="first 100">first 100</option>
-                            <option value="custom">custom</option>
+                            <option value="datewise">Date-wise (Target Date)</option>
+                            <option value="first 50">First 50 Leads</option>
+                            <option value="first 100">First 100 Leads</option>
+                            <option value="custom">Custom Batch Count</option>
                         </select>
                     </div>
                     <!-- Dedicated Info Callout Box -->

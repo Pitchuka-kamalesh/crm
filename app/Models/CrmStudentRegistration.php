@@ -64,5 +64,15 @@ class CrmStudentRegistration extends Model
     {
         return $this->belongsTo(State::class, 'stateid', 'state_id');
     }
+
+    public function personalInfo()
+    {
+        return $this->hasOne(StudentPersonalInfo::class, 'applino', 'applinano');
+    }
+
+    public function academicDetails()
+    {
+        return $this->hasOne(StudentAcademicDetail::class, 'applino', 'applinano');
+    }
 }
 

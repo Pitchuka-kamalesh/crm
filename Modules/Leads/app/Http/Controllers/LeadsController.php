@@ -38,7 +38,7 @@ class LeadsController extends Controller
         $searchQuery = trim($request->input('q', ''));
         $statusFilter = $request->input('status', 'all');
 
-        $leadsQuery = CrmStudentRegistration::with(['program', 'branch']);
+        $leadsQuery = CrmStudentRegistration::with(['program', 'branch', 'campus', 'state', 'country']);
         if ($searchQuery) {
             $leadsQuery->where(function ($q) use ($searchQuery) {
                 $q->where('name', 'ilike', "%{$searchQuery}%")
@@ -149,7 +149,9 @@ class LeadsController extends Controller
 
         $status = $request->input('status');
 
-        $student = CrmStudentRegistration::where('applinano', $applinano)->first();
+        $student = CrmStudentRegistration::where('applinano', $applinano)
+            ->orWhere('phoneno', str_replace('APP', '', $applinano))
+            ->first();
         if ($student) {
             $student->std_status = $status;
             $student->log_userid = auth()->user()->usercode ?? '02598';
@@ -159,8 +161,9 @@ class LeadsController extends Controller
         }
 
         // Also sync with crm.leads table if matching
-        if ($student && !empty($student->phoneno)) {
-            \App\Models\Lead::where('phoneno', $student->phoneno)->update([
+        $targetPhone = $student ? $student->phoneno : str_replace('APP', '', $applinano);
+        if (!empty($targetPhone)) {
+            \App\Models\Lead::where('phoneno', $targetPhone)->update([
                 'phnostatus' => $status,
                 'log_userid' => auth()->user()->usercode ?? '02598',
                 'log_timestamp' => now(),
