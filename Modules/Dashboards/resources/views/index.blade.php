@@ -1046,16 +1046,6 @@
                 </div>
             </a>
 
-            <!-- Center Navigation Links (Dynamic from master.menus) -->
-            <ul class="dash-nav-links">
-                @foreach($stages as $num => $stg)
-                    <li>
-                        <a href="{{ route('dashboards.index', ['step' => $num]) }}" class="dash-nav-link {{ $activeStep === $num ? 'active' : '' }}">
-                            {{ $stg['title'] }}
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
 
             <div class="user-nav-cluster">
                 <div class="user-info-text">
@@ -1139,48 +1129,6 @@
             </div>
         @endif
 
-        <!-- 8-STEP BUBBLE PROGRESS TRACKER -->
-        <section class="stepper-card">
-            <div class="stepper-header">
-                <div class="stepper-title-box">
-                    <h2>Admission Onboarding</h2>
-                    <span class="stepper-step-indicator">Step {{ $activeStep }} of 8</span>
-                </div>
-                <div class="stepper-progress-box">
-                    <div class="progress-bar-track">
-                        <div class="progress-bar-fill" style="width: {{ $progressPercent }}%;"></div>
-                    </div>
-                    <span class="progress-percent-label">{{ $progressPercent }}% Complete</span>
-                </div>
-            </div>
-
-            <!-- 8 Stages Bubble Bar -->
-            <div class="stepper-nav-bar">
-                @foreach($stages as $num => $stg)
-                    @php
-                        $isActive = ($activeStep === $num);
-                        $isDone = ($stg['status'] === 'completed');
-                    @endphp
-                    <a href="{{ route('dashboards.index', ['step' => $num]) }}"
-                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }}"
-                       title="Step {{ $num }}: {{ $stg['title'] }}">
-                        <div class="step-circle">
-                            @if($isDone)
-                                ✓
-                            @else
-                                {{ $num }}
-                            @endif
-                        </div>
-                        <span class="step-nav-name">{{ $stg['title'] }}</span>
-                        @if($isActive)
-                            <span class="step-nav-status-sub">In Progress</span>
-                        @elseif($isDone)
-                            <span class="step-nav-status-sub done">Completed</span>
-                        @endif
-                    </a>
-                @endforeach
-            </div>
-        </section>
 
         <!-- STEP CONTENT PANEL -->
         <section class="step-panel-card">
