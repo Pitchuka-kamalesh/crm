@@ -1068,6 +1068,35 @@
             box-shadow: 0 4px 12px rgba(15, 39, 68, 0.35);
         }
 
+        .degree-pill-btn {
+            background: #ffffff;
+            color: #334155;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 0.4rem 0.95rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: inherit;
+        }
+
+        .degree-pill-btn:hover {
+            border-color: #2563eb;
+            color: #1e40af;
+            background: #eff6ff;
+        }
+
+        .degree-pill-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
         .mockup-cards-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1076,7 +1105,36 @@
         }
 
         @media (max-width: 992px) {
-            .mockup-cards-grid {
+            .degree-pill-btn {
+            background: #ffffff;
+            color: #334155;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 0.4rem 0.95rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: inherit;
+        }
+
+        .degree-pill-btn:hover {
+            border-color: #2563eb;
+            color: #1e40af;
+            background: #eff6ff;
+        }
+
+        .degree-pill-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .mockup-cards-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -1110,6 +1168,18 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.85rem 1rem;
+        }
+
+        .mockup-field-row-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.85rem 1.15rem;
+        }
+
+        @media (max-width: 900px) {
+            .mockup-field-row-3 {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 640px) {
@@ -1543,19 +1613,9 @@
 
             <!-- ================= STAGE 2: PERSONAL INFO (SEPARATE STEP 2) ================= -->
             @elseif($activeStep === 2)
-                <div class="personal-app-header">
-                    <h2 class="personal-app-title">Personal Application</h2>
-                    <a href="javascript:void(0)" onclick="window.print()" class="btn-pdf-download">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        <span>Pdf download</span>
-                    </a>
-                </div>
-
-                <div style="max-width: 720px; margin: 0 auto; width: 100%;">
-                    <!-- CARD 1: 2. PERSONAL INFO -->
-                    <div class="mockup-card card-active-step">
+                <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
+                    <!-- CARD 1: 2. PERSONAL INFO (FULL WIDTH) -->
+                    <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
                             <h3 class="mockup-card-title">2. personal info : Fathers Name</h3>
                             @if($stages[2]['status'] === 'completed')
@@ -1569,7 +1629,8 @@
                             @csrf
                             <input type="hidden" name="step" value="2">
 
-                            <div class="mockup-field-row-2">
+                            <!-- Row 1: Father Name, Phone No, DOB (3 Columns) -->
+                            <div class="mockup-field-row-3">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">father name: <span style="color:#ef4444;">*</span></label>
                                     <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name ?: '' }}" placeholder="Enter Father's Name" required>
@@ -1578,13 +1639,14 @@
                                     <label class="mockup-label">Phone no: <span style="color:#ef4444;">*</span></label>
                                     <input type="tel" name="phone_no" class="mockup-input" value="{{ $personalInfo?->parentphono ?: ($crmStudent?->phoneno ?: $user?->phnno) }}" placeholder="Enter 10-digit Phone Number" maxlength="10" pattern="[0-9]{10}" required>
                                 </div>
-                            </div>
-
-                            <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">DOB: <span style="color:#ef4444;">*</span></label>
                                     <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '2008-05-14' }}" required>
                                 </div>
+                            </div>
+
+                            <!-- Row 2: Gender, Category, Referee By (3 Columns) -->
+                            <div class="mockup-field-row-3" style="margin-top: 1rem; align-items: start;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Gender: <span style="color:#ef4444;">*</span></label>
                                     <select name="gender" class="mockup-select" required>
@@ -1593,64 +1655,60 @@
                                         <option value="Other" {{ ($personalInfo?->gender === 'Other') ? 'selected' : '' }}>Other</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <!-- Referee By Checkboxes -->
-                            @php
-                                $savedRefs = array_map('trim', explode(',', $personalInfo?->referedby ?? 'via advertisement'));
-                            @endphp
-                            <div class="mockup-field-group" style="margin-top: 0.85rem;">
-                                <label class="mockup-label">referee by:</label>
-                                <div class="mockup-radio-grid" style="margin-top: 0.35rem;">
-                                    <label class="mockup-radio-label">
-                                        <input type="checkbox" name="referee_by[]" value="via advertisement" {{ in_array('via advertisement', $savedRefs) ? 'checked' : '' }}>
-                                        <span>via advertisement</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="checkbox" name="referee_by[]" value="via @by own" {{ in_array('via @by own', $savedRefs) ? 'checked' : '' }}>
-                                        <span>via @by own</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="checkbox" name="referee_by[]" value="via Emp vtstr" {{ in_array('via Emp vtstr', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
-                                        <span>via Emp vtstr</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="checkbox" name="referee_by[]" value="via Conseller / Telecaller" {{ in_array('via Conseller / Telecaller', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
-                                        <span>via Conseller / Telecaller</span>
-                                    </label>
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">category: <span style="color:#ef4444;">*</span></label>
+                                    <div class="mockup-radio-row" style="margin-top: 0.5rem;">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
+                                            <span>OC</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
+                                            <span>BC</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
+                                            <span>SC</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
+                                            <span>ST</span>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div id="ref-empcode-wrap" style="display: {{ (in_array('via Emp vtstr', $savedRefs) || in_array('via Conseller / Telecaller', $savedRefs)) ? 'block' : 'none' }}; margin-top: 0.45rem;">
-                                    <input type="text" name="referee_empcode" class="mockup-input" value="{{ $personalInfo?->referedempcode }}" placeholder="Enter Employee / Counselor Code (optional)">
-                                </div>
-                            </div>
-
-                            <!-- Category -->
-                            <div class="mockup-field-group" style="margin-top: 0.85rem;">
-                                <label class="mockup-label">category: <span style="color:#ef4444;">*</span></label>
-                                <div class="mockup-radio-row">
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
-                                        <span>OC</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
-                                        <span>BC</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
-                                        <span>SC</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
-                                        <span>ST</span>
-                                    </label>
+                                @php
+                                    $savedRefs = array_map('trim', explode(',', $personalInfo?->referedby ?? 'via advertisement'));
+                                @endphp
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">referee by:</label>
+                                    <div class="mockup-radio-grid" style="margin-top: 0.35rem;">
+                                        <label class="mockup-radio-label">
+                                            <input type="checkbox" name="referee_by[]" value="via advertisement" {{ in_array('via advertisement', $savedRefs) ? 'checked' : '' }}>
+                                            <span>via advertisement</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="checkbox" name="referee_by[]" value="via @by own" {{ in_array('via @by own', $savedRefs) ? 'checked' : '' }}>
+                                            <span>via @by own</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="checkbox" name="referee_by[]" value="via Emp vtstr" {{ in_array('via Emp vtstr', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
+                                            <span>via Emp vtstr</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="checkbox" name="referee_by[]" value="via Conseller / Telecaller" {{ in_array('via Conseller / Telecaller', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
+                                            <span>via Conseller / Telecaller</span>
+                                        </label>
+                                    </div>
+                                    <div id="ref-empcode-wrap" style="display: {{ (in_array('via Emp vtstr', $savedRefs) || in_array('via Conseller / Telecaller', $savedRefs)) ? 'block' : 'none' }}; margin-top: 0.45rem;">
+                                        <input type="text" name="referee_empcode" class="mockup-input" value="{{ $personalInfo?->referedempcode }}" placeholder="Enter Employee / Counselor Code (optional)">
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Address Box populated from crm DB tables -->
-                            <div class="mockup-subbox" style="margin-top: 0.85rem;">
+                            <!-- Address Box populated from crm DB tables (3 Columns) -->
+                            <div class="mockup-subbox" style="margin-top: 1.25rem;">
                                 <h4 class="mockup-subbox-title">Address</h4>
-                                <div class="mockup-field-row-2">
+                                <div class="mockup-field-row-3">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">street/country: <span style="color:#ef4444;">*</span></label>
                                         <select name="street_country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
@@ -1672,8 +1730,6 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
-                                <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">distric t: <span style="color:#ef4444;">*</span></label>
                                         <select name="distric_t" id="geo-district-select" class="mockup-select" required>
@@ -1685,12 +1741,12 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                </div>
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">city / mandal: <span style="color:#ef4444;">*</span></label>
                                         <input type="text" name="city_mandal" class="mockup-input" value="{{ $personalInfo?->city_mandal ?: 'Guntur' }}" placeholder="City / Mandal" required>
                                     </div>
-                                </div>
-                                <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">village : <span style="color:#ef4444;">*</span></label>
                                         <input type="text" name="village" class="mockup-input" value="{{ $personalInfo?->village ?: 'Flat 402, Sri Sai Nilayam, Brodipet' }}" placeholder="Village / Street Address" required>
@@ -1702,7 +1758,7 @@
                                 </div>
                             </div>
 
-                            <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
                                 <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
                                     &larr; Stage 1: {{ $stages[1]['title'] }}
                                 </a>
@@ -1768,21 +1824,11 @@
 
             <!-- ================= STAGE 3: ACADEMIC DETAILS (SEPARATE STEP 3) ================= -->
             @elseif($activeStep === 3)
-                <div class="personal-app-header">
-                    <h2 class="personal-app-title">Personal Application</h2>
-                    <a href="javascript:void(0)" onclick="window.print()" class="btn-pdf-download">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        <span>Pdf download</span>
-                    </a>
-                </div>
-
-                <div style="max-width: 720px; margin: 0 auto; width: 100%;">
-                    <!-- CARD 2: 3. EDUCATION DETAILS -->
-                    <div class="mockup-card card-active-step">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                            <h3 class="mockup-card-title">3. education details; B-tech; m-tech; phd; 10th+Inter+ug+pg</h3>
+                <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
+                    <!-- CARD 2: 3. EDUCATION DETAILS (FULL WIDTH) -->
+                    <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <h3 class="mockup-card-title" style="margin: 0;">3. education details; B-tech; m-tech; phd; 10th+Inter+ug+pg</h3>
                             @if($stages[3]['status'] === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
@@ -1790,94 +1836,270 @@
                             @endif
                         </div>
 
-                        <div>
-                            <span class="mockup-pill-badge">10th + inter</span>
+                        <!-- Degree Stream Selector: B.Tech (10th + Inter) | M.Tech (10th + Inter + B.Tech) | PhD (10th + Inter + UG + PG) -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.15rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b;">Degree Stream:</span>
+                                <button type="button" class="degree-pill-btn {{ $degreeLevel === 'btech' ? 'active' : '' }}" id="pill-btech" onclick="setDegreeLevel('btech')">
+                                    🎓 B.Tech &bull; 10th + Inter
+                                </button>
+                                <button type="button" class="degree-pill-btn {{ $degreeLevel === 'mtech' ? 'active' : '' }}" id="pill-mtech" onclick="setDegreeLevel('mtech')">
+                                    🎓 M.Tech &bull; 10th + Inter + B.Tech (UG)
+                                </button>
+                                <button type="button" class="degree-pill-btn {{ $degreeLevel === 'phd' ? 'active' : '' }}" id="pill-phd" onclick="setDegreeLevel('phd')">
+                                    🎓 Ph.D &bull; 10th + Inter + UG + PG
+                                </button>
+                                <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
+                            </div>
+                            <span id="degree-badge-indicator" class="mockup-pill-badge" style="font-size: 0.76rem; padding: 0.25rem 0.7rem; background: #0f2744; color: #fff;">
+                                {{ $degreeLevel === 'phd' ? '10th + Inter + UG + PG' : ($degreeLevel === 'mtech' ? '10th + Inter + B.Tech (UG)' : '10th + Inter') }}
+                            </span>
                         </div>
 
-                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep3Form(this);">
                             @csrf
                             <input type="hidden" name="step" value="3">
 
-                            <!-- Subbox: school/ college 10 th info -->
-                            <div class="mockup-subbox">
+                            <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
+                            <div class="mockup-subbox" id="sec-10th-details">
                                 <h4 class="mockup-subbox-title">school/ college 10 th info</h4>
 
-                                <div class="mockup-field-group">
-                                    <label class="mockup-label">school/ co name :</label>
-                                    <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name ?: 'Sri Chaitanya English Medium High School' }}" placeholder="School / College Name">
-                                </div>
-
-                                <div class="mockup-field-group" style="margin-top: 0.5rem;">
-                                    <label class="mockup-label">Boad of study :</label>
-                                    <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board ?: 'BSEAP' }}" placeholder="Board of Study">
-                                </div>
-
-                                <div class="mockup-field-row-2" style="margin-top: 0.5rem;">
+                                <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Roll NO :</label>
-                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no ?: '2407189021' }}" placeholder="Roll / Hall Ticket No">
+                                        <label class="mockup-label">school/ co name : <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name ?: 'Sri Chaitanya English Medium High School' }}" placeholder="School / College Name" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">passing year :</label>
-                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year ?: 2024 }}" placeholder="2024">
+                                        <label class="mockup-label">Boad of study : <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board ?: 'BSEAP' }}" placeholder="Board of Study" required>
                                     </div>
                                 </div>
 
-                                <div class="mockup-radio-row" style="margin-top: 0.5rem;">
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="eval_type" value="marks" {{ ($academicDetails?->tenth_marks_type !== 'CGPA') ? 'checked' : '' }}>
-                                        <span>marks</span>
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="eval_type" value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'checked' : '' }}>
-                                        <span>CGPA</span>
-                                        <input type="text" name="cgpa_value" style="width: 55px; padding: 2px 6px; font-size: 0.8rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff;" value="{{ $academicDetails?->tenth_cgpa ? $academicDetails->tenth_cgpa : '590' }}">
-                                    </label>
-                                    <label class="mockup-radio-label">
-                                        <input type="radio" name="eval_type" value="sixty_percent">
-                                        <span>&gt;= 60%</span>
-                                    </label>
-                                </div>
-
-                                <div style="margin-top: 0.5rem;">
-                                    <label class="mockup-label">Course choice</label>
-                                    <div class="mockup-radio-row">
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="course_choice" value="Inter" {{ ($academicDetails?->pu2_study_board !== 'Diploma') ? 'checked' : '' }}>
-                                            <span>Inter</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="course_choice" value="Diploma" {{ ($academicDetails?->pu2_study_board === 'Diploma') ? 'checked' : '' }}>
-                                            <span>Diploma</span>
-                                        </label>
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Roll NO : <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no ?: '2407189021' }}" placeholder="Roll / Hall Ticket No" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">passing year : <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year ?: 2024 }}" placeholder="2024" min="2000" max="2030" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Evaluation Type / Marks: <span style="color:#ef4444;">*</span></label>
+                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
+                                            <label class="mockup-radio-label">
+                                                <input type="radio" name="eval_type" value="marks" {{ ($academicDetails?->tenth_marks_type !== 'CGPA') ? 'checked' : '' }} onchange="onEvalTypeChange('marks')">
+                                                <span>marks</span>
+                                            </label>
+                                            <label class="mockup-radio-label">
+                                                <input type="radio" name="eval_type" value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'checked' : '' }} onchange="onEvalTypeChange('CGPA')">
+                                                <span>CGPA</span>
+                                            </label>
+                                        </div>
+                                        <div id="cgpa-input-box" style="display: {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'block' : 'none' }}; margin-top: 0.35rem;">
+                                            <input type="number" id="eval_cgpa_field" name="cgpa_value" class="mockup-input" style="padding: 0.4rem 0.65rem;" step="0.01" min="1.0" max="10.0" value="{{ $academicDetails?->tenth_cgpa ?: '9.80' }}" placeholder="e.g. 9.80" oninput="evaluateScholarshipFromInput()">
+                                        </div>
+                                        <div id="marks-input-box" style="display: {{ ($academicDetails?->tenth_marks_type !== 'CGPA') ? 'block' : 'none' }}; margin-top: 0.35rem;">
+                                            <input type="number" id="eval_marks_field" name="marks_value" class="mockup-input" style="padding: 0.4rem 0.65rem;" step="0.1" min="0" max="1000" value="{{ $academicDetails?->tenth_marks ?: '590' }}" placeholder="e.g. 590 or 85%" oninput="evaluateScholarshipFromInput()">
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div style="margin-top: 0.35rem;">
-                                    <label class="mockup-label">Subset choice</label>
-                                    <div class="mockup-radio-row">
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year') ? 'checked' : '' }}>
-                                            <span>First Year</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="subset_choice" value="Second year" {{ ($academicDetails?->pu2_current_status === 'Second year') ? 'checked' : '' }}>
-                                            <span>Second year</span>
-                                        </label>
+                                <!-- DYNAMIC SCHOLARSHIP ELIGIBILITY & CONCESSION CONTAINER (POPS UP WHEN >= 60%) -->
+                                <div id="scholarship-details-box" style="display: none; margin-top: 1rem; background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.25rem 1.35rem; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.08);">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.85rem; border-bottom: 1px dashed #86efac; padding-bottom: 0.75rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                            <span style="font-size: 1.5rem;">🎉</span>
+                                            <div>
+                                                <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #14532d;">Eligible for VFSTR Merit Scholarship!</h4>
+                                                <p style="margin: 0.15rem 0 0 0; font-size: 0.76rem; color: #166534; font-weight: 600;">Candidate aggregate score is &ge; 60% — Tuition Fee Concession Tier unlocked!</p>
+                                            </div>
+                                        </div>
+                                        <span id="scholarship-status-badge" style="background: #16a34a; color: #ffffff; font-size: 0.74rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 20px; letter-spacing: 0.02em;">
+                                            ✓ Scholarship Eligible
+                                        </span>
                                     </div>
-                                </div>
 
-                                <div style="margin-top: 0.5rem;">
-                                    <label class="mockup-label">Upload Docs</label>
-                                    <div class="mockup-file-wrap">
-                                        <input type="file" id="upload-docs-file" name="upload_docs" style="display: none;" onchange="document.getElementById('upload-docs-label-text').textContent = this.files[0] ? this.files[0].name : 'upload docs:';">
-                                        <span id="upload-docs-label-text" class="mockup-file-text">upload docs:</span>
-                                        <button type="button" class="mockup-browse-btn" onclick="document.getElementById('upload-docs-file').click();">Browse</button>
+                                    <div class="mockup-field-row-2" style="align-items: center;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label" style="color: #14532d;">Applicable Concession Tier:</label>
+                                            <div id="scholarship-tier-display" style="background: #ffffff; border: 1.5px solid #86efac; border-radius: 10px; padding: 0.65rem 0.95rem; font-size: 0.86rem; font-weight: 800; color: #15803d; display: flex; align-items: center; gap: 0.5rem; min-height: 42px;">
+                                                <span>🏆 Tier 1: 50% Tuition Fee Concession</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label" style="color: #14532d;">Scholarship Concession Status:</label>
+                                            <div style="background: #e0f2fe; border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 0.65rem 0.95rem; font-size: 0.84rem; font-weight: 700; color: #0369a1; display: flex; align-items: center; gap: 0.5rem; min-height: 42px;">
+                                                <span>Auto-adjusted in Semester Fee</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px solid rgba(134, 239, 172, 0.4); font-size: 0.76rem; color: #166534; display: flex; flex-wrap: wrap; gap: 1.5rem;">
+                                        <span><strong>Tier 1 (&ge; 80%):</strong> 50% Fee Concession</span>
+                                        <span><strong>Tier 2 (70% - 79.9%):</strong> 35% Fee Concession</span>
+                                        <span><strong>Tier 3 (60% - 69.9%):</strong> 25% Fee Concession</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                            <!-- ================= SUBBOX 2: 12th / INTERMEDIATE / DIPLOMA INFO ================= -->
+                            <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
+                                <h4 class="mockup-subbox-title">12th / Intermediate / Diploma Details</h4>
+
+                                <div class="mockup-field-row-3">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Course choice: <span style="color:#ef4444;">*</span></label>
+                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
+                                            <label class="mockup-radio-label">
+                                                <input type="radio" name="course_choice" value="Inter" {{ ($academicDetails?->pu2_study_board !== 'Diploma') ? 'checked' : '' }}>
+                                                <span>Inter</span>
+                                            </label>
+                                            <label class="mockup-radio-label">
+                                                <input type="radio" name="course_choice" value="Diploma" {{ ($academicDetails?->pu2_study_board === 'Diploma') ? 'checked' : '' }}>
+                                                <span>Diploma</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Subset choice: <span style="color:#ef4444;">*</span></label>
+                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
+                                            <label class="mockup-radio-label">
+                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year') ? 'checked' : '' }}>
+                                                <span>First Year</span>
+                                            </label>
+                                            <label class="mockup-radio-label">
+                                                <input type="radio" name="subset_choice" value="Second year" {{ ($academicDetails?->pu2_current_status === 'Second year') ? 'checked' : '' }}>
+                                                <span>Second year</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?: 2026 }}" placeholder="2026" min="2000" max="2030">
+                                    </div>
+                                </div>
+
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Junior College / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name ?: 'Narayana Junior College' }}" placeholder="Junior College Name">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Hall Ticket / Roll No: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no ?: '2607189021' }}" placeholder="Inter Roll No">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Inter Total Marks / CGPA: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_marks" class="mockup-input" value="{{ $academicDetails?->pu2_marks ?: '962' }}" placeholder="e.g. 962 / 1000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ================= SUBBOX 3: UNDERGRADUATE (B.TECH / DEGREE) (M.TECH & PHD) ================= -->
+                            <div class="mockup-subbox" id="sec-ug-details" style="display: {{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd') ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                    <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (B.Tech / Degree) Details</h4>
+                                    <span class="mockup-pill-badge" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Required for M.Tech &amp; Ph.D</span>
+                                </div>
+
+                                <div class="mockup-field-row-3">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">UG College / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_college_name" class="mockup-input" value="{{ $academicDetails?->ug_college_name ?: "Vignan's Lara Institute of Technology & Science" }}" placeholder="UG College Name">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">University / Board: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_university_board" class="mockup-input" value="{{ $academicDetails?->ug_university_board ?: 'JNTUK / Andhra University' }}" placeholder="University Name">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">UG Registration / Roll NO: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_roll_no" class="mockup-input" value="{{ $academicDetails?->ug_roll_no ?: '201FA04001' }}" placeholder="UG Roll Number">
+                                    </div>
+                                </div>
+
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="ug_passed_year" class="mockup-input" value="{{ $academicDetails?->ug_passed_year ?: 2024 }}" placeholder="2024" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Aggregate CGPA / %: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_cgpa" class="mockup-input" value="{{ $academicDetails?->ug_cgpa ?: '8.75' }}" placeholder="e.g. 8.75 CGPA">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Degree Status: <span style="color:#ef4444;">*</span></label>
+                                        <select name="ug_current_status" class="mockup-select">
+                                            <option value="Completed" {{ ($academicDetails?->ug_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed (Graduated)</option>
+                                            <option value="Final Year Appeared" {{ ($academicDetails?->ug_current_status === 'Final Year Appeared') ? 'selected' : '' }}>Final Year Appeared / Awaiting Results</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ================= SUBBOX 4: POSTGRADUATE (M.TECH / PG) (PHD ONLY) ================= -->
+                            <div class="mockup-subbox" id="sec-pg-details" style="display: {{ $degreeLevel === 'phd' ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                    <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate (M.Tech / PG) Details</h4>
+                                    <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
+                                </div>
+
+                                <div class="mockup-field-row-3">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">PG College / University Name: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_college_name" class="mockup-input" value="{{ $academicDetails?->pg_college_name ?: 'VFSTR Deemed to be University' }}" placeholder="PG College Name">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">University / Board: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_university_board" class="mockup-input" value="{{ $academicDetails?->pg_university_board ?: 'VFSTR' }}" placeholder="University Name">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">PG Roll NO / Reg No: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_roll_no" class="mockup-input" value="{{ $academicDetails?->pg_roll_no ?: '241FK01001' }}" placeholder="PG Roll Number">
+                                    </div>
+                                </div>
+
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year ?: 2026 }}" placeholder="2026" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">PG CGPA / %: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_cgpa" class="mockup-input" value="{{ $academicDetails?->pg_cgpa ?: '9.10' }}" placeholder="e.g. 9.10 CGPA">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">PG Status: <span style="color:#ef4444;">*</span></label>
+                                        <select name="pg_current_status" class="mockup-select">
+                                            <option value="Completed" {{ ($academicDetails?->pg_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
+                                            <option value="Pursuing" {{ ($academicDetails?->pg_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing / Final Semester</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ================= SUBBOX 5: UPLOAD DOCS ================= -->
+                            <div class="mockup-subbox" style="margin-top: 1rem;">
+                                <h4 class="mockup-subbox-title">Upload Academic Documents</h4>
+                                <div class="mockup-field-row-2" style="align-items: center;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Upload Certificates / Marks Memo: (Max 5MB PDF/JPG)</label>
+                                        <div class="mockup-file-wrap" style="margin-top: 0.35rem;">
+                                            <input type="file" id="upload-docs-file" name="upload_docs" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="document.getElementById('upload-docs-label-text').textContent = this.files[0] ? this.files[0].name : 'upload docs:';">
+                                            <span id="upload-docs-label-text" class="mockup-file-text">upload docs:</span>
+                                            <button type="button" class="mockup-browse-btn" onclick="document.getElementById('upload-docs-file').click();">Browse</button>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.78rem; color: #64748b; line-height: 1.4; padding-top: 1.15rem;">
+                                        Attach 10th Marks Memo, Intermediate / Diploma Certificates, and UG Degree Memo if applicable.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
                                 <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev" style="text-decoration: none;">
                                     &larr; Stage 2: {{ $stages[2]['title'] }}
                                 </a>
@@ -1886,6 +2108,106 @@
                                 </button>
                             </div>
                         </form>
+
+                        <script>
+                            function setDegreeLevel(level) {
+                                document.querySelectorAll('.degree-pill-btn').forEach(function(b) {
+                                    b.classList.remove('active');
+                                });
+                                const activeBtn = document.getElementById('pill-' + level);
+                                if (activeBtn) activeBtn.classList.add('active');
+
+                                const hiddenInput = document.getElementById('degree_level_input');
+                                if (hiddenInput) hiddenInput.value = level;
+
+                                const ugSec = document.getElementById('sec-ug-details');
+                                const pgSec = document.getElementById('sec-pg-details');
+                                const indicator = document.getElementById('degree-badge-indicator');
+
+                                if (level === 'btech') {
+                                    if (ugSec) ugSec.style.display = 'none';
+                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (indicator) indicator.textContent = '10th + Inter';
+                                } else if (level === 'mtech') {
+                                    if (ugSec) ugSec.style.display = 'block';
+                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (indicator) indicator.textContent = '10th + Inter + B.Tech (UG)';
+                                } else if (level === 'phd') {
+                                    if (ugSec) ugSec.style.display = 'block';
+                                    if (pgSec) pgSec.style.display = 'block';
+                                    if (indicator) indicator.textContent = '10th + Inter + UG + PG';
+                                }
+                            }
+
+                            function onEvalTypeChange(type) {
+                                const cgpaIn = document.getElementById('cgpa-input-box');
+                                const marksIn = document.getElementById('marks-input-box');
+
+                                if (type === 'CGPA') {
+                                    if (cgpaIn) cgpaIn.style.display = 'block';
+                                    if (marksIn) marksIn.style.display = 'none';
+                                } else {
+                                    if (cgpaIn) cgpaIn.style.display = 'none';
+                                    if (marksIn) marksIn.style.display = 'block';
+                                }
+                                evaluateScholarshipFromInput();
+                            }
+
+                            function evaluateScholarshipFromInput() {
+                                const isCgpa = document.querySelector('input[name="eval_type"][value="CGPA"]')?.checked;
+                                let percentage = 0;
+
+                                if (isCgpa) {
+                                    const cgpa = parseFloat(document.getElementById('eval_cgpa_field')?.value || 0);
+                                    percentage = cgpa * 9.5;
+                                } else {
+                                    const marks = parseFloat(document.getElementById('eval_marks_field')?.value || 0);
+                                    if (marks > 100) {
+                                        percentage = (marks / 600) * 100;
+                                    } else {
+                                        percentage = marks;
+                                    }
+                                }
+
+                                const sBox = document.getElementById('scholarship-details-box');
+                                const display = document.getElementById('scholarship-tier-display');
+                                const badge = document.getElementById('scholarship-status-badge');
+
+                                if (percentage >= 60) {
+                                    if (sBox) sBox.style.display = 'block';
+                                    if (percentage >= 80) {
+                                        if (display) display.innerHTML = '<span>🏆 Tier 1: 50% Tuition Fee Concession (' + Math.round(percentage) + '%)</span>';
+                                        if (badge) {
+                                            badge.style.background = '#16a34a';
+                                            badge.textContent = '✓ Eligible: 50% Concession';
+                                        }
+                                    } else if (percentage >= 70) {
+                                        if (display) display.innerHTML = '<span>⭐ Tier 2: 35% Tuition Fee Concession (' + Math.round(percentage) + '%)</span>';
+                                        if (badge) {
+                                            badge.style.background = '#2563eb';
+                                            badge.textContent = '✓ Eligible: 35% Concession';
+                                        }
+                                    } else {
+                                        if (display) display.innerHTML = '<span>⭐ Tier 3: 25% Tuition Fee Concession (' + Math.round(percentage) + '%)</span>';
+                                        if (badge) {
+                                            badge.style.background = '#d97706';
+                                            badge.textContent = '✓ Eligible: 25% Concession';
+                                        }
+                                    }
+                                } else {
+                                    if (sBox) sBox.style.display = 'none';
+                                }
+                            }
+
+                            function validateStep3Form(form) {
+                                return true;
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const activeEval = document.querySelector('input[name="eval_type"]:checked')?.value || 'marks';
+                                onEvalTypeChange(activeEval);
+                            });
+                        </script>
                     </div>
                 </div>
 

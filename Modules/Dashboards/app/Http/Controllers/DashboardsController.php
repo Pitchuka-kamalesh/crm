@@ -69,6 +69,16 @@ class DashboardsController extends Controller
         $campus = $campusCode ? Campus::where('campus_code', $campusCode)->first() : null;
         $campusName = $campus ? $campus->campus_short_name : '';
 
+        // Determine Degree Level for Step 3 (B.Tech, M.Tech, PhD)
+        $progShort = strtoupper($program?->program_short_name ?? ($crmStudent?->programlevel ?? 'B.Tech'));
+        if (str_contains($progShort, 'M.TECH') || in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])) {
+            $degreeLevel = 'mtech';
+        } elseif (str_contains($progShort, 'PHD') || str_contains($progShort, 'PH.D')) {
+            $degreeLevel = 'phd';
+        } else {
+            $degreeLevel = 'btech';
+        }
+
         $student = $crmStudent;
         $regulation = 'R25';
 
@@ -206,6 +216,8 @@ class DashboardsController extends Controller
             'displayName',
             'roleName',
             'programName',
+            'program',
+            'degreeLevel',
             'branchName',
             'campusName',
             'regulation',
@@ -258,13 +270,28 @@ class DashboardsController extends Controller
             } elseif ($step === 2) {
                 // Validation for Step 2
                 $request->validate([
-                    'phone_no' => ['nullable', 'regex:/^[0-9]{10}$/'],
-                    'pin_code' => ['nullable', 'regex:/^[0-9]{6}$/'],
-                    'father_name' => ['nullable', 'string', 'max:255'],
-                    'dob' => ['nullable', 'date'],
+                    'father_name' => ['required', 'string', 'max:255'],
+                    'phone_no' => ['required', 'regex:/^[0-9]{10}$/'],
+                    'dob' => ['required', 'date'],
+                    'gender' => ['required', 'string'],
+                    'category' => ['required', 'string'],
+                    'street_country' => ['required'],
+                    'state' => ['required'],
+                    'distric_t' => ['required'],
+                    'city_mandal' => ['required', 'string', 'max:100'],
+                    'village' => ['required', 'string', 'max:255'],
+                    'pin_code' => ['required', 'regex:/^[0-9]{6}$/'],
                 ], [
+                    'father_name.required' => 'Father name is required.',
+                    'phone_no.required' => 'Phone number is required.',
                     'phone_no.regex' => 'Phone number must be exactly 10 digits.',
+                    'dob.required' => 'Date of birth is required.',
+                    'pin_code.required' => 'Pin code is required.',
                     'pin_code.regex' => 'Pin code must be exactly 6 digits.',
+                    'distric_t.required' => 'Please select a District.',
+                    'state.required' => 'Please select a State.',
+                    'city_mandal.required' => 'City / Mandal is required.',
+                    'village.required' => 'Village / Street address is required.',
                 ]);
 
                 if ($crmStudent) {
@@ -366,6 +393,22 @@ class DashboardsController extends Controller
                 $nextStep = 3;
                 $msg = 'Stage 2: Personal Profile saved successfully!';
             } elseif ($step === 3) {
+                // Validation for Step 3
+                $request->validate([
+                    'school_co_name' => ['required', 'string', 'max:255'],
+                    'boad_of_study' => ['required', 'string', 'max:255'],
+                    'roll_no' => ['required', 'string', 'max:50'],
+                    'passing_year' => ['required', 'integer', 'min:2000', 'max:2030'],
+                    'eval_type' => ['required', 'string'],
+                    'upload_docs' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                ], [
+                    'school_co_name.required' => 'School / College name is required.',
+                    'boad_of_study.required' => 'Board of study is required.',
+                    'roll_no.required' => 'Roll / Hall ticket number is required.',
+                    'passing_year.required' => 'Passing year is required.',
+                    'upload_docs.max' => 'Document file must be 5MB or smaller.',
+                ]);
+
                 if ($crmStudent) {
                     $academicCrmId = 'CRMA_' . ($crmStudent->applinano ?: 'APP') . '_' . time();
                     $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
@@ -384,17 +427,17 @@ class DashboardsController extends Controller
 
                     if ($evalType === 'CGPA' || $request->filled('cgpa_value')) {
                         $cgpaInput = $request->input('cgpa_value') ?? $sscMarks;
-                        if (is_numeric($cgpaInput)) {
-                            $tenthCgpaNum = (float) $cgpaInput;
-                        } elseif (preg_match('/([\d\.]+)/', (string)$cgpaInput, $m)) {
-                            $tenthCgpaNum = (float) $m[1];
-                        }
+                        $tenthCgpaNum = is_numeric($cgpaInput) ? (float)$cgpaInput : 9.80;
+                        $tenthMarksNum = round($tenthCgpaNum * 9.5, 2);
+                        $evalType = 'CGPA';
                     } else {
-                        if (is_numeric($sscMarks)) {
-                            $tenthMarksNum = (float) $sscMarks;
-                        } elseif (preg_match('/([\d\.]+)/', (string)$sscMarks, $m)) {
-                            $tenthMarksNum = (float) $m[1];
+                        $tenthMarksNum = is_numeric($sscMarks) ? (float)$sscMarks : 590.0;
+                        if ($tenthMarksNum > 100) {
+                            $tenthCgpaNum = round(($tenthMarksNum / 600) * 10, 2);
+                        } else {
+                            $tenthCgpaNum = round($tenthMarksNum / 9.5, 2);
                         }
+                        $evalType = 'marks';
                     }
 
                     $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board') ?? 'Inter';
@@ -411,37 +454,67 @@ class DashboardsController extends Controller
                         }
                     }
 
+                    $academicPayload = [
+                        'crmid' => $existingAcademic?->crmid ?? $academicCrmId,
+                        'progmid' => $crmStudent->programid,
+                        'branchid' => $crmStudent->branchid,
+                        'tenth_school_name' => $tenthSchool,
+                        'tenth_study_board' => $tenthBoard,
+                        'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location') ?? 'Guntur',
+                        'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location') ?? 'Guntur',
+                        'tenth_roll_no' => $tenthRoll,
+                        'tenth_passed_year' => $tenthYear,
+                        'tenth_marks_type' => $evalType,
+                        'tenth_marks' => $tenthMarksNum,
+                        'tenth_cgpa' => $tenthCgpaNum,
+                        'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name') ?? 'Narayana Junior College',
+                        'pu2_study_board' => $courseChoice,
+                        'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
+                        'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
+                        'pu2_passed_year' => (int) ($request->input('inter_year') ?? $request->input('pu2_passed_year') ?? 2026),
+                        'pu2_marks_type' => 'Marks',
+                        'pu2_marks' => is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : 962.00,
+                        'pu2_cgpa' => is_numeric($request->input('inter_cgpa')) ? (float)$request->input('inter_cgpa') : null,
+                        'pu2_current_status' => $subsetChoice,
+                        'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
+                        'log_datetime' => now(),
+                        'log_ipaddress' => $request->ip(),
+                    ];
+
+                    // If Degree level is M.Tech or PhD, save UG (B.Tech) details
+                    if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
+                        $academicPayload['ug_college_name'] = $request->input('ug_college_name') ?: "Vignan's Lara Institute of Tech & Science";
+                        $academicPayload['ug_university_board'] = $request->input('ug_university_board') ?: 'JNTUK / Andhra University';
+                        $academicPayload['ug_college_city'] = $request->input('ug_college_city') ?: 'Guntur';
+                        $academicPayload['ug_college_district'] = $request->input('ug_college_district') ?: 'Guntur';
+                        $academicPayload['ug_roll_no'] = $request->input('ug_roll_no') ?: '201FA04001';
+                        $academicPayload['ug_passed_year'] = (int)($request->input('ug_passed_year') ?: 2024);
+                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: 'CGPA';
+                        $academicPayload['ug_marks'] = is_numeric($request->input('ug_marks')) ? (float)$request->input('ug_marks') : null;
+                        $academicPayload['ug_cgpa'] = is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : 8.75;
+                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: 'Completed';
+                    }
+
+                    // If Degree level is PhD, save PG (M.Tech) details
+                    if ($request->filled('pg_college_name') || $request->input('degree_level') === 'phd') {
+                        $academicPayload['pg_college_name'] = $request->input('pg_college_name') ?: 'VFSTR University';
+                        $academicPayload['pg_university_board'] = $request->input('pg_university_board') ?: 'VFSTR';
+                        $academicPayload['pg_college_city'] = $request->input('pg_college_city') ?: 'Vadlamudi, Guntur';
+                        $academicPayload['pg_college_district'] = $request->input('pg_college_district') ?: 'Guntur';
+                        $academicPayload['pg_roll_no'] = $request->input('pg_roll_no') ?: '241FK01001';
+                        $academicPayload['pg_passed_year'] = (int)($request->input('pg_passed_year') ?: 2026);
+                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: 'CGPA';
+                        $academicPayload['pg_marks'] = is_numeric($request->input('pg_marks')) ? (float)$request->input('pg_marks') : null;
+                        $academicPayload['pg_cgpa'] = is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : 9.10;
+                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
+                    }
+
                     StudentAcademicDetail::updateOrCreate(
                         [
                             'applino' => $crmStudent->applinano,
                             'phoneno' => $crmStudent->phoneno,
                         ],
-                        [
-                            'crmid' => $existingAcademic?->crmid ?? $academicCrmId,
-                            'progmid' => $crmStudent->programid,
-                            'branchid' => $crmStudent->branchid,
-                            'tenth_school_name' => $tenthSchool,
-                            'tenth_study_board' => $tenthBoard,
-                            'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location') ?? 'Guntur',
-                            'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location') ?? 'Guntur',
-                            'tenth_roll_no' => $tenthRoll,
-                            'tenth_passed_year' => $tenthYear,
-                            'tenth_marks_type' => $evalType,
-                            'tenth_marks' => $tenthMarksNum,
-                            'tenth_cgpa' => $tenthCgpaNum ?: ($evalType === 'CGPA' ? 9.80 : null),
-                            'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name') ?? 'Narayana Junior College',
-                            'pu2_study_board' => $courseChoice,
-                            'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
-                            'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
-                            'pu2_passed_year' => (int) ($request->input('inter_year') ?? $request->input('pu2_passed_year') ?? 2026),
-                            'pu2_marks_type' => 'Marks',
-                            'pu2_marks' => is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : 962.00,
-                            'pu2_cgpa' => is_numeric($request->input('inter_cgpa')) ? (float)$request->input('inter_cgpa') : null,
-                            'pu2_current_status' => $subsetChoice,
-                            'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
-                            'log_datetime' => now(),
-                            'log_ipaddress' => $request->ip(),
-                        ]
+                        $academicPayload
                     );
 
                     $crmStudent->update([
