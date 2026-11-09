@@ -1353,14 +1353,14 @@
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Date of Birth <span class="required-star">*</span></label>
-                                <input type="date" name="dob" class="field-input" value="2008-05-14" required>
+                                <input type="date" name="dob" class="field-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '2008-05-14' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Gender <span class="required-star">*</span></label>
                                 <select name="gender" class="field-select">
-                                    <option value="Male" selected>Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Male" {{ ($personalInfo?->gender === 'Male' || !$personalInfo) ? 'selected' : '' }}>Male</option>
+                                    <option value="Female" {{ ($personalInfo?->gender === 'Female') ? 'selected' : '' }}>Female</option>
+                                    <option value="Other" {{ ($personalInfo?->gender === 'Other') ? 'selected' : '' }}>Other</option>
                                 </select>
                             </div>
                             <div class="field-group">
@@ -1380,13 +1380,13 @@
                             <div class="field-group">
                                 <label class="field-label">Social Category / Community</label>
                                 <select name="category" class="field-select">
-                                    <option value="OC" selected>Open Category (OC)</option>
-                                    <option value="OBC">Other Backward Class (OBC)</option>
-                                    <option value="BC-A">BC-A</option>
-                                    <option value="BC-B">BC-B</option>
-                                    <option value="SC">Scheduled Caste (SC)</option>
-                                    <option value="ST">Scheduled Tribe (ST)</option>
-                                    <option value="EWS">Economically Weaker Section (EWS)</option>
+                                    <option value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'selected' : '' }}>Open Category (OC)</option>
+                                    <option value="OBC" {{ ($personalInfo?->caste_category === 'OBC') ? 'selected' : '' }}>Other Backward Class (OBC)</option>
+                                    <option value="BC-A" {{ ($personalInfo?->caste_category === 'BC-A') ? 'selected' : '' }}>BC-A</option>
+                                    <option value="BC-B" {{ ($personalInfo?->caste_category === 'BC-B') ? 'selected' : '' }}>BC-B</option>
+                                    <option value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'selected' : '' }}>Scheduled Caste (SC)</option>
+                                    <option value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'selected' : '' }}>Scheduled Tribe (ST)</option>
+                                    <option value="EWS" {{ ($personalInfo?->caste_category === 'EWS') ? 'selected' : '' }}>Economically Weaker Section (EWS)</option>
                                 </select>
                             </div>
                         </div>
@@ -1399,7 +1399,7 @@
                         <div class="form-grid-3">
                             <div class="field-group">
                                 <label class="field-label">Mobile Number</label>
-                                <input type="text" name="phone" class="field-input" value="{{ $user?->phnno }}" readonly>
+                                <input type="text" name="phone" class="field-input" value="{{ $crmStudent?->phoneno ?: $user?->phnno }}" readonly>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Personal Email ID <span class="required-star">*</span></label>
@@ -1415,23 +1415,23 @@
                             </div>
                             <div class="field-group" style="grid-column: span 2;">
                                 <label class="field-label">Door No / Street Address <span class="required-star">*</span></label>
-                                <input type="text" name="address" class="field-input" value="Flat 402, Sri Sai Nilayam, Brodipet 4th Line" required>
+                                <input type="text" name="address" class="field-input" value="{{ $personalInfo?->village ?: 'Flat 402, Sri Sai Nilayam, Brodipet 4th Line' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Pin Code <span class="required-star">*</span></label>
-                                <input type="text" name="pincode" class="field-input" value="522002" maxlength="6" required>
+                                <input type="text" name="pincode" class="field-input" value="{{ $personalInfo?->pincode ?: '522002' }}" maxlength="6" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">City / Town <span class="required-star">*</span></label>
-                                <input type="text" name="city" class="field-input" value="Guntur" required>
+                                <input type="text" name="city" class="field-input" value="{{ $personalInfo?->city_mandal ?: 'Guntur' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">State</label>
-                                <input type="text" name="state" class="field-input" value="Andhra Pradesh" readonly>
+                                <input type="text" name="state" class="field-input" value="{{ $personalInfo?->state ?: 'Andhra Pradesh' }}" readonly>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Country</label>
-                                <input type="text" name="country" class="field-input" value="India" readonly>
+                                <input type="text" name="country" class="field-input" value="{{ $personalInfo?->country ?: 'India' }}" readonly>
                             </div>
                         </div>
                     </div>
@@ -1473,35 +1473,35 @@
                             <div class="field-group">
                                 <label class="field-label">Board of Examination <span class="required-star">*</span></label>
                                 <select name="ssc_board" class="field-select">
-                                    <option value="BSEAP" selected>Board of Secondary Education, AP (BSEAP)</option>
-                                    <option value="CBSE">Central Board of Secondary Education (CBSE)</option>
-                                    <option value="ICSE">Indian Certificate of Secondary Education (ICSE)</option>
-                                    <option value="OTHER">Other State Board</option>
+                                    <option value="BSEAP" {{ ($academicDetails?->tenth_study_board === 'BSEAP' || !$academicDetails) ? 'selected' : '' }}>Board of Secondary Education, AP (BSEAP)</option>
+                                    <option value="CBSE" {{ ($academicDetails?->tenth_study_board === 'CBSE') ? 'selected' : '' }}>Central Board of Secondary Education (CBSE)</option>
+                                    <option value="ICSE" {{ ($academicDetails?->tenth_study_board === 'ICSE') ? 'selected' : '' }}>Indian Certificate of Secondary Education (ICSE)</option>
+                                    <option value="OTHER" {{ ($academicDetails?->tenth_study_board === 'OTHER') ? 'selected' : '' }}>Other State Board</option>
                                 </select>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">School Name <span class="required-star">*</span></label>
-                                <input type="text" name="ssc_school" class="field-input" value="Sri Chaitanya English Medium High School" required>
+                                <input type="text" name="ssc_school" class="field-input" value="{{ $academicDetails?->tenth_school_name ?: 'Sri Chaitanya English Medium High School' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">SSC Hall Ticket Number <span class="required-star">*</span></label>
-                                <input type="text" name="ssc_hallticket" class="field-input" value="2407189021" required>
+                                <input type="text" name="ssc_hallticket" class="field-input" value="{{ $academicDetails?->tenth_roll_no ?: '2407189021' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Year of Passing <span class="required-star">*</span></label>
                                 <select name="ssc_year" class="field-select">
-                                    <option value="2024" selected>2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
+                                    <option value="2024" {{ ($academicDetails?->tenth_passed_year == 2024 || !$academicDetails) ? 'selected' : '' }}>2024</option>
+                                    <option value="2023" {{ ($academicDetails?->tenth_passed_year == 2023) ? 'selected' : '' }}>2023</option>
+                                    <option value="2022" {{ ($academicDetails?->tenth_passed_year == 2022) ? 'selected' : '' }}>2022</option>
                                 </select>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Grade / CGPA / Total Marks <span class="required-star">*</span></label>
-                                <input type="text" name="ssc_marks" class="field-input" value="9.8 / 10.0 CGPA" required>
+                                <input type="text" name="ssc_marks" class="field-input" value="{{ $academicDetails?->tenth_cgpa ? ($academicDetails->tenth_cgpa . ' / 10.0 CGPA') : '9.8 / 10.0 CGPA' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">School District / State</label>
-                                <input type="text" name="ssc_location" class="field-input" value="Guntur, Andhra Pradesh">
+                                <input type="text" name="ssc_location" class="field-input" value="{{ $academicDetails?->tenth_school_city ?: 'Guntur, Andhra Pradesh' }}">
                             </div>
                         </div>
                     </div>
@@ -1514,20 +1514,20 @@
                             <div class="field-group">
                                 <label class="field-label">Qualifying Examination <span class="required-star">*</span></label>
                                 <select name="inter_board" class="field-select">
-                                    <option value="BIEAP" selected>Board of Intermediate Education, AP (BIEAP)</option>
-                                    <option value="TSBIE">Telangana Board of Intermediate (TSBIE)</option>
-                                    <option value="CBSE_XII">CBSE Class XII</option>
-                                    <option value="ISC">ISC (Class XII)</option>
-                                    <option value="DIPLOMA">Polytechnic Diploma</option>
+                                    <option value="BIEAP" {{ ($academicDetails?->pu2_study_board === 'BIEAP' || !$academicDetails) ? 'selected' : '' }}>Board of Intermediate Education, AP (BIEAP)</option>
+                                    <option value="TSBIE" {{ ($academicDetails?->pu2_study_board === 'TSBIE') ? 'selected' : '' }}>Telangana Board of Intermediate (TSBIE)</option>
+                                    <option value="CBSE_XII" {{ ($academicDetails?->pu2_study_board === 'CBSE_XII') ? 'selected' : '' }}>CBSE Class XII</option>
+                                    <option value="ISC" {{ ($academicDetails?->pu2_study_board === 'ISC') ? 'selected' : '' }}>ISC (Class XII)</option>
+                                    <option value="DIPLOMA" {{ ($academicDetails?->pu2_study_board === 'DIPLOMA') ? 'selected' : '' }}>Polytechnic Diploma</option>
                                 </select>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Junior College Name <span class="required-star">*</span></label>
-                                <input type="text" name="inter_college" class="field-input" value="Narayana Junior College, Ring Road Campus" required>
+                                <input type="text" name="inter_college" class="field-input" value="{{ $academicDetails?->pu2_college_name ?: 'Narayana Junior College, Ring Road Campus' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Intermediate Hall Ticket No <span class="required-star">*</span></label>
-                                <input type="text" name="inter_hallticket" class="field-input" value="2601248931" required>
+                                <input type="text" name="inter_hallticket" class="field-input" value="{{ $academicDetails?->pu2_roll_no ?: '2601248931' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Major Stream / Group <span class="required-star">*</span></label>
@@ -1540,14 +1540,14 @@
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Marks Obtained / Percentage <span class="required-star">*</span></label>
-                                <input type="text" name="inter_marks" class="field-input" value="962 / 1000 (96.2%)" required>
+                                <input type="text" name="inter_marks" class="field-input" value="{{ $academicDetails?->pu2_marks ? ($academicDetails->pu2_marks . ' / 1000') : '962 / 1000 (96.2%)' }}" required>
                             </div>
                             <div class="field-group">
                                 <label class="field-label">Year of Completion <span class="required-star">*</span></label>
                                 <select name="inter_year" class="field-select">
-                                    <option value="2026" selected>2026 (Appearing / Passed)</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
+                                    <option value="2026" {{ ($academicDetails?->pu2_passed_year == 2026 || !$academicDetails) ? 'selected' : '' }}>2026 (Appearing / Passed)</option>
+                                    <option value="2025" {{ ($academicDetails?->pu2_passed_year == 2025) ? 'selected' : '' }}>2025</option>
+                                    <option value="2024" {{ ($academicDetails?->pu2_passed_year == 2024) ? 'selected' : '' }}>2024</option>
                                 </select>
                             </div>
                         </div>

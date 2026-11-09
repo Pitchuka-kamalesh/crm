@@ -7,7 +7,9 @@ use App\Models\Branch;
 use App\Models\Campus;
 use App\Models\CrmStudentRegistration;
 use App\Models\Program;
+use App\Models\StudentAcademicDetail;
 use App\Models\StudentEducationInfo;
+use App\Models\StudentPersonalInfo;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -69,6 +71,22 @@ class DashboardsController extends Controller
 
         $student = $crmStudent;
         $regulation = 'R25';
+
+        // Fetch Personal Info and Academic Details from CRM tables
+        $personalInfo = null;
+        $academicDetails = null;
+        if ($crmStudent) {
+            try {
+                $personalInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
+                    ->where('phoneno', $crmStudent->phoneno)
+                    ->first();
+                $academicDetails = StudentAcademicDetail::where('applino', $crmStudent->applinano)
+                    ->where('phoneno', $crmStudent->phoneno)
+                    ->first();
+            } catch (\Throwable $e) {
+                Log::warning('Could not load student personal/academic details: ' . $e->getMessage());
+            }
+        }
 
         // Fetch 10th and Inter educational info
         $edu10th = null;
@@ -163,6 +181,8 @@ class DashboardsController extends Controller
             'user',
             'student',
             'crmStudent',
+            'personalInfo',
+            'academicDetails',
             'edu10th',
             'eduInter',
             'documents',
@@ -220,7 +240,128 @@ class DashboardsController extends Controller
                 }
                 $nextStep = 2;
                 $msg = 'Stage 1: Admission Fee Payment confirmed!';
-            } elseif ($step >= 2 && $step <= 8) {
+            } elseif ($step === 2) {
+                if ($crmStudent) {
+                    $personalCrmId = 'CRMP_' . ($crmStudent->applinano ?: 'APP') . '_' . time();
+                    $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
+                        ->where('phoneno', $crmStudent->phoneno)
+                        ->first();
+
+                    StudentPersonalInfo::updateOrCreate(
+                        [
+                            'applino' => $crmStudent->applinano,
+                            'phoneno' => $crmStudent->phoneno,
+                        ],
+                        [
+                            'crmid' => $existingInfo?->crmid ?? $personalCrmId,
+                            'dob' => $request->input('dob') ?: null,
+                            'gender' => $request->input('gender') ?: 'Male',
+                            'parent_name' => $request->input('parent_name'),
+                            'parentphono' => $request->input('parentphono'),
+                            'caste_category' => $request->input('category') ?? $request->input('caste_category'),
+                            'referedby' => $request->input('referedby'),
+                            'referedempcode' => $request->input('referedempcode'),
+                            'country' => $request->input('country', 'India'),
+                            'state' => $request->input('state', 'Andhra Pradesh'),
+                            'district' => $request->input('district', 'Guntur'),
+                            'city_mandal' => $request->input('city') ?? $request->input('city_mandal'),
+                            'village' => $request->input('address') ?? $request->input('village'),
+                            'pincode' => $request->input('pincode'),
+                            'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
+                            'log_ipaddress' => $request->ip(),
+                            'log_timestamp' => now(),
+                        ]
+                    );
+
+                    $crmUpdates = [
+                        'stage2' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ];
+                    if ($request->filled('name')) {
+                        $crmUpdates['name'] = $request->input('name');
+                    }
+                    if ($request->filled('email')) {
+                        $crmUpdates['emailid'] = $request->input('email');
+                    }
+                    if ($request->has('hostel_required')) {
+                        $crmUpdates['ableto'] = (bool) $request->input('hostel_required');
+                    }
+                    $crmStudent->update($crmUpdates);
+                }
+                $nextStep = 3;
+                $msg = 'Stage 2: Personal Profile saved successfully!';
+            } elseif ($step === 3) {
+                if ($crmStudent) {
+                    $academicCrmId = 'CRMA_' . ($crmStudent->applinano ?: 'APP') . '_' . time();
+                    $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
+                        ->where('phoneno', $crmStudent->phoneno)
+                        ->first();
+
+                    $sscMarks = $request->input('ssc_marks');
+                    $tenthMarksNum = null;
+                    $tenthCgpaNum = null;
+                    if (is_numeric($sscMarks)) {
+                        $tenthMarksNum = (float) $sscMarks;
+                    } elseif (preg_match('/([\d\.]+)\s*\/\s*10/i', (string) $sscMarks, $m)) {
+                        $tenthCgpaNum = (float) $m[1];
+                    } elseif (preg_match('/([\d\.]+)/', (string) $sscMarks, $m)) {
+                        $tenthCgpaNum = (float) $m[1];
+                    }
+
+                    $interMarks = $request->input('inter_marks');
+                    $interMarksNum = null;
+                    $interCgpaNum = null;
+                    if (is_numeric($interMarks)) {
+                        $interMarksNum = (float) $interMarks;
+                    } elseif (preg_match('/([\d\.]+)\s*\/\s*1000/i', (string) $interMarks, $m)) {
+                        $interMarksNum = (float) $m[1];
+                    } elseif (preg_match('/([\d\.]+)/', (string) $interMarks, $m)) {
+                        $interMarksNum = (float) $m[1];
+                    }
+
+                    StudentAcademicDetail::updateOrCreate(
+                        [
+                            'applino' => $crmStudent->applinano,
+                            'phoneno' => $crmStudent->phoneno,
+                        ],
+                        [
+                            'crmid' => $existingAcademic?->crmid ?? $academicCrmId,
+                            'progmid' => $crmStudent->programid,
+                            'branchid' => $crmStudent->branchid,
+                            'tenth_school_name' => $request->input('ssc_school') ?? $request->input('tenth_school_name'),
+                            'tenth_study_board' => $request->input('ssc_board') ?? $request->input('tenth_study_board'),
+                            'tenth_school_city' => $request->input('ssc_location') ?? $request->input('tenth_school_city'),
+                            'tenth_school_district' => $request->input('ssc_location') ?? $request->input('tenth_school_district'),
+                            'tenth_roll_no' => $request->input('ssc_hallticket') ?? $request->input('tenth_roll_no'),
+                            'tenth_passed_year' => (int) ($request->input('ssc_year') ?? 2024),
+                            'tenth_marks_type' => 'CGPA',
+                            'tenth_marks' => $tenthMarksNum,
+                            'tenth_cgpa' => $tenthCgpaNum ?: 9.80,
+                            'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
+                            'pu2_study_board' => $request->input('inter_board') ?? $request->input('pu2_study_board'),
+                            'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
+                            'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
+                            'pu2_passed_year' => (int) ($request->input('inter_year') ?? 2026),
+                            'pu2_marks_type' => 'Marks',
+                            'pu2_marks' => $interMarksNum ?: 962.00,
+                            'pu2_cgpa' => $interCgpaNum,
+                            'pu2_current_status' => 'Passed',
+                            'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
+                            'log_datetime' => now(),
+                            'log_ipaddress' => $request->ip(),
+                        ]
+                    );
+
+                    $crmStudent->update([
+                        'stage3' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 4;
+                $msg = 'Stage 3: Academic Records saved successfully!';
+            } elseif ($step >= 4 && $step <= 5) {
                 if ($crmStudent) {
                     $crmStudent->update([
                         'stage' . $step => 'completed',
@@ -228,7 +369,7 @@ class DashboardsController extends Controller
                         'log_timestamp' => now(),
                     ]);
                 }
-                $nextStep = min(8, $step + 1);
+                $nextStep = min(5, $step + 1);
                 $msg = 'Stage ' . $step . ' saved successfully!';
             } else {
                 $msg = 'Stage updated successfully!';
