@@ -157,7 +157,21 @@
             };
         @endphp
 
-        <!-- DYNAMIC ROLE-BASED MENUS (100% from database master.menus & master.menu_access_roles) -->
+        <!-- DYNAMIC ROLE-BASED MENUS (Strictly from database master.menus & master.menu_access_roles) -->
+        @if($roleId != 4)
+            <!-- PROMINENT ACTIVE PILL: DASHBOARD -->
+            @php
+                $dashboardRoute = route('crm.alias', ['tab' => 'overview']);
+            @endphp
+            <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+        @endif
+
         @foreach($menuGroups as $mainId => $group)
             @php
                 $main = $group['main'];
@@ -176,16 +190,7 @@
                 $mainUrl = $resolveMenuUrl($main->controller_ref);
             @endphp
 
-            @if($main->menu_code === 'DASH0001' || strtolower($main->menu_name) === 'dashboard')
-                <!-- PROMINENT ACTIVE PILL: DASHBOARD (DRIVEN DYNAMICALLY FROM DATABASE) -->
-                <a href="{{ $mainUrl }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="{{ $main->menu_name }}">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                    <span>{{ $main->menu_name }}</span>
-                </a>
-            @elseif($hasSubmenus)
+            @if($hasSubmenus)
                 <!-- ACCORDION MAIN MENU (mposition = 1 with submenus mposition = 2) -->
                 <div class="accordion-group {{ $isGroupOpen ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
                     <button type="button" class="accordion-header {{ $isGroupOpen ? 'active' : '' }}" onclick="toggleAccordion('group-{{ strtolower($main->menu_code) }}')">
