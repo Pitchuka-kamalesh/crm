@@ -1130,6 +1130,49 @@
         @endif
 
 
+        <!-- STEP PROGRESS INDICATION TRACKER -->
+        <section class="stepper-card">
+            <div class="stepper-header">
+                <div class="stepper-title-box">
+                    <h2>Admission Onboarding</h2>
+                    <span class="stepper-step-indicator">Step {{ $activeStep }} of 8</span>
+                </div>
+                <div class="stepper-progress-box">
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" style="width: {{ $progressPercent }}%;"></div>
+                    </div>
+                    <span class="progress-percent-label">{{ $progressPercent }}% Complete</span>
+                </div>
+            </div>
+
+            <!-- 8 Stages Indication Bar -->
+            <div class="stepper-nav-bar">
+                @foreach($stages as $num => $stg)
+                    @php
+                        $isActive = ($activeStep === $num);
+                        $isDone = ($stg['status'] === 'completed');
+                    @endphp
+                    <a href="{{ route('dashboards.index', ['step' => $num]) }}"
+                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }}"
+                       title="Step {{ $num }}: {{ $stg['title'] }}">
+                        <div class="step-circle">
+                            @if($isDone)
+                                ✓
+                            @else
+                                {{ $num }}
+                            @endif
+                        </div>
+                        <span class="step-nav-name">{{ $stg['title'] }}</span>
+                        @if($isActive)
+                            <span class="step-nav-status-sub">In Progress</span>
+                        @elseif($isDone)
+                            <span class="step-nav-status-sub done">Completed</span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        </section>
+
         <!-- STEP CONTENT PANEL -->
         <section class="step-panel-card">
 
