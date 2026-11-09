@@ -116,7 +116,7 @@ class DashboardsController extends Controller
             $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 113 => 5];
             foreach ($dbStageMenus as $m) {
                 $stepNum = null;
-                if (!empty($m->controller_ref) && preg_match('/step=(\d+)/', $m->controller_ref, $matches)) {
+                if (!empty($m->controller_ref) && preg_match('/step\D*(\d+)/i', $m->controller_ref, $matches)) {
                     $stepNum = (int) $matches[1];
                 } elseif (isset($stepMap[$m->menu_id])) {
                     $stepNum = $stepMap[$m->menu_id];
