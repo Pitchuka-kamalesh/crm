@@ -62,7 +62,7 @@ Route::get('/crm/stpstep4', fn() => redirect()->route('dashboards.index', ['step
 Route::get('/crm/stpstep5', fn() => redirect()->route('dashboards.index', ['step' => 5]))->middleware('auth');
 Route::get('/crm/stpstep6', fn() => redirect()->route('dashboards.index', ['step' => 6]))->middleware('auth');
 Route::get('/crm/stpstep7', fn() => redirect()->route('dashboards.index', ['step' => 7]))->middleware('auth');
-Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 8]))->middleware('auth');
+Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 1]))->middleware('auth');
 
 // PayU Gateway Integration Routes
 Route::post('/payu/initiate', [\App\Http\Controllers\PayUController::class, 'initiate'])->middleware('auth')->name('payu.initiate');
