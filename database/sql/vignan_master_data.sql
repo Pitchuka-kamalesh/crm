@@ -324,9 +324,9 @@ INSERT INTO master.menus VALUES (107, 'LEADS0002', 2, 'Allotted Leads', 'leads/a
 INSERT INTO master.menus VALUES (106, 'FINA0002', 3, 'Paid details', 'finance/paiddetails', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
 INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'Fee Payment', 'dashboards?step=1', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
 INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'Personal Profile', 'dashboards?step=2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Records', 'dashboards?step=3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Certificates & KYC', 'dashboards?step=4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'Family Details', 'dashboards?step=5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Info', 'dashboards?step=3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Application Download', 'dashboards?step=4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'VSAT Results', 'dashboards?step=5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (114, 'CRMM0008', 1, 'Seat Allotment', 'dashboards?step=6', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (115, 'CRMM0009', 1, 'Tuition Structure', 'dashboards?step=7', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (116, 'LEADS0003', 2, 'Leads Allocation', 'leads/leadsallocation', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);

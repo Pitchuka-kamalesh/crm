@@ -1050,9 +1050,11 @@
             <ul class="dash-nav-links">
                 <li><a href="{{ route('dashboards.index', ['step' => 1]) }}" class="dash-nav-link {{ $activeStep === 1 ? 'active' : '' }}">Fee Payment</a></li>
                 <li><a href="{{ route('dashboards.index', ['step' => 2]) }}" class="dash-nav-link {{ $activeStep === 2 ? 'active' : '' }}">Profile</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 3]) }}" class="dash-nav-link {{ $activeStep === 3 ? 'active' : '' }}">Academic</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 4]) }}" class="dash-nav-link {{ $activeStep === 4 ? 'active' : '' }}">Documents</a></li>
+                <li><a href="{{ route('dashboards.index', ['step' => 3]) }}" class="dash-nav-link {{ $activeStep === 3 ? 'active' : '' }}">Academic Info</a></li>
+                <li><a href="{{ route('dashboards.index', ['step' => 4]) }}" class="dash-nav-link {{ $activeStep === 4 ? 'active' : '' }}">Application Download</a></li>
+                <li><a href="{{ route('dashboards.index', ['step' => 5]) }}" class="dash-nav-link {{ $activeStep === 5 ? 'active' : '' }}">VSAT Results</a></li>
                 <li><a href="{{ route('dashboards.index', ['step' => 6]) }}" class="dash-nav-link {{ $activeStep === 6 ? 'active' : '' }}">Allotment</a></li>
+                <li><a href="{{ route('dashboards.index', ['step' => 7]) }}" class="dash-nav-link {{ $activeStep === 7 ? 'active' : '' }}">Tuition</a></li>
                 <li><a href="{{ route('dashboards.index', ['step' => 8]) }}" class="dash-nav-link {{ $activeStep === 8 ? 'active' : '' }}">Digital ID</a></li>
             </ul>
 
@@ -1454,12 +1456,12 @@
                     </div>
                 </form>
 
-            <!-- ================= STAGE 3: ACADEMIC RECORDS ================= -->
+            <!-- ================= STAGE 3: ACADEMIC INFO ================= -->
             @elseif($activeStep === 3)
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 3 of 8 &bull; Education Background</div>
-                        <h3>Academic Records</h3>
+                        <h3>Academic Info</h3>
                         <p>Enter your 10th Standard (SSC) and 12th Standard (Intermediate / Diploma) educational qualifications.</p>
                     </div>
                     @if($stages[3]['status'] === 'completed')
@@ -1571,16 +1573,16 @@
                     </div>
                 </form>
 
-            <!-- ================= STAGE 4: CERTIFICATES & KYC ================= -->
+            <!-- ================= STAGE 4: APPLICATION DOWNLOAD ================= -->
             @elseif($activeStep === 4)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 4 of 8 &bull; Document Verification</div>
-                        <h3>Certificates &amp; Document KYC</h3>
-                        <p>Upload your academic certificates and official identity proof for document scrutiny.</p>
+                        <div class="step-panel-kicker">Stage 4 of 8 &bull; Application &amp; Documents</div>
+                        <h3>Application Download</h3>
+                        <p>Download your official candidate admission application form and verify submitted academic documents.</p>
                     </div>
                     @if($stages[4]['status'] === 'completed')
-                        <span class="step-header-tag tag-success">✓ Completed</span>
+                        <span class="step-header-tag tag-success">✓ Available</span>
                     @else
                         <span class="step-header-tag tag-pending">In Progress</span>
                     @endif
@@ -1589,6 +1591,24 @@
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
                     <input type="hidden" name="step" value="4">
+
+                    <!-- Official Application Form Download Capsule -->
+                    <div class="section-box" style="background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); border: 1.5px solid #86efac; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 48px; height: 48px; border-radius: 10px; background: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff;">
+                                    📄
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Official Candidate Admission Application Form</h4>
+                                    <p style="margin: 0.2rem 0 0; font-size: 0.82rem; color: #475569;">Application No: <strong>#{{ $appNo }}</strong> &bull; Generated from Admission Master Database</p>
+                                </div>
+                            </div>
+                            <a href="javascript:void(0)" onclick="window.print()" class="btn-step-next" style="text-decoration: none; padding: 0.6rem 1.25rem; font-size: 0.85rem; background: #16a34a;">
+                                <span>📥 Download Application PDF</span>
+                            </a>
+                        </div>
+                    </div>
 
                     <div class="section-box">
                         <div class="section-box-title">
@@ -1671,26 +1691,26 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
-                            &larr; Stage 3: Academic Records
+                            &larr; Stage 3: Academic Info
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Proceed to Stage 5 &rarr;</span>
+                            <span>Proceed to Stage 5: VSAT Results &rarr;</span>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STAGE 5: FAMILY & PARENT DETAILS ================= -->
+            <!-- ================= STAGE 5: VSAT RESULTS ================= -->
             @elseif($activeStep === 5)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 5 of 8 &bull; Family Information</div>
-                        <h3>Parent &amp; Guardian Details</h3>
-                        <p>Provide contact details and occupational records of parents or local guardian.</p>
+                        <div class="step-panel-kicker">Stage 5 of 8 &bull; V-SAT 2026 Examination</div>
+                        <h3>VSAT Results &amp; Merit Scorecard</h3>
+                        <p>Official V-SAT (Vignan Scholastic Aptitude Test) scorecard, rank percentile, and merit scholarship eligibility.</p>
                     </div>
                     @if($stages[5]['status'] === 'completed')
-                        <span class="step-header-tag tag-success">✓ Completed</span>
+                        <span class="step-header-tag tag-success">✓ Verified</span>
                     @else
-                        <span class="step-header-tag tag-pending">In Progress</span>
+                        <span class="step-header-tag tag-success">✓ Merit Qualified</span>
                     @endif
                 </div>
 
@@ -1698,89 +1718,88 @@
                     @csrf
                     <input type="hidden" name="step" value="5">
 
+                    <!-- Official VSAT Merit Card -->
+                    <div class="section-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <div style="width:44px; height:44px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem;">
+                                    🏆
+                                </div>
+                                <div>
+                                    <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e3a8a;">V-SAT 2026 National Entrance Examination</h4>
+                                    <span style="font-size:0.8rem; color:#475569;">Hall Ticket: <strong>VSAT26-{{ $appNo ?: '2027000005' }}</strong> &bull; Exam Mode: Online Computer Based</span>
+                                </div>
+                            </div>
+                            <span class="meta-badge meta-badge-success" style="font-size:0.85rem; padding:0.4rem 0.85rem;">✓ Qualified for Counseling</span>
+                        </div>
+
+                        <div class="form-grid-3">
+                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">All India Rank (AIR)</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#2563eb; margin-top:0.2rem;">1,420</div>
+                                <span style="font-size:0.75rem; color:#16a34a; font-weight:700;">Top 3.2% Nationally</span>
+                            </div>
+                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Percentile Score</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">96.85 %</div>
+                                <span style="font-size:0.75rem; color:#475569;">Total Marks: 94 / 120</span>
+                            </div>
+                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Scholarship Granted</div>
+                                <div style="font-size:1.4rem; font-weight:900; color:#16a34a; margin-top:0.2rem;">25% Fee Waiver</div>
+                                <span style="font-size:0.75rem; color:#15803d; font-weight:600;">Category-A Merit Slab</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject-wise Breakdown -->
                     <div class="section-box">
                         <div class="section-box-title">
-                            <span>Father's Details</span>
+                            <span>Subject-wise Mark Distribution</span>
                         </div>
                         <div class="form-grid-3">
                             <div class="field-group">
-                                <label class="field-label">Father's Full Name <span class="required-star">*</span></label>
+                                <label class="field-label">Mathematics / Biology</label>
+                                <input type="text" class="field-input" value="42 / 50 Marks (84%)" readonly style="font-weight:700;">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">Physics</label>
+                                <input type="text" class="field-input" value="26 / 35 Marks (74.3%)" readonly style="font-weight:700;">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">Chemistry &amp; English</label>
+                                <input type="text" class="field-input" value="26 / 35 Marks (74.3%)" readonly style="font-weight:700;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parent / Emergency Contact Record (Preserved) -->
+                    <div class="section-box">
+                        <div class="section-box-title">
+                            <span>Parent &amp; Emergency Contact Records</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="field-group">
+                                <label class="field-label">Father's Name <span class="required-star">*</span></label>
                                 <input type="text" name="father_name" class="field-input" value="Guduru Venkateswara Rao" required>
                             </div>
                             <div class="field-group">
-                                <label class="field-label">Father's Occupation <span class="required-star">*</span></label>
-                                <select name="father_occupation" class="field-select">
-                                    <option value="Business" selected>Business / Self-Employed</option>
-                                    <option value="Government Service">Government Service</option>
-                                    <option value="Private Sector">Private Sector Corporate</option>
-                                    <option value="Agriculture">Agriculture / Farming</option>
-                                    <option value="Professional">Doctor / Lawyer / CA / Professor</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Father's Mobile Number <span class="required-star">*</span></label>
+                                <label class="field-label">Father's Contact Number <span class="required-star">*</span></label>
                                 <input type="tel" name="father_phone" class="field-input" value="9848123456" required>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Mother's Details</span>
-                        </div>
-                        <div class="form-grid-3">
                             <div class="field-group">
-                                <label class="field-label">Mother's Full Name <span class="required-star">*</span></label>
+                                <label class="field-label">Mother's Name <span class="required-star">*</span></label>
                                 <input type="text" name="mother_name" class="field-input" value="Guduru Lakshmi" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Mother's Occupation</label>
-                                <select name="mother_occupation" class="field-select">
-                                    <option value="Homemaker" selected>Homemaker</option>
-                                    <option value="Government Service">Government Service</option>
-                                    <option value="Teaching / Professor">Teaching / Academician</option>
-                                    <option value="Private Sector">Private Sector Corporate</option>
-                                    <option value="Business">Business</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Mother's Mobile Number</label>
-                                <input type="tel" name="mother_phone" class="field-input" value="9848654321">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Annual Household Income &amp; Emergency Contact</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Annual Family Income <span class="required-star">*</span></label>
-                                <select name="annual_income" class="field-select">
-                                    <option value="Upto 2 Lakhs">Below ₹ 2,00,000</option>
-                                    <option value="2 to 5 Lakhs">₹ 2,00,000 to ₹ 5,00,000</option>
-                                    <option value="5 to 8 Lakhs" selected>₹ 5,00,000 to ₹ 8,00,000</option>
-                                    <option value="Above 8 Lakhs">Above ₹ 8,00,000</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Emergency Contact Person <span class="required-star">*</span></label>
-                                <input type="text" name="emergency_contact_person" class="field-input" value="Guduru Venkateswara Rao (Father)" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Emergency Mobile Number <span class="required-star">*</span></label>
-                                <input type="tel" name="emergency_phone" class="field-input" value="9848123456" required>
                             </div>
                         </div>
                     </div>
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: Certificates &amp; KYC
+                            &larr; Stage 4: Application Download
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Proceed to Stage 6 &rarr;</span>
+                            <span>Confirm &amp; Proceed to Stage 6: Seat Allotment &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1848,7 +1867,7 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            &larr; Stage 5: Family Details
+                            &larr; Stage 5: VSAT Results
                         </a>
                         <button type="submit" class="btn-step-next">
                             <span>Confirm &amp; Proceed to Stage 7 &rarr;</span>

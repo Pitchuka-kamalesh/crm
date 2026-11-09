@@ -77,7 +77,7 @@ class DashboardsController extends Controller
         // Uploaded KYC documents
         $documents = collect();
 
-        // 8-Stage Metadata definitions
+        // 8-Stage Metadata definitions (strictly aligned with master.menus)
         $stageMeta = [
             1 => [
                 'title' => 'Fee Payment',
@@ -90,19 +90,19 @@ class DashboardsController extends Controller
                 'icon' => '👤',
             ],
             3 => [
-                'title' => 'Academic Records',
+                'title' => 'Academic Info',
                 'subtitle' => '10th SSC & Intermediate Details',
                 'icon' => '🎓',
             ],
             4 => [
-                'title' => 'Certificates & KYC',
-                'subtitle' => 'Document Verification & Uploads',
+                'title' => 'Application Download',
+                'subtitle' => 'Application PDF & Documents Download',
                 'icon' => '📄',
             ],
             5 => [
-                'title' => 'Family Details',
-                'subtitle' => 'Parent & Guardian Information',
-                'icon' => '👨‍👩‍👧',
+                'title' => 'VSAT Results',
+                'subtitle' => 'VSAT Scorecard & Merit Rank Details',
+                'icon' => '📊',
             ],
             6 => [
                 'title' => 'Seat Allotment',
