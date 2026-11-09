@@ -1025,6 +1025,224 @@
                 padding: 1rem;
             }
         }
+
+        /* ================= EXACT PERSONAL APPLICATION & MOCKUP STYLING ================= */
+        .personal-app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.35rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .personal-app-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #0f2744;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .btn-pdf-download {
+            background: #0f2744;
+            color: #ffffff;
+            padding: 0.6rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(15, 39, 68, 0.25);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-pdf-download:hover {
+            background: #1e3a8a;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 39, 68, 0.35);
+        }
+
+        .mockup-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .mockup-cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mockup-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.5rem 1.65rem;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mockup-card.card-active-step {
+            border-color: #3b82f6;
+            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.12);
+        }
+
+        .mockup-card-title {
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.35;
+        }
+
+        .mockup-field-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .mockup-field-row-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mockup-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .mockup-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .mockup-input, .mockup-select {
+            width: 100%;
+            background: #eef3f7;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 0.6rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+            font-family: inherit;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .mockup-input:focus, .mockup-select:focus {
+            outline: none;
+            border-color: #0f2744;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
+        }
+
+        .mockup-subbox {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1.15rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mockup-subbox-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 0.35rem 0;
+        }
+
+        .mockup-radio-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem 1rem;
+            margin: 0.25rem 0 0.5rem;
+        }
+
+        .mockup-radio-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.65rem 1.25rem;
+            margin: 0.35rem 0 0.5rem;
+        }
+
+        .mockup-radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+        }
+
+        .mockup-radio-label input[type="radio"] {
+            accent-color: #0f2744;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .mockup-pill-badge {
+            background: #475569;
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 0.3rem 0.85rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            align-self: flex-start;
+        }
+
+        .mockup-file-wrap {
+            display: flex;
+            align-items: center;
+            background: #eef3f7;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .mockup-file-text {
+            flex: 1;
+            padding: 0.55rem 0.85rem;
+            font-size: 0.82rem;
+            color: #64748b;
+        }
+
+        .mockup-browse-btn {
+            background: #3f7b82;
+            color: #ffffff;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.84rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            text-align: center;
+        }
+
+        .mockup-browse-btn:hover {
+            background: #2e5f65;
+        }
     </style>
 </head>
 <body>
@@ -1323,245 +1541,289 @@
                     </div>
                 </div>
 
-            <!-- ================= STAGE 2: PERSONAL PROFILE ================= -->
+            <!-- ================= STAGE 2: PERSONAL INFO (SEPARATE STEP 2) ================= -->
             @elseif($activeStep === 2)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 2 of 5 &bull; Candidate Information</div>
-                        <h3>{{ $stages[2]['title'] }}</h3>
-                        <p>Verify and update your personal details, contact coordinates, and residential background.</p>
-                    </div>
-                    @if($stages[2]['status'] === 'completed')
-                        <span class="step-header-tag tag-success">✓ Completed</span>
-                    @else
-                        <span class="step-header-tag tag-pending">In Progress</span>
-                    @endif
+                <div class="personal-app-header">
+                    <h2 class="personal-app-title">Personal Application</h2>
+                    <a href="javascript:void(0)" onclick="window.print()" class="btn-pdf-download">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span>Pdf download</span>
+                    </a>
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="2">
+                <div style="max-width: 720px; margin: 0 auto; width: 100%;">
+                    <!-- CARD 1: 2. PERSONAL INFO -->
+                    <div class="mockup-card card-active-step">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                            <h3 class="mockup-card-title">2. personal info : Fathers Name</h3>
+                            @if($stages[2]['status'] === 'completed')
+                                <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
+                            @else
+                                <span class="step-header-tag tag-pending" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">In Progress</span>
+                            @endif
+                        </div>
 
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Candidate Demographics</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Full Name as per SSC <span class="required-star">*</span></label>
-                                <input type="text" name="name" class="field-input" value="{{ $crmStudent?->name ?: $displayName }}" required>
+                        <form action="{{ route('dashboards.save-step') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="step" value="2">
+
+                            <div class="mockup-field-row-2">
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">father name:</label>
+                                    <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name ?: '' }}" placeholder="Enter Father's Name">
+                                </div>
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">far ph ne no:</label>
+                                    <input type="text" name="far_ph_ne_no" class="mockup-input" value="{{ $personalInfo?->parentphono ?: '' }}" placeholder="Enter Father's Phone">
+                                </div>
                             </div>
-                            <div class="field-group">
-                                <label class="field-label">Date of Birth <span class="required-star">*</span></label>
-                                <input type="date" name="dob" class="field-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '2008-05-14' }}" required>
+
+                            <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">DOB:</label>
+                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '2008-05-14' }}">
+                                </div>
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">referee by:</label>
+                                    <select name="referee_by_select" class="mockup-select" onchange="const r = document.querySelector('input[name=referee_by][value=\"' + this.value + '\"]'); if(r) r.checked = true;">
+                                        <option value="via advertisement" {{ ($personalInfo?->referedby === 'via advertisement' || !$personalInfo) ? 'selected' : '' }}>via advertisement</option>
+                                        <option value="via @by own" {{ ($personalInfo?->referedby === 'via @by own') ? 'selected' : '' }}>via @by own</option>
+                                        <option value="via Emp vtstr" {{ ($personalInfo?->referedby === 'via Emp vtstr') ? 'selected' : '' }}>via Emp vtstr</option>
+                                        <option value="via Conseller / Telecaller" {{ ($personalInfo?->referedby === 'via Conseller / Telecaller') ? 'selected' : '' }}>via Conseller / Telecaller</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="field-group">
-                                <label class="field-label">Gender <span class="required-star">*</span></label>
-                                <select name="gender" class="field-select">
-                                    <option value="Male" {{ ($personalInfo?->gender === 'Male' || !$personalInfo) ? 'selected' : '' }}>Male</option>
-                                    <option value="Female" {{ ($personalInfo?->gender === 'Female') ? 'selected' : '' }}>Female</option>
-                                    <option value="Other" {{ ($personalInfo?->gender === 'Other') ? 'selected' : '' }}>Other</option>
-                                </select>
+
+                            <div class="mockup-radio-grid" style="margin-top: 0.75rem;">
+                                <label class="mockup-radio-label">
+                                    <input type="radio" name="referee_by" value="via advertisement" {{ ($personalInfo?->referedby === 'via advertisement' || !$personalInfo) ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
+                                    <span>via advertisement</span>
+                                </label>
+                                <label class="mockup-radio-label">
+                                    <input type="radio" name="referee_by" value="via @by own" {{ ($personalInfo?->referedby === 'via @by own') ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
+                                    <span>via @by own</span>
+                                </label>
+                                <label class="mockup-radio-label">
+                                    <input type="radio" name="referee_by" value="via Emp vtstr" {{ ($personalInfo?->referedby === 'via Emp vtstr') ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
+                                    <span>via Emp vtstr</span>
+                                </label>
+                                <label class="mockup-radio-label">
+                                    <input type="radio" name="referee_by" value="via Conseller / Telecaller" {{ ($personalInfo?->referedby === 'via Conseller / Telecaller') ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
+                                    <span>via Conseller / Telecaller</span>
+                                </label>
                             </div>
-                            <div class="field-group">
-                                <label class="field-label">Blood Group</label>
-                                <select name="blood_group" class="field-select">
-                                    <option value="O+">O Positive (O+)</option>
-                                    <option value="A+">A Positive (A+)</option>
-                                    <option value="B+" selected>B Positive (B+)</option>
-                                    <option value="AB+">AB Positive (AB+)</option>
-                                    <option value="O-">O Negative (O-)</option>
-                                </select>
+
+                            <div class="mockup-field-row-2" style="margin-top: 0.85rem; align-items: center;">
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">Gender:</label>
+                                    <select name="gender" class="mockup-select">
+                                        <option value="Male" {{ ($personalInfo?->gender === 'Male' || !$personalInfo) ? 'selected' : '' }}>Male</option>
+                                        <option value="Female" {{ ($personalInfo?->gender === 'Female') ? 'selected' : '' }}>Female</option>
+                                        <option value="Other" {{ ($personalInfo?->gender === 'Other') ? 'selected' : '' }}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">category:</label>
+                                    <div class="mockup-radio-row">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
+                                            <span>OC</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
+                                            <span>BC</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
+                                            <span>SC</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
+                                            <span>ST</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="field-group">
-                                <label class="field-label">Aadhaar Card Number <span class="required-star">*</span></label>
-                                <input type="text" name="aadhaar_no" class="field-input" value="7845 9210 4432" maxlength="14" placeholder="XXXX XXXX XXXX" required>
+
+                            <!-- Address Box -->
+                            <div class="mockup-subbox">
+                                <h4 class="mockup-subbox-title">Address</h4>
+                                <div class="mockup-field-row-2">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">street/country:</label>
+                                        <select name="street_country" class="mockup-select">
+                                            <option value="India" selected>India</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">state:</label>
+                                        <select name="state" class="mockup-select">
+                                            <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
+                                            <option value="Telangana">Telangana</option>
+                                            <option value="Karnataka">Karnataka</option>
+                                            <option value="Tamil Nadu">Tamil Nadu</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mockup-field-row-2">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">distric t:</label>
+                                        <input type="text" name="distric_t" class="mockup-input" value="{{ $personalInfo?->district ?: 'Guntur' }}" placeholder="District">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">city / mandal:</label>
+                                        <input type="text" name="city_mandal" class="mockup-input" value="{{ $personalInfo?->city_mandal ?: 'Guntur' }}" placeholder="City / Mandal">
+                                    </div>
+                                </div>
+                                <div class="mockup-field-row-2">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">village :</label>
+                                        <input type="text" name="village" class="mockup-input" value="{{ $personalInfo?->village ?: 'Flat 402, Sri Sai Nilayam, Brodipet' }}" placeholder="Village / Street">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">pin code</label>
+                                        <input type="text" name="pin_code" class="mockup-input" value="{{ $personalInfo?->pincode ?: '522002' }}" placeholder="Pin Code" maxlength="6">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="field-group">
-                                <label class="field-label">Social Category / Community</label>
-                                <select name="category" class="field-select">
-                                    <option value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'selected' : '' }}>Open Category (OC)</option>
-                                    <option value="OBC" {{ ($personalInfo?->caste_category === 'OBC') ? 'selected' : '' }}>Other Backward Class (OBC)</option>
-                                    <option value="BC-A" {{ ($personalInfo?->caste_category === 'BC-A') ? 'selected' : '' }}>BC-A</option>
-                                    <option value="BC-B" {{ ($personalInfo?->caste_category === 'BC-B') ? 'selected' : '' }}>BC-B</option>
-                                    <option value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'selected' : '' }}>Scheduled Caste (SC)</option>
-                                    <option value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'selected' : '' }}>Scheduled Tribe (ST)</option>
-                                    <option value="EWS" {{ ($personalInfo?->caste_category === 'EWS') ? 'selected' : '' }}>Economically Weaker Section (EWS)</option>
-                                </select>
+
+                            <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                                <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
+                                    &larr; Stage 1: {{ $stages[1]['title'] }}
+                                </a>
+                                <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                    <span>Save Personal Info &amp; Proceed to Stage 3 &rarr;</span>
+                                </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
+                </div>
 
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Communication &amp; Permanent Address</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Mobile Number</label>
-                                <input type="text" name="phone" class="field-input" value="{{ $crmStudent?->phoneno ?: $user?->phnno }}" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Personal Email ID <span class="required-star">*</span></label>
-                                <input type="email" name="email" class="field-input" value="{{ $crmStudent?->emailid ?: $user?->email }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Accommodation Preference</label>
-                                <select name="hostel_required" class="field-select">
-                                    <option value="0" {{ ($crmStudent?->ableto == 0) ? 'selected' : '' }}>Day Scholar (University Bus Route)</option>
-                                    <option value="1" {{ ($crmStudent?->ableto == 1) ? 'selected' : '' }}>Campus Hostel (AC / Attached Bath)</option>
-                                    <option value="2">Campus Hostel (Non-AC)</option>
-                                </select>
-                            </div>
-                            <div class="field-group" style="grid-column: span 2;">
-                                <label class="field-label">Door No / Street Address <span class="required-star">*</span></label>
-                                <input type="text" name="address" class="field-input" value="{{ $personalInfo?->village ?: 'Flat 402, Sri Sai Nilayam, Brodipet 4th Line' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Pin Code <span class="required-star">*</span></label>
-                                <input type="text" name="pincode" class="field-input" value="{{ $personalInfo?->pincode ?: '522002' }}" maxlength="6" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">City / Town <span class="required-star">*</span></label>
-                                <input type="text" name="city" class="field-input" value="{{ $personalInfo?->city_mandal ?: 'Guntur' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">State</label>
-                                <input type="text" name="state" class="field-input" value="{{ $personalInfo?->state ?: 'Andhra Pradesh' }}" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Country</label>
-                                <input type="text" name="country" class="field-input" value="{{ $personalInfo?->country ?: 'India' }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev">
-                            &larr; Stage 1: {{ $stages[1]['title'] }}
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Proceed to Stage 3: {{ $stages[3]['title'] }} &rarr;</span>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STAGE 3: ACADEMIC INFO ================= -->
+            <!-- ================= STAGE 3: ACADEMIC DETAILS (SEPARATE STEP 3) ================= -->
             @elseif($activeStep === 3)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 3 of 5 &bull; Education Background</div>
-                        <h3>{{ $stages[3]['title'] }}</h3>
-                        <p>Enter your 10th Standard (SSC) and 12th Standard (Intermediate / Diploma) educational qualifications.</p>
-                    </div>
-                    @if($stages[3]['status'] === 'completed')
-                        <span class="step-header-tag tag-success">✓ Completed</span>
-                    @else
-                        <span class="step-header-tag tag-pending">In Progress</span>
-                    @endif
+                <div class="personal-app-header">
+                    <h2 class="personal-app-title">Personal Application</h2>
+                    <a href="javascript:void(0)" onclick="window.print()" class="btn-pdf-download">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span>Pdf download</span>
+                    </a>
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="3">
+                <div style="max-width: 720px; margin: 0 auto; width: 100%;">
+                    <!-- CARD 2: 3. EDUCATION DETAILS -->
+                    <div class="mockup-card card-active-step">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                            <h3 class="mockup-card-title">3. education details; B-tech; m-tech; phd; 10th+Inter+ug+pg</h3>
+                            @if($stages[3]['status'] === 'completed')
+                                <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
+                            @else
+                                <span class="step-header-tag tag-pending" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">In Progress</span>
+                            @endif
+                        </div>
 
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Class 10th (Secondary School Certificate - SSC)</span>
+                        <div>
+                            <span class="mockup-pill-badge">10th + inter</span>
                         </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Board of Examination <span class="required-star">*</span></label>
-                                <select name="ssc_board" class="field-select">
-                                    <option value="BSEAP" {{ ($academicDetails?->tenth_study_board === 'BSEAP' || !$academicDetails) ? 'selected' : '' }}>Board of Secondary Education, AP (BSEAP)</option>
-                                    <option value="CBSE" {{ ($academicDetails?->tenth_study_board === 'CBSE') ? 'selected' : '' }}>Central Board of Secondary Education (CBSE)</option>
-                                    <option value="ICSE" {{ ($academicDetails?->tenth_study_board === 'ICSE') ? 'selected' : '' }}>Indian Certificate of Secondary Education (ICSE)</option>
-                                    <option value="OTHER" {{ ($academicDetails?->tenth_study_board === 'OTHER') ? 'selected' : '' }}>Other State Board</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">School Name <span class="required-star">*</span></label>
-                                <input type="text" name="ssc_school" class="field-input" value="{{ $academicDetails?->tenth_school_name ?: 'Sri Chaitanya English Medium High School' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">SSC Hall Ticket Number <span class="required-star">*</span></label>
-                                <input type="text" name="ssc_hallticket" class="field-input" value="{{ $academicDetails?->tenth_roll_no ?: '2407189021' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Year of Passing <span class="required-star">*</span></label>
-                                <select name="ssc_year" class="field-select">
-                                    <option value="2024" {{ ($academicDetails?->tenth_passed_year == 2024 || !$academicDetails) ? 'selected' : '' }}>2024</option>
-                                    <option value="2023" {{ ($academicDetails?->tenth_passed_year == 2023) ? 'selected' : '' }}>2023</option>
-                                    <option value="2022" {{ ($academicDetails?->tenth_passed_year == 2022) ? 'selected' : '' }}>2022</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Grade / CGPA / Total Marks <span class="required-star">*</span></label>
-                                <input type="text" name="ssc_marks" class="field-input" value="{{ $academicDetails?->tenth_cgpa ? ($academicDetails->tenth_cgpa . ' / 10.0 CGPA') : '9.8 / 10.0 CGPA' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">School District / State</label>
-                                <input type="text" name="ssc_location" class="field-input" value="{{ $academicDetails?->tenth_school_city ?: 'Guntur, Andhra Pradesh' }}">
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Class 12th (Intermediate / +2 / Diploma)</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Qualifying Examination <span class="required-star">*</span></label>
-                                <select name="inter_board" class="field-select">
-                                    <option value="BIEAP" {{ ($academicDetails?->pu2_study_board === 'BIEAP' || !$academicDetails) ? 'selected' : '' }}>Board of Intermediate Education, AP (BIEAP)</option>
-                                    <option value="TSBIE" {{ ($academicDetails?->pu2_study_board === 'TSBIE') ? 'selected' : '' }}>Telangana Board of Intermediate (TSBIE)</option>
-                                    <option value="CBSE_XII" {{ ($academicDetails?->pu2_study_board === 'CBSE_XII') ? 'selected' : '' }}>CBSE Class XII</option>
-                                    <option value="ISC" {{ ($academicDetails?->pu2_study_board === 'ISC') ? 'selected' : '' }}>ISC (Class XII)</option>
-                                    <option value="DIPLOMA" {{ ($academicDetails?->pu2_study_board === 'DIPLOMA') ? 'selected' : '' }}>Polytechnic Diploma</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Junior College Name <span class="required-star">*</span></label>
-                                <input type="text" name="inter_college" class="field-input" value="{{ $academicDetails?->pu2_college_name ?: 'Narayana Junior College, Ring Road Campus' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Intermediate Hall Ticket No <span class="required-star">*</span></label>
-                                <input type="text" name="inter_hallticket" class="field-input" value="{{ $academicDetails?->pu2_roll_no ?: '2601248931' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Major Stream / Group <span class="required-star">*</span></label>
-                                <select name="inter_group" class="field-select">
-                                    <option value="MPC" selected>MPC (Mathematics, Physics, Chemistry)</option>
-                                    <option value="BiPC">BiPC (Biology, Physics, Chemistry)</option>
-                                    <option value="MEC">MEC (Mathematics, Economics, Commerce)</option>
-                                    <option value="OTHER">Other Vocational Stream</option>
-                                </select>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Marks Obtained / Percentage <span class="required-star">*</span></label>
-                                <input type="text" name="inter_marks" class="field-input" value="{{ $academicDetails?->pu2_marks ? ($academicDetails->pu2_marks . ' / 1000') : '962 / 1000 (96.2%)' }}" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Year of Completion <span class="required-star">*</span></label>
-                                <select name="inter_year" class="field-select">
-                                    <option value="2026" {{ ($academicDetails?->pu2_passed_year == 2026 || !$academicDetails) ? 'selected' : '' }}>2026 (Appearing / Passed)</option>
-                                    <option value="2025" {{ ($academicDetails?->pu2_passed_year == 2025) ? 'selected' : '' }}>2025</option>
-                                    <option value="2024" {{ ($academicDetails?->pu2_passed_year == 2024) ? 'selected' : '' }}>2024</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="step" value="3">
 
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
-                            &larr; Stage 2: {{ $stages[2]['title'] }}
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Proceed to Stage 4: {{ $stages[4]['title'] }} &rarr;</span>
-                        </button>
+                            <!-- Subbox: school/ college 10 th info -->
+                            <div class="mockup-subbox">
+                                <h4 class="mockup-subbox-title">school/ college 10 th info</h4>
+
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">school/ co name :</label>
+                                    <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name ?: 'Sri Chaitanya English Medium High School' }}" placeholder="School / College Name">
+                                </div>
+
+                                <div class="mockup-field-group" style="margin-top: 0.5rem;">
+                                    <label class="mockup-label">Boad of study :</label>
+                                    <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board ?: 'BSEAP' }}" placeholder="Board of Study">
+                                </div>
+
+                                <div class="mockup-field-row-2" style="margin-top: 0.5rem;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Roll NO :</label>
+                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no ?: '2407189021' }}" placeholder="Roll / Hall Ticket No">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">passing year :</label>
+                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year ?: 2024 }}" placeholder="2024">
+                                    </div>
+                                </div>
+
+                                <div class="mockup-radio-row" style="margin-top: 0.5rem;">
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="eval_type" value="marks" {{ ($academicDetails?->tenth_marks_type !== 'CGPA') ? 'checked' : '' }}>
+                                        <span>marks</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="eval_type" value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'checked' : '' }}>
+                                        <span>CGPA</span>
+                                        <input type="text" name="cgpa_value" style="width: 55px; padding: 2px 6px; font-size: 0.8rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff;" value="{{ $academicDetails?->tenth_cgpa ? $academicDetails->tenth_cgpa : '590' }}">
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="eval_type" value="sixty_percent">
+                                        <span>&gt;= 60%</span>
+                                    </label>
+                                </div>
+
+                                <div style="margin-top: 0.5rem;">
+                                    <label class="mockup-label">Course choice</label>
+                                    <div class="mockup-radio-row">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="course_choice" value="Inter" {{ ($academicDetails?->pu2_study_board !== 'Diploma') ? 'checked' : '' }}>
+                                            <span>Inter</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="course_choice" value="Diploma" {{ ($academicDetails?->pu2_study_board === 'Diploma') ? 'checked' : '' }}>
+                                            <span>Diploma</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 0.35rem;">
+                                    <label class="mockup-label">Subset choice</label>
+                                    <div class="mockup-radio-row">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year') ? 'checked' : '' }}>
+                                            <span>First Year</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="subset_choice" value="Second year" {{ ($academicDetails?->pu2_current_status === 'Second year') ? 'checked' : '' }}>
+                                            <span>Second year</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 0.5rem;">
+                                    <label class="mockup-label">Upload Docs</label>
+                                    <div class="mockup-file-wrap">
+                                        <input type="file" id="upload-docs-file" name="upload_docs" style="display: none;" onchange="document.getElementById('upload-docs-label-text').textContent = this.files[0] ? this.files[0].name : 'upload docs:';">
+                                        <span id="upload-docs-label-text" class="mockup-file-text">upload docs:</span>
+                                        <button type="button" class="mockup-browse-btn" onclick="document.getElementById('upload-docs-file').click();">Browse</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                                <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev" style="text-decoration: none;">
+                                    &larr; Stage 2: {{ $stages[2]['title'] }}
+                                </a>
+                                <button type="submit" class="btn-step-next" style="background: #0f2744;">
+                                    <span>Save Academic Info &amp; Proceed to Stage 4 &rarr;</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
 
             <!-- ================= STAGE 4: APPLICATION DOWNLOAD ================= -->
             @elseif($activeStep === 4)

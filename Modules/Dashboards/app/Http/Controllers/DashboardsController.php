@@ -247,6 +247,20 @@ class DashboardsController extends Controller
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
 
+                    $parentName = $request->input('parent_name') ?? $request->input('father_name');
+                    $parentPhone = $request->input('parentphono') ?? $request->input('far_ph_ne_no') ?? $request->input('father_phone');
+                    $dobVal = $request->input('dob') ?? $request->input('DOB');
+                    $refBy = $request->input('referedby') ?? $request->input('referee_by');
+                    $refEmp = $request->input('referedempcode') ?? $request->input('referee_empcode');
+                    $genderVal = $request->input('gender') ?? $request->input('Gender') ?? 'Male';
+                    $catVal = $request->input('caste_category') ?? $request->input('category') ?? 'OC';
+                    $countryVal = $request->input('country') ?? $request->input('street_country') ?? 'India';
+                    $stateVal = $request->input('state') ?? 'Andhra Pradesh';
+                    $districtVal = $request->input('district') ?? $request->input('distric_t') ?? 'Guntur';
+                    $cityVal = $request->input('city_mandal') ?? $request->input('city') ?? 'Guntur';
+                    $villageVal = $request->input('village') ?? $request->input('address') ?? '';
+                    $pincodeVal = $request->input('pincode') ?? $request->input('pin_code') ?? '522002';
+
                     StudentPersonalInfo::updateOrCreate(
                         [
                             'applino' => $crmStudent->applinano,
@@ -254,19 +268,19 @@ class DashboardsController extends Controller
                         ],
                         [
                             'crmid' => $existingInfo?->crmid ?? $personalCrmId,
-                            'dob' => $request->input('dob') ?: null,
-                            'gender' => $request->input('gender') ?: 'Male',
-                            'parent_name' => $request->input('parent_name'),
-                            'parentphono' => $request->input('parentphono'),
-                            'caste_category' => $request->input('category') ?? $request->input('caste_category'),
-                            'referedby' => $request->input('referedby'),
-                            'referedempcode' => $request->input('referedempcode'),
-                            'country' => $request->input('country', 'India'),
-                            'state' => $request->input('state', 'Andhra Pradesh'),
-                            'district' => $request->input('district', 'Guntur'),
-                            'city_mandal' => $request->input('city') ?? $request->input('city_mandal'),
-                            'village' => $request->input('address') ?? $request->input('village'),
-                            'pincode' => $request->input('pincode'),
+                            'dob' => $dobVal ? date('Y-m-d', strtotime($dobVal)) : null,
+                            'gender' => $genderVal,
+                            'parent_name' => $parentName,
+                            'parentphono' => $parentPhone,
+                            'caste_category' => $catVal,
+                            'referedby' => $refBy,
+                            'referedempcode' => $refEmp,
+                            'country' => $countryVal,
+                            'state' => $stateVal,
+                            'district' => $districtVal,
+                            'city_mandal' => $cityVal,
+                            'village' => $villageVal,
+                            'pincode' => $pincodeVal,
                             'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
                             'log_ipaddress' => $request->ip(),
                             'log_timestamp' => now(),
@@ -298,26 +312,43 @@ class DashboardsController extends Controller
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
 
-                    $sscMarks = $request->input('ssc_marks');
+                    $tenthSchool = $request->input('tenth_school_name') ?? $request->input('school_co_name') ?? $request->input('ssc_school');
+                    $tenthBoard = $request->input('tenth_study_board') ?? $request->input('boad_of_study') ?? $request->input('ssc_board');
+                    $tenthRoll = $request->input('tenth_roll_no') ?? $request->input('roll_no') ?? $request->input('ssc_hallticket');
+                    $tenthYear = (int) ($request->input('tenth_passed_year') ?? $request->input('passing_year') ?? $request->input('ssc_year') ?? 2024);
+
+                    $evalType = $request->input('eval_type') ?? $request->input('tenth_marks_type') ?? 'marks';
+                    $sscMarks = $request->input('tenth_marks') ?? $request->input('marks_value') ?? $request->input('ssc_marks');
                     $tenthMarksNum = null;
                     $tenthCgpaNum = null;
-                    if (is_numeric($sscMarks)) {
-                        $tenthMarksNum = (float) $sscMarks;
-                    } elseif (preg_match('/([\d\.]+)\s*\/\s*10/i', (string) $sscMarks, $m)) {
-                        $tenthCgpaNum = (float) $m[1];
-                    } elseif (preg_match('/([\d\.]+)/', (string) $sscMarks, $m)) {
-                        $tenthCgpaNum = (float) $m[1];
+
+                    if ($evalType === 'CGPA' || $request->filled('cgpa_value')) {
+                        $cgpaInput = $request->input('cgpa_value') ?? $sscMarks;
+                        if (is_numeric($cgpaInput)) {
+                            $tenthCgpaNum = (float) $cgpaInput;
+                        } elseif (preg_match('/([\d\.]+)/', (string)$cgpaInput, $m)) {
+                            $tenthCgpaNum = (float) $m[1];
+                        }
+                    } else {
+                        if (is_numeric($sscMarks)) {
+                            $tenthMarksNum = (float) $sscMarks;
+                        } elseif (preg_match('/([\d\.]+)/', (string)$sscMarks, $m)) {
+                            $tenthMarksNum = (float) $m[1];
+                        }
                     }
 
-                    $interMarks = $request->input('inter_marks');
-                    $interMarksNum = null;
-                    $interCgpaNum = null;
-                    if (is_numeric($interMarks)) {
-                        $interMarksNum = (float) $interMarks;
-                    } elseif (preg_match('/([\d\.]+)\s*\/\s*1000/i', (string) $interMarks, $m)) {
-                        $interMarksNum = (float) $m[1];
-                    } elseif (preg_match('/([\d\.]+)/', (string) $interMarks, $m)) {
-                        $interMarksNum = (float) $m[1];
+                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board') ?? 'Inter';
+                    $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? 'First Year';
+
+                    // Handle document upload if present
+                    if ($request->hasFile('upload_docs')) {
+                        try {
+                            $file = $request->file('upload_docs');
+                            $fileName = 'DOC_' . ($crmStudent->applinano ?: 'APP') . '_' . time() . '.' . $file->getClientOriginalExtension();
+                            $file->move(public_path('uploads/documents'), $fileName);
+                        } catch (\Throwable $e) {
+                            Log::warning('Document upload note: ' . $e->getMessage());
+                        }
                     }
 
                     StudentAcademicDetail::updateOrCreate(
@@ -329,24 +360,24 @@ class DashboardsController extends Controller
                             'crmid' => $existingAcademic?->crmid ?? $academicCrmId,
                             'progmid' => $crmStudent->programid,
                             'branchid' => $crmStudent->branchid,
-                            'tenth_school_name' => $request->input('ssc_school') ?? $request->input('tenth_school_name'),
-                            'tenth_study_board' => $request->input('ssc_board') ?? $request->input('tenth_study_board'),
-                            'tenth_school_city' => $request->input('ssc_location') ?? $request->input('tenth_school_city'),
-                            'tenth_school_district' => $request->input('ssc_location') ?? $request->input('tenth_school_district'),
-                            'tenth_roll_no' => $request->input('ssc_hallticket') ?? $request->input('tenth_roll_no'),
-                            'tenth_passed_year' => (int) ($request->input('ssc_year') ?? 2024),
-                            'tenth_marks_type' => 'CGPA',
+                            'tenth_school_name' => $tenthSchool,
+                            'tenth_study_board' => $tenthBoard,
+                            'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location') ?? 'Guntur',
+                            'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location') ?? 'Guntur',
+                            'tenth_roll_no' => $tenthRoll,
+                            'tenth_passed_year' => $tenthYear,
+                            'tenth_marks_type' => $evalType,
                             'tenth_marks' => $tenthMarksNum,
-                            'tenth_cgpa' => $tenthCgpaNum ?: 9.80,
-                            'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
-                            'pu2_study_board' => $request->input('inter_board') ?? $request->input('pu2_study_board'),
+                            'tenth_cgpa' => $tenthCgpaNum ?: ($evalType === 'CGPA' ? 9.80 : null),
+                            'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name') ?? 'Narayana Junior College',
+                            'pu2_study_board' => $courseChoice,
                             'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
                             'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
-                            'pu2_passed_year' => (int) ($request->input('inter_year') ?? 2026),
+                            'pu2_passed_year' => (int) ($request->input('inter_year') ?? $request->input('pu2_passed_year') ?? 2026),
                             'pu2_marks_type' => 'Marks',
-                            'pu2_marks' => $interMarksNum ?: 962.00,
-                            'pu2_cgpa' => $interCgpaNum,
-                            'pu2_current_status' => 'Passed',
+                            'pu2_marks' => is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : 962.00,
+                            'pu2_cgpa' => is_numeric($request->input('inter_cgpa')) ? (float)$request->input('inter_cgpa') : null,
+                            'pu2_current_status' => $subsetChoice,
                             'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
                             'log_datetime' => now(),
                             'log_ipaddress' => $request->ip(),
