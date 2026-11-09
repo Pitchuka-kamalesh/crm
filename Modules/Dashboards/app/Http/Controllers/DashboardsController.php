@@ -177,12 +177,27 @@ class DashboardsController extends Controller
         }
         $progressPercent = round(($completedCount / 5) * 100);
 
+        // Load Country, State, District options from crm tables
+        $countries = collect();
+        $states = collect();
+        $districts = collect();
+        try {
+            $countries = DB::table('crm.countries')->where('lock_status', 0)->orderBy('country_name')->get();
+            $states = DB::table('crm.states')->where('lock_status', 0)->orderBy('state_name')->get();
+            $districts = DB::table('crm.district')->where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+        } catch (\Throwable $e) {
+            Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
+        }
+
         return view('dashboards::index', compact(
             'user',
             'student',
             'crmStudent',
             'personalInfo',
             'academicDetails',
+            'countries',
+            'states',
+            'districts',
             'edu10th',
             'eduInter',
             'documents',
@@ -241,6 +256,17 @@ class DashboardsController extends Controller
                 $nextStep = 2;
                 $msg = 'Stage 1: Admission Fee Payment confirmed!';
             } elseif ($step === 2) {
+                // Validation for Step 2
+                $request->validate([
+                    'phone_no' => ['nullable', 'regex:/^[0-9]{10}$/'],
+                    'pin_code' => ['nullable', 'regex:/^[0-9]{6}$/'],
+                    'father_name' => ['nullable', 'string', 'max:255'],
+                    'dob' => ['nullable', 'date'],
+                ], [
+                    'phone_no.regex' => 'Phone number must be exactly 10 digits.',
+                    'pin_code.regex' => 'Pin code must be exactly 6 digits.',
+                ]);
+
                 if ($crmStudent) {
                     $personalCrmId = 'CRMP_' . ($crmStudent->applinano ?: 'APP') . '_' . time();
                     $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
@@ -248,15 +274,49 @@ class DashboardsController extends Controller
                         ->first();
 
                     $parentName = $request->input('parent_name') ?? $request->input('father_name');
-                    $parentPhone = $request->input('parentphono') ?? $request->input('far_ph_ne_no') ?? $request->input('father_phone');
+                    $rawPhone = $request->input('phone_no') ?? $request->input('far_ph_ne_no') ?? $request->input('phone') ?? $crmStudent->phoneno;
+                    $cleanPhoneVal = preg_replace('/\D/', '', (string)$rawPhone);
+
                     $dobVal = $request->input('dob') ?? $request->input('DOB');
-                    $refBy = $request->input('referedby') ?? $request->input('referee_by');
+
+                    // Handle referee_by checkboxes (array or string)
+                    $refByInput = $request->input('referee_by');
+                    if (is_array($refByInput)) {
+                        $refBy = implode(', ', array_filter($refByInput));
+                    } else {
+                        $refBy = (string)($refByInput ?? $request->input('referedby') ?? 'via advertisement');
+                    }
                     $refEmp = $request->input('referedempcode') ?? $request->input('referee_empcode');
+
                     $genderVal = $request->input('gender') ?? $request->input('Gender') ?? 'Male';
                     $catVal = $request->input('caste_category') ?? $request->input('category') ?? 'OC';
-                    $countryVal = $request->input('country') ?? $request->input('street_country') ?? 'India';
-                    $stateVal = $request->input('state') ?? 'Andhra Pradesh';
-                    $districtVal = $request->input('district') ?? $request->input('distric_t') ?? 'Guntur';
+
+                    // Resolve Country, State, District from DB values
+                    $countryInput = $request->input('street_country') ?? $request->input('country') ?? 'India';
+                    $stateInput = $request->input('state') ?? 'Andhra Pradesh';
+                    $districtInput = $request->input('distric_t') ?? $request->input('district') ?? 'Guntur';
+
+                    if (is_numeric($countryInput)) {
+                        $cObj = DB::table('crm.countries')->where('country_id', (int)$countryInput)->first();
+                        $countryVal = $cObj?->country_name ?? 'India';
+                    } else {
+                        $countryVal = (string)$countryInput;
+                    }
+
+                    if (is_numeric($stateInput)) {
+                        $sObj = DB::table('crm.states')->where('state_id', (int)$stateInput)->first();
+                        $stateVal = $sObj?->state_name ?? 'Andhra Pradesh';
+                    } else {
+                        $stateVal = (string)$stateInput;
+                    }
+
+                    if (is_numeric($districtInput)) {
+                        $dObj = DB::table('crm.district')->where('DISTRICT_ID', (int)$districtInput)->first();
+                        $districtVal = $dObj?->DISTRICT_NAME ?? 'Guntur';
+                    } else {
+                        $districtVal = (string)$districtInput;
+                    }
+
                     $cityVal = $request->input('city_mandal') ?? $request->input('city') ?? 'Guntur';
                     $villageVal = $request->input('village') ?? $request->input('address') ?? '';
                     $pincodeVal = $request->input('pincode') ?? $request->input('pin_code') ?? '522002';
@@ -271,7 +331,7 @@ class DashboardsController extends Controller
                             'dob' => $dobVal ? date('Y-m-d', strtotime($dobVal)) : null,
                             'gender' => $genderVal,
                             'parent_name' => $parentName,
-                            'parentphono' => $parentPhone,
+                            'parentphono' => $cleanPhoneVal ?: $crmStudent->phoneno,
                             'caste_category' => $catVal,
                             'referedby' => $refBy,
                             'referedempcode' => $refEmp,

@@ -1571,121 +1571,133 @@
 
                             <div class="mockup-field-row-2">
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">father name:</label>
-                                    <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name ?: '' }}" placeholder="Enter Father's Name">
+                                    <label class="mockup-label">father name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name ?: '' }}" placeholder="Enter Father's Name" required>
                                 </div>
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">far ph ne no:</label>
-                                    <input type="text" name="far_ph_ne_no" class="mockup-input" value="{{ $personalInfo?->parentphono ?: '' }}" placeholder="Enter Father's Phone">
+                                    <label class="mockup-label">Phone no: <span style="color:#ef4444;">*</span></label>
+                                    <input type="tel" name="phone_no" class="mockup-input" value="{{ $personalInfo?->parentphono ?: ($crmStudent?->phoneno ?: $user?->phnno) }}" placeholder="Enter 10-digit Phone Number" maxlength="10" pattern="[0-9]{10}" required>
                                 </div>
                             </div>
 
                             <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">DOB:</label>
-                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '2008-05-14' }}">
+                                    <label class="mockup-label">DOB: <span style="color:#ef4444;">*</span></label>
+                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '2008-05-14' }}" required>
                                 </div>
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">referee by:</label>
-                                    <select name="referee_by_select" class="mockup-select" onchange="const r = document.querySelector('input[name=referee_by][value=\"' + this.value + '\"]'); if(r) r.checked = true;">
-                                        <option value="via advertisement" {{ ($personalInfo?->referedby === 'via advertisement' || !$personalInfo) ? 'selected' : '' }}>via advertisement</option>
-                                        <option value="via @by own" {{ ($personalInfo?->referedby === 'via @by own') ? 'selected' : '' }}>via @by own</option>
-                                        <option value="via Emp vtstr" {{ ($personalInfo?->referedby === 'via Emp vtstr') ? 'selected' : '' }}>via Emp vtstr</option>
-                                        <option value="via Conseller / Telecaller" {{ ($personalInfo?->referedby === 'via Conseller / Telecaller') ? 'selected' : '' }}>via Conseller / Telecaller</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="mockup-radio-grid" style="margin-top: 0.75rem;">
-                                <label class="mockup-radio-label">
-                                    <input type="radio" name="referee_by" value="via advertisement" {{ ($personalInfo?->referedby === 'via advertisement' || !$personalInfo) ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
-                                    <span>via advertisement</span>
-                                </label>
-                                <label class="mockup-radio-label">
-                                    <input type="radio" name="referee_by" value="via @by own" {{ ($personalInfo?->referedby === 'via @by own') ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
-                                    <span>via @by own</span>
-                                </label>
-                                <label class="mockup-radio-label">
-                                    <input type="radio" name="referee_by" value="via Emp vtstr" {{ ($personalInfo?->referedby === 'via Emp vtstr') ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
-                                    <span>via Emp vtstr</span>
-                                </label>
-                                <label class="mockup-radio-label">
-                                    <input type="radio" name="referee_by" value="via Conseller / Telecaller" {{ ($personalInfo?->referedby === 'via Conseller / Telecaller') ? 'checked' : '' }} onchange="document.querySelector('select[name=referee_by_select]').value = this.value;">
-                                    <span>via Conseller / Telecaller</span>
-                                </label>
-                            </div>
-
-                            <div class="mockup-field-row-2" style="margin-top: 0.85rem; align-items: center;">
-                                <div class="mockup-field-group">
-                                    <label class="mockup-label">Gender:</label>
-                                    <select name="gender" class="mockup-select">
+                                    <label class="mockup-label">Gender: <span style="color:#ef4444;">*</span></label>
+                                    <select name="gender" class="mockup-select" required>
                                         <option value="Male" {{ ($personalInfo?->gender === 'Male' || !$personalInfo) ? 'selected' : '' }}>Male</option>
                                         <option value="Female" {{ ($personalInfo?->gender === 'Female') ? 'selected' : '' }}>Female</option>
                                         <option value="Other" {{ ($personalInfo?->gender === 'Other') ? 'selected' : '' }}>Other</option>
                                     </select>
                                 </div>
-                                <div class="mockup-field-group">
-                                    <label class="mockup-label">category:</label>
-                                    <div class="mockup-radio-row">
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
-                                            <span>OC</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
-                                            <span>BC</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
-                                            <span>SC</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
-                                            <span>ST</span>
-                                        </label>
-                                    </div>
+                            </div>
+
+                            <!-- Referee By Checkboxes -->
+                            @php
+                                $savedRefs = array_map('trim', explode(',', $personalInfo?->referedby ?? 'via advertisement'));
+                            @endphp
+                            <div class="mockup-field-group" style="margin-top: 0.85rem;">
+                                <label class="mockup-label">referee by:</label>
+                                <div class="mockup-radio-grid" style="margin-top: 0.35rem;">
+                                    <label class="mockup-radio-label">
+                                        <input type="checkbox" name="referee_by[]" value="via advertisement" {{ in_array('via advertisement', $savedRefs) ? 'checked' : '' }}>
+                                        <span>via advertisement</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="checkbox" name="referee_by[]" value="via @by own" {{ in_array('via @by own', $savedRefs) ? 'checked' : '' }}>
+                                        <span>via @by own</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="checkbox" name="referee_by[]" value="via Emp vtstr" {{ in_array('via Emp vtstr', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
+                                        <span>via Emp vtstr</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="checkbox" name="referee_by[]" value="via Conseller / Telecaller" {{ in_array('via Conseller / Telecaller', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
+                                        <span>via Conseller / Telecaller</span>
+                                    </label>
+                                </div>
+                                <div id="ref-empcode-wrap" style="display: {{ (in_array('via Emp vtstr', $savedRefs) || in_array('via Conseller / Telecaller', $savedRefs)) ? 'block' : 'none' }}; margin-top: 0.45rem;">
+                                    <input type="text" name="referee_empcode" class="mockup-input" value="{{ $personalInfo?->referedempcode }}" placeholder="Enter Employee / Counselor Code (optional)">
                                 </div>
                             </div>
 
-                            <!-- Address Box -->
-                            <div class="mockup-subbox">
+                            <!-- Category -->
+                            <div class="mockup-field-group" style="margin-top: 0.85rem;">
+                                <label class="mockup-label">category: <span style="color:#ef4444;">*</span></label>
+                                <div class="mockup-radio-row">
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
+                                        <span>OC</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
+                                        <span>BC</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
+                                        <span>SC</span>
+                                    </label>
+                                    <label class="mockup-radio-label">
+                                        <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
+                                        <span>ST</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Address Box populated from crm DB tables -->
+                            <div class="mockup-subbox" style="margin-top: 0.85rem;">
                                 <h4 class="mockup-subbox-title">Address</h4>
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">street/country:</label>
-                                        <select name="street_country" class="mockup-select">
-                                            <option value="India" selected>India</option>
-                                            <option value="Other">Other</option>
+                                        <label class="mockup-label">street/country: <span style="color:#ef4444;">*</span></label>
+                                        <select name="street_country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
+                                            @foreach($countries as $c)
+                                                <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ ($personalInfo?->country == $c->country_name || (!$personalInfo && $c->country_code === 'IN')) ? 'selected' : '' }}>
+                                                    {{ $c->country_name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">state:</label>
-                                        <select name="state" class="mockup-select">
-                                            <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-                                            <option value="Telangana">Telangana</option>
-                                            <option value="Karnataka">Karnataka</option>
-                                            <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <label class="mockup-label">state: <span style="color:#ef4444;">*</span></label>
+                                        <select name="state" id="geo-state-select" class="mockup-select" onchange="onStateChange(this.value)" required>
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ ($personalInfo?->state == $s->state_name || (!$personalInfo && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">distric t:</label>
-                                        <input type="text" name="distric_t" class="mockup-input" value="{{ $personalInfo?->district ?: 'Guntur' }}" placeholder="District">
+                                        <label class="mockup-label">distric t: <span style="color:#ef4444;">*</span></label>
+                                        <select name="distric_t" id="geo-district-select" class="mockup-select" required>
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ ($personalInfo?->district == $d->DISTRICT_NAME || (!$personalInfo && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">city / mandal:</label>
-                                        <input type="text" name="city_mandal" class="mockup-input" value="{{ $personalInfo?->city_mandal ?: 'Guntur' }}" placeholder="City / Mandal">
+                                        <label class="mockup-label">city / mandal: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city_mandal" class="mockup-input" value="{{ $personalInfo?->city_mandal ?: 'Guntur' }}" placeholder="City / Mandal" required>
                                     </div>
                                 </div>
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">village :</label>
-                                        <input type="text" name="village" class="mockup-input" value="{{ $personalInfo?->village ?: 'Flat 402, Sri Sai Nilayam, Brodipet' }}" placeholder="Village / Street">
+                                        <label class="mockup-label">village : <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="village" class="mockup-input" value="{{ $personalInfo?->village ?: 'Flat 402, Sri Sai Nilayam, Brodipet' }}" placeholder="Village / Street Address" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">pin code</label>
-                                        <input type="text" name="pin_code" class="mockup-input" value="{{ $personalInfo?->pincode ?: '522002' }}" placeholder="Pin Code" maxlength="6">
+                                        <label class="mockup-label">pin code: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pin_code" class="mockup-input" value="{{ $personalInfo?->pincode ?: '522002' }}" placeholder="6-digit Pin Code" maxlength="6" pattern="[0-9]{6}" required>
                                     </div>
                                 </div>
                             </div>
@@ -1699,6 +1711,58 @@
                                 </button>
                             </div>
                         </form>
+
+                        <script>
+                            function toggleEmpCode() {
+                                const wrap = document.getElementById('ref-empcode-wrap');
+                                const emp = document.querySelector('input[value="via Emp vtstr"]')?.checked;
+                                const cou = document.querySelector('input[value="via Conseller / Telecaller"]')?.checked;
+                                if (wrap) wrap.style.display = (emp || cou) ? 'block' : 'none';
+                            }
+
+                            const allStatesData = @json($states);
+                            const allDistrictsData = @json($districts);
+
+                            function onCountryChange(countryId) {
+                                const stateSelect = document.getElementById('geo-state-select');
+                                if (!stateSelect) return;
+                                const currentSelectedState = stateSelect.value;
+                                stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+                                allStatesData.forEach(function(s) {
+                                    if (!countryId || s.country_id == countryId) {
+                                        const opt = document.createElement('option');
+                                        opt.value = s.state_id;
+                                        opt.textContent = s.state_name;
+                                        if (s.state_id == currentSelectedState) opt.selected = true;
+                                        stateSelect.appendChild(opt);
+                                    }
+                                });
+                                onStateChange(stateSelect.value);
+                            }
+
+                            function onStateChange(stateId) {
+                                const distSelect = document.getElementById('geo-district-select');
+                                if (!distSelect) return;
+                                const currentSelectedDist = distSelect.value;
+                                distSelect.innerHTML = '<option value="">-- Select District --</option>';
+                                allDistrictsData.forEach(function(d) {
+                                    if (!stateId || d.STATE_ID == stateId) {
+                                        const opt = document.createElement('option');
+                                        opt.value = d.DISTRICT_ID;
+                                        opt.textContent = d.DISTRICT_NAME;
+                                        if (d.DISTRICT_ID == currentSelectedDist) opt.selected = true;
+                                        distSelect.appendChild(opt);
+                                    }
+                                });
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const stateSelect = document.getElementById('geo-state-select');
+                                if (stateSelect && stateSelect.value) {
+                                    onStateChange(stateSelect.value);
+                                }
+                            });
+                        </script>
                     </div>
                 </div>
 
