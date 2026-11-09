@@ -1046,16 +1046,15 @@
                 </div>
             </a>
 
-            <!-- Center Navigation Links -->
+            <!-- Center Navigation Links (Dynamic from master.menus) -->
             <ul class="dash-nav-links">
-                <li><a href="{{ route('dashboards.index', ['step' => 1]) }}" class="dash-nav-link {{ $activeStep === 1 ? 'active' : '' }}">Fee Payment</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 2]) }}" class="dash-nav-link {{ $activeStep === 2 ? 'active' : '' }}">Profile</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 3]) }}" class="dash-nav-link {{ $activeStep === 3 ? 'active' : '' }}">Academic Info</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 4]) }}" class="dash-nav-link {{ $activeStep === 4 ? 'active' : '' }}">Application Download</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 5]) }}" class="dash-nav-link {{ $activeStep === 5 ? 'active' : '' }}">VSAT Results</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 6]) }}" class="dash-nav-link {{ $activeStep === 6 ? 'active' : '' }}">Allotment</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 7]) }}" class="dash-nav-link {{ $activeStep === 7 ? 'active' : '' }}">Tuition</a></li>
-                <li><a href="{{ route('dashboards.index', ['step' => 8]) }}" class="dash-nav-link {{ $activeStep === 8 ? 'active' : '' }}">Digital ID</a></li>
+                @foreach($stages as $num => $stg)
+                    <li>
+                        <a href="{{ route('dashboards.index', ['step' => $num]) }}" class="dash-nav-link {{ $activeStep === $num ? 'active' : '' }}">
+                            {{ $stg['title'] }}
+                        </a>
+                    </li>
+                @endforeach
             </ul>
 
             <div class="user-nav-cluster">
@@ -1328,7 +1327,7 @@
                             @endif
                         </div>
                         <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev" style="text-decoration: none;">
-                            <span>Step 2: Personal Profile &rarr;</span>
+                            <span>Step 2: {{ $stages[2]['title'] }} &rarr;</span>
                         </a>
                     </div>
                 </div>
@@ -1338,7 +1337,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 2 of 8 &bull; Candidate Information</div>
-                        <h3>Personal Profile</h3>
+                        <h3>{{ $stages[2]['title'] }}</h3>
                         <p>Verify and update your personal details, contact coordinates, and residential background.</p>
                     </div>
                     @if($stages[2]['status'] === 'completed')
@@ -1448,10 +1447,10 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev">
-                            &larr; Stage 1: Fee Payment
+                            &larr; Stage 1: {{ $stages[1]['title'] }}
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Proceed to Stage 3 &rarr;</span>
+                            <span>Save &amp; Proceed to Stage 3: {{ $stages[3]['title'] }} &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1461,7 +1460,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 3 of 8 &bull; Education Background</div>
-                        <h3>Academic Info</h3>
+                        <h3>{{ $stages[3]['title'] }}</h3>
                         <p>Enter your 10th Standard (SSC) and 12th Standard (Intermediate / Diploma) educational qualifications.</p>
                     </div>
                     @if($stages[3]['status'] === 'completed')
@@ -1565,10 +1564,10 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
-                            &larr; Stage 2: Personal Profile
+                            &larr; Stage 2: {{ $stages[2]['title'] }}
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Save &amp; Proceed to Stage 4 &rarr;</span>
+                            <span>Save &amp; Proceed to Stage 4: {{ $stages[4]['title'] }} &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1578,7 +1577,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 4 of 8 &bull; Application &amp; Documents</div>
-                        <h3>Application Download</h3>
+                        <h3>{{ $stages[4]['title'] }}</h3>
                         <p>Download your official candidate admission application form and verify submitted academic documents.</p>
                     </div>
                     @if($stages[4]['status'] === 'completed')
@@ -1691,10 +1690,10 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
-                            &larr; Stage 3: Academic Info
+                            &larr; Stage 3: {{ $stages[3]['title'] }}
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Proceed to Stage 5: VSAT Results &rarr;</span>
+                            <span>Proceed to Stage 5: {{ $stages[5]['title'] }} &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1704,7 +1703,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 5 of 8 &bull; V-SAT 2026 Examination</div>
-                        <h3>VSAT Results &amp; Merit Scorecard</h3>
+                        <h3>{{ $stages[5]['title'] }} &amp; Merit Scorecard</h3>
                         <p>Official V-SAT (Vignan Scholastic Aptitude Test) scorecard, rank percentile, and merit scholarship eligibility.</p>
                     </div>
                     @if($stages[5]['status'] === 'completed')
@@ -1796,10 +1795,10 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: Application Download
+                            &larr; Stage 4: {{ $stages[4]['title'] }}
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Confirm &amp; Proceed to Stage 6: Seat Allotment &rarr;</span>
+                            <span>Confirm &amp; Proceed to Stage 6: {{ $stages[6]['title'] }} &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1809,7 +1808,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 6 of 8 &bull; Academic Allotment</div>
-                        <h3>Seat Allotment &amp; Program Confirmation</h3>
+                        <h3>{{ $stages[6]['title'] }} &amp; Program Confirmation</h3>
                         <p>Official university allotment order confirming your allotted department and academic campus.</p>
                     </div>
                     @if($stages[6]['status'] === 'completed')
@@ -1867,10 +1866,10 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            &larr; Stage 5: VSAT Results
+                            &larr; Stage 5: {{ $stages[5]['title'] }}
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Confirm &amp; Proceed to Stage 7 &rarr;</span>
+                            <span>Confirm &amp; Proceed to Stage 7: {{ $stages[7]['title'] }} &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1880,7 +1879,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 7 of 8 &bull; Financial Structure</div>
-                        <h3>Tuition Structure &amp; Fee Breakdown</h3>
+                        <h3>{{ $stages[7]['title'] }} &amp; Fee Breakdown</h3>
                         <p>Complete academic tuition fee schedule, applicable scholarships, and payment installments.</p>
                     </div>
                     @if($stages[7]['status'] === 'completed')
@@ -1952,10 +1951,10 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
-                            &larr; Stage 6: Seat Allotment
+                            &larr; Stage 6: {{ $stages[6]['title'] }}
                         </a>
                         <button type="submit" class="btn-step-next">
-                            <span>Acknowledge &amp; Proceed to Stage 8 &rarr;</span>
+                            <span>Acknowledge &amp; Proceed to Stage 8: {{ $stages[8]['title'] }} &rarr;</span>
                         </button>
                     </div>
                 </form>
@@ -1965,7 +1964,7 @@
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 8 of 8 &bull; Admission Pass &amp; ID</div>
-                        <h3>Provisional ID &amp; Digital Admission Pass</h3>
+                        <h3>{{ $stages[8]['title'] }} &amp; Digital Admission Pass</h3>
                         <p>Congratulations! Your admission onboarding has been successfully verified.</p>
                     </div>
                     <span class="step-header-tag tag-success">✓ Allotment Active</span>
@@ -2045,7 +2044,7 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 7]) }}" class="btn-step-prev">
-                            &larr; Stage 7: Tuition Structure
+                            &larr; Stage 7: {{ $stages[7]['title'] }}
                         </a>
                         <button type="button" onclick="window.print()" class="btn-step-next">
                             <span>Print Admission Dossier</span>

@@ -121,6 +121,29 @@ class DashboardsController extends Controller
             ],
         ];
 
+        // Dynamically populate stage titles from master.menus table so DB updates reflect immediately
+        try {
+            $dbStageMenus = DB::table('master.menus')
+                ->whereIn('menu_id', [109, 110, 111, 112, 113, 114, 115])
+                ->orWhere('controller_ref', 'like', 'dashboards?step=%')
+                ->get();
+
+            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 113 => 5, 114 => 6, 115 => 7];
+            foreach ($dbStageMenus as $m) {
+                $stepNum = null;
+                if (!empty($m->controller_ref) && preg_match('/step=(\d+)/', $m->controller_ref, $matches)) {
+                    $stepNum = (int) $matches[1];
+                } elseif (isset($stepMap[$m->menu_id])) {
+                    $stepNum = $stepMap[$m->menu_id];
+                }
+                if ($stepNum && isset($stageMeta[$stepNum]) && !empty($m->menu_name)) {
+                    $stageMeta[$stepNum]['title'] = trim((string) $m->menu_name);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Could not load dynamic stage menus from master.menus: ' . $e->getMessage());
+        }
+
         // Calculate stage statuses strictly from crmStudent DB columns
         $stages = [];
         for ($i = 1; $i <= 8; $i++) {
