@@ -313,6 +313,7 @@ INSERT INTO master.login VALUES ('20261106837', '7816024445', NULL, NULL, 'test@
 -- Data for Name: menus; Type: TABLE DATA; Schema: master; Owner: postgres
 --
 
+INSERT INTO master.menus VALUES (99, 'DASH0001', 1, 'Dashboard', 'crm/index', 'fa fa-dashboard', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 INSERT INTO master.menus VALUES (100, 'CRMM0001', 1, 'CRM', 'crm/index', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 INSERT INTO master.menus VALUES (101, 'LEADS0001', 2, 'Leads', 'leads/index', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 INSERT INTO master.menus VALUES (102, 'FINA0001', 3, 'Finance', 'finance/index', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
@@ -322,14 +323,15 @@ INSERT INTO master.menus VALUES (104, 'CRMM0002', 1, 'Student data', 'crm/stddat
 INSERT INTO master.menus VALUES (105, 'CRMM0003', 1, 'Student search', 'crm/stdsearch', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (107, 'LEADS0002', 2, 'Allotted Leads', 'leads/allottedleads', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
 INSERT INTO master.menus VALUES (106, 'FINA0002', 3, 'Paid details', 'finance/paiddetails', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
-INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'pay fee', 'finance/payfee', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
-INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'STEP2', 'crm/stpstep2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'STEP3', 'crm/stpstep3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'STEP4', 'crm/stpstep4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'STEP5', 'crm/stpstep5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (114, 'CRMM0008', 1, 'STEP6', 'crm/stpstep6', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (115, 'CRMM0009', 1, 'STEP7', 'crm/stpstep7', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'Fee Payment', 'dashboards?step=1', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
+INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'Personal Profile', 'dashboards?step=2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Records', 'dashboards?step=3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Certificates & KYC', 'dashboards?step=4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'Family Details', 'dashboards?step=5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (114, 'CRMM0008', 1, 'Seat Allotment', 'dashboards?step=6', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (115, 'CRMM0009', 1, 'Tuition Structure', 'dashboards?step=7', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (116, 'LEADS0003', 2, 'Leads Allocation', 'leads/leadsallocation', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
+INSERT INTO master.menus VALUES (117, 'SMS0001', 4, 'SMS Tracker', 'sms/index', 'fa fa-envelope-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 
 
 --
@@ -347,47 +349,50 @@ INSERT INTO master.roles VALUES (4, '1', 1, 'Tele Caller', 1, '02598', '192.168.
 -- Data for Name: menu_access_roles; Type: TABLE DATA; Schema: master; Owner: postgres
 --
 
-INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 1, '1', 1, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 1, '1', 2, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 1, '1', 3, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 1, '1', 4, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0002', 107, 1, '1', 5, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 1, '1', 6, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 1, '1', 7, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 1, '1', 8, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 1, '1', 9, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 1, '1', 10, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 1, '1', 11, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 2, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.131559');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 2, '1', 2, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.137995');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 2, '1', 3, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 2, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.140713');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 2, '1', 5, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
-INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 2, '1', 6, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.143081');
-INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 2, '1', 7, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.144316');
-INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 2, '1', 8, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.145942');
-INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 2, '1', 9, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
-INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 2, '1', 10, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 3, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.131559');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 3, '1', 2, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.137995');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 3, '1', 3, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 3, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.140713');
-INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 3, '1', 5, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
-INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 3, '1', 6, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.143081');
-INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 3, '1', 7, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.144316');
-INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 3, '1', 8, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.145942');
-INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 3, '1', 9, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
-INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 3, '1', 10, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('DASH0001', 99, 1, '1', 1, 1, '02598', '192.168.111.111', '2026-11-09 09:48:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 1, '1', 2, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 1, '1', 3, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 1, '1', 4, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 1, '1', 5, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0002', 107, 1, '1', 6, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 1, '1', 7, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 1, '1', 8, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 1, '1', 9, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 1, '1', 10, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 1, '1', 11, 2, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 1, '1', 12, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('DASH0001', 99, 2, '1', 1, 1, '02598', '192.168.111.111', '2026-11-09 09:48:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 2, '1', 2, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.131559');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 2, '1', 3, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.137995');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 2, '1', 4, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 2, '1', 5, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.140713');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 2, '1', 6, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
+INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 2, '1', 7, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.143081');
+INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 2, '1', 8, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.144316');
+INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 2, '1', 9, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.145942');
+INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 2, '1', 10, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
+INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 2, '1', 11, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
+INSERT INTO master.menu_access_roles VALUES ('DASH0001', 99, 3, '1', 1, 1, '02598', '192.168.111.111', '2026-11-09 09:48:00');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0001', 100, 3, '1', 2, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.131559');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0002', 104, 3, '1', 3, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.137995');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0003', 105, 3, '1', 4, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.139308');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 3, '1', 5, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.140713');
+INSERT INTO master.menu_access_roles VALUES ('LEADS0003', 116, 3, '1', 6, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.141977');
+INSERT INTO master.menu_access_roles VALUES ('FINA0001', 102, 3, '1', 7, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.143081');
+INSERT INTO master.menu_access_roles VALUES ('FINA0002', 106, 3, '1', 8, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.144316');
+INSERT INTO master.menu_access_roles VALUES ('KPII0001', 103, 3, '1', 9, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.145942');
+INSERT INTO master.menu_access_roles VALUES ('KPII0002', 108, 3, '1', 10, 2, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
+INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 3, '1', 11, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
 INSERT INTO master.menu_access_roles VALUES ('LEADS0001', 101, 4, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
 INSERT INTO master.menu_access_roles VALUES ('LEADS0002', 107, 4, '1', 2, 2, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
 INSERT INTO master.menu_access_roles VALUES ('SMS0001', 117, 4, '1', 3, 1, '02598', '192.168.111.111', '2026-11-09 09:18:00');
 INSERT INTO master.menu_access_roles VALUES ('FINA0003', 109, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:02:42.147261');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0004', 110, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.293256');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0005', 111, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.294182');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0006', 112, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.295253');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0007', 113, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.296468');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0008', 114, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.297772');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0009', 115, 5, '1', 1, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0004', 110, 5, '1', 2, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.293256');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0005', 111, 5, '1', 3, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.294182');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0006', 112, 5, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.295253');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0007', 113, 5, '1', 5, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.296468');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0008', 114, 5, '1', 6, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.297772');
+INSERT INTO master.menu_access_roles VALUES ('CRMM0009', 115, 5, '1', 7, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
 
 
 --

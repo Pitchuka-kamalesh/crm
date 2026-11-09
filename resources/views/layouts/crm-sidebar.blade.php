@@ -48,13 +48,10 @@
 
     <!-- 3. Navigation Menu List -->
     <div class="sidebar-menu-container">
-        <!-- PROMINENT GREEN ACTIVE PILL: DASHBOARD (MATCHING SCREENSHOT) -->
         @php
-            $dashboardRoute = match($roleId) {
-                4 => route('leads.allotted'),
-                default => route('crm.alias', ['tab' => 'overview']),
-            };
             $currentTab = $activeTab ?? request()->query('tab', '');
+            $currentPath = trim(request()->path(), '/');
+
             $isDashboardActive = ($currentTab === 'overview' || empty($currentTab)) 
                 && !request()->routeIs('leads.*') 
                 && !request()->routeIs('finance.*') 
@@ -64,21 +61,7 @@
             if ($roleId == 4) {
                 $isDashboardActive = request()->routeIs('leads.allotted') && empty($currentTab);
             }
-        @endphp
 
-        @if($roleId == 4)
-            {{-- For Role 4 (Tele Caller), Dashboard is removed per user request --}}
-        @else
-            <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
-                <svg viewBox="0 0 24 24">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                <span>Dashboard</span>
-            </a>
-        @endif
-
-        @php
             $roleMenus = $roleMenus ?? \App\Models\MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
 
             // Strictly group menus into Main (mposition = 1) and Sub (mposition = 2)
@@ -116,10 +99,11 @@
                 }
             }
 
-            $currentPath = trim(request()->path(), '/');
-            $currentTab = request()->query('tab', $activeTab ?? '');
-
             $resolveMenuUrl = function($controllerRef) {
+                if (str_starts_with($controllerRef, 'dashboards?step=')) {
+                    $step = (int)str_replace('dashboards?step=', '', $controllerRef);
+                    return route('dashboards.index', ['step' => $step]);
+                }
                 return match($controllerRef) {
                     'crm/stddata' => route('crm.stddata', ['tab' => 'stddata']),
                     'crm/stdsearch' => route('crm.stdsearch', ['tab' => 'stdsearch']),
@@ -128,7 +112,7 @@
                     'leads/leadsallocation' => route('leads.allocation', ['tab' => 'allocation']),
                     'leads/index' => route('leads.index'),
                     'finance/paiddetails' => route('finance.paiddetails', ['tab' => 'paiddetails']),
-                    'finance/payfee' => url('/finance/payfee'),
+                    'finance/payfee' => route('dashboards.index', ['step' => 1]),
                     'finance/index' => route('finance.index'),
                     'kpi/studentkpi' => route('kpi.studentkpi', ['tab' => 'studentkpi']),
                     'kpi/index' => route('kpi.index', ['tab' => 'kpi']),
@@ -151,6 +135,9 @@
             };
 
             $getMenuSvgIcon = function($iconName, $menuCode) {
+                if (str_starts_with($menuCode, 'DASH')) {
+                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+                }
                 if (str_starts_with($menuCode, 'CRM')) {
                     return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
                 }
@@ -170,7 +157,7 @@
             };
         @endphp
 
-        <!-- DYNAMIC ROLE-BASED MENUS (Strictly from master.menu_access_roles: mposition 1 = Main, mposition 2 = Sub) -->
+        <!-- DYNAMIC ROLE-BASED MENUS (100% from database master.menus & master.menu_access_roles) -->
         @foreach($menuGroups as $mainId => $group)
             @php
                 $main = $group['main'];
@@ -186,9 +173,19 @@
                 } else {
                     $isGroupOpen = ($currentPath === trim($main->controller_ref, '/'));
                 }
+                $mainUrl = $resolveMenuUrl($main->controller_ref);
             @endphp
 
-            @if($hasSubmenus)
+            @if($main->menu_code === 'DASH0001' || strtolower($main->menu_name) === 'dashboard')
+                <!-- PROMINENT ACTIVE PILL: DASHBOARD (DRIVEN DYNAMICALLY FROM DATABASE) -->
+                <a href="{{ $mainUrl }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="{{ $main->menu_name }}">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>{{ $main->menu_name }}</span>
+                </a>
+            @elseif($hasSubmenus)
                 <!-- ACCORDION MAIN MENU (mposition = 1 with submenus mposition = 2) -->
                 <div class="accordion-group {{ $isGroupOpen ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
                     <button type="button" class="accordion-header {{ $isGroupOpen ? 'active' : '' }}" onclick="toggleAccordion('group-{{ strtolower($main->menu_code) }}')">
@@ -216,7 +213,6 @@
             @else
                 <!-- DIRECT MAIN MENU LINK (mposition = 1 without submenus) -->
                 @php
-                    $mainUrl = $resolveMenuUrl($main->controller_ref);
                     $isMainActive = ($currentPath === trim($main->controller_ref, '/'));
                 @endphp
                 <div class="accordion-group {{ $isMainActive ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
