@@ -31,9 +31,9 @@ class DashboardsController extends Controller
             $cleanPhone = substr($cleanPhone, -10);
         }
 
-        // Active step (1 through 8, default 1)
+        // Active step (1 through 5, default 1)
         $activeStep = (int) $request->query('step', 1);
-        if ($activeStep < 1 || $activeStep > 8) {
+        if ($activeStep < 1 || $activeStep > 5) {
             $activeStep = 1;
         }
 
@@ -77,7 +77,7 @@ class DashboardsController extends Controller
         // Uploaded KYC documents
         $documents = collect();
 
-        // 8-Stage Metadata definitions (strictly aligned with master.menus)
+        // 5-Stage Metadata definitions (strictly aligned with master.menus)
         $stageMeta = [
             1 => [
                 'title' => 'Fee Payment',
@@ -104,31 +104,16 @@ class DashboardsController extends Controller
                 'subtitle' => 'VSAT Scorecard & Merit Rank Details',
                 'icon' => '📊',
             ],
-            6 => [
-                'title' => 'Seat Allotment',
-                'subtitle' => 'Campus & Branch Allotment Details',
-                'icon' => '🏛️',
-            ],
-            7 => [
-                'title' => 'Tuition Structure',
-                'subtitle' => 'Fee Breakdown & Concessions',
-                'icon' => '💰',
-            ],
-            8 => [
-                'title' => 'Provisional ID',
-                'subtitle' => 'Digital Admission Pass & Order',
-                'icon' => '🪪',
-            ],
         ];
 
         // Dynamically populate stage titles from master.menus table so DB updates reflect immediately
         try {
             $dbStageMenus = DB::table('master.menus')
-                ->whereIn('menu_id', [109, 110, 111, 112, 113, 114, 115])
+                ->whereIn('menu_id', [109, 110, 111, 112, 113])
                 ->orWhere('controller_ref', 'like', 'dashboards?step=%')
                 ->get();
 
-            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 113 => 5, 114 => 6, 115 => 7];
+            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 113 => 5];
             foreach ($dbStageMenus as $m) {
                 $stepNum = null;
                 if (!empty($m->controller_ref) && preg_match('/step=(\d+)/', $m->controller_ref, $matches)) {
@@ -146,10 +131,10 @@ class DashboardsController extends Controller
 
         // Calculate stage statuses strictly from crmStudent DB columns
         $stages = [];
-        for ($i = 1; $i <= 8; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             $col = 'stage' . $i;
             $val = $crmStudent ? (string)$crmStudent->{$col} : '';
-            // For stage 1, 'paid' is completed; for stages 2-8, 'completed' or 'paid' is completed
+            // For stage 1, 'paid' is completed; for stages 2-5, 'completed' or 'paid' is completed
             $isCompleted = ($i === 1) ? ($val === 'paid') : ($val === 'completed' || $val === 'paid');
 
             $stages[$i] = [
@@ -163,7 +148,7 @@ class DashboardsController extends Controller
         }
 
         // All stages are accessible on click as requested
-        $maxAllowedStep = 8;
+        $maxAllowedStep = 5;
 
         // Overall progress percentage
         $completedCount = 0;
@@ -172,7 +157,7 @@ class DashboardsController extends Controller
                 $completedCount++;
             }
         }
-        $progressPercent = round(($completedCount / 8) * 100);
+        $progressPercent = round(($completedCount / 5) * 100);
 
         return view('dashboards::index', compact(
             'user',
@@ -222,7 +207,7 @@ class DashboardsController extends Controller
         $regNo = $crmStudent?->applinano ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
 
         $step = (int) $request->input('step', 1);
-        $nextStep = min(8, $step + 1);
+        $nextStep = min(5, $step + 1);
 
         try {
             if ($step === 1) {

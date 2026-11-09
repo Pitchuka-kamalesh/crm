@@ -327,8 +327,6 @@ INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'Personal Profile', 'dashbo
 INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Info', 'dashboards?step=3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Application Download', 'dashboards?step=4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'VSAT Results', 'dashboards?step=5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (114, 'CRMM0008', 1, 'Seat Allotment', 'dashboards?step=6', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (115, 'CRMM0009', 1, 'Tuition Structure', 'dashboards?step=7', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (116, 'LEADS0003', 2, 'Leads Allocation', 'leads/leadsallocation', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
 INSERT INTO master.menus VALUES (117, 'SMS0001', 4, 'SMS Tracker', 'sms/index', 'fa fa-envelope-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 
@@ -387,8 +385,6 @@ INSERT INTO master.menu_access_roles VALUES ('CRMM0004', 110, 5, '1', 2, 1, '025
 INSERT INTO master.menu_access_roles VALUES ('CRMM0005', 111, 5, '1', 3, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.294182');
 INSERT INTO master.menu_access_roles VALUES ('CRMM0006', 112, 5, '1', 4, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.295253');
 INSERT INTO master.menu_access_roles VALUES ('CRMM0007', 113, 5, '1', 5, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.296468');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0008', 114, 5, '1', 6, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.297772');
-INSERT INTO master.menu_access_roles VALUES ('CRMM0009', 115, 5, '1', 7, 1, '02598', '192.168.111.111', '2026-11-01 06:11:10.298817');
 
 
 --

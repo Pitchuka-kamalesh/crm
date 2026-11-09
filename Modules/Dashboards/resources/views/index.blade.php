@@ -434,11 +434,11 @@
             color: #64748b;
         }
 
-        /* Sleek 8-Step Bubble Track */
+        /* Sleek 5-Step Bubble Track */
         .stepper-nav-bar {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 0.25rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
             border-top: 1px solid #f1f5f9;
             padding-top: 0.65rem;
             overflow-x: auto;
@@ -1135,7 +1135,7 @@
             <div class="stepper-header">
                 <div class="stepper-title-box">
                     <h2>Admission Onboarding</h2>
-                    <span class="stepper-step-indicator">Step {{ $activeStep }} of 8</span>
+                    <span class="stepper-step-indicator">Step {{ $activeStep }} of 5</span>
                 </div>
                 <div class="stepper-progress-box">
                     <div class="progress-bar-track">
@@ -1180,7 +1180,7 @@
             @if($activeStep === 1)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 1 of 8 &bull; Seat Confirmation</div>
+                        <div class="step-panel-kicker">Stage 1 of 5 &bull; Seat Confirmation</div>
                         <h3>
                             <span>Seat Confirmation &amp; Admission Fee</span>
                         </h3>
@@ -1327,7 +1327,7 @@
             @elseif($activeStep === 2)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 2 of 8 &bull; Candidate Information</div>
+                        <div class="step-panel-kicker">Stage 2 of 5 &bull; Candidate Information</div>
                         <h3>{{ $stages[2]['title'] }}</h3>
                         <p>Verify and update your personal details, contact coordinates, and residential background.</p>
                     </div>
@@ -1450,7 +1450,7 @@
             @elseif($activeStep === 3)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 3 of 8 &bull; Education Background</div>
+                        <div class="step-panel-kicker">Stage 3 of 5 &bull; Education Background</div>
                         <h3>{{ $stages[3]['title'] }}</h3>
                         <p>Enter your 10th Standard (SSC) and 12th Standard (Intermediate / Diploma) educational qualifications.</p>
                     </div>
@@ -1567,7 +1567,7 @@
             @elseif($activeStep === 4)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 4 of 8 &bull; Application &amp; Documents</div>
+                        <div class="step-panel-kicker">Stage 4 of 5 &bull; Application &amp; Documents</div>
                         <h3>{{ $stages[4]['title'] }}</h3>
                         <p>Download your official candidate admission application form and verify submitted academic documents.</p>
                     </div>
@@ -1693,7 +1693,7 @@
             @elseif($activeStep === 5)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 5 of 8 &bull; V-SAT 2026 Examination</div>
+                        <div class="step-panel-kicker">Stage 5 of 5 &bull; V-SAT 2026 Examination</div>
                         <h3>{{ $stages[5]['title'] }} &amp; Merit Scorecard</h3>
                         <p>Official V-SAT (Vignan Scholastic Aptitude Test) scorecard, rank percentile, and merit scholarship eligibility.</p>
                     </div>
@@ -1788,260 +1788,14 @@
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
                             &larr; Stage 4: {{ $stages[4]['title'] }}
                         </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Confirm &amp; Proceed to Stage 6: {{ $stages[6]['title'] }} &rarr;</span>
+                        <button type="submit" class="btn-step-next" style="background: #15803d;">
+                            <span>✓ Complete &amp; Save Application</span>
                         </button>
                     </div>
                 </form>
 
-            <!-- ================= STAGE 6: SEAT ALLOTMENT & BRANCH ================= -->
-            @elseif($activeStep === 6)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 6 of 8 &bull; Academic Allotment</div>
-                        <h3>{{ $stages[6]['title'] }} &amp; Program Confirmation</h3>
-                        <p>Official university allotment order confirming your allotted department and academic campus.</p>
-                    </div>
-                    @if($stages[6]['status'] === 'completed')
-                        <span class="step-header-tag tag-success">✓ Confirmed</span>
-                    @else
-                        <span class="step-header-tag tag-pending">Active Allotment</span>
-                    @endif
-                </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="6">
 
-                    <div class="section-box">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                            <div class="section-box-title" style="margin-bottom:0;">
-                                <span>Confirmed Allotment Details</span>
-                            </div>
-                            <span class="meta-badge meta-badge-success">✓ Provisional Seat Reserved</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Allotted Campus</label>
-                                <input type="text" class="field-input" value="Vadlamudi Main Campus (VDM), Guntur" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Academic Program</label>
-                                <input type="text" class="field-input" value="{{ $programName ?: 'B.Tech - Bachelor of Technology' }}" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Allotted Department / Branch</label>
-                                <input type="text" class="field-input" value="{{ $branchName ?: 'Information Technology' }}" style="font-weight:700; color:#1e3a8a;" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Academic Curriculum Regulation</label>
-                                <input type="text" class="field-input" value="R25 (Outcome-Based AI-Embedded Curriculum)" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Admission Category</label>
-                                <input type="text" class="field-input" value="Category-A (Merit / Convenor Quota)" readonly>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Commencement / Induction Date</label>
-                                <input type="text" class="field-input" value="July 15, 2026 (Wednesday)" readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-box" style="background:#f8fafc;">
-                        <h4 style="font-size:0.88rem; font-weight:700; color:#1e3a8a; margin-bottom:0.3rem;">Branch Sliding &amp; Upgradation Policy</h4>
-                        <p style="font-size:0.82rem; color:#475569; line-height:1.5; margin:0;">
-                            Students holding a confirmed seat in <strong>Information Technology</strong> are eligible for automated merit-sliding into CSE (Core) or CSE (Artificial Intelligence &amp; Machine Learning) during internal counseling rounds based on intermediate merit ranks.
-                        </p>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            &larr; Stage 5: {{ $stages[5]['title'] }}
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Confirm &amp; Proceed to Stage 7: {{ $stages[7]['title'] }} &rarr;</span>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STAGE 7: TUITION STRUCTURE ================= -->
-            @elseif($activeStep === 7)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 7 of 8 &bull; Financial Structure</div>
-                        <h3>{{ $stages[7]['title'] }} &amp; Fee Breakdown</h3>
-                        <p>Complete academic tuition fee schedule, applicable scholarships, and payment installments.</p>
-                    </div>
-                    @if($stages[7]['status'] === 'completed')
-                        <span class="step-header-tag tag-success">✓ Completed</span>
-                    @else
-                        <span class="step-header-tag tag-pending">In Progress</span>
-                    @endif
-                </div>
-
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
-                    @csrf
-                    <input type="hidden" name="step" value="7">
-
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Academic Year 2026-27 Tuition Breakdown</span>
-                        </div>
-                        <table class="fee-table">
-                            <thead>
-                                <tr>
-                                    <th>Fee Component</th>
-                                    <th>Description / Eligibility</th>
-                                    <th style="text-align:right;">Amount (INR)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Base Annual Tuition Fee</strong></td>
-                                    <td>Undergraduate B.Tech (Information Technology)</td>
-                                    <td style="text-align:right; font-weight:700;">₹ 2,20,000.00</td>
-                                </tr>
-                                <tr>
-                                    <td style="color:#059669;"><strong>V-SAT / Intermediate Merit Concession</strong></td>
-                                    <td style="color:#059669;">Applicable for &gt;95% aggregate in Intermediate Board</td>
-                                    <td style="text-align:right; color:#059669; font-weight:700;">- ₹ 35,000.00</td>
-                                </tr>
-                                <tr>
-                                    <td style="color:#059669;"><strong>Early Bird Registration Waiver</strong></td>
-                                    <td style="color:#059669;">Coupon code <code>27EARLYB100</code> auto-applied</td>
-                                    <td style="text-align:right; color:#059669; font-weight:700;">- ₹ 5,000.00</td>
-                                </tr>
-                                <tr>
-                                    <td style="color:#2563eb;"><strong>Stage 1 Seat Confirmation Fee Paid</strong></td>
-                                    <td style="color:#2563eb;">Credited towards 1st Semester tuition installment</td>
-                                    <td style="text-align:right; color:#2563eb; font-weight:700;">- ₹ 20,000.00</td>
-                                </tr>
-                                <tr>
-                                    <td style="font-size:0.95rem; font-weight:700; color:#0f172a;">Remaining Net Annual Tuition Payable</td>
-                                    <td style="font-size:0.82rem; color:#64748b;">Payable in 2 equal semester installments</td>
-                                    <td style="text-align:right; font-size:1.15rem; font-weight:800; color:#059669;">₹ 1,60,000.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="section-box">
-                            <h4 style="font-size:0.88rem; font-weight:700; color:#0f172a; margin-bottom:0.4rem;">Semester 1 Due</h4>
-                            <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">Due at the time of campus orientation and physical document verification.</p>
-                            <div style="font-size:1.1rem; font-weight:800; color:#2563eb;">₹ 80,000.00</div>
-                        </div>
-
-                        <div class="section-box">
-                            <h4 style="font-size:0.88rem; font-weight:700; color:#0f172a; margin-bottom:0.4rem;">Semester 2 Due</h4>
-                            <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">Due on or before November 30, 2026 before even semester commencement.</p>
-                            <div style="font-size:1.1rem; font-weight:800; color:#2563eb;">₹ 80,000.00</div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
-                            &larr; Stage 6: {{ $stages[6]['title'] }}
-                        </a>
-                        <button type="submit" class="btn-step-next">
-                            <span>Acknowledge &amp; Proceed to Stage 8: {{ $stages[8]['title'] }} &rarr;</span>
-                        </button>
-                    </div>
-                </form>
-
-            <!-- ================= STAGE 8: PROVISIONAL ID & PASS ================= -->
-            @elseif($activeStep === 8)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 8 of 8 &bull; Admission Pass &amp; ID</div>
-                        <h3>{{ $stages[8]['title'] }} &amp; Digital Admission Pass</h3>
-                        <p>Congratulations! Your admission onboarding has been successfully verified.</p>
-                    </div>
-                    <span class="step-header-tag tag-success">✓ Allotment Active</span>
-                </div>
-
-                <div class="step-panel-body">
-                    <!-- DIGITAL ID CARD PREVIEW -->
-                    <div class="id-card-preview">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
-                            <div>
-                                <div style="font-size:0.68rem; font-weight:800; letter-spacing:0.06em; color:#93c5fd; text-transform:uppercase;">VFSTR &bull; Deemed to be University</div>
-                                <div style="font-size:1.05rem; font-weight:800; color:#ffffff;">VIGNAN UNIVERSITY</div>
-                                <div style="font-size:0.68rem; color:#cbd5e1;">NAAC A+ Accredited &bull; Vadlamudi, Guntur</div>
-                            </div>
-                            <img src="/images/vignan-shield-clean.png" alt="Vignan Logo" style="width:38px; height:38px; object-fit:contain;">
-                        </div>
-
-                        <div style="display:flex; gap:1.25rem; align-items:center; margin:1.25rem 0; background:rgba(255,255,255,0.06); padding:1rem; border-radius:12px; border:1px solid rgba(255,255,255,0.1);">
-                            <div style="width:72px; height:72px; border-radius:10px; background:linear-gradient(135deg, #2563eb, #38bdf8); color:#ffffff; font-size:1.85rem; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
-                                {{ strtoupper(substr($displayName, 0, 1)) }}
-                            </div>
-                            <div style="display:flex; flex-direction:column; gap:0.2rem;">
-                                <div style="font-size:1.05rem; font-weight:800; color:#ffffff;">{{ $displayName }}</div>
-                                <div style="font-size:0.78rem; color:#7dd3fc; font-weight:700;">Appli No: {{ $appNo }}</div>
-                                <div style="font-size:0.75rem; color:#e2e8f0;">{{ $programName ?: 'B.Tech' }} ({{ $branchName ?: 'Information Technology' }})</div>
-                                <div style="font-size:0.72rem; color:#94a3b8;">Academic Session: 2026 - 2030</div>
-                            </div>
-                        </div>
-
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#94a3b8; border-top:1px dashed rgba(255,255,255,0.2); padding-top:0.75rem;">
-                            <span>Regulation: <strong>R25</strong></span>
-                            <span>Campus: <strong>VDM Main</strong></span>
-                            <span style="color:#6ee7b7; font-weight:700;">Status: ADMITTED ✓</span>
-                        </div>
-                    </div>
-
-                    <!-- DOWNLOADS -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Download Official Signed Credentials</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📜</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Provisional Allotment Letter</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Dean Admissions Signed Letter (PDF)</p>
-                                </div>
-                                <button type="button" onclick="alert('Downloading Provisional Admission Order PDF...')" class="btn-doc-download">
-                                    <span>Download Letter ↓</span>
-                                </button>
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🪪</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Digital Student ID Card</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">High-Resolution Printable Pass</p>
-                                </div>
-                                <button type="button" onclick="alert('Printing Digital Student ID Card...')" class="btn-doc-download">
-                                    <span>Print ID Card 🖨</span>
-                                </button>
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🎒</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Campus Induction Booklet</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Hostel, Bus &amp; Academic Guide</p>
-                                </div>
-                                <button type="button" onclick="alert('Downloading Campus Induction Booklet...')" class="btn-doc-download">
-                                    <span>Download Guide ↓</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 7]) }}" class="btn-step-prev">
-                            &larr; Stage 7: {{ $stages[7]['title'] }}
-                        </a>
-                        <button type="button" onclick="window.print()" class="btn-step-next">
-                            <span>Print Admission Dossier</span>
-                        </button>
-                    </div>
-                </div>
             @endif
 
         </section>
