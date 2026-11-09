@@ -322,11 +322,11 @@ INSERT INTO master.menus VALUES (104, 'CRMM0002', 1, 'Student data', 'crm/stddat
 INSERT INTO master.menus VALUES (105, 'CRMM0003', 1, 'Student search', 'crm/stdsearch', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (107, 'LEADS0002', 2, 'Allotted Leads', 'leads/allottedleads', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
 INSERT INTO master.menus VALUES (106, 'FINA0002', 3, 'Paid details', 'finance/paiddetails', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
-INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'Fee Payment', 'dashboards?step=1', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
-INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'Personal Profile', 'dashboards?step=2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Info', 'dashboards?step=3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Application Download', 'dashboards?step=4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
-INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'VSAT Results', 'dashboards?step=5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (109, 'FINA0003', 3, 'Fee Payment', 'step1', 'fa fa-file-text-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 102);
+INSERT INTO master.menus VALUES (110, 'CRMM0004', 1, 'Personal Profile', 'step2', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (111, 'CRMM0005', 1, 'Academic Info', 'step3', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (112, 'CRMM0006', 1, 'Application Download', 'step4', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
+INSERT INTO master.menus VALUES (113, 'CRMM0007', 1, 'VSAT Result', 'step5', 'fa fa-user-plus', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 100);
 INSERT INTO master.menus VALUES (116, 'LEADS0003', 2, 'Leads Allocation', 'leads/leadsallocation', 'fa fa-graduation-cap', true, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', 101);
 INSERT INTO master.menus VALUES (117, 'KPII0003', 4, 'SMS Tracker', 'sms/index', 'fa fa-envelope-o', false, 0, 1, '1', '02598', '192.168.111.111', '2026-10-10 08:02:05.388', NULL);
 

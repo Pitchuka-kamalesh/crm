@@ -100,6 +100,9 @@
             }
 
             $resolveMenuUrl = function($controllerRef) {
+                if (preg_match('/step\D*(\d+)/i', $controllerRef, $matches)) {
+                    return route('dashboards.index', ['step' => (int)$matches[1]]);
+                }
                 if (str_starts_with($controllerRef, 'dashboards?step=')) {
                     $step = (int)str_replace('dashboards?step=', '', $controllerRef);
                     return route('dashboards.index', ['step' => $step]);
@@ -122,6 +125,10 @@
             };
 
             $isSubActiveCheck = function($controllerRef) use ($currentPath, $currentTab) {
+                if (preg_match('/step\D*(\d+)/i', $controllerRef, $matches)) {
+                    $stepNum = (int)$matches[1];
+                    return (request()->routeIs('dashboards.*') && request()->query('step', 1) == $stepNum) || $currentPath === 'step' . $stepNum;
+                }
                 return match($controllerRef) {
                     'crm/stddata' => $currentTab === 'stddata' || request()->routeIs('crm.stddata') || $currentPath === 'crm/stddata',
                     'crm/stdsearch' => $currentTab === 'stdsearch' || request()->routeIs('crm.stdsearch') || $currentPath === 'crm/stdsearch',
