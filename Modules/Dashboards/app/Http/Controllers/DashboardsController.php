@@ -5,8 +5,12 @@ namespace Modules\Dashboards\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Campus;
+use App\Models\Country;
 use App\Models\CrmStudentRegistration;
+use App\Models\District;
+use App\Models\Menu;
 use App\Models\Program;
+use App\Models\State;
 use App\Models\StudentAcademicDetail;
 use App\Models\StudentEducationInfo;
 use App\Models\StudentPersonalInfo;
@@ -134,10 +138,9 @@ class DashboardsController extends Controller
             ],
         ];
 
-        // Dynamically populate stage titles from master.menus table so DB updates reflect immediately
+        // Dynamically populate stage titles from master.menus table so DB updates reflect immediately via Eloquent
         try {
-            $dbStageMenus = DB::table('master.menus')
-                ->whereIn('menu_id', [109, 110, 111, 112, 113])
+            $dbStageMenus = Menu::whereIn('menu_id', [109, 110, 111, 112, 113])
                 ->orWhere('controller_ref', 'like', 'dashboards?step=%')
                 ->get();
 
@@ -187,14 +190,14 @@ class DashboardsController extends Controller
         }
         $progressPercent = round(($completedCount / 5) * 100);
 
-        // Load Country, State, District options from crm tables
+        // Load Country, State, District options from crm tables via Eloquent
         $countries = collect();
         $states = collect();
         $districts = collect();
         try {
-            $countries = DB::table('crm.countries')->where('lock_status', 0)->orderBy('country_name')->get();
-            $states = DB::table('crm.states')->where('lock_status', 0)->orderBy('state_name')->get();
-            $districts = DB::table('crm.district')->where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+            $countries = Country::where('lock_status', 0)->orderBy('country_name')->get();
+            $states = State::where('lock_status', 0)->orderBy('state_name')->get();
+            $districts = District::where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
         } catch (\Throwable $e) {
             Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
         }
@@ -295,7 +298,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $personalCrmId = 'CRMP_' . ($crmStudent->applinano ?: 'APP') . '_' . time();
+                    $personalCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
                     $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
@@ -324,21 +327,21 @@ class DashboardsController extends Controller
                     $districtInput = $request->input('distric_t') ?? $request->input('district') ?? 'Guntur';
 
                     if (is_numeric($countryInput)) {
-                        $cObj = DB::table('crm.countries')->where('country_id', (int)$countryInput)->first();
+                        $cObj = Country::where('country_id', (int)$countryInput)->first();
                         $countryVal = $cObj?->country_name ?? 'India';
                     } else {
                         $countryVal = (string)$countryInput;
                     }
 
                     if (is_numeric($stateInput)) {
-                        $sObj = DB::table('crm.states')->where('state_id', (int)$stateInput)->first();
+                        $sObj = State::where('state_id', (int)$stateInput)->first();
                         $stateVal = $sObj?->state_name ?? 'Andhra Pradesh';
                     } else {
                         $stateVal = (string)$stateInput;
                     }
 
                     if (is_numeric($districtInput)) {
-                        $dObj = DB::table('crm.district')->where('DISTRICT_ID', (int)$districtInput)->first();
+                        $dObj = District::where('DISTRICT_ID', (int)$districtInput)->first();
                         $districtVal = $dObj?->DISTRICT_NAME ?? 'Guntur';
                     } else {
                         $districtVal = (string)$districtInput;
@@ -410,7 +413,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $academicCrmId = 'CRMA_' . ($crmStudent->applinano ?: 'APP') . '_' . time();
+                    $academicCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
                     $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
@@ -609,5 +612,31 @@ class DashboardsController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Apply student personal coupon from Stage 1 Fee Payment card.
+     */
+    public function applyPersonalCoupon(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $code = (string) $request->input('coupon_code', '');
+        $applino = (string) $request->input('applino', '');
+
+        if (empty($applino)) {
+            $user = Auth::user();
+            $applino = $user?->usercode ?? '20261106333';
+        }
+
+        $res = \App\Services\CouponService::validateAndApplyPersonalCoupon($code, $applino);
+        return response()->json($res);
+    }
+
+    /**
+     * Remove applied personal coupon from student session.
+     */
+    public function removePersonalCoupon(): \Illuminate\Http\JsonResponse
+    {
+        $res = \App\Services\CouponService::removeAppliedCoupon();
+        return response()->json($res);
     }
 }

@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Campus;
 use App\Models\CommunicationLog;
+use App\Models\CouponInfo;
 use App\Models\CrmStudentRegistration;
 use App\Models\Employee;
 use App\Models\MenuAccessRole;
+use App\Models\PayDetail;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\StudentRegistration;
+use App\Models\TelecallerLead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -30,14 +33,18 @@ class CrmController extends Controller
         $currentRoute = $request->route() ? $request->route()->getName() : '';
         $activeTab = $request->query('tab');
         if (!$activeTab) {
-            $activeTab = match ($currentRoute) {
-                'crm.stddata', 'crm.enquirylist' => 'stddata',
-                'crm.stdsearch', 'crm.registerlist' => 'stdsearch',
-                'crm.couponinfo' => 'couponinfo',
-                'crm.employeelist' => 'employeelist',
-                'kpi.index', 'kpi.studentkpi' => 'kpi',
-                default => 'overview',
-            };
+            if ($request->is('*coupoungenration*')) {
+                $activeTab = 'couponinfo';
+            } else {
+                $activeTab = match ($currentRoute) {
+                    'crm.stddata', 'crm.enquirylist' => 'stddata',
+                    'crm.stdsearch', 'crm.registerlist' => 'stdsearch',
+                    'crm.couponinfo', 'crm.coupoungenration' => 'couponinfo',
+                    'crm.employeelist' => 'employeelist',
+                    'kpi.index', 'kpi.studentkpi' => 'kpi',
+                    default => 'overview',
+                };
+            }
         }
 
         // Summary counts from Eloquent Models (Read-Only)
@@ -183,26 +190,51 @@ class CrmController extends Controller
             $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
         } catch (\Throwable $e) {}
 
-        // Available employees for enquiry allotment
+        // Available employees for enquiry allotment & Telecallers with Role 4
         $employees = collect();
+        $telecallers = collect();
         try {
+            $telecallers = \App\Services\TelecallerService::getTelecallers();
             $employees = Employee::where('is_active', 1)->orderBy('full_name')->get();
             if ($employees->isEmpty()) {
-                $employees = Employee::all();
+                $employees = $telecallers->isNotEmpty() ? $telecallers : Employee::all();
             }
         } catch (\Throwable $e) {}
 
-        // Session-backed lead assignments (Read-only DB safe)
-        $leadAssignments = session()->get('lead_assignments', []);
+        // Database-backed lead assignments from crm.telecaller_leads via Eloquent
+        $dbAllocations = collect();
+        try {
+            $dbAllocations = TelecallerLead::with('employee')
+                ->get()
+                ->map(function ($l) {
+                    $l->emp_name = $l->employee?->full_name ?? $l->empcode;
+                    return $l;
+                })
+                ->keyBy('applino');
+        } catch (\Throwable $e) {}
 
-        // Fetch coupon batches and personal coupons from finance.couponinfo
+        $unallocatedLeadsCount = max(0, $totalApplications - $dbAllocations->count());
+
+        // Session-backed lead assignments fallback
+        $leadAssignments = session()->get('lead_assignments', []);
+        foreach ($dbAllocations as $appli => $alloc) {
+            $leadAssignments[$appli] = [
+                'employee' => $alloc->emp_name ?? $alloc->empcode,
+                'empcode' => $alloc->empcode,
+                'leadcount' => $alloc->leadcount ?? 1,
+                'mode' => 'Assigned',
+                'allotted_at' => $alloc->assigndatetime ? date('d M Y, h:i A', strtotime($alloc->assigndatetime)) : date('d M Y, h:i A'),
+            ];
+        }
+
+        // Fetch coupon batches, personal coupons, and pay details via Eloquent
         $couponBatches = collect();
         $personalCoupons = collect();
         $payDetails = collect();
         try {
-            $couponBatches = \Illuminate\Support\Facades\DB::table('finance.couponinfo')->where('coupontype', 'DEFAULT')->orderBy('id', 'asc')->get();
-            $personalCoupons = \Illuminate\Support\Facades\DB::table('finance.couponinfo')->where('coupontype', 'PERSONAL')->get()->keyBy('applino');
-            $payDetails = \Illuminate\Support\Facades\DB::table('finance.paydetails')->get()->keyBy('applino');
+            $couponBatches = CouponInfo::where('coupontype', 'DEFAULT')->orderBy('id', 'asc')->get();
+            $personalCoupons = CouponInfo::where('coupontype', 'PERSONAL')->get()->keyBy('applino');
+            $payDetails = PayDetail::all()->keyBy('applino');
         } catch (\Throwable $e) {}
 
         return view('crm::index', compact(
@@ -228,6 +260,9 @@ class CrmController extends Controller
             'filterDate',
             'availableStatuses',
             'employees',
+            'telecallers',
+            'dbAllocations',
+            'unallocatedLeadsCount',
             'leadAssignments',
             'couponBatches',
             'personalCoupons',
@@ -243,11 +278,11 @@ class CrmController extends Controller
     {
         $request->validate([
             'applino' => 'required|string',
-            'discount_amount' => 'required|numeric|min:1',
+            'discount_amount' => 'required|numeric|min:1|max:1200',
         ]);
 
         $applino = trim($request->input('applino'));
-        $discount = (float) $request->input('discount_amount', 5000.00);
+        $discount = (float) $request->input('discount_amount', 500.00);
         $user = Auth::user();
         $usercode = $user?->usercode ?? '03141';
 
@@ -258,44 +293,76 @@ class CrmController extends Controller
     }
 
     /**
-     * Allot admission enquiries to an employee (Saved in session, read-only DB safe).
+     * Allot admission enquiries to a telecaller employee.
+     * Persists into crm.telecaller_leads and logs into crm.telecaller_leads_tasks.
      */
     public function allotLeads(Request $request)
     {
+        $employeeCode = trim($request->input('employee_code', ''));
         $employeeName = trim($request->input('employee_name', ''));
         $allotMode = trim($request->input('allot_mode', 'single'));
         $appliNo = trim($request->input('application_no', ''));
+        $phoneNo = trim($request->input('phone_no', ''));
         $date = trim($request->input('allot_date', ''));
         $count = (int)$request->input('allot_count', 0);
+        $stageName = trim($request->input('stage_name', 'Stage 1: Calling & Verification'));
+        $stageRemark = trim($request->input('stage_remark', 'Lead assigned to telecaller by CRM Incharge'));
 
-        if (!$employeeName) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Please select an employee'], 422);
+        // If employee_code not directly passed, lookup by name
+        if (empty($employeeCode) && !empty($employeeName)) {
+            $matchedEmp = Employee::where('full_name', $employeeName)->first();
+            if ($matchedEmp) {
+                $employeeCode = $matchedEmp->emp_code;
+            } else {
+                // Check if employeeName has code in parentheses e.g. "Ganesh kumar (03434)"
+                if (preg_match('/\((\w+)\)/', $employeeName, $m)) {
+                    $employeeCode = $m[1];
+                }
             }
-            return redirect()->back()->with('error', 'Please select an employee');
         }
 
+        if (empty($employeeCode)) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Please select a valid telecaller employee'], 422);
+            }
+            return redirect()->back()->with('error', 'Please select a valid telecaller employee');
+        }
+
+        $user = Auth::user();
+        $crmId = $user ? $user->usercode : '02598';
+
+        // Call TelecallerService
+        $allocResult = \App\Services\TelecallerService::allocateLeads([
+            'empcode' => $employeeCode,
+            'crmid' => $crmId,
+            'allot_mode' => $allotMode,
+            'applino' => $appliNo,
+            'phoneno' => $phoneNo,
+            'allot_date' => $date,
+            'allot_count' => $count,
+            'stage_name' => $stageName,
+            'stage_remark' => $stageRemark,
+            'log_userid' => $crmId,
+            'log_ipaddress' => $request->ip() ?: '127.0.0.1',
+        ]);
+
+        if (!$allocResult['success']) {
+            if ($request->wantsJson()) {
+                return response()->json($allocResult, 422);
+            }
+            return redirect()->back()->with('error', $allocResult['message']);
+        }
+
+        // Keep session updated for immediate reactive UI compatibility
         $assignments = session()->get('lead_assignments', []);
         $allottedAt = now()->format('d M Y, h:i A');
+        $resolvedEmpName = $allocResult['employee_name'] ?? $employeeName;
 
-        if ($allotMode === 'single' && $appliNo) {
-            $assignments[$appliNo] = [
-                'employee' => $employeeName,
-                'mode' => 'Single',
-                'allotted_at' => $allottedAt,
-            ];
-        } else {
-            // Bulk / mode assignment
-            $assignments['_last_bulk'] = [
-                'employee' => $employeeName,
-                'mode' => ucfirst($allotMode),
-                'date' => $date,
-                'count' => $count,
-                'allotted_at' => $allottedAt,
-            ];
-            if ($appliNo) {
-                $assignments[$appliNo] = [
-                    'employee' => $employeeName,
+        if (!empty($allocResult['applications'])) {
+            foreach ($allocResult['applications'] as $app) {
+                $assignments[$app] = [
+                    'employee' => $resolvedEmpName,
+                    'empcode' => $employeeCode,
                     'mode' => ucfirst($allotMode),
                     'allotted_at' => $allottedAt,
                 ];
@@ -305,16 +372,16 @@ class CrmController extends Controller
         session()->put('lead_assignments', $assignments);
 
         if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'employee' => $employeeName,
+            return response()->json(array_merge($allocResult, [
+                'employee' => $resolvedEmpName,
+                'empcode' => $employeeCode,
                 'mode' => $allotMode,
                 'allotted_at' => $allottedAt,
                 'assignments' => $assignments,
-            ]);
+            ]));
         }
 
-        return redirect()->back()->with('status', "Enquiries successfully allotted to {$employeeName}!");
+        return redirect()->back()->with('status', $allocResult['message']);
     }
 
     /**

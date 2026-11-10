@@ -207,6 +207,9 @@ class RegistrationController extends Controller
                     'log_timestamp'=> now(),
                 ]);
             }
+            if ($crmRecord) {
+                \App\Services\CrmIdService::generateForStudent($crmRecord);
+            }
         } catch (Exception $e) {
             Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
         }
