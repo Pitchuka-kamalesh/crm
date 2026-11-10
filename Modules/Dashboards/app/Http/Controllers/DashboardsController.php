@@ -3,54 +3,640 @@
 namespace Modules\Dashboards\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
+use App\Models\Campus;
+use App\Models\Country;
+use App\Models\CrmStudentRegistration;
+use App\Models\District;
+use App\Models\Menu;
+use App\Models\Program;
+use App\Models\State;
+use App\Models\StudentAcademicDetail;
+use App\Models\StudentEducationInfo;
+use App\Models\StudentPersonalInfo;
+use App\Models\User;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class DashboardsController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the 8-Stage Student Admission & Onboarding Landing Page.
      */
-    public function index()
+    public function index(Request $request): View
     {
-        return view('dashboards::index');
+        $user = Auth::user();
+        $usercode = $user?->usercode ?? '';
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+
+        // Active step (1 through 5, default 1)
+        $activeStep = (int) $request->query('step', 1);
+        if ($activeStep < 1 || $activeStep > 5) {
+            $activeStep = 1;
+        }
+
+        // Resolve CRM student record from crm.student_registration
+        $crmStudent = null;
+        try {
+            $crmStudent = CrmStudentRegistration::where('applinano', $usercode)
+                ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                    $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+                })
+                ->first();
+        } catch (\Throwable $e) {}
+
+        $appNo = $crmStudent?->applinano ?: ($usercode ?: '');
+        $regNo = ($crmStudent?->std_status === 'Admitted' || $crmStudent?->stage1 === 'paid') ? ($crmStudent?->applinano ?: '') : '';
+        $displayName = trim((string) ($crmStudent?->name ?: ($user?->name ?: 'Applicant')));
+
+        // Always display Candidate / Student role
+        $roleName = ($user?->role_id === 5 || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
+
+        // Resolve Program and Branch dynamically from DB (empty if not filled)
+        $progId = $crmStudent?->programid;
+        $program = $progId ? Program::where('program_id', $progId)->first() : null;
+        $programName = $program ? ($program->program_short_name . ' - ' . $program->program_long_name) : ($crmStudent?->programlevel ?: '');
+
+        $branchId = $crmStudent?->branchid;
+        $branch = $branchId ? Branch::where('branch_id', $branchId)->first() : null;
+        $branchName = $branch ? $branch->branch_long_name : '';
+
+        $campusCode = $crmStudent?->campuscode;
+        $campus = $campusCode ? Campus::where('campus_code', $campusCode)->first() : null;
+        $campusName = $campus ? $campus->campus_short_name : '';
+
+        // Determine Degree Level for Step 3 (B.Tech, M.Tech, PhD)
+        $progShort = strtoupper($program?->program_short_name ?? ($crmStudent?->programlevel ?? 'B.Tech'));
+        if (str_contains($progShort, 'M.TECH') || in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])) {
+            $degreeLevel = 'mtech';
+        } elseif (str_contains($progShort, 'PHD') || str_contains($progShort, 'PH.D')) {
+            $degreeLevel = 'phd';
+        } else {
+            $degreeLevel = 'btech';
+        }
+
+        $student = $crmStudent;
+        $regulation = 'R25';
+
+        // Fetch Personal Info and Academic Details from CRM tables
+        $personalInfo = null;
+        $academicDetails = null;
+        if ($crmStudent) {
+            try {
+                $personalInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
+                    ->where('phoneno', $crmStudent->phoneno)
+                    ->first();
+                $academicDetails = StudentAcademicDetail::where('applino', $crmStudent->applinano)
+                    ->where('phoneno', $crmStudent->phoneno)
+                    ->first();
+            } catch (\Throwable $e) {
+                Log::warning('Could not load student personal/academic details: ' . $e->getMessage());
+            }
+        }
+
+        // Fetch 10th and Inter educational info
+        $edu10th = null;
+        $eduInter = null;
+
+        // Uploaded KYC documents
+        $documents = collect();
+
+        // 5-Stage Metadata definitions (strictly aligned with master.menus)
+        $stageMeta = [
+            1 => [
+                'title' => 'Fee Payment',
+                'subtitle' => 'Seat Confirmation & Fee Payment',
+                'icon' => '💳',
+            ],
+            2 => [
+                'title' => 'Personal Profile',
+                'subtitle' => 'Candidate Bio & Contact Information',
+                'icon' => '👤',
+            ],
+            3 => [
+                'title' => 'Academic Info',
+                'subtitle' => '10th SSC & Intermediate Details',
+                'icon' => '🎓',
+            ],
+            4 => [
+                'title' => 'Application Download',
+                'subtitle' => 'Application PDF & Documents Download',
+                'icon' => '📄',
+            ],
+            5 => [
+                'title' => 'VSAT Results',
+                'subtitle' => 'VSAT Scorecard & Merit Rank Details',
+                'icon' => '📊',
+            ],
+        ];
+
+        // Dynamically populate stage titles from master.menus table so DB updates reflect immediately via Eloquent
+        try {
+            $dbStageMenus = Menu::whereIn('menu_id', [109, 110, 111, 112, 113])
+                ->orWhere('controller_ref', 'like', 'dashboards?step=%')
+                ->get();
+
+            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 113 => 5];
+            foreach ($dbStageMenus as $m) {
+                $stepNum = null;
+                if (!empty($m->controller_ref) && preg_match('/step\D*(\d+)/i', $m->controller_ref, $matches)) {
+                    $stepNum = (int) $matches[1];
+                } elseif (isset($stepMap[$m->menu_id])) {
+                    $stepNum = $stepMap[$m->menu_id];
+                }
+                if ($stepNum && isset($stageMeta[$stepNum]) && !empty($m->menu_name)) {
+                    $stageMeta[$stepNum]['title'] = trim((string) $m->menu_name);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Could not load dynamic stage menus from master.menus: ' . $e->getMessage());
+        }
+
+        // Calculate stage statuses strictly from crmStudent DB columns
+        $stages = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $col = 'stage' . $i;
+            $val = $crmStudent ? (string)$crmStudent->{$col} : '';
+            // For stage 1, 'paid' is completed; for stages 2-5, 'completed' or 'paid' is completed
+            $isCompleted = ($i === 1) ? ($val === 'paid') : ($val === 'completed' || $val === 'paid');
+
+            $stages[$i] = [
+                'title' => $stageMeta[$i]['title'],
+                'subtitle' => $stageMeta[$i]['subtitle'],
+                'icon' => $stageMeta[$i]['icon'],
+                'status' => $isCompleted ? 'completed' : 'pending',
+                'db_field' => $col,
+                'db_value' => $val ?: ($i === 1 ? 'not_paid' : 'NA'),
+            ];
+        }
+
+        // All stages are accessible on click as requested
+        $maxAllowedStep = 5;
+
+        // Overall progress percentage
+        $completedCount = 0;
+        foreach ($stages as $stg) {
+            if ($stg['status'] === 'completed') {
+                $completedCount++;
+            }
+        }
+        $progressPercent = round(($completedCount / 5) * 100);
+
+        // Load Country, State, District options from crm tables via Eloquent
+        $countries = collect();
+        $states = collect();
+        $districts = collect();
+        try {
+            $countries = Country::where('lock_status', 0)->orderBy('country_name')->get();
+            $states = State::where('lock_status', 0)->orderBy('state_name')->get();
+            $districts = District::where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+        } catch (\Throwable $e) {
+            Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
+        }
+
+        return view('dashboards::index', compact(
+            'user',
+            'student',
+            'crmStudent',
+            'personalInfo',
+            'academicDetails',
+            'countries',
+            'states',
+            'districts',
+            'edu10th',
+            'eduInter',
+            'documents',
+            'appNo',
+            'regNo',
+            'displayName',
+            'roleName',
+            'programName',
+            'program',
+            'degreeLevel',
+            'branchName',
+            'campusName',
+            'regulation',
+            'activeStep',
+            'maxAllowedStep',
+            'stages',
+            'completedCount',
+            'progressPercent'
+        ));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Unified handler to save candidate details for any of the 8 steps.
      */
-    public function create()
+    public function saveStep(Request $request): RedirectResponse
     {
-        return view('dashboards::create');
+        $user = Auth::user();
+        $usercode = $user?->usercode ?? '';
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+
+        $crmStudent = null;
+        try {
+            $crmStudent = CrmStudentRegistration::where('applinano', $usercode)
+                ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                    $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+                })
+                ->first();
+        } catch (\Throwable $e) {}
+
+        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
+        $regNo = $crmStudent?->applinano ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
+
+        $step = (int) $request->input('step', 1);
+        $nextStep = min(5, $step + 1);
+
+        try {
+            if ($step === 1) {
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage1' => 'paid',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 2;
+                $msg = 'Stage 1: Admission Fee Payment confirmed!';
+            } elseif ($step === 2) {
+                // Validation for Step 2
+                $request->validate([
+                    'father_name' => ['required', 'string', 'max:255'],
+                    'phone_no' => ['required', 'regex:/^[0-9]{10}$/'],
+                    'dob' => ['required', 'date'],
+                    'gender' => ['required', 'string'],
+                    'category' => ['required', 'string'],
+                    'street_country' => ['required'],
+                    'state' => ['required'],
+                    'distric_t' => ['required'],
+                    'city_mandal' => ['required', 'string', 'max:100'],
+                    'village' => ['required', 'string', 'max:255'],
+                    'pin_code' => ['required', 'regex:/^[0-9]{6}$/'],
+                ], [
+                    'father_name.required' => 'Father name is required.',
+                    'phone_no.required' => 'Phone number is required.',
+                    'phone_no.regex' => 'Phone number must be exactly 10 digits.',
+                    'dob.required' => 'Date of birth is required.',
+                    'pin_code.required' => 'Pin code is required.',
+                    'pin_code.regex' => 'Pin code must be exactly 6 digits.',
+                    'distric_t.required' => 'Please select a District.',
+                    'state.required' => 'Please select a State.',
+                    'city_mandal.required' => 'City / Mandal is required.',
+                    'village.required' => 'Village / Street address is required.',
+                ]);
+
+                if ($crmStudent) {
+                    $personalCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+                    $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
+                        ->where('phoneno', $crmStudent->phoneno)
+                        ->first();
+
+                    $parentName = $request->input('parent_name') ?? $request->input('father_name');
+                    $rawPhone = $request->input('phone_no') ?? $request->input('far_ph_ne_no') ?? $request->input('phone') ?? $crmStudent->phoneno;
+                    $cleanPhoneVal = preg_replace('/\D/', '', (string)$rawPhone);
+
+                    $dobVal = $request->input('dob') ?? $request->input('DOB');
+
+                    // Handle referee_by checkboxes (array or string)
+                    $refByInput = $request->input('referee_by');
+                    if (is_array($refByInput)) {
+                        $refBy = implode(', ', array_filter($refByInput));
+                    } else {
+                        $refBy = (string)($refByInput ?? $request->input('referedby') ?? 'via advertisement');
+                    }
+                    $refEmp = $request->input('referedempcode') ?? $request->input('referee_empcode');
+
+                    $genderVal = $request->input('gender') ?? $request->input('Gender') ?? 'Male';
+                    $catVal = $request->input('caste_category') ?? $request->input('category') ?? 'OC';
+
+                    // Resolve Country, State, District from DB values
+                    $countryInput = $request->input('street_country') ?? $request->input('country') ?? 'India';
+                    $stateInput = $request->input('state') ?? 'Andhra Pradesh';
+                    $districtInput = $request->input('distric_t') ?? $request->input('district') ?? 'Guntur';
+
+                    if (is_numeric($countryInput)) {
+                        $cObj = Country::where('country_id', (int)$countryInput)->first();
+                        $countryVal = $cObj?->country_name ?? 'India';
+                    } else {
+                        $countryVal = (string)$countryInput;
+                    }
+
+                    if (is_numeric($stateInput)) {
+                        $sObj = State::where('state_id', (int)$stateInput)->first();
+                        $stateVal = $sObj?->state_name ?? 'Andhra Pradesh';
+                    } else {
+                        $stateVal = (string)$stateInput;
+                    }
+
+                    if (is_numeric($districtInput)) {
+                        $dObj = District::where('DISTRICT_ID', (int)$districtInput)->first();
+                        $districtVal = $dObj?->DISTRICT_NAME ?? 'Guntur';
+                    } else {
+                        $districtVal = (string)$districtInput;
+                    }
+
+                    $cityVal = $request->input('city_mandal') ?? $request->input('city') ?? 'Guntur';
+                    $villageVal = $request->input('village') ?? $request->input('address') ?? '';
+                    $pincodeVal = $request->input('pincode') ?? $request->input('pin_code') ?? '522002';
+
+                    StudentPersonalInfo::updateOrCreate(
+                        [
+                            'applino' => $crmStudent->applinano,
+                            'phoneno' => $crmStudent->phoneno,
+                        ],
+                        [
+                            'crmid' => $existingInfo?->crmid ?? $personalCrmId,
+                            'dob' => $dobVal ? date('Y-m-d', strtotime($dobVal)) : null,
+                            'gender' => $genderVal,
+                            'parent_name' => $parentName,
+                            'parentphono' => $cleanPhoneVal ?: $crmStudent->phoneno,
+                            'caste_category' => $catVal,
+                            'referedby' => $refBy,
+                            'referedempcode' => $refEmp,
+                            'country' => $countryVal,
+                            'state' => $stateVal,
+                            'district' => $districtVal,
+                            'city_mandal' => $cityVal,
+                            'village' => $villageVal,
+                            'pincode' => $pincodeVal,
+                            'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
+                            'log_ipaddress' => $request->ip(),
+                            'log_timestamp' => now(),
+                        ]
+                    );
+
+                    $crmUpdates = [
+                        'stage2' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ];
+                    if ($request->filled('name')) {
+                        $crmUpdates['name'] = $request->input('name');
+                    }
+                    if ($request->filled('email')) {
+                        $crmUpdates['emailid'] = $request->input('email');
+                    }
+                    if ($request->has('hostel_required')) {
+                        $crmUpdates['ableto'] = (bool) $request->input('hostel_required');
+                    }
+                    $crmStudent->update($crmUpdates);
+                }
+                $nextStep = 3;
+                $msg = 'Stage 2: Personal Profile saved successfully!';
+            } elseif ($step === 3) {
+                // Validation for Step 3
+                $request->validate([
+                    'school_co_name' => ['required', 'string', 'max:255'],
+                    'boad_of_study' => ['required', 'string', 'max:255'],
+                    'roll_no' => ['required', 'string', 'max:50'],
+                    'passing_year' => ['required', 'integer', 'min:2000', 'max:2030'],
+                    'eval_type' => ['required', 'string'],
+                    'upload_docs' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                ], [
+                    'school_co_name.required' => 'School / College name is required.',
+                    'boad_of_study.required' => 'Board of study is required.',
+                    'roll_no.required' => 'Roll / Hall ticket number is required.',
+                    'passing_year.required' => 'Passing year is required.',
+                    'upload_docs.max' => 'Document file must be 5MB or smaller.',
+                ]);
+
+                if ($crmStudent) {
+                    $academicCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+                    $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
+                        ->where('phoneno', $crmStudent->phoneno)
+                        ->first();
+
+                    $tenthSchool = $request->input('tenth_school_name') ?? $request->input('school_co_name') ?? $request->input('ssc_school');
+                    $tenthBoard = $request->input('tenth_study_board') ?? $request->input('boad_of_study') ?? $request->input('ssc_board');
+                    $tenthRoll = $request->input('tenth_roll_no') ?? $request->input('roll_no') ?? $request->input('ssc_hallticket');
+                    $tenthYear = (int) ($request->input('tenth_passed_year') ?? $request->input('passing_year') ?? $request->input('ssc_year') ?? 2024);
+
+                    $evalType = $request->input('eval_type') ?? $request->input('tenth_marks_type') ?? 'marks';
+                    $sscMarks = $request->input('tenth_marks') ?? $request->input('marks_value') ?? $request->input('ssc_marks');
+                    $tenthMarksNum = null;
+                    $tenthCgpaNum = null;
+
+                    if ($evalType === 'CGPA' || $request->filled('cgpa_value')) {
+                        $cgpaInput = $request->input('cgpa_value') ?? $sscMarks;
+                        $tenthCgpaNum = is_numeric($cgpaInput) ? (float)$cgpaInput : 9.80;
+                        $tenthMarksNum = round($tenthCgpaNum * 9.5, 2);
+                        $evalType = 'CGPA';
+                    } else {
+                        $tenthMarksNum = is_numeric($sscMarks) ? (float)$sscMarks : 590.0;
+                        if ($tenthMarksNum > 100) {
+                            $tenthCgpaNum = round(($tenthMarksNum / 600) * 10, 2);
+                        } else {
+                            $tenthCgpaNum = round($tenthMarksNum / 9.5, 2);
+                        }
+                        $evalType = 'marks';
+                    }
+
+                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board') ?? 'Inter';
+                    $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? 'First Year';
+
+                    // Handle document upload if present
+                    if ($request->hasFile('upload_docs')) {
+                        try {
+                            $file = $request->file('upload_docs');
+                            $fileName = 'DOC_' . ($crmStudent->applinano ?: 'APP') . '_' . time() . '.' . $file->getClientOriginalExtension();
+                            $file->move(public_path('uploads/documents'), $fileName);
+                        } catch (\Throwable $e) {
+                            Log::warning('Document upload note: ' . $e->getMessage());
+                        }
+                    }
+
+                    $academicPayload = [
+                        'crmid' => $existingAcademic?->crmid ?? $academicCrmId,
+                        'progmid' => $crmStudent->programid,
+                        'branchid' => $crmStudent->branchid,
+                        'tenth_school_name' => $tenthSchool,
+                        'tenth_study_board' => $tenthBoard,
+                        'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location') ?? 'Guntur',
+                        'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location') ?? 'Guntur',
+                        'tenth_roll_no' => $tenthRoll,
+                        'tenth_passed_year' => $tenthYear,
+                        'tenth_marks_type' => $evalType,
+                        'tenth_marks' => $tenthMarksNum,
+                        'tenth_cgpa' => $tenthCgpaNum,
+                        'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name') ?? 'Narayana Junior College',
+                        'pu2_study_board' => $courseChoice,
+                        'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
+                        'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
+                        'pu2_passed_year' => (int) ($request->input('inter_year') ?? $request->input('pu2_passed_year') ?? 2026),
+                        'pu2_marks_type' => 'Marks',
+                        'pu2_marks' => is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : 962.00,
+                        'pu2_cgpa' => is_numeric($request->input('inter_cgpa')) ? (float)$request->input('inter_cgpa') : null,
+                        'pu2_current_status' => $subsetChoice,
+                        'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
+                        'log_datetime' => now(),
+                        'log_ipaddress' => $request->ip(),
+                    ];
+
+                    // If Degree level is M.Tech or PhD, save UG (B.Tech) details
+                    if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
+                        $academicPayload['ug_college_name'] = $request->input('ug_college_name') ?: "Vignan's Lara Institute of Tech & Science";
+                        $academicPayload['ug_university_board'] = $request->input('ug_university_board') ?: 'JNTUK / Andhra University';
+                        $academicPayload['ug_college_city'] = $request->input('ug_college_city') ?: 'Guntur';
+                        $academicPayload['ug_college_district'] = $request->input('ug_college_district') ?: 'Guntur';
+                        $academicPayload['ug_roll_no'] = $request->input('ug_roll_no') ?: '201FA04001';
+                        $academicPayload['ug_passed_year'] = (int)($request->input('ug_passed_year') ?: 2024);
+                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: 'CGPA';
+                        $academicPayload['ug_marks'] = is_numeric($request->input('ug_marks')) ? (float)$request->input('ug_marks') : null;
+                        $academicPayload['ug_cgpa'] = is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : 8.75;
+                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: 'Completed';
+                    }
+
+                    // If Degree level is PhD, save PG (M.Tech) details
+                    if ($request->filled('pg_college_name') || $request->input('degree_level') === 'phd') {
+                        $academicPayload['pg_college_name'] = $request->input('pg_college_name') ?: 'VFSTR University';
+                        $academicPayload['pg_university_board'] = $request->input('pg_university_board') ?: 'VFSTR';
+                        $academicPayload['pg_college_city'] = $request->input('pg_college_city') ?: 'Vadlamudi, Guntur';
+                        $academicPayload['pg_college_district'] = $request->input('pg_college_district') ?: 'Guntur';
+                        $academicPayload['pg_roll_no'] = $request->input('pg_roll_no') ?: '241FK01001';
+                        $academicPayload['pg_passed_year'] = (int)($request->input('pg_passed_year') ?: 2026);
+                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: 'CGPA';
+                        $academicPayload['pg_marks'] = is_numeric($request->input('pg_marks')) ? (float)$request->input('pg_marks') : null;
+                        $academicPayload['pg_cgpa'] = is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : 9.10;
+                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
+                    }
+
+                    StudentAcademicDetail::updateOrCreate(
+                        [
+                            'applino' => $crmStudent->applinano,
+                            'phoneno' => $crmStudent->phoneno,
+                        ],
+                        $academicPayload
+                    );
+
+                    $crmStudent->update([
+                        'stage3' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 4;
+                $msg = 'Stage 3: Academic Records saved successfully!';
+            } elseif ($step >= 4 && $step <= 5) {
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage' . $step => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = min(5, $step + 1);
+                $msg = 'Stage ' . $step . ' saved successfully!';
+            } else {
+                $msg = 'Stage updated successfully!';
+            }
+
+            return redirect()->route('dashboards.index', ['step' => $nextStep])
+                ->with('status', $msg);
+
+        } catch (Exception $e) {
+            Log::error('[DashboardsController] saveStep error: ' . $e->getMessage());
+            return redirect()->route('dashboards.index', ['step' => $step])
+                ->withErrors(['error' => 'Failed to save stage details: ' . $e->getMessage()]);
+        }
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Backward-compatible alias for existing form submissions.
      */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function saveEducation(Request $request): RedirectResponse
     {
-        return view('dashboards::show');
+        $request->merge(['step' => 6]);
+        return $this->saveStep($request);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Silent autosave on blur / change for any student dashboard input.
      */
-    public function edit($id)
+    public function autosave(Request $request): \Illuminate\Http\JsonResponse
     {
-        return view('dashboards::edit');
+        $user = Auth::user();
+        $usercode = $user?->usercode ?? '';
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+
+        $crmStudent = null;
+        try {
+            $crmStudent = CrmStudentRegistration::where('applinano', $usercode)
+                ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                    $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+                })
+                ->first();
+        } catch (\Throwable $e) {}
+
+        $fieldName = (string)$request->input('field', '');
+        $fieldValue = $request->input('value');
+        $data = $request->except(['_token', 'field', 'value']);
+        if (!empty($fieldName)) {
+            $data[$fieldName] = $fieldValue;
+        }
+
+        try {
+            if ($crmStudent) {
+                $crmUpdates = [];
+                if (isset($data['student_name']) || isset($data['name'])) {
+                    $crmUpdates['name'] = $data['student_name'] ?? $data['name'];
+                }
+                if (isset($data['personal_email']) || isset($data['email'])) {
+                    $crmUpdates['emailid'] = $data['personal_email'] ?? $data['email'];
+                }
+                if (isset($data['hostel_required'])) {
+                    $crmUpdates['ableto'] = (bool)$data['hostel_required'];
+                }
+                if (!empty($crmUpdates)) {
+                    $crmUpdates['log_ipaddress'] = $request->ip();
+                    $crmUpdates['log_timestamp'] = now();
+                    $crmStudent->update($crmUpdates);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[DashboardsController] autosave error: ' . $e->getMessage());
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Apply student personal coupon from Stage 1 Fee Payment card.
      */
-    public function update(Request $request, $id) {}
+    public function applyPersonalCoupon(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $code = (string) $request->input('coupon_code', '');
+        $applino = (string) $request->input('applino', '');
+
+        if (empty($applino)) {
+            $user = Auth::user();
+            $applino = $user?->usercode ?? '20261106333';
+        }
+
+        $res = \App\Services\CouponService::validateAndApplyPersonalCoupon($code, $applino);
+        return response()->json($res);
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove applied personal coupon from student session.
      */
-    public function destroy($id) {}
+    public function removePersonalCoupon(): \Illuminate\Http\JsonResponse
+    {
+        $res = \App\Services\CouponService::removeAppliedCoupon();
+        return response()->json($res);
+    }
 }

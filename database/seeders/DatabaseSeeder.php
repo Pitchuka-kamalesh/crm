@@ -2,24 +2,34 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $seedSqlPath = database_path('sql/vignan_master_data.sql');
+        if (File::exists($seedSqlPath)) {
+            $hasData = false;
+            try {
+                $hasData = DB::table('master.campuses')->exists();
+            } catch (\Throwable $e) {}
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+            if (!$hasData) {
+                DB::unprepared(File::get($seedSqlPath));
+                if (isset($this->command)) {
+                    $this->command->info('Vignan University master seed data imported successfully.');
+                }
+            } else {
+                if (isset($this->command)) {
+                    $this->command->info('Master tables already contain data, skipping seed.');
+                }
+            }
+        }
     }
 }

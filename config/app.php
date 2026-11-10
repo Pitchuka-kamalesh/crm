@@ -65,7 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Asia/Kolkata'),
+    'is_login_bypass' => env('IS_LOGIN_BYPASS', false),
 
     /*
     |--------------------------------------------------------------------------
