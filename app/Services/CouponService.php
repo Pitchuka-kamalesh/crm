@@ -324,17 +324,11 @@ class CouponService
         $perCode = '';
         $perAmount = 0.00;
 
-        if (session('applied_coupon_code')) {
-            $sessionCode = session('applied_coupon_code');
-            $perCoupon = CouponInfo::where('coupontype', 'PERSONAL')
-                ->where('couponsno', $sessionCode)
-                ->first();
-            $perCode = $sessionCode;
-            $perAmount = (float) (session('applied_coupon_discount') ?? $perCoupon?->discountamount ?? 0.00);
-        } elseif (!session('applied_coupon_removed')) {
-            $perCoupon = self::getPersonalCouponForStudent($applino);
-            $perCode = $perCoupon?->couponsno ?? '';
-            $perAmount = $perCoupon ? (float) $perCoupon->discountamount : 0.00;
+        $candidatePer = self::getPersonalCouponForStudent($applino);
+        if ($candidatePer && $candidatePer->coupstatus === 'ACTIVE') {
+            $perCoupon = $candidatePer;
+            $perCode = $perCoupon->couponsno ?? '';
+            $perAmount = (float) ($perCoupon->discountamount ?? 0.00);
         }
 
         // Cap personal discount to remaining balance after default coupon

@@ -46,6 +46,10 @@ Route::post('/crm/coupons/generate-personal', [\Modules\Crm\Http\Controllers\Crm
 Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
 Route::get('/leads/allottedleads', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allotted');
 Route::get('/leads/leadsallocation', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allocation');
+Route::get('/leads/leads input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.input');
+Route::get('/leads/leadsinput', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
+Route::get('/leads/leads-input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
+Route::post('/leads/store-input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'storeLeadInput'])->middleware('auth')->name('leads.storeInput');
 Route::post('/leads/allocate', [\Modules\Leads\Http\Controllers\LeadsController::class, 'allocate'])->middleware('auth');
 Route::post('/leads/log-task', [\Modules\Leads\Http\Controllers\LeadsController::class, 'logTask'])->middleware('auth');
 
@@ -80,4 +84,5 @@ Route::post('/dashboards/remove-coupon', [\Modules\Dashboards\Http\Controllers\D
 // PayU Gateway Integration Routes
 Route::post('/payu/initiate', [\App\Http\Controllers\PayUController::class, 'initiate'])->middleware('auth')->name('payu.initiate');
 Route::match(['get', 'post'], '/payu/response', [\App\Http\Controllers\PayUController::class, 'handleResponse'])->name('payu.response');
+Route::get('/payu/receipt', [\App\Http\Controllers\PayUController::class, 'receipt'])->middleware('auth')->name('payu.receipt');
 

@@ -1486,8 +1486,13 @@
                         @if($crmStudent?->stage1 === 'paid')
                             <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">✅</div>
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.2rem;">Admission Fee Confirmed</h3>
-                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">Your seat confirmation fee is verified in the database. Download your official documents below.</p>
-                            <span class="step-header-tag tag-success" style="display: inline-block;">Status: Completed ✓</span>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">Your seat confirmation fee is verified in the database. View or download your official receipt below.</p>
+                            <div style="display: flex; justify-content: center; gap: 0.65rem; flex-wrap: wrap; align-items: center;">
+                                <span class="step-header-tag tag-success" style="display: inline-block;">Status: Completed ✓</span>
+                                <a href="{{ route('payu.receipt') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #0f172a; color: #ffffff; padding: 0.42rem 0.95rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                                    <span>🧾 View Official Receipt &rarr;</span>
+                                </a>
+                            </div>
                         @else
                             @php
                                 $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '20261106333';
@@ -1512,74 +1517,12 @@
                                     </div>
                                 @endif
 
-                                @php
-                                    $defaultAllocated = \App\Services\CouponService::getPersonalCouponForStudent($studentAppliNo);
-                                    $hasPersonalCoupon = $feeBreakdown['per_discount'] > 0;
-                                    $suggestedPersonalCode = $defaultAllocated?->couponsno ?? \App\Services\CouponService::formatPersonalCouponCode($studentAppliNo);
-                                @endphp
-
-                                <!-- Personal Coupon Row & Button -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; margin: 5px 0; border-top: 1px dashed #e2e8f0; border-bottom: 1px dashed #e2e8f0;">
-                                    <div>
-                                        <div style="display: flex; align-items: center; gap: 5px;">
-                                            <span style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">🎟️ Personal Coupon</span>
-                                            @if($defaultAllocated && $defaultAllocated->coupstatus === 'ACTIVE' && !$hasPersonalCoupon)
-                                                <span style="font-size: 0.68rem; color: #059669; font-weight: 700; background: #ecfdf5; padding: 1px 5px; border-radius: 4px; border: 1px solid #a7f3d0;">
-                                                    Available
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <div style="font-size: 0.7rem; color: #64748b;" id="personalCouponSubtext">
-                                            @if($hasPersonalCoupon)
-                                                Applied: <code>{{ $feeBreakdown['per_coupon'] }}</code>
-                                            @elseif($defaultAllocated && $defaultAllocated->coupstatus === 'ACTIVE')
-                                                Approved code: <code>{{ $suggestedPersonalCode }}</code>
-                                            @else
-                                                Special counselor concession
-                                            @endif
-                                        </div>
+                                @if($feeBreakdown['per_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
+                                        <span>Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
                                     </div>
-
-                                    <div id="appliedPersonalCouponCol" style="{{ $hasPersonalCoupon ? 'display: flex;' : 'display: none;' }} align-items: center; gap: 6px;">
-                                        <strong style="color: #059669; font-size: 0.82rem;">- ₹ <span id="dispPersonalDiscountVal">{{ number_format($feeBreakdown['per_discount'], 2) }}</span></strong>
-                                        <button type="button" onclick="handleRemovePersonalCoupon()" style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; border-radius: 4px; padding: 2px 7px; font-size: 0.68rem; font-weight: 700; cursor: pointer;" title="Remove Personal Coupon">✕ Remove</button>
-                                    </div>
-
-                                    <div id="btnPromptCol" style="{{ $hasPersonalCoupon ? 'display: none;' : 'display: block;' }}">
-                                        <button type="button" 
-                                                id="btnShowCouponInput"
-                                                onclick="togglePersonalCouponBox()" 
-                                                style="background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);">
-                                            <span>+</span> Apply Coupon
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Personal Coupon Input & Apply Box -->
-                                <div id="couponEntryBox" style="{{ (!$hasPersonalCoupon && $defaultAllocated && $defaultAllocated->coupstatus === 'ACTIVE') ? 'display: block;' : 'display: none;' }} margin: 0.4rem 0 0.6rem 0; padding: 0.5rem; background: #f8fafc; border: 1px dashed #93c5fd; border-radius: 8px;">
-                                    <div style="font-size: 0.72rem; color: #1e40af; font-weight: 600; margin-bottom: 4px;">
-                                        Enter Personal Coupon Code:
-                                    </div>
-                                    <div style="display: flex; gap: 6px; align-items: center;">
-                                        <input type="text" 
-                                               id="personalCouponInput" 
-                                               placeholder="e.g. {{ $suggestedPersonalCode }}" 
-                                               value="{{ $suggestedPersonalCode }}" 
-                                               style="flex: 1; height: 32px; padding: 0 10px; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">
-                                        <button type="button" 
-                                                id="btnSubmitPersonalCoupon"
-                                                onclick="submitPersonalCouponAjax('{{ $studentAppliNo }}')" 
-                                                style="height: 32px; background: #4f46e5; color: #ffffff; border: none; padding: 0 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
-                                            Apply
-                                        </button>
-                                        <button type="button" 
-                                                onclick="togglePersonalCouponBox()" 
-                                                style="height: 32px; background: #e2e8f0; color: #475569; border: none; padding: 0 8px; border-radius: 6px; font-size: 0.74rem; cursor: pointer;" title="Close">
-                                            ✕
-                                        </button>
-                                    </div>
-                                    <div id="couponAjaxNotice" style="font-size: 0.72rem; margin-top: 4px; display: none;"></div>
-                                </div>
+                                @endif
 
                                 <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
                                     <span style="font-weight: 600;">Total Concession Deducted:</span>
@@ -1588,7 +1531,7 @@
 
                                 <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
                                     <span>Payment Gateway:</span>
-                                    <span style="font-weight: 600; color: #059669;">PayU Secure Hosted</span>
+                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'PayU Secure Hosted' }}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
                                     <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
@@ -1600,108 +1543,14 @@
                                 @csrf
                                 <input type="hidden" id="payuAmountInput" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
                                 <button type="submit" id="btnPayUGateway" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
-                                    <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> via PayU Gateway</span>
+                                    @if($feeBreakdown['net_payable'] <= 0)
+                                        <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
+                                    @else
+                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> via PayU Gateway</span>
+                                    @endif
                                     <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </button>
                             </form>
-
-                            <script>
-                                function togglePersonalCouponBox() {
-                                    const box = document.getElementById('couponEntryBox');
-                                    if (box) {
-                                        box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
-                                    }
-                                }
-
-                                function submitPersonalCouponAjax(applino) {
-                                    const input = document.getElementById('personalCouponInput');
-                                    const notice = document.getElementById('couponAjaxNotice');
-                                    const btn = document.getElementById('btnSubmitPersonalCoupon');
-                                    const code = (input ? input.value : '').trim();
-
-                                    if (!code) {
-                                        if (notice) {
-                                            notice.style.display = 'block';
-                                            notice.style.color = '#dc2626';
-                                            notice.textContent = 'Please enter a personal coupon code.';
-                                        }
-                                        return;
-                                    }
-
-                                    if (btn) btn.disabled = true;
-                                    if (notice) {
-                                        notice.style.display = 'block';
-                                        notice.style.color = '#2563eb';
-                                        notice.textContent = 'Verifying personal coupon and remaining balance...';
-                                    }
-
-                                    fetch('{{ route("dashboards.apply-coupon") }}', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                        },
-                                        body: JSON.stringify({ coupon_code: code, applino: applino })
-                                    })
-                                    .then(r => r.json())
-                                    .then(data => {
-                                        if (btn) btn.disabled = false;
-                                        if (data.success) {
-                                            if (notice) {
-                                                notice.style.color = '#059669';
-                                                notice.textContent = '✓ ' + data.message;
-                                            }
-                                            const appliedCol = document.getElementById('appliedPersonalCouponCol');
-                                            const btnCol = document.getElementById('btnPromptCol');
-                                            const entryBox = document.getElementById('couponEntryBox');
-                                            const subtext = document.getElementById('personalCouponSubtext');
-                                            const valSpan = document.getElementById('dispPersonalDiscountVal');
-                                            const totConcessionSpan = document.getElementById('dispTotalConcessionVal');
-                                            const totPayableSpan = document.getElementById('dispTotalPayableVal');
-                                            const payInput = document.getElementById('payuAmountInput');
-                                            const btnPayText = document.getElementById('btnPayAmountText');
-
-                                            if (valSpan) valSpan.textContent = Number(data.discount).toFixed(2);
-                                            if (subtext) subtext.innerHTML = `Applied: <code>${data.code}</code>`;
-                                            if (appliedCol) appliedCol.style.display = 'flex';
-                                            if (btnCol) btnCol.style.display = 'none';
-                                            if (entryBox) entryBox.style.display = 'none';
-
-                                            if (totConcessionSpan) totConcessionSpan.textContent = Number(data.total_discount).toFixed(2);
-                                            if (totPayableSpan) totPayableSpan.textContent = Number(data.net_payable).toFixed(2);
-                                            if (payInput) payInput.value = data.net_payable;
-                                            if (btnPayText) btnPayText.textContent = Math.round(data.net_payable);
-                                        } else {
-                                            if (notice) {
-                                                notice.style.color = '#dc2626';
-                                                notice.textContent = '✕ ' + data.message;
-                                            }
-                                        }
-                                    })
-                                    .catch(err => {
-                                        if (btn) btn.disabled = false;
-                                        if (notice) {
-                                            notice.style.color = '#dc2626';
-                                            notice.textContent = 'Network error while applying coupon. Please try again.';
-                                        }
-                                    });
-                                }
-
-                                function handleRemovePersonalCoupon() {
-                                    fetch('{{ route("dashboards.remove-coupon") }}', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                        }
-                                    })
-                                    .then(r => r.json())
-                                    .then(data => {
-                                        location.reload();
-                                    })
-                                    .catch(e => location.reload());
-                                }
-                            </script>
                         @endif
                     </div>
 
@@ -1733,8 +1582,8 @@
                                     <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Accounts Verified Receipt</p>
                                 </div>
                                 @if($crmStudent?->stage1 === 'paid')
-                                    <a href="javascript:alert('Downloading Official Fee Payment Receipt (PDF)...')" class="btn-doc-download">
-                                        <span>Download Receipt ↓</span>
+                                    <a href="{{ route('payu.receipt') }}" class="btn-doc-download">
+                                        <span>Open Official Receipt &rarr;</span>
                                     </a>
                                 @else
                                     <span class="doc-status-pill">Unlocks after fee payment</span>
