@@ -31,8 +31,9 @@ class LeadsController extends Controller
         if (!$activeTab) {
             $activeTab = match ($currentRoute) {
                 'leads.allocation' => 'allocation',
+                'leads.input' => 'input',
                 'leads.allotted' => 'allotted',
-                default => ($roleId === 4 ? 'allotted' : 'overview'),
+                default => ($roleId === 4 ? 'allotted' : 'input'),
             };
         }
 
@@ -40,6 +41,10 @@ class LeadsController extends Controller
         $searchQuery = trim($request->input('q', ''));
         $statusFilter = $request->input('status', 'all');
         $callerFilter = $request->input('caller', 'all');
+        $allocStatusFilter = $request->input('alloc_status', 'all');
+        $programFilter = $request->input('program', 'all');
+
+        $allocatedApplis = TelecallerLead::pluck('applino');
 
         $leadsQuery = CrmStudentRegistration::with(['program', 'branch', 'campus', 'state', 'country']);
         if ($searchQuery) {
@@ -47,18 +52,40 @@ class LeadsController extends Controller
                 $q->where('name', 'ilike', "%{$searchQuery}%")
                   ->orWhere('phoneno', 'ilike', "%{$searchQuery}%")
                   ->orWhere('applinano', 'ilike', "%{$searchQuery}%")
+                  ->orWhere('crmid', 'ilike', "%{$searchQuery}%")
                   ->orWhere('emailid', 'ilike', "%{$searchQuery}%");
             });
         }
         if ($statusFilter && $statusFilter !== 'all') {
             if (in_array(strtolower($statusFilter), ['stage1','stage2','stage3','stage4','stage5','step1','step2','step3','step4','step5'])) {
                 $col = str_replace('step', 'stage', strtolower($statusFilter));
-                $leadsQuery->where(function ($q) use ($col) {
-                    $q->whereIn($col, ['completed', 'paid', 'approved', 'in_progress', 'active', 'not_started', 'not_paid']);
-                });
+                $leadsQuery->whereIn($col, ['completed', 'paid', 'approved', 'in_progress', 'active']);
             } else {
                 $leadsQuery->where('std_status', $statusFilter);
             }
+        }
+
+        // On Leads Allocation tab, strictly show only UNALLOCATED leads so allocated ones clear out automatically
+        if ($activeTab === 'allocation') {
+            if ($allocatedApplis->isNotEmpty()) {
+                $leadsQuery->whereNotIn('applinano', $allocatedApplis);
+            }
+        } elseif ($activeTab === 'input') {
+            // On Lead input tab, reflect the entire dataset with optional allocation/telecaller/program filters
+            if ($allocStatusFilter === 'allocated') {
+                $leadsQuery->whereIn('applinano', $allocatedApplis);
+            } elseif ($allocStatusFilter === 'unallocated' && $allocatedApplis->isNotEmpty()) {
+                $leadsQuery->whereNotIn('applinano', $allocatedApplis);
+            }
+
+            if ($callerFilter && $callerFilter !== 'all') {
+                $callerApplis = TelecallerLead::where('empcode', $callerFilter)->pluck('applino');
+                $leadsQuery->whereIn('applinano', $callerApplis);
+            }
+        }
+
+        if ($programFilter && $programFilter !== 'all') {
+            $leadsQuery->where('program_id', $programFilter);
         }
 
         // If logged in as Tele Caller (Role 4) and on allotted tab, show assigned leads or all if not assigned
@@ -72,8 +99,8 @@ class LeadsController extends Controller
         // 25 records per page with query strings preserved
         $leads = $leadsQuery->orderBy('log_timestamp', 'desc')->paginate(25)->withQueryString();
 
-        // If CRM student registration is empty, fallback to crm.leads (actual DB leads table)
-        if ($leads->isEmpty() && !$searchQuery && $statusFilter === 'all') {
+        // If CRM student registration is empty, fallback to crm.leads only when viewing full input without filters
+        if ($leads->isEmpty() && $activeTab !== 'allocation' && !$searchQuery && $statusFilter === 'all' && $allocStatusFilter === 'all' && $callerFilter === 'all' && $programFilter === 'all') {
             $rawLeadsQuery = \App\Models\Lead::query();
             $leads = $rawLeadsQuery->orderBy('log_timestamp', 'desc')->paginate(25)->withQueryString();
         }
@@ -106,7 +133,7 @@ class LeadsController extends Controller
 
         // If AJAX request (Live Search / Filtering), return the table rows partial
         if ($request->ajax()) {
-            return view('leads::partials.leads_table', compact('leads', 'dbAllocations', 'latestTasks'));
+            return view('leads::partials.leads_table', compact('leads', 'dbAllocations', 'latestTasks', 'activeTab'));
         }
 
         // Telecallers list (Role 4 in roles_assigned / employees)
@@ -139,8 +166,80 @@ class LeadsController extends Controller
             'roleMenus',
             'searchQuery',
             'statusFilter',
-            'callerFilter'
+            'callerFilter',
+            'allocStatusFilter',
+            'programFilter'
         ));
+    }
+
+    /**
+     * Store a newly inputted lead directly from Lead input tab into crm.student_registration.
+     */
+    public function storeLeadInput(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:150'],
+            'phoneno' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+            'emailid' => ['nullable', 'email', 'max:150'],
+            'program_id' => ['required', 'integer'],
+            'empcode' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $phone = trim($request->input('phoneno'));
+        $existing = CrmStudentRegistration::where('phoneno', $phone)->first();
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => "A lead with mobile +91 {$phone} already exists (App #{$existing->applinano}).",
+            ], 422);
+        }
+
+        $maxApp = CrmStudentRegistration::max('applinano');
+        $nextAppNo = is_numeric($maxApp) ? (string) ((int) $maxApp + 1) : '2027000001';
+        $nextId = (CrmStudentRegistration::max('id') ?? 0) + 1;
+        $programId = (int) $request->input('program_id');
+        $prog = Program::find($programId);
+
+        $student = CrmStudentRegistration::create([
+            'id' => $nextId,
+            'applinano' => $nextAppNo,
+            'phoneno' => $phone,
+            'name' => trim($request->input('name')),
+            'emailid' => trim((string) $request->input('emailid', '')) ?: null,
+            'program_id' => $programId,
+            'programlevel' => $prog?->program_short_name ?? null,
+            'campus_id' => 1,
+            'std_status' => 'Interested',
+            'stage1' => 'not_paid',
+            'stage2' => 'locked',
+            'stage3' => 'locked',
+            'stage4' => 'locked',
+            'stage5' => 'locked',
+            'log_userid' => auth()->user()?->usercode ?? '02598',
+            'log_ipaddress' => $request->ip() ?: '127.0.0.1',
+            'log_timestamp' => now(),
+        ]);
+
+        $crmId = \App\Services\CrmIdService::generateForStudent($student);
+
+        $empCode = trim((string) $request->input('empcode', ''));
+        if ($empCode !== '') {
+            \App\Services\TelecallerService::allocateLeads([
+                'empcode' => $empCode,
+                'allot_mode' => 'single',
+                'applino' => $student->applinano,
+                'phoneno' => $student->phoneno,
+                'stage_name' => 'Stage 1: Calling & Verification',
+                'stage_remark' => 'Assigned directly on Lead input',
+                'log_userid' => auth()->user()?->usercode ?? '02598',
+                'log_ipaddress' => $request->ip() ?: '127.0.0.1',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Lead [{$student->name}] added successfully (App #{$student->applinano}, CRM ID: {$crmId}).",
+        ]);
     }
 
     /**
@@ -151,19 +250,30 @@ class LeadsController extends Controller
         $request->validate([
             'stage' => ['required', 'string', 'regex:/^stage[1-5]$/'],
             'status' => ['required', 'string', 'in:completed,in_progress,not_started,locked,not_paid,paid,approved,rejected'],
+            'stage_name' => ['nullable', 'string', 'max:255'],
+            'stage_calltime' => ['nullable', 'string', 'max:60'],
+            'stage_callperson' => ['nullable', 'string', 'max:255'],
+            'call_duration' => ['nullable', 'string', 'max:50'],
             'remarks' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $stageCol = $request->input('stage');
         $stageStatus = $request->input('status');
-        $remarks = $request->input('remarks');
+        $customStageName = trim((string) $request->input('stage_name', ''));
+        $callTime = trim((string) $request->input('stage_calltime', ''));
+        $callPerson = trim((string) $request->input('stage_callperson', ''));
+        $callDuration = trim((string) $request->input('call_duration', ''));
+        $remarks = trim((string) $request->input('remarks', ''));
+
+        $fullRemark = $remarks ?: ('Stage status updated to ' . $stageStatus);
+        if ($callDuration !== '') {
+            $fullRemark = "[Duration: {$callDuration}] " . $fullRemark;
+        }
 
         $student = CrmStudentRegistration::where('applinano', $applinano)->first();
         if ($student) {
             $student->{$stageCol} = $stageStatus;
-            if ($request->has('remarks')) {
-                $student->remarks = $remarks;
-            }
+            $student->remarks = $fullRemark;
             $student->log_userid = auth()->user()->usercode ?? '02598';
             $student->log_ipaddress = $request->ip() ?: '127.0.0.1';
             $student->log_timestamp = now();
@@ -175,9 +285,10 @@ class LeadsController extends Controller
                     'applino' => $student->applinano,
                     'phoneno' => $student->phoneno,
                     'empcode' => auth()->user()->usercode ?? '03434',
-                    'stage_name' => strtoupper($stageCol) . ' (' . ucfirst($stageStatus) . ')',
-                    'stage_remark' => $remarks ?: ('Stage status updated to ' . $stageStatus),
-                    'stage_callperson' => $student->name,
+                    'stage_name' => $customStageName ?: (strtoupper($stageCol) . ' (' . ucfirst($stageStatus) . ')'),
+                    'stage_calltime' => $callTime ?: null,
+                    'stage_remark' => $fullRemark,
+                    'stage_callperson' => $callPerson ?: $student->name,
                     'log_userid' => auth()->user()->usercode ?? '02598',
                     'log_ipaddress' => $request->ip() ?: '127.0.0.1',
                 ]);

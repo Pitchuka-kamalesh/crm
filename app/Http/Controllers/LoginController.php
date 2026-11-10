@@ -6,6 +6,8 @@ use App\Models\CrmStudentRegistration;
 use App\Models\Employee;
 use App\Models\Lead;
 use App\Models\LoginOtp;
+use App\Models\PayDetail;
+use App\Models\ReceiptDetail;
 use App\Models\Role;
 use App\Models\StudentRegistration;
 use App\Models\User;
@@ -516,8 +518,32 @@ class LoginController extends Controller
     {
         $roleId = $user->getActiveRoleId();
 
-        // 1. Student Candidate (user_type 1 or role_id 5) -> Student Admission Portal
+        // 1. Student Candidate (user_type 1 or role_id 5) -> Receipt Page if fee paid, else Step 1 Portal
         if ($user->user_type === 1 || $roleId === 5) {
+            try {
+                $cleanPhone = preg_replace('/\D/', '', $user->phnno ?? '');
+                if (strlen($cleanPhone) > 10) {
+                    $cleanPhone = substr($cleanPhone, -10);
+                }
+
+                $crmStudent = CrmStudentRegistration::where('applinano', $user->usercode)
+                    ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                        $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+                    })
+                    ->first();
+
+                $applino = $crmStudent?->applinano ?? $user->usercode;
+                $hasReceipt = $applino && (
+                    ($crmStudent && $crmStudent->stage1 === 'paid')
+                    || PayDetail::where('applino', $applino)->where('txnstatus', 'success')->exists()
+                    || ReceiptDetail::where('applino', $applino)->exists()
+                );
+
+                if ($hasReceipt) {
+                    return route('payu.receipt');
+                }
+            } catch (\Throwable $e) {}
+
             return route('dashboards.index');
         }
 

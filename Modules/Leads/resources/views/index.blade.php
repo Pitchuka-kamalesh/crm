@@ -1414,8 +1414,10 @@
                     <span class="breadcrumb-separator">/</span>
                     <span class="breadcrumb-active-tag">
                         <span class="breadcrumb-dot"></span>
-                        @if($activeTab === 'allocation' || in_array($roleId, [2, 3]))
-                            <span>Leads Incharge • Telecaller &amp; Step Allocation</span>
+                        @if($activeTab === 'input')
+                            <span>Lead Input &bull; Complete Leads Directory</span>
+                        @elseif($activeTab === 'allocation' || in_array($roleId, [2, 3]))
+                            <span>Leads Allocation &bull; Unallocated Queue</span>
                         @else
                             <span>Allotted Leads (Tele Caller)</span>
                         @endif
@@ -1458,7 +1460,7 @@
                 <div class="stat-card-modern">
                     <div class="stat-meta">
                         <span class="stat-title">Allotted Leads</span>
-                        <span class="stat-number">{{ $totalAllotted }}</span>
+                        <span class="stat-number" id="statAllottedCount">{{ $totalAllotted }}</span>
                         <span class="stat-caption">In Telecaller Queues</span>
                     </div>
                     <div class="stat-icon-disc stat-icon-blue">
@@ -1474,7 +1476,7 @@
                 <div class="stat-card-modern">
                     <div class="stat-meta">
                         <span class="stat-title">Unallocated Leads</span>
-                        <span class="stat-number" style="color: #b91c1c;">{{ $unallocatedCount ?? 0 }}</span>
+                        <span class="stat-number" id="statUnallocatedCount" style="color: #b91c1c;">{{ $unallocatedCount ?? 0 }}</span>
                         <span class="stat-caption">Ready for Assignment</span>
                     </div>
                     <div class="stat-icon-disc stat-icon-amber">
@@ -1489,7 +1491,7 @@
                 <div class="stat-card-modern">
                     <div class="stat-meta">
                         <span class="stat-title">Stage Tasks</span>
-                        <span class="stat-number">{{ $totalTasksCount ?? 0 }}</span>
+                        <span class="stat-number" id="statTasksCount">{{ $totalTasksCount ?? 0 }}</span>
                         <span class="stat-caption">Tasks in Log</span>
                     </div>
                     <div class="stat-icon-disc stat-icon-green">
@@ -1519,8 +1521,8 @@
                 </div>
             </div>
 
-            <!-- LEADS INCHARGE ALLOCATION CONTROL PANEL (Visible to Leads Incharge, Dean & on Allocation Tab) -->
-            @if($activeTab === 'allocation' || in_array($roleId, [1, 2, 3]))
+            <!-- LEADS INCHARGE ALLOCATION CONTROL PANEL (Shown on Leads Allocation tab) -->
+            @if($activeTab === 'allocation')
                 <div class="allocation-command-card">
                     <!-- Header -->
                     <div class="incharge-header-wrap">
@@ -1534,18 +1536,21 @@
                             </div>
                             <div>
                                 <h3 class="incharge-title-text">
-                                    <span>Leads Incharge &bull; Telecaller &amp; Steps Allocation</span>
+                                    <span>Leads Allocation &bull; Unallocated Queue</span>
                                 </h3>
                                 <p class="incharge-sub-text">
-                                    Allocate candidate lead numbers directly to telecaller queues in <code>crm.telecaller_leads</code> and assign action steps in <code>crm.telecaller_leads_tasks</code>.
+                                    Select leads below and allocate to a telecaller. Once allocated, leads clear from this queue automatically and reflect in <strong>Lead input</strong>.
                                 </p>
                             </div>
                         </div>
-                        <div>
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
                             <div class="incharge-selection-badge" id="selectedCountBadgeBox">
                                 <span class="incharge-badge-dot"></span>
                                 <span id="selectedCountBadge">0 Leads Selected</span>
                             </div>
+                            <a href="{{ route('leads.input', ['tab' => 'input']) }}" style="font-size: 0.78rem; font-weight: 700; color: #2563eb; text-decoration: none; padding: 0.45rem 0.85rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.45rem;">
+                                View Lead Input &rarr;
+                            </a>
                         </div>
                     </div>
 
@@ -1658,43 +1663,96 @@
                         </div>
                     </form>
                 </div>
+            @elseif($activeTab === 'input')
+                <div class="allocation-command-card" style="padding: 1.15rem 1.5rem;">
+                    <div class="incharge-header-wrap" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+                        <div class="incharge-brand-box">
+                            <div class="incharge-icon-emblem">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20h9"></path>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="incharge-title-text">
+                                    <span>Lead Input &bull; Complete Master Leads Directory</span>
+                                </h3>
+                                <p class="incharge-sub-text">
+                                    Displays the entire leads dataset including allocated telecaller queues, branch CRM IDs, step progress, and latest task remarks.
+                                </p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                            <button type="button" onclick="openAddLeadModal()" class="incharge-btn-submit" style="height: 36px; padding: 0 1rem; font-size: 0.8rem;">
+                                <span>+ Add Lead Input</span>
+                            </button>
+                            <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" style="font-size: 0.78rem; font-weight: 700; color: #b91c1c; text-decoration: none; padding: 0.45rem 0.85rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.45rem;">
+                                Unallocated Queue (<span id="bannerUnallocCount">{{ $unallocatedCount ?? 0 }}</span>) &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             <!-- PORTAL TABLE CARD -->
             <div class="portal-card-shell">
                 <!-- Top Toolbar -->
-                <div class="portal-card-topbar">
-                    <div class="filter-nav-pills" id="statusFilterPills">
-                        <button type="button" onclick="applyStatusFilter('all', this)" class="filter-nav-pill {{ ($statusFilter ?? 'all') === 'all' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
-                                <rect x="3" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="14" width="7" height="7"></rect>
-                                <rect x="3" y="14" width="7" height="7"></rect>
-                            </svg>All Leads
-                        </button>
-                        <button type="button" onclick="applyStatusFilter('stage1', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage1' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 1: Fee Payment</button>
-                        <button type="button" onclick="applyStatusFilter('stage2', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage2' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 2: Personal Profile</button>
-                        <button type="button" onclick="applyStatusFilter('stage3', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage3' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 3: Academic Info</button>
-                        <button type="button" onclick="applyStatusFilter('stage4', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage4' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 4: Doc Upload</button>
-                        <button type="button" onclick="applyStatusFilter('stage5', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage5' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 5: VSAT &amp; Confirm</button>
-                    </div>
+                <div class="portal-card-topbar" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem;">
+                        <div class="filter-nav-pills" id="statusFilterPills">
+                            <button type="button" onclick="applyStatusFilter('all', this)" class="filter-nav-pill {{ ($statusFilter ?? 'all') === 'all' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>All Leads
+                            </button>
+                            <button type="button" onclick="applyStatusFilter('stage1', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage1' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 1: Fee Payment</button>
+                            <button type="button" onclick="applyStatusFilter('stage2', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage2' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 2: Personal Profile</button>
+                            <button type="button" onclick="applyStatusFilter('stage3', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage3' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 3: Academic Info</button>
+                            <button type="button" onclick="applyStatusFilter('stage4', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage4' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 4: Doc Upload</button>
+                            <button type="button" onclick="applyStatusFilter('stage5', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage5' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 5: VSAT &amp; Confirm</button>
+                        </div>
 
-                    <div style="display: flex; gap: 0.4rem; align-items: center;">
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px;">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                            <input type="text" id="liveSearchInput" value="{{ $searchQuery ?? '' }}" oninput="handleLiveSearch(this.value)" placeholder="Live search candidate, phone, app #..." style="padding: 0.45rem 2rem 0.45rem 2rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.8rem; width: 250px; outline: none; transition: border-color 0.15s ease;">
-                            <div class="live-search-spinner" id="searchSpinner"></div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            @if($activeTab === 'input')
+                                <select id="allocStatusFilterSelect" onchange="applyExtraFilter('alloc_status', this.value)" style="padding: 0.42rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
+                                    <option value="all" {{ ($allocStatusFilter ?? 'all') === 'all' ? 'selected' : '' }}>Status: All Leads</option>
+                                    <option value="allocated" {{ ($allocStatusFilter ?? '') === 'allocated' ? 'selected' : '' }}>Allocated Only</option>
+                                    <option value="unallocated" {{ ($allocStatusFilter ?? '') === 'unallocated' ? 'selected' : '' }}>Unallocated Only</option>
+                                </select>
+
+                                <select id="callerFilterSelect" onchange="applyExtraFilter('caller', this.value)" style="padding: 0.42rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
+                                    <option value="all">Telecaller: All</option>
+                                    @foreach($telecallers as $tc)
+                                        <option value="{{ $tc->emp_code }}" {{ ($callerFilter ?? '') === $tc->emp_code ? 'selected' : '' }}>{{ $tc->full_name }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+
+                            <select id="programFilterSelect" onchange="applyExtraFilter('program', this.value)" style="padding: 0.42rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
+                                <option value="all">Program: All</option>
+                                @foreach($availablePrograms as $prog)
+                                    <option value="{{ $prog->program_id }}" {{ (string)($programFilter ?? '') === (string)$prog->program_id ? 'selected' : '' }}>{{ $prog->program_short_name }}</option>
+                                @endforeach
+                            </select>
+
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px;">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="liveSearchInput" value="{{ $searchQuery ?? '' }}" oninput="handleLiveSearch(this.value)" placeholder="Search name, phone, app #, CRM ID..." style="padding: 0.45rem 2rem 0.45rem 2rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.8rem; width: 240px; outline: none; transition: border-color 0.15s ease;">
+                                <div class="live-search-spinner" id="searchSpinner"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Clean Table Shell Container (Updated dynamically via Live Search) -->
                 <div id="leadsTableContainer">
-                    @include('leads::partials.leads_table', ['leads' => $leads])
+                    @include('leads::partials.leads_table', ['leads' => $leads, 'activeTab' => $activeTab])
                 </div>
             </div>
         </main>
@@ -1783,13 +1841,69 @@
                     </label>
                 </div>
 
+                <!-- Stage Call Task Details (Logged to crm.telecaller_leads_tasks) -->
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 1.15rem;">
+                    <div>
+                        <label for="modalStageNameSelect" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                            Stage Name
+                        </label>
+                        <select id="modalStageNameSelect" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
+                            <option value="Stage 1: Fee Payment">Stage 1: Fee Payment</option>
+                            <option value="Stage 2: Personal Profile">Stage 2: Personal Profile</option>
+                            <option value="Stage 3: Academic Info">Stage 3: Academic Info</option>
+                            <option value="Stage 4: Doc Upload">Stage 4: Doc Upload</option>
+                            <option value="Stage 5: VSAT & Confirm">Stage 5: VSAT &amp; Confirm</option>
+                            <option value="Calling & Verification">Calling &amp; Verification</option>
+                            <option value="Follow-up Counseling Call">Follow-up Counseling Call</option>
+                            <option value="Fee & Concession Discussion">Fee &amp; Concession Discussion</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="modalStageCallPerson" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                            Stage Call Person
+                        </label>
+                        <select id="modalStageCallPerson" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
+                            <option value="Student / Candidate">Student / Candidate</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Brother / Sister">Brother / Sister</option>
+                            <option value="Other Family Member">Other Family Member</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="modalStageCallTime" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                            Stage Call Date &amp; Time
+                        </label>
+                        <input type="datetime-local" id="modalStageCallTime" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
+                    </div>
+
+                    <div>
+                        <label for="modalCallDuration" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                            Call Duration
+                        </label>
+                        <input type="text" id="modalCallDuration" list="durationPresetsList" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;" placeholder="e.g. 5 mins" value="5 mins">
+                        <datalist id="durationPresetsList">
+                            <option value="1 min">
+                            <option value="2 mins">
+                            <option value="5 mins">
+                            <option value="10 mins">
+                            <option value="15 mins">
+                            <option value="20+ mins">
+                            <option value="Not Connected / Callback">
+                        </datalist>
+                    </div>
+                </div>
+
                 <!-- Remarks (Optional) -->
                 <div class="remarks-field-box">
                     <label for="modalStageRemarks" style="font-size: 0.78rem; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: space-between;">
                         <span>Telecaller Calling Remarks</span>
-                        <span style="font-size: 0.68rem; color: #64748b; font-weight: 500; background: #e2e8f0; padding: 0.1rem 0.45rem; border-radius: 4px;">Optional</span>
+                        <span style="font-size: 0.68rem; color: #64748b; font-weight: 500; background: #e2e8f0; padding: 0.1rem 0.45rem; border-radius: 4px;">Saved in DB</span>
                     </label>
-                    <textarea id="modalStageRemarks" class="remarks-textarea" rows="2" placeholder="Enter counseling notes or callback details..."></textarea>
+                    <textarea id="modalStageRemarks" class="remarks-textarea" rows="2" placeholder="Enter counseling notes, discussion summary, or callback details..."></textarea>
                 </div>
             </div>
         </div>
@@ -1830,6 +1944,57 @@
     </div>
 </div>
 
+<!-- ================= ADD LEAD INPUT MODAL ================= -->
+<div class="wizard-overlay" id="addLeadModal" onclick="if(event.target.id==='addLeadModal') closeAddLeadModal()">
+    <div class="wizard-modal-box" style="max-width: 520px;">
+        <div class="wizard-modal-header">
+            <div>
+                <div class="candidate-header-name">Add New Candidate Lead</div>
+                <div class="candidate-header-sub">Creates candidate in crm.student_registration with auto CRM ID</div>
+            </div>
+            <button type="button" class="btn-close-modal" onclick="closeAddLeadModal()" title="Close">✕</button>
+        </div>
+        <form onsubmit="event.preventDefault(); submitAddLeadModal();" style="padding: 1.5rem 1.75rem;">
+            <div style="display: grid; gap: 0.9rem;">
+                <div>
+                    <label class="incharge-label">Candidate Name <span class="required-dot">*</span></label>
+                    <input type="text" id="newLeadName" class="incharge-input incharge-input-no-icon" required placeholder="Full Name">
+                </div>
+                <div>
+                    <label class="incharge-label">Mobile Number (10 digits) <span class="required-dot">*</span></label>
+                    <input type="text" id="newLeadPhone" class="incharge-input incharge-input-no-icon" required pattern="[0-9]{10}" maxlength="10" placeholder="e.g. 9876543210">
+                </div>
+                <div>
+                    <label class="incharge-label">Email Address</label>
+                    <input type="email" id="newLeadEmail" class="incharge-input incharge-input-no-icon" placeholder="student@example.com">
+                </div>
+                <div>
+                    <label class="incharge-label">Program <span class="required-dot">*</span></label>
+                    <select id="newLeadProgram" class="incharge-select incharge-input-no-icon" required>
+                        @foreach($availablePrograms as $prog)
+                            <option value="{{ $prog->program_id }}">{{ $prog->program_short_name }} — {{ $prog->program_long_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="incharge-label">Assign Telecaller (Optional)</label>
+                    <select id="newLeadCaller" class="incharge-select incharge-input-no-icon">
+                        <option value="">-- Leave Unallocated (Goes to Leads Allocation) --</option>
+                        @foreach($telecallers as $tc)
+                            <option value="{{ $tc->emp_code }}">{{ $tc->full_name }} ({{ $tc->emp_code }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="addLeadNotice" style="display: none; font-size: 0.8rem; font-weight: 600;"></div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.65rem; margin-top: 1.25rem;">
+                <button type="button" onclick="closeAddLeadModal()" class="tele-btn-action" style="background: #f8fafc; border: 1px solid var(--card-border); color: #475569; padding: 0.5rem 1rem;">Cancel</button>
+                <button type="submit" id="btnSubmitNewLead" class="incharge-btn-submit" style="height: 36px; padding: 0 1.25rem;">Save Lead</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Toast -->
 <div id="teleToast">
     <span id="toastMsg">Stage updated successfully!</span>
@@ -1866,6 +2031,11 @@
         document.getElementById('modalCandidateName').textContent = name;
         document.getElementById('modalCandidateAppNo').textContent = `APP: ${applinano}`;
         document.getElementById('modalCandidateSub').textContent = `Program: ${program} | Contact: +91 ${phone}`;
+
+        const callTimeInput = document.getElementById('modalStageCallTime');
+        if (callTimeInput) callTimeInput.value = '';
+        const durationInput = document.getElementById('modalCallDuration');
+        if (durationInput && !durationInput.value) durationInput.value = '5 mins';
 
         renderModalStepper();
         loadStepDetail(0);
@@ -1941,6 +2111,21 @@
         document.getElementById('btnPrevStage').disabled = (idx === 0);
         document.getElementById('btnNextStage').disabled = (idx === STAGES_META.length - 1);
 
+        const stageNameSelect = document.getElementById('modalStageNameSelect');
+        if (stageNameSelect) {
+            const matchedLabel = `Stage ${stg.num}: ${stg.name}`;
+            if (Array.from(stageNameSelect.options).some(o => o.value === matchedLabel)) {
+                stageNameSelect.value = matchedLabel;
+            }
+        }
+
+        const callTimeInput = document.getElementById('modalStageCallTime');
+        if (callTimeInput && !callTimeInput.value) {
+            const now = new Date();
+            const offsetMs = now.getTimezoneOffset() * 60000;
+            callTimeInput.value = new Date(now.getTime() - offsetMs).toISOString().slice(0, 16);
+        }
+
         const remarksInput = document.getElementById('modalStageRemarks');
         if (remarksInput) {
             remarksInput.value = currentCandidate.remarks || '';
@@ -1975,6 +2160,10 @@
     function saveActiveStageUpdate() {
         if (!currentCandidate) return;
         const stg = STAGES_META[currentStepIndex];
+        const stageNameVal = document.getElementById('modalStageNameSelect')?.value || `Stage ${stg.num}: ${stg.name}`;
+        const callPersonVal = document.getElementById('modalStageCallPerson')?.value || 'Student / Candidate';
+        const callTimeVal = document.getElementById('modalStageCallTime')?.value || '';
+        const callDurationVal = document.getElementById('modalCallDuration')?.value || '';
         const remarksVal = document.getElementById('modalStageRemarks')?.value || '';
 
         fetch(`/leads/${currentCandidate.applinano}/update-stage`, {
@@ -1987,15 +2176,19 @@
             body: JSON.stringify({
                 stage: stg.key,
                 status: selectedStatus,
+                stage_name: stageNameVal,
+                stage_callperson: callPersonVal,
+                stage_calltime: callTimeVal,
+                call_duration: callDurationVal,
                 remarks: remarksVal
             })
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                showToast(`✓ Stage ${stg.num} (${stg.name}) updated!`);
+                showToast(`✓ ${stageNameVal} logged & saved!`);
                 currentCandidate.stages[stg.key] = selectedStatus;
-                currentCandidate.remarks = remarksVal;
+                currentCandidate.remarks = data.remarks || remarksVal;
                 renderModalStepper();
                 loadStepDetail(currentStepIndex);
                 
@@ -2037,7 +2230,11 @@
 
     // ================= LIVE SEARCH & FILTERING WITH 25 PAGINATION =================
     let searchDebounceTimer = null;
+    const activeTabName = '{{ $activeTab ?? "input" }}';
     let activeFilterStatus = '{{ $statusFilter ?? "all" }}';
+    let activeAllocStatus = '{{ $allocStatusFilter ?? "all" }}';
+    let activeCallerFilter = '{{ $callerFilter ?? "all" }}';
+    let activeProgramFilter = '{{ $programFilter ?? "all" }}';
     let currentSearchTerm = '{{ $searchQuery ?? "" }}';
     let currentPage = 1;
 
@@ -2060,14 +2257,33 @@
         fetchLeadsTable(1);
     }
 
+    function applyExtraFilter(filterKey, val) {
+        if (filterKey === 'alloc_status') activeAllocStatus = val || 'all';
+        if (filterKey === 'caller') activeCallerFilter = val || 'all';
+        if (filterKey === 'program') activeProgramFilter = val || 'all';
+        fetchLeadsTable(1);
+    }
+
     function fetchLeadsTable(page = 1, showSpinner = true) {
         currentPage = page;
         const spinner = document.getElementById('searchSpinner');
         if (showSpinner && spinner) spinner.style.display = 'block';
 
         const url = new URL('{{ route("leads.index") }}', window.location.origin);
+        if (activeTabName) {
+            url.searchParams.set('tab', activeTabName);
+        }
         if (activeFilterStatus && activeFilterStatus !== 'all') {
             url.searchParams.set('status', activeFilterStatus);
+        }
+        if (activeAllocStatus && activeAllocStatus !== 'all') {
+            url.searchParams.set('alloc_status', activeAllocStatus);
+        }
+        if (activeCallerFilter && activeCallerFilter !== 'all') {
+            url.searchParams.set('caller', activeCallerFilter);
+        }
+        if (activeProgramFilter && activeProgramFilter !== 'all') {
+            url.searchParams.set('program', activeProgramFilter);
         }
         if (currentSearchTerm.trim()) {
             url.searchParams.set('q', currentSearchTerm.trim());
@@ -2095,6 +2311,71 @@
         })
         .finally(() => {
             if (spinner) spinner.style.display = 'none';
+        });
+    }
+
+    function openAddLeadModal() {
+        const modal = document.getElementById('addLeadModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeAddLeadModal() {
+        const modal = document.getElementById('addLeadModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function submitAddLeadModal() {
+        const btn = document.getElementById('btnSubmitNewLead');
+        const notice = document.getElementById('addLeadNotice');
+        if (btn) btn.disabled = true;
+        if (notice) notice.style.display = 'none';
+
+        fetch('{{ route("leads.storeInput") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: document.getElementById('newLeadName')?.value || '',
+                phoneno: document.getElementById('newLeadPhone')?.value || '',
+                emailid: document.getElementById('newLeadEmail')?.value || '',
+                program_id: document.getElementById('newLeadProgram')?.value || '',
+                empcode: document.getElementById('newLeadCaller')?.value || ''
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (btn) btn.disabled = false;
+            if (data.success) {
+                closeAddLeadModal();
+                showToast(`✓ ${data.message}`);
+                document.getElementById('newLeadName').value = '';
+                document.getElementById('newLeadPhone').value = '';
+                document.getElementById('newLeadEmail').value = '';
+                fetchLeadsTable(1, true);
+            } else {
+                if (notice) {
+                    notice.style.display = 'block';
+                    notice.style.color = '#dc2626';
+                    notice.textContent = '✕ ' + (data.message || 'Unable to save lead.');
+                }
+            }
+        })
+        .catch(err => {
+            if (btn) btn.disabled = false;
+            if (notice) {
+                notice.style.display = 'block';
+                notice.style.color = '#dc2626';
+                notice.textContent = 'Server error while saving lead.';
+            }
         });
     }
 
@@ -2202,8 +2483,20 @@
 
             if (data.success) {
                 showToast(`✓ ${data.message}`);
-                // Refresh table live
-                fetchLeadsTable(currentPage, true);
+                if (data.metrics) {
+                    const sAllot = document.getElementById('statAllottedCount');
+                    const sUnalloc = document.getElementById('statUnallocatedCount');
+                    const sTasks = document.getElementById('statTasksCount');
+                    if (sAllot) sAllot.textContent = data.metrics.total_allocated ?? sAllot.textContent;
+                    if (sUnalloc) sUnalloc.textContent = data.metrics.unallocated ?? sUnalloc.textContent;
+                    if (sTasks) sTasks.textContent = data.metrics.total_tasks ?? sTasks.textContent;
+                    const unallocOpt = document.querySelector('#inchargeTargetSelect option[value="unallocated"]');
+                    if (unallocOpt && data.metrics.unallocated !== undefined) {
+                        unallocOpt.textContent = `All Unallocated Leads (${data.metrics.unallocated})`;
+                    }
+                }
+                // Refresh table live from page 1 so allocated rows immediately clear from Leads Allocation
+                fetchLeadsTable(1, true);
                 // Reset selected checkboxes count
                 const badge = document.getElementById('selectedCountBadge');
                 if (badge) badge.textContent = '0 Leads Selected';

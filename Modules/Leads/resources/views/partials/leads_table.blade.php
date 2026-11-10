@@ -48,25 +48,9 @@
                         <input type="checkbox" class="lead-select-chk" value="{{ $leadAppNo }}" data-phone="{{ $leadPhone }}" data-name="{{ $leadName }}" onchange="updateSelectedLeadsCount()" style="width: 17px; height: 17px; accent-color: #10b981; cursor: pointer; border-radius: 4px; vertical-align: middle;">
                     </td>
                     <td>
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
-                            <div>
-                                <div class="lead-detail-primary" style="font-weight: 700; color: #0f172a;">+91 {{ $leadPhone }}</div>
-                                <div style="font-size: 0.72rem; color: #64748b; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ $leadEmail }}">{{ $leadEmail }}</div>
-                            </div>
-                            <div style="display: flex; gap: 0.3rem;">
-                                <a href="tel:{{ $leadPhone }}" class="tele-btn-action tele-btn-call" title="Call candidate" style="padding: 4px 8px; font-size: 0.72rem;">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                    </svg>
-                                    <span>Call</span>
-                                </a>
-                                <a href="https://wa.me/91{{ $leadPhone }}" target="_blank" class="tele-btn-action tele-btn-wapp" title="WhatsApp Chat" style="padding: 4px 8px; font-size: 0.72rem;">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                                    </svg>
-                                    <span>Chat</span>
-                                </a>
-                            </div>
+                        <div>
+                            <div class="lead-detail-primary" style="font-weight: 700; color: #0f172a;">+91 {{ $leadPhone }}</div>
+                            <div style="font-size: 0.72rem; color: #64748b; max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ $leadEmail }}">{{ $leadEmail }}</div>
                         </div>
                     </td>
                     <td>
@@ -123,7 +107,12 @@
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                        <div>No allotted leads found matching criteria.</div>
+                        @if(($activeTab ?? '') === 'allocation')
+                            <div style="font-weight: 600; color: #059669;">✓ All leads have been allocated!</div>
+                            <div style="font-size: 0.78rem; margin-top: 4px;">Check <strong>Lead input</strong> to view the entire dataset and assigned telecaller details.</div>
+                        @else
+                            <div>No leads found matching your filter criteria.</div>
+                        @endif
                     </td>
                 </tr>
             @endforelse

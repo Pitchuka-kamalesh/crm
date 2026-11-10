@@ -98,27 +98,30 @@ class TelecallerService
                     $candidates->push($found);
                 }
             }
-        } elseif ($allotMode === 'unallocated') {
-            // Find leads not yet in crm.telecaller_leads using Eloquent
+        } elseif (in_array($allotMode, ['unallocated', 'first 10', 'first_10', 'first 25', 'first_25', 'first 50', 'first_50', 'first 100', 'first_100', 'custom'], true)) {
+            $takeCount = match ($allotMode) {
+                'first 10', 'first_10' => 10,
+                'first 25', 'first_25' => 25,
+                'first 50', 'first_50' => 50,
+                'custom' => max(1, (int) ($params['allot_count'] ?? 15)),
+                default => 100,
+            };
             $allocatedApplis = TelecallerLead::pluck('applino');
             $candidates = CrmStudentRegistration::whereNotIn('applinano', $allocatedApplis)
                 ->orderBy('log_timestamp', 'desc')
-                ->take(100)
+                ->take($takeCount)
                 ->get();
-        } elseif ($allotMode === 'first 50' || $allotMode === 'first_50') {
-            $candidates = CrmStudentRegistration::orderBy('log_timestamp', 'desc')->take(50)->get();
-        } elseif ($allotMode === 'first 100' || $allotMode === 'first_100') {
-            $candidates = CrmStudentRegistration::orderBy('log_timestamp', 'desc')->take(100)->get();
         } elseif ($allotMode === 'datewise' && !empty($params['allot_date'])) {
             $candidates = CrmStudentRegistration::whereDate('log_timestamp', $params['allot_date'])
                 ->orderBy('log_timestamp', 'desc')
                 ->get();
-        } elseif ($allotMode === 'custom' || !empty($params['allot_count'])) {
-            $count = max(1, (int)($params['allot_count'] ?? 25));
-            $candidates = CrmStudentRegistration::orderBy('log_timestamp', 'desc')->take($count)->get();
         } else {
-            // Fallback: take first 25
-            $candidates = CrmStudentRegistration::orderBy('log_timestamp', 'desc')->take(25)->get();
+            // Fallback: take first 25 unallocated leads
+            $allocatedApplis = TelecallerLead::pluck('applino');
+            $candidates = CrmStudentRegistration::whereNotIn('applinano', $allocatedApplis)
+                ->orderBy('log_timestamp', 'desc')
+                ->take(25)
+                ->get();
         }
 
         if ($candidates->isEmpty()) {
@@ -200,6 +203,7 @@ class TelecallerService
                 'employee' => $employeeName,
                 'empcode' => $empCode,
                 'stage' => $stageName,
+                'metrics' => self::getMetrics(),
             ];
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -250,6 +254,15 @@ class TelecallerService
             ->first();
 
         $now = now();
+        $callTime = $now;
+        if (!empty($params['stage_calltime'])) {
+            try {
+                $callTime = \Carbon\Carbon::parse($params['stage_calltime']);
+            } catch (\Throwable $e) {
+                $callTime = $now;
+            }
+        }
+
         $studentCrmId = CrmIdService::getOrGenerateByAppli($applino);
 
         if (!$lead) {
@@ -272,7 +285,7 @@ class TelecallerService
             'crmid' => $studentCrmId,
             'empcode' => $empCode,
             'stage_name' => $stageName,
-            'stage_calltime' => $now,
+            'stage_calltime' => $callTime,
             'stage_remark' => $remark,
             'stage_callperson' => $callPerson,
             'log_userid' => $logUser,
