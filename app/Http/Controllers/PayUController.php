@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\CrmStudentRegistration;
+use App\Models\PayDetail;
+use App\Models\ReceiptDetail;
 use App\Services\CouponService;
 use App\Services\PayUService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -41,20 +42,42 @@ class PayUController extends Controller
         } catch (\Throwable $e) {}
 
         $applino = $crmStudent?->applinano ?? ($usercode ?: ('VU2026' . ($cleanPhone ? substr($cleanPhone, -6) : rand(100000, 999999))));
-        $name = $crmStudent?->name ?? $user?->name ?? 'Candidate';
-        $email = $crmStudent?->emailid ?? 'admissions@vignan.ac.in';
-        $phone = $cleanPhone ?: ($crmStudent?->phoneno ?? '9999999999');
+        $rawName = trim((string) ($crmStudent?->name ?? $user?->name ?? 'Candidate'));
+        $name = substr(trim((string) preg_replace('/[^a-zA-Z0-9\s]/', '', $rawName)), 0, 50) ?: 'Candidate';
+        $rawEmail = trim((string) ($crmStudent?->emailid ?? ''));
+        $email = filter_var($rawEmail, FILTER_VALIDATE_EMAIL) ? $rawEmail : 'admissions@vignan.ac.in';
+        $rawPhone = preg_replace('/\D/', '', (string) ($cleanPhone ?: ($crmStudent?->phoneno ?? '')));
+        $phone = strlen($rawPhone) >= 10 ? substr($rawPhone, -10) : '9999999999';
 
         // Dynamic fee breakdown with Default Early Bird and Incharge Personal coupons
-        $breakdown = CouponService::calculateFeeBreakdown($applino, 25000.00);
+        $breakdown = CouponService::calculateFeeBreakdown($applino, CouponService::DEFAULT_ADMISSION_FEE);
 
-        // Net payable amount after applying coupons
-        $amount = (float) $request->input('amount', $breakdown['net_payable']);
+        // Net payable amount after applying coupons (always enforce server-side calculation)
+        $amount = max(0.00, (float) $breakdown['net_payable']);
+        $cleanAppliSuffix = substr(preg_replace('/[^a-zA-Z0-9]/', '', $applino), -6);
+        $txnid = date('dmYHis') . ($cleanAppliSuffix ?: rand(100000, 999999));
+
+        // If coupons cover 100% of the admission fee (payable = ₹0), settle immediately in DB without hitting PayU
         if ($amount <= 0) {
-            $amount = $breakdown['net_payable'];
+            $couponTxnId = 'COUPON_' . $txnid;
+            $receiptNo = $this->recordSuccessfulPayment(
+                request: $request,
+                applino: $applino,
+                txnid: $txnid,
+                mihpayid: $couponTxnId,
+                amount: 0.00,
+                payType: 'Coupon (100% Concession)',
+                receiptPayType: 'Coupon',
+                txnRemark: '100% Concession Applied | Total Discount: ₹' . number_format((float) ($breakdown['total_discount'] ?? 0)),
+                breakdown: $breakdown,
+                defCoupon: $breakdown['def_coupon'] ?? '',
+                perCoupon: $breakdown['per_coupon'] ?? ''
+            );
+
+            return redirect()->route('payu.receipt')
+                ->with('status', "✓ Payment Completed! Net Payable: ₹0.00 (100% covered by coupons). Receipt: {$receiptNo}.");
         }
 
-        $txnid = date('dmYHis') . substr($applino, -6);
         $gatewayUrl = $this->payuService->getGatewayUrl();
 
         $params = [
@@ -72,25 +95,25 @@ class PayUController extends Controller
             'udf2' => (string) ($crmStudent?->id ?? '1'),
             'udf3' => (string) $amount,
             'udf4' => $breakdown['def_coupon'] ?? '27EARLYB100', // Default coupon code
-            'udf5' => $breakdown['per_coupon'] ?? '',             // Personal coupon code (last 8 digits)
+            'udf5' => $breakdown['per_coupon'] ?? '',             // Personal coupon code
         ];
 
         $params['hash'] = $this->payuService->generateHash($params);
 
-        // Pre-record initiated transaction in finance.paydetails
+        // Pre-record initiated transaction in finance.paydetails via Eloquent (with 0.00 defaults for numeric cells)
         try {
-            $existing = DB::table('finance.paydetails')->where('txncrmid', $txnid)->first();
+            $existing = PayDetail::where('txncrmid', $txnid)->first();
             if (!$existing) {
-                $nextFeeId = (DB::table('finance.paydetails')->max('feeid') ?? 0) + 1;
-                DB::table('finance.paydetails')->insert([
+                $nextFeeId = (PayDetail::max('feeid') ?? 0) + 1;
+                PayDetail::create([
                     'feeid' => $nextFeeId,
                     'applino' => $applino,
-                    'feepayable' => $breakdown['base_fee'],
-                    'defcoupon' => $breakdown['def_coupon'],
-                    'defcouponamount' => $breakdown['def_discount'],
-                    'percoupon' => $breakdown['per_coupon'],
-                    'percouponamount' => $breakdown['per_discount'],
-                    'totalcouponamount' => $breakdown['total_discount'],
+                    'feepayable' => (float) ($breakdown['base_fee'] ?? CouponService::DEFAULT_ADMISSION_FEE),
+                    'defcoupon' => $breakdown['def_coupon'] ?: '',
+                    'defcouponamount' => (float) ($breakdown['def_discount'] ?? 0.00),
+                    'percoupon' => $breakdown['per_coupon'] ?: '',
+                    'percouponamount' => (float) ($breakdown['per_discount'] ?? 0.00),
+                    'totalcouponamount' => (float) ($breakdown['total_discount'] ?? 0.00),
                     'paidamount' => 0.00,
                     'paytype' => 'PayU (Initiated)',
                     'txndatetime' => now(),
@@ -139,105 +162,37 @@ class PayUController extends Controller
         $errorMsg = (string) ($request->input('error_Message') ?? $request->input('field9') ?? '');
 
         // Recalculate fee details
-        $breakdown = CouponService::calculateFeeBreakdown($applino, 25000.00);
+        $breakdown = CouponService::calculateFeeBreakdown($applino, CouponService::DEFAULT_ADMISSION_FEE);
 
         if ($status === 'success') {
-            // 1. Record / Update finance.paydetails
-            try {
-                $existing = DB::table('finance.paydetails')->where('txncrmid', $txnid)->first();
-                if ($existing) {
-                    DB::table('finance.paydetails')->where('txncrmid', $txnid)->update([
-                        'feepayable' => $breakdown['base_fee'],
-                        'defcoupon' => $defCoupon ?: $breakdown['def_coupon'],
-                        'defcouponamount' => $breakdown['def_discount'],
-                        'percoupon' => $perCoupon ?: $breakdown['per_coupon'],
-                        'percouponamount' => $breakdown['per_discount'],
-                        'totalcouponamount' => $breakdown['total_discount'],
-                        'paidamount' => $amount,
-                        'paytype' => 'PayU (' . ($mode ?: 'Online') . ')',
-                        'txnpayuid' => $mihpayid,
-                        'txnstatus' => 'success',
-                        'txnremark' => 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | PayU ID: ' . $mihpayid,
-                        'log_timestamp' => now(),
-                    ]);
-                } else {
-                    $nextFeeId = (DB::table('finance.paydetails')->max('feeid') ?? 0) + 1;
-                    DB::table('finance.paydetails')->insert([
-                        'feeid' => $nextFeeId,
-                        'applino' => $applino ?: 'VU2026',
-                        'feepayable' => $breakdown['base_fee'],
-                        'defcoupon' => $defCoupon ?: $breakdown['def_coupon'],
-                        'defcouponamount' => $breakdown['def_discount'],
-                        'percoupon' => $perCoupon ?: $breakdown['per_coupon'],
-                        'percouponamount' => $breakdown['per_discount'],
-                        'totalcouponamount' => $breakdown['total_discount'],
-                        'paidamount' => $amount,
-                        'paytype' => 'PayU (' . ($mode ?: 'Online') . ')',
-                        'txndatetime' => now(),
-                        'txncrmid' => $txnid,
-                        'txnpayuid' => $mihpayid,
-                        'txnstatus' => 'success',
-                        'txnremark' => 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | PayU ID: ' . $mihpayid,
-                        'log_userid' => $applino,
-                        'log_ipaddress' => $request->ip() ?? '127.0.0.1',
-                        'log_timestamp' => now(),
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                Log::error('[PayU] Error writing to finance.paydetails: ' . $e->getMessage());
-            }
+            $usedDefCoupon = $defCoupon ?: ($breakdown['def_coupon'] ?? '');
+            $usedPerCoupon = $perCoupon ?: ($breakdown['per_coupon'] ?? '');
+            $receiptNo = $this->recordSuccessfulPayment(
+                request: $request,
+                applino: $applino,
+                txnid: $txnid,
+                mihpayid: $mihpayid,
+                amount: $amount,
+                payType: 'PayU (' . ($mode ?: 'Online') . ')',
+                receiptPayType: 'PayU',
+                txnRemark: 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | PayU ID: ' . $mihpayid,
+                breakdown: $breakdown,
+                defCoupon: $usedDefCoupon,
+                perCoupon: $usedPerCoupon
+            );
 
-            // 2. Increment coupon counts in finance.couponinfo
-            CouponService::recordCouponUsage($defCoupon ?: $breakdown['def_coupon'], $perCoupon ?: $breakdown['per_coupon']);
-
-            // 3. Generate and Insert finance.receiptdetails
-            $receiptNo = 'REC-2026-' . date('Ymd') . '-' . rand(1000, 9999);
-            try {
-                $nextRecId = (DB::table('finance.receiptdetails')->max('id') ?? 0) + 1;
-                DB::table('finance.receiptdetails')->insert([
-                    'id' => $nextRecId,
-                    'applino' => $applino ?: 'VU2026',
-                    'receiptno' => $receiptNo,
-                    'paytype' => 'PayU',
-                    'feepayable' => $amount,
-                    'defcouponamount' => $breakdown['def_discount'],
-                    'percouponamount' => $breakdown['per_discount'],
-                    'totalcouponamount' => $breakdown['total_discount'],
-                    'txndatetime' => now(),
-                    'receiptdatetime' => now(),
-                    'log_userid' => $applino,
-                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
-                    'log_timestamp' => now(),
-                ]);
-            } catch (\Throwable $e) {
-                Log::error('[PayU] Error writing to finance.receiptdetails: ' . $e->getMessage());
-            }
-
-            // 4. Mark stage1 as 'paid' in crm.student_registration
-            try {
-                if ($applino) {
-                    CrmStudentRegistration::where('applinano', $applino)->update([
-                        'stage1' => 'paid',
-                        'log_ipaddress' => $request->ip() ?? '127.0.0.1',
-                        'log_timestamp' => now(),
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                Log::error('[PayU] Error updating crm.student_registration: ' . $e->getMessage());
-            }
-
-            $discountMsg = $breakdown['total_discount'] > 0 
-                ? " (Concession Applied: -₹" . number_format($breakdown['total_discount']) . " via {$breakdown['def_coupon']}" . ($breakdown['per_coupon'] ? " & {$breakdown['per_coupon']}" : "") . ")" 
+            $discountMsg = ($breakdown['total_discount'] ?? 0) > 0
+                ? " (Concession Applied: -₹" . number_format((float) $breakdown['total_discount']) . " via {$usedDefCoupon}" . ($usedPerCoupon ? " & {$usedPerCoupon}" : "") . ")"
                 : "";
 
-            return redirect()->route('dashboards.index', ['step' => 2])
-                ->with('status', "✓ Payment Successful! Net Paid: ₹" . number_format($amount) . " confirmed via PayU (ID: {$mihpayid}){$discountMsg}. Receipt: {$receiptNo}. Stage 1 completed!");
+            return redirect()->route('payu.receipt')
+                ->with('status', "✓ Payment Successful! Net Paid: ₹" . number_format($amount) . " confirmed via PayU (ID: {$mihpayid}){$discountMsg}. Receipt: {$receiptNo}.");
         } else {
             // Unsuccessful or cancelled payment
             try {
-                $existing = DB::table('finance.paydetails')->where('txncrmid', $txnid)->first();
+                $existing = PayDetail::where('txncrmid', $txnid)->first();
                 if ($existing) {
-                    DB::table('finance.paydetails')->where('txncrmid', $txnid)->update([
+                    $existing->update([
                         'txnstatus' => 'failed',
                         'txnerror' => $errorMsg ?: 'Payment failed or cancelled at gateway',
                         'log_timestamp' => now(),
@@ -248,5 +203,163 @@ class PayUController extends Controller
             return redirect()->route('dashboards.index', ['step' => 1])
                 ->withErrors(['error' => 'Payment was unsuccessful or cancelled at PayU gateway: ' . ($errorMsg ?: 'User cancelled')]);
         }
+    }
+
+    /**
+     * Persist confirmed payment to finance.paydetails, couponinfo, receiptdetails, and student stage1.
+     */
+    private function recordSuccessfulPayment(
+        Request $request,
+        string $applino,
+        string $txnid,
+        string $mihpayid,
+        float $amount,
+        string $payType,
+        string $receiptPayType,
+        string $txnRemark,
+        array $breakdown,
+        string $defCoupon,
+        string $perCoupon
+    ): string {
+        $baseFee = (float) ($breakdown['base_fee'] ?? CouponService::DEFAULT_ADMISSION_FEE);
+        $defDiscount = (float) ($breakdown['def_discount'] ?? 0.00);
+        $perDiscount = (float) ($breakdown['per_discount'] ?? 0.00);
+        $totalDiscount = (float) ($breakdown['total_discount'] ?? 0.00);
+
+        // 1. Record / Update finance.paydetails via Eloquent
+        try {
+            $existing = PayDetail::where('txncrmid', $txnid)->first();
+            $payAttributes = [
+                'feepayable' => $baseFee,
+                'defcoupon' => $defCoupon ?: '',
+                'defcouponamount' => $defDiscount,
+                'percoupon' => $perCoupon ?: '',
+                'percouponamount' => $perDiscount,
+                'totalcouponamount' => $totalDiscount,
+                'paidamount' => $amount,
+                'paytype' => $payType,
+                'txnpayuid' => $mihpayid,
+                'txnstatus' => 'success',
+                'txnremark' => $txnRemark,
+                'log_timestamp' => now(),
+            ];
+
+            if ($existing) {
+                $existing->update($payAttributes);
+            } else {
+                $nextFeeId = (PayDetail::max('feeid') ?? 0) + 1;
+                PayDetail::create(array_merge($payAttributes, [
+                    'feeid' => $nextFeeId,
+                    'applino' => $applino ?: 'VU2026',
+                    'txndatetime' => now(),
+                    'txncrmid' => $txnid,
+                    'log_userid' => $applino ?: 'VU2026',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                ]));
+            }
+        } catch (\Throwable $e) {
+            Log::error('[PayU] Error writing to finance.paydetails: ' . $e->getMessage());
+        }
+
+        // 2. Increment coupon counts and mark personal coupon USED in finance.couponinfo
+        CouponService::recordCouponUsage($defCoupon, $perCoupon);
+
+        // 3. Generate and Insert finance.receiptdetails via Eloquent
+        $receiptNo = 'REC-2026-' . date('Ymd') . '-' . rand(1000, 9999);
+        try {
+            $nextRecId = (ReceiptDetail::max('id') ?? 0) + 1;
+            ReceiptDetail::create([
+                'id' => $nextRecId,
+                'applino' => $applino ?: 'VU2026',
+                'receiptno' => $receiptNo,
+                'paytype' => $receiptPayType,
+                'feepayable' => $amount,
+                'defcouponamount' => $defDiscount,
+                'percouponamount' => $perDiscount,
+                'totalcouponamount' => $totalDiscount,
+                'txndatetime' => now(),
+                'receiptdatetime' => now(),
+                'log_userid' => $applino ?: 'VU2026',
+                'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                'log_timestamp' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('[PayU] Error writing to finance.receiptdetails: ' . $e->getMessage());
+        }
+
+        // 4. Mark stage1 as 'paid' in crm.student_registration and clear session coupon flags
+        try {
+            if ($applino) {
+                CrmStudentRegistration::where('applinano', $applino)->update([
+                    'stage1' => 'paid',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp' => now(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error('[PayU] Error updating crm.student_registration: ' . $e->getMessage());
+        }
+
+        session()->forget(['applied_coupon_code', 'applied_coupon_discount', 'applied_coupon_removed']);
+
+        return $receiptNo;
+    }
+
+    /**
+     * Display Official Fee Payment Receipt for an authenticated student whose Stage 1 is paid.
+     */
+    public function receipt(Request $request): View|RedirectResponse
+    {
+        $user = Auth::user();
+        $usercode = $user?->usercode ?? '';
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+
+        $student = CrmStudentRegistration::with(['program', 'branch'])
+            ->where('applinano', $usercode)
+            ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+            })
+            ->first();
+
+        $applino = $student?->applinano ?? $usercode;
+        $payDetail = PayDetail::where('applino', $applino)
+            ->where('txnstatus', 'success')
+            ->orderBy('feeid', 'desc')
+            ->first();
+
+        $receipt = ReceiptDetail::where('applino', $applino)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ((!$student || $student->stage1 !== 'paid') && !$payDetail && !$receipt) {
+            return redirect()->route('dashboards.index', ['step' => 1]);
+        }
+
+        $crmId = $student?->crmid ?: \App\Services\CrmIdService::getOrGenerateByAppli($applino);
+        $programName = $student?->program
+            ? ($student->program->program_short_name . ($student->branch?->branch_long_name ? ' - ' . $student->branch->branch_long_name : ''))
+            : ($student?->programlevel ?: 'B.Tech Admission');
+
+        $baseFee = (float) ($payDetail?->feepayable ?? CouponService::DEFAULT_ADMISSION_FEE);
+        $defDiscount = (float) ($payDetail?->defcouponamount ?? $receipt?->defcouponamount ?? 0.00);
+        $perDiscount = (float) ($payDetail?->percouponamount ?? $receipt?->percouponamount ?? 0.00);
+        $paidAmount = (float) ($payDetail?->paidamount ?? $receipt?->feepayable ?? max(0, $baseFee - $defDiscount - $perDiscount));
+
+        return view('payments.receipt', compact(
+            'user',
+            'student',
+            'applino',
+            'crmId',
+            'programName',
+            'payDetail',
+            'receipt',
+            'baseFee',
+            'defDiscount',
+            'perDiscount',
+            'paidAmount'
+        ));
     }
 }

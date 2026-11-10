@@ -1486,23 +1486,28 @@
                         @if($crmStudent?->stage1 === 'paid')
                             <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">✅</div>
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.2rem;">Admission Fee Confirmed</h3>
-                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">Your seat confirmation fee is verified in the database. Download your official documents below.</p>
-                            <span class="step-header-tag tag-success" style="display: inline-block;">Status: Completed ✓</span>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">Your seat confirmation fee is verified in the database. View or download your official receipt below.</p>
+                            <div style="display: flex; justify-content: center; gap: 0.65rem; flex-wrap: wrap; align-items: center;">
+                                <span class="step-header-tag tag-success" style="display: inline-block;">Status: Completed ✓</span>
+                                <a href="{{ route('payu.receipt') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #0f172a; color: #ffffff; padding: 0.42rem 0.95rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                                    <span>🧾 View Official Receipt &rarr;</span>
+                                </a>
+                            </div>
                         @else
                             @php
                                 $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '20261106333';
-                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, 25000.00);
+                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
                             @endphp
                             <div style="margin-bottom: 0.65rem; text-align: left;">
-                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Seat Confirmation Fee Payment</h4>
-                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely via the official PayU gateway to lock your provisional seat.</p>
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
+                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely via the official PayU gateway to lock your provisional registration.</p>
                             </div>
 
                             <!-- PayU Fee Summary Box with Concessions -->
                             <div style="max-width: 480px; margin: 0 auto 0.75rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; text-align: left;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
                                     <span>Base Admission Fee:</span>
-                                    <strong style="color: #0f172a;">₹ 25,000.00</strong>
+                                    <strong style="color: #0f172a;">₹ {{ number_format($feeBreakdown['base_fee'], 2) }}</strong>
                                 </div>
 
                                 @if($feeBreakdown['def_discount'] > 0)
@@ -1514,33 +1519,35 @@
 
                                 @if($feeBreakdown['per_discount'] > 0)
                                     <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
-                                        <span>Incharge Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
+                                        <span>Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
                                         <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
                                     </div>
                                 @endif
 
-                                @if($feeBreakdown['total_discount'] > 0)
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
-                                        <span style="font-weight: 600;">Total Concession Deducted:</span>
-                                        <strong style="color: #047857;">- ₹ {{ number_format($feeBreakdown['total_discount'], 2) }}</strong>
-                                    </div>
-                                @endif
+                                <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
+                                    <span style="font-weight: 600;">Total Concession Deducted:</span>
+                                    <strong style="color: #047857;">- ₹ <span id="dispTotalConcessionVal">{{ number_format($feeBreakdown['total_discount'], 2) }}</span></strong>
+                                </div>
 
                                 <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
                                     <span>Payment Gateway:</span>
-                                    <span style="font-weight: 600; color: #059669;">PayU Secure Hosted</span>
+                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'PayU Secure Hosted' }}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
                                     <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
-                                    <span style="font-size: 1.15rem; font-weight: 800; color: #059669;">₹ {{ number_format($feeBreakdown['net_payable'], 2) }}</span>
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: #059669;">₹ <span id="dispTotalPayableVal">{{ number_format($feeBreakdown['net_payable'], 2) }}</span></span>
                                 </div>
                             </div>
 
-                            <form action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
+                            <form id="payuSubmitForm" action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
                                 @csrf
-                                <input type="hidden" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
-                                <button type="submit" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
-                                    <span>💳 Pay ₹{{ number_format($feeBreakdown['net_payable']) }} via PayU Gateway</span>
+                                <input type="hidden" id="payuAmountInput" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
+                                <button type="submit" id="btnPayUGateway" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
+                                    @if($feeBreakdown['net_payable'] <= 0)
+                                        <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
+                                    @else
+                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> via PayU Gateway</span>
+                                    @endif
                                     <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </button>
                             </form>
@@ -1575,8 +1582,8 @@
                                     <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Accounts Verified Receipt</p>
                                 </div>
                                 @if($crmStudent?->stage1 === 'paid')
-                                    <a href="javascript:alert('Downloading Official Fee Payment Receipt (PDF)...')" class="btn-doc-download">
-                                        <span>Download Receipt ↓</span>
+                                    <a href="{{ route('payu.receipt') }}" class="btn-doc-download">
+                                        <span>Open Official Receipt &rarr;</span>
                                     </a>
                                 @else
                                     <span class="doc-status-pill">Unlocks after fee payment</span>

@@ -15,6 +15,7 @@ class CrmStudentRegistration extends Model
 
     protected $fillable = [
         'applinano',
+        'crmid',
         'name',
         'phoneno',
         'campuscode',
@@ -73,6 +74,16 @@ class CrmStudentRegistration extends Model
     public function academicDetails()
     {
         return $this->hasOne(StudentAcademicDetail::class, 'applino', 'applinano');
+    }
+
+    public function telecallerLead()
+    {
+        return $this->hasOne(TelecallerLead::class, 'applino', 'applinano');
+    }
+
+    public function telecallerTasks()
+    {
+        return $this->hasMany(TelecallerLeadTask::class, 'applino', 'applinano');
     }
 }
 

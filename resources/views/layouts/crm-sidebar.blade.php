@@ -110,9 +110,11 @@
                 return match($controllerRef) {
                     'crm/stddata' => route('crm.stddata', ['tab' => 'stddata']),
                     'crm/stdsearch' => route('crm.stdsearch', ['tab' => 'stdsearch']),
+                    'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => route('crm.couponinfo', ['tab' => 'couponinfo']),
                     'crm/index' => route('crm.alias', ['tab' => 'overview']),
                     'leads/allottedleads' => route('leads.allotted'),
                     'leads/leadsallocation' => route('leads.allocation', ['tab' => 'allocation']),
+                    'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => route('leads.input', ['tab' => 'input']),
                     'leads/index' => route('leads.index'),
                     'finance/paiddetails' => route('finance.paiddetails', ['tab' => 'paiddetails']),
                     'finance/payfee' => route('dashboards.index', ['step' => 1]),
@@ -132,8 +134,10 @@
                 return match($controllerRef) {
                     'crm/stddata' => $currentTab === 'stddata' || request()->routeIs('crm.stddata') || $currentPath === 'crm/stddata',
                     'crm/stdsearch' => $currentTab === 'stdsearch' || request()->routeIs('crm.stdsearch') || $currentPath === 'crm/stdsearch',
+                    'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => $currentTab === 'couponinfo' || request()->routeIs('crm.couponinfo*') || request()->routeIs('crm.coupoungenration*') || str_contains($currentPath, 'coupoungenration') || str_contains($currentPath, 'coupon-info') || str_contains($currentPath, 'couponinfo'),
                     'leads/allottedleads' => request()->routeIs('leads.allotted') || str_contains($currentPath, 'allotted'),
-                    'leads/leadsallocation' => request()->routeIs('leads.allocation') || str_contains($currentPath, 'allocation'),
+                    'leads/leadsallocation' => $currentTab === 'allocation' || request()->routeIs('leads.allocation') || str_contains($currentPath, 'allocation'),
+                    'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => $currentTab === 'input' || request()->routeIs('leads.input') || str_contains($currentPath, 'leadsinput') || str_contains($currentPath, 'leads-input') || str_contains($currentPath, 'leads%20input') || str_contains($currentPath, 'leads input'),
                     'finance/paiddetails' => request()->routeIs('finance.paiddetails') || str_contains($currentPath, 'paiddetails'),
                     'finance/payfee' => str_contains($currentPath, 'payfee'),
                     'kpi/studentkpi' => request()->routeIs('kpi.studentkpi') || $currentTab === 'studentkpi' || str_contains($currentPath, 'studentkpi'),

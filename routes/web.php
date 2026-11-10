@@ -35,6 +35,8 @@ Route::get('/crm/stdsearch', [\Modules\Crm\Http\Controllers\CrmController::class
 Route::get('/crm/register-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.registerlist');
 Route::get('/crm/coupon-info', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.couponinfo');
 Route::get('/crm/couponinfo', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
+Route::get('/coupoungenration', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.coupoungenration');
+Route::get('/crm/coupoungenration', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/employee-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.employeelist');
 Route::get('/crm/employeelist', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::post('/crm/allot-leads', [\Modules\Crm\Http\Controllers\CrmController::class, 'allotLeads'])->middleware('auth')->name('crm.allot');
@@ -44,6 +46,12 @@ Route::post('/crm/coupons/generate-personal', [\Modules\Crm\Http\Controllers\Crm
 Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
 Route::get('/leads/allottedleads', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allotted');
 Route::get('/leads/leadsallocation', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allocation');
+Route::get('/leads/leads input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.input');
+Route::get('/leads/leadsinput', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
+Route::get('/leads/leads-input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
+Route::post('/leads/store-input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'storeLeadInput'])->middleware('auth')->name('leads.storeInput');
+Route::post('/leads/allocate', [\Modules\Leads\Http\Controllers\LeadsController::class, 'allocate'])->middleware('auth');
+Route::post('/leads/log-task', [\Modules\Leads\Http\Controllers\LeadsController::class, 'logTask'])->middleware('auth');
 
 // Finance aliases matching master.menus controller_ref
 Route::get('/finance', [\Modules\Finance\Http\Controllers\FinanceController::class, 'index'])->middleware('auth')->name('finance.index');
@@ -69,7 +77,12 @@ Route::get('/crm/stpstep6', fn() => redirect()->route('dashboards.index', ['step
 Route::get('/crm/stpstep7', fn() => redirect()->route('dashboards.index', ['step' => 7]))->middleware('auth');
 Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 1]))->middleware('auth');
 
+// Student Personal Coupon Application on Stage 1
+Route::post('/dashboards/apply-coupon', [\Modules\Dashboards\Http\Controllers\DashboardsController::class, 'applyPersonalCoupon'])->middleware('auth')->name('dashboards.apply-coupon');
+Route::post('/dashboards/remove-coupon', [\Modules\Dashboards\Http\Controllers\DashboardsController::class, 'removePersonalCoupon'])->middleware('auth')->name('dashboards.remove-coupon');
+
 // PayU Gateway Integration Routes
 Route::post('/payu/initiate', [\App\Http\Controllers\PayUController::class, 'initiate'])->middleware('auth')->name('payu.initiate');
 Route::match(['get', 'post'], '/payu/response', [\App\Http\Controllers\PayUController::class, 'handleResponse'])->name('payu.response');
+Route::get('/payu/receipt', [\App\Http\Controllers\PayUController::class, 'receipt'])->middleware('auth')->name('payu.receipt');
 
