@@ -305,6 +305,286 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* ==========================================================================
+           LEADS INCHARGE TELECALLER & STEP ALLOCATION COMMAND CARD (CLEAN MODERN UI)
+           ========================================================================== */
+        .allocation-command-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.4rem;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .incharge-header-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.15rem;
+            gap: 1rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .incharge-brand-box {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            flex: 1;
+        }
+
+        .incharge-icon-emblem {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 1.5px solid #a7f3d0;
+            color: #059669;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.12);
+        }
+
+        .incharge-title-text {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            letter-spacing: -0.01em;
+        }
+
+        .incharge-sub-text {
+            font-size: 0.76rem;
+            color: #64748b;
+            margin: 0.2rem 0 0 0;
+            line-height: 1.4;
+        }
+
+        .incharge-sub-text code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.1rem 0.45rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .incharge-selection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #f8fafc;
+            color: #64748b;
+            border: 1.5px solid #e2e8f0;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .incharge-selection-badge.has-selected {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #93c5fd;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.14);
+        }
+
+        .incharge-badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .incharge-selection-badge.has-selected .incharge-badge-dot {
+            background: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        /* 2-Row Form Grid */
+        .incharge-controls-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr 1.35fr;
+            gap: 1.15rem;
+            margin-bottom: 1.15rem;
+        }
+
+        @media (max-width: 1024px) {
+            .incharge-controls-grid {
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+        }
+
+        .incharge-action-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1.15rem;
+            align-items: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .incharge-action-row {
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+            .incharge-action-row button {
+                width: 100%;
+            }
+        }
+
+        .incharge-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .incharge-label {
+            font-size: 0.77rem;
+            font-weight: 700;
+            color: #334155;
+            letter-spacing: 0.01em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .incharge-label .required-dot {
+            color: #ef4444;
+            font-weight: 800;
+            margin-left: 2px;
+        }
+
+        .incharge-control-shell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .incharge-control-shell .input-icon-left {
+            position: absolute;
+            left: 12px;
+            color: #94a3b8;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .incharge-select,
+        .incharge-input {
+            width: 100%;
+            height: 42px;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0 0.85rem 0 2.35rem;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #0f172a;
+            outline: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .incharge-input-no-icon {
+            padding-left: 0.85rem !important;
+        }
+
+        .incharge-select:hover,
+        .incharge-input:hover {
+            border-color: #94a3b8;
+        }
+
+        .incharge-select:focus,
+        .incharge-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+            background: #ffffff;
+        }
+
+        .incharge-btn-submit {
+            height: 42px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0 1.6rem;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.28);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .incharge-btn-submit:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 5px 14px rgba(16, 185, 129, 0.38);
+            transform: translateY(-1px);
+        }
+
+        .incharge-btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Dark Mode Support for Incharge Card */
+        [data-theme-mode="dark"] .allocation-command-card {
+            background: #131d31;
+            border-color: #1e293b;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+        }
+        [data-theme-mode="dark"] .incharge-header-wrap {
+            border-color: #1e293b;
+        }
+        [data-theme-mode="dark"] .incharge-title-text {
+            color: #f8fafc;
+        }
+        [data-theme-mode="dark"] .incharge-sub-text {
+            color: #94a3b8;
+        }
+        [data-theme-mode="dark"] .incharge-sub-text code {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+        [data-theme-mode="dark"] .incharge-label {
+            color: #cbd5e1;
+        }
+        [data-theme-mode="dark"] .incharge-select,
+        [data-theme-mode="dark"] .incharge-input {
+            background: #1a253c;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+        [data-theme-mode="dark"] .incharge-select:focus,
+        [data-theme-mode="dark"] .incharge-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+        }
+        [data-theme-mode="dark"] .incharge-selection-badge {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
         /* Moderate Buttons with SVG Icons */
         .tele-btn-action {
             display: inline-flex;
@@ -477,14 +757,14 @@
             border-color: transparent;
         }
 
-        /* 8 Stepper Steps Inside Modal */
+        /* 5 Stepper Steps Inside Modal */
         .stepper-nav-bar {
             padding: 1rem 1.75rem;
             background: #f8fafc;
             border-bottom: 1px solid var(--card-border);
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 0.5rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.65rem;
         }
 
         .stepper-tab-item {
@@ -1134,7 +1414,11 @@
                     <span class="breadcrumb-separator">/</span>
                     <span class="breadcrumb-active-tag">
                         <span class="breadcrumb-dot"></span>
-                        <span>Allotted Leads (Tele Caller)</span>
+                        @if($activeTab === 'allocation' || in_array($roleId, [2, 3]))
+                            <span>Leads Incharge • Telecaller &amp; Step Allocation</span>
+                        @else
+                            <span>Allotted Leads (Tele Caller)</span>
+                        @endif
                     </span>
                 </div>
             </div>
@@ -1156,10 +1440,10 @@
                     </div>
                 </div>
                 <div class="print-report-meta">
-                    <div><strong>Officer:</strong> {{ $roleName }} (Tele Caller)</div>
+                    <div><strong>Officer:</strong> {{ $roleName }}</div>
                     <div><strong>Date &amp; Time:</strong> {{ date('d M Y, h:i A') }}</div>
-                    <div><strong>Active Leads:</strong> {{ $totalAllotted }} in Queue</div>
-                    <div><strong>Calls Made Today:</strong> {{ $callsMadeToday }}</div>
+                    <div><strong>Total Allotted:</strong> {{ $totalAllotted }}</div>
+                    <div><strong>Unallocated:</strong> {{ $unallocatedCount ?? 0 }}</div>
                 </div>
             </div>
 
@@ -1175,7 +1459,7 @@
                     <div class="stat-meta">
                         <span class="stat-title">Allotted Leads</span>
                         <span class="stat-number">{{ $totalAllotted }}</span>
-                        <span class="stat-caption">Active in Queue</span>
+                        <span class="stat-caption">In Telecaller Queues</span>
                     </div>
                     <div class="stat-icon-disc stat-icon-blue">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1189,36 +1473,38 @@
 
                 <div class="stat-card-modern">
                     <div class="stat-meta">
-                        <span class="stat-title">Calls Today</span>
-                        <span class="stat-number">{{ $callsMadeToday }}</span>
-                        <span class="stat-caption">↑ 82% Daily Target</span>
-                    </div>
-                    <div class="stat-icon-disc stat-icon-green">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="stat-card-modern">
-                    <div class="stat-meta">
-                        <span class="stat-title">Callbacks Due</span>
-                        <span class="stat-number">{{ $followupsScheduled }}</span>
-                        <span class="stat-caption" style="color: #d97706;">Pending Follow-ups</span>
+                        <span class="stat-title">Unallocated Leads</span>
+                        <span class="stat-number" style="color: #b91c1c;">{{ $unallocatedCount ?? 0 }}</span>
+                        <span class="stat-caption">Ready for Assignment</span>
                     </div>
                     <div class="stat-icon-disc stat-icon-amber">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
                     </div>
                 </div>
 
                 <div class="stat-card-modern">
                     <div class="stat-meta">
-                        <span class="stat-title">Converted</span>
+                        <span class="stat-title">Stage Tasks</span>
+                        <span class="stat-number">{{ $totalTasksCount ?? 0 }}</span>
+                        <span class="stat-caption">Tasks in Log</span>
+                    </div>
+                    <div class="stat-icon-disc stat-icon-green">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="stat-meta">
+                        <span class="stat-title">Converted / Paid</span>
                         <span class="stat-number">{{ $converted }}</span>
-                        <span class="stat-caption">Fee Paid & Enrolled</span>
+                        <span class="stat-caption">Fee Paid &amp; Enrolled</span>
                     </div>
                     <div class="stat-icon-disc stat-icon-purple">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1233,6 +1519,147 @@
                 </div>
             </div>
 
+            <!-- LEADS INCHARGE ALLOCATION CONTROL PANEL (Visible to Leads Incharge, Dean & on Allocation Tab) -->
+            @if($activeTab === 'allocation' || in_array($roleId, [1, 2, 3]))
+                <div class="allocation-command-card">
+                    <!-- Header -->
+                    <div class="incharge-header-wrap">
+                        <div class="incharge-brand-box">
+                            <div class="incharge-icon-emblem">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <polyline points="16 11 18 13 22 9"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="incharge-title-text">
+                                    <span>Leads Incharge &bull; Telecaller &amp; Steps Allocation</span>
+                                </h3>
+                                <p class="incharge-sub-text">
+                                    Allocate candidate lead numbers directly to telecaller queues in <code>crm.telecaller_leads</code> and assign action steps in <code>crm.telecaller_leads_tasks</code>.
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="incharge-selection-badge" id="selectedCountBadgeBox">
+                                <span class="incharge-badge-dot"></span>
+                                <span id="selectedCountBadge">0 Leads Selected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Body -->
+                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); submitInchargeAllocation();">
+                        <!-- Row 1: 3 Balanced Wide Columns -->
+                        <div class="incharge-controls-grid">
+                            <!-- 1. Select Telecaller -->
+                            <div class="incharge-field-group">
+                                <label for="inchargeTelecallerSelect" class="incharge-label">
+                                    <span>Select Telecaller (Role 4)<span class="required-dot">*</span></span>
+                                </label>
+                                <div class="incharge-control-shell">
+                                    <span class="input-icon-left">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                        </svg>
+                                    </span>
+                                    <select id="inchargeTelecallerSelect" class="incharge-select" required>
+                                        <option value="">-- Choose Telecaller --</option>
+                                        @foreach($telecallers as $tc)
+                                            <option value="{{ $tc->emp_code }}">
+                                                {{ $tc->full_name }} ({{ $tc->emp_code }}) - Tele Caller
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 2. Allocation Scope / Mode -->
+                            <div class="incharge-field-group">
+                                <label for="inchargeTargetSelect" class="incharge-label">
+                                    <span>Allocation Target<span class="required-dot">*</span></span>
+                                </label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <div class="incharge-control-shell" style="flex: 1;">
+                                        <span class="input-icon-left">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </span>
+                                        <select id="inchargeTargetSelect" class="incharge-select" onchange="onInchargeTargetChange(this.value)" required>
+                                            <option value="selected">Selected Checked Leads</option>
+                                            <option value="unallocated">All Unallocated Leads ({{ $unallocatedCount ?? 0 }})</option>
+                                            <option value="first 10">First 10 Leads</option>
+                                            <option value="first 25">First 25 Leads</option>
+                                            <option value="first 50">First 50 Leads</option>
+                                            <option value="custom">Custom Quantity...</option>
+                                        </select>
+                                    </div>
+                                    <div id="inchargeCustomCountGroup" style="display: none; width: 85px;">
+                                        <input type="number" id="inchargeCustomCount" class="incharge-input incharge-input-no-icon" min="1" max="500" value="15" title="Number of leads to allot" placeholder="Qty">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Assign Step / Stage -->
+                            <div class="incharge-field-group">
+                                <label for="inchargeStageSelect" class="incharge-label">
+                                    <span>Assign Step / Stage<span class="required-dot">*</span></span>
+                                </label>
+                                <div class="incharge-control-shell">
+                                    <span class="input-icon-left">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 11 12 14 22 4"/>
+                                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                        </svg>
+                                    </span>
+                                    <select id="inchargeStageSelect" class="incharge-select" required>
+                                        <option value="Stage 1: Fee Payment">Stage 1: Fee Payment</option>
+                                        <option value="Stage 2: Personal Profile">Stage 2: Personal Profile</option>
+                                        <option value="Stage 3: Academic Info">Stage 3: Academic Info</option>
+                                        <option value="Stage 4: Doc Upload">Stage 4: Doc Upload</option>
+                                        <option value="Stage 5: VSAT & Confirmation">Stage 5: VSAT &amp; Confirmation</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Full Width Remarks + Pinned Allocate Button -->
+                        <div class="incharge-action-row">
+                            <div class="incharge-field-group">
+                                <label for="inchargeRemarksInput" class="incharge-label">
+                                    <span>Step Remarks</span>
+                                    <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 500;">Saved into crm.telecaller_leads_tasks</span>
+                                </label>
+                                <div class="incharge-control-shell">
+                                    <span class="input-icon-left">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="inchargeRemarksInput" class="incharge-input" placeholder="e.g. Call student for admission confirmation & seat booking" value="Initial telecalling allocation for admission counseling">
+                                </div>
+                            </div>
+
+                            <div>
+                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <polyline points="16 11 18 13 22 9"/>
+                                    </svg>
+                                    <span>Allocate to Telecaller</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            @endif
+
             <!-- PORTAL TABLE CARD -->
             <div class="portal-card-shell">
                 <!-- Top Toolbar -->
@@ -1246,10 +1673,11 @@
                                 <rect x="3" y="14" width="7" height="7"></rect>
                             </svg>All Leads
                         </button>
-                        <button type="button" onclick="applyStatusFilter('Interested', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'Interested' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Interested</button>
-                        <button type="button" onclick="applyStatusFilter('Follow-up', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'Follow-up' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Follow-up Required</button>
-                        <button type="button" onclick="applyStatusFilter('Registered', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'Registered' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Registered</button>
-                        <button type="button" onclick="applyStatusFilter('Fee Paid', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'Fee Paid' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Fee Paid</button>
+                        <button type="button" onclick="applyStatusFilter('stage1', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage1' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 1: Fee Payment</button>
+                        <button type="button" onclick="applyStatusFilter('stage2', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage2' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 2: Personal Profile</button>
+                        <button type="button" onclick="applyStatusFilter('stage3', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage3' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 3: Academic Info</button>
+                        <button type="button" onclick="applyStatusFilter('stage4', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage4' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 4: Doc Upload</button>
+                        <button type="button" onclick="applyStatusFilter('stage5', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage5' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 5: VSAT &amp; Confirm</button>
                     </div>
 
                     <div style="display: flex; gap: 0.4rem; align-items: center;">
@@ -1288,7 +1716,7 @@
             <button type="button" class="btn-close-modal" onclick="closeWizardModal()" title="Close Wizard">✕</button>
         </div>
 
-        <!-- 8-Step Stepper Track -->
+        <!-- 5-Step Stepper Track -->
         <div class="stepper-nav-bar" id="modalStepperTrack">
             <!-- Dynamically injected tabs -->
         </div>
@@ -1411,14 +1839,11 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     const STAGES_META = [
-        { key: 'stage1', num: 1, name: 'Registration', desc: 'Application registration and fee payment verification.' },
-        { key: 'stage2', num: 2, name: 'Basic Details', desc: 'Candidate personal info, parent details, and residential address.' },
-        { key: 'stage3', num: 3, name: 'Academic Info', desc: '10th / +2 / Intermediate marks and stream verification.' },
-        { key: 'stage4', num: 4, name: 'Doc Upload', desc: 'Aadhaar, marks memos, and required certificates upload.' },
-        { key: 'stage5', num: 5, name: 'Scholarship', desc: 'VSAT, EAPCET, JEE rank eligibility and scholarship grant.' },
-        { key: 'stage6', num: 6, name: 'Accommodation', desc: 'Hostel preference or university bus transport allocation.' },
-        { key: 'stage7', num: 7, name: 'Review', desc: 'Academic counselor eligibility verification and review sign-off.' },
-        { key: 'stage8', num: 8, name: 'Confirmed', desc: 'Final registration number generation and official admission confirmation.' }
+        { key: 'stage1', num: 1, name: 'Fee Payment', desc: 'Seat confirmation registration fee payment via PayU and concession coupon allocation.' },
+        { key: 'stage2', num: 2, name: 'Personal Profile', desc: 'Candidate personal info, parent details, permanent address, contact numbers, and category.' },
+        { key: 'stage3', num: 3, name: 'Academic Info', desc: 'SSC / 10th and Intermediate / 12th / Diploma hall ticket numbers, board, and marks.' },
+        { key: 'stage4', num: 4, name: 'Doc Upload', desc: 'Aadhaar card, 10th & 12th marks memos, study certificates, and photo upload verification.' },
+        { key: 'stage5', num: 5, name: 'VSAT & Confirm', desc: 'VSAT rank verification, branch eligibility check, and provisional admission confirmation.' }
     ];
 
     let currentCandidate = null;
@@ -1685,6 +2110,118 @@
                     fetchLeadsTable(page);
                 }
             });
+        });
+    }
+
+    // ================= LEADS INCHARGE ALLOCATION ACTIONS =================
+    function toggleSelectAllLeads(checked) {
+        document.querySelectorAll('.lead-select-chk').forEach(chk => {
+            chk.checked = checked;
+        });
+        updateSelectedLeadsCount();
+    }
+
+    function updateSelectedLeadsCount() {
+        const selected = document.querySelectorAll('.lead-select-chk:checked');
+        const badge = document.getElementById('selectedCountBadge');
+        const badgeBox = document.getElementById('selectedCountBadgeBox');
+        if (badge) {
+            badge.textContent = `${selected.length} Leads Selected`;
+        }
+        if (badgeBox) {
+            if (selected.length > 0) {
+                badgeBox.classList.add('has-selected');
+            } else {
+                badgeBox.classList.remove('has-selected');
+            }
+        }
+    }
+
+    function onInchargeTargetChange(val) {
+        const customGroup = document.getElementById('inchargeCustomCountGroup');
+        if (customGroup) {
+            customGroup.style.display = (val === 'custom') ? 'block' : 'none';
+        }
+    }
+
+    function submitInchargeAllocation() {
+        const empSelect = document.getElementById('inchargeTelecallerSelect');
+        const empCode = empSelect?.value;
+        if (!empCode) {
+            alert('Please choose a telecaller from the dropdown.');
+            empSelect?.focus();
+            return;
+        }
+
+        const targetMode = document.getElementById('inchargeTargetSelect')?.value || 'selected';
+        const stageName = document.getElementById('inchargeStageSelect')?.value || 'Stage 1: Fee Payment';
+        const remarks = document.getElementById('inchargeRemarksInput')?.value || '';
+        const customCount = parseInt(document.getElementById('inchargeCustomCount')?.value || '15', 10);
+
+        let leadKeys = [];
+        if (targetMode === 'selected') {
+            const checkedBoxes = Array.from(document.querySelectorAll('.lead-select-chk:checked'));
+            if (checkedBoxes.length === 0) {
+                alert('Please select at least one lead from the table using the checkboxes.');
+                return;
+            }
+            leadKeys = checkedBoxes.map(chk => ({
+                applino: chk.value,
+                phoneno: chk.getAttribute('data-phone') || ''
+            }));
+        }
+
+        const btn = document.getElementById('btnInchargeAllot');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = 'Allocating...';
+        }
+
+        fetch('/leads/allocate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                empcode: empCode,
+                allot_mode: targetMode,
+                lead_keys: leadKeys,
+                allot_count: customCount,
+                stage_name: stageName,
+                stage_remark: remarks
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>📤</span> Allocate to Telecaller';
+            }
+
+            if (data.success) {
+                showToast(`✓ ${data.message}`);
+                // Refresh table live
+                fetchLeadsTable(currentPage, true);
+                // Reset selected checkboxes count
+                const badge = document.getElementById('selectedCountBadge');
+                if (badge) badge.textContent = '0 Leads Selected';
+                const badgeBox = document.getElementById('selectedCountBadgeBox');
+                if (badgeBox) badgeBox.classList.remove('has-selected');
+                const selectAll = document.getElementById('selectAllLeadsCheckbox');
+                if (selectAll) selectAll.checked = false;
+            } else {
+                showToast(data.message || 'Allocation failed', true);
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>📤</span> Allocate to Telecaller';
+            }
+            console.error('Allocation error:', err);
+            showToast('Server error while allocating leads.', true);
         });
     }
 

@@ -174,7 +174,7 @@
         </div>
         <div class="info-row">
             <span class="info-label">Base Admission Fee</span>
-            <span class="info-value">₹ {{ number_format($breakdown['base_fee'] ?? 25000, 2) }}</span>
+            <span class="info-value">₹ {{ number_format($breakdown['base_fee'] ?? 1200, 2) }}</span>
         </div>
 
         @if(!empty($breakdown['def_discount']) && $breakdown['def_discount'] > 0)

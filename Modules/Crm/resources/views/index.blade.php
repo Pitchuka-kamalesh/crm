@@ -104,10 +104,10 @@
                         </div>
                         <div class="metric-icon-box metric-purple">🏫</div>
                     </div>
-                    <div class="metric-card">
+                    <div class="metric-card" onclick="openAssignBox('', 'All Unallocated Leads')" style="cursor: pointer;" title="Click to allot unallocated leads to telecallers">
                         <div class="metric-info">
                             <span class="metric-label">Unallocated Leads</span>
-                            <span class="metric-value">{{ max($totalApplications, 12) }}</span>
+                            <span class="metric-value" id="topMetricUnallocated">{{ $unallocatedLeadsCount ?? max(0, $totalApplications - ($dbAllocations?->count() ?? 0)) }}</span>
                             <span class="metric-sub">Ready for Telecallers</span>
                         </div>
                         <div class="metric-icon-box metric-emerald">📤</div>
@@ -259,7 +259,22 @@
                                         $timeFormatted = $timestamp ? \Carbon\Carbon::parse($timestamp)->format('h:i A') : '';
                                         $appliKey = $std->application_no ?? $std->applinano ?? '';
                                         $candidateName = $std->student_name ?? $std->name ?? 'Candidate';
-                                        $assignedInfo = $leadAssignments[$appliKey] ?? ($leadAssignments['_last_bulk'] ?? null);
+                                        
+                                        $assignedInfo = null;
+                                        if (isset($dbAllocations[$appliKey])) {
+                                            $alloc = $dbAllocations[$appliKey];
+                                            $assignedInfo = [
+                                                'employee' => $alloc->emp_name ?? $alloc->empcode,
+                                                'empcode' => $alloc->empcode,
+                                                'leadcount' => $alloc->leadcount ?? 1,
+                                                'mode' => 'Telecaller (#' . ($alloc->leadcount ?? 1) . ')',
+                                                'allotted_at' => $alloc->assigndatetime ? date('d M Y, h:i A', strtotime($alloc->assigndatetime)) : '',
+                                            ];
+                                        } elseif (isset($leadAssignments[$appliKey])) {
+                                            $assignedInfo = $leadAssignments[$appliKey];
+                                        } elseif (isset($leadAssignments['_last_bulk'])) {
+                                            $assignedInfo = $leadAssignments['_last_bulk'];
+                                        }
                                         
                                         $badgeClass = match(strtolower($rawStatus)) {
                                             'applied' => 'badge-applied',
@@ -523,10 +538,10 @@
                     <div class="card-header-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div>
                             <div class="card-title">🎟️ Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</div>
-                            <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Generate Personal Coupons from Last 8 Digits</div>
+                            <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Personal Coupons (Last 7 Digits + 26 Prefix &amp; P1 Suffix, e.g. 261106333P1)</div>
                         </div>
                         <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; cursor: pointer;">
-                            + 🎟️ Generate Personal Coupon (Last 8 Digits)
+                            + 🎟️ Generate Personal Coupon (e.g. 261106333P1)
                         </button>
                     </div>
                     <!-- Search Toolbar with Live Search -->
@@ -543,8 +558,8 @@
 
                         <div class="tracking-legend">
                             <span class="legend-item"><span class="legend-dot dot-done"></span> Paid &amp; Verified</span>
-                            <span class="legend-item" style="color: #059669; font-weight: 700;">Default Coupon: 27EARLYB100 (-₹ 5,000)</span>
-                            <span class="legend-item" style="color: #6366f1; font-weight: 700;">Personal: Last 8 Digits (-₹ 5,000)</span>
+                            <span class="legend-item" style="color: #059669; font-weight: 700;">Default Coupon: 27EARLYB100 (-₹ 500)</span>
+                            <span class="legend-item" style="color: #6366f1; font-weight: 700;">Personal: 261106333P1 (-₹ 500)</span>
                         </div>
                     </div>
 
@@ -552,10 +567,10 @@
                         <table class="crm-table" id="couponInfoTable">
                             <thead>
                                 <tr>
-                                    <th>Application Number</th>
+                                    <th>Application Number &amp; CRM ID</th>
                                     <th>Payment Status</th>
                                     <th>Default Coupon</th>
-                                    <th>Personal Coupon (Last 8 Digits)</th>
+                                    <th>Personal Coupon (e.g. 261106333P1)</th>
                                     <th>Fee Payable &amp; Paid</th>
                                     <th>Date Time</th>
                                     <th style="text-align: center;">Actions</th>
@@ -565,6 +580,8 @@
                                 @forelse($allStudents as $idx => $std)
                                     @php
                                         $appliNo = $std->application_no ?? $std->applinano ?? ('20' . str_pad($idx + 10001, 8, '0', STR_PAD_LEFT));
+                                        $expectedPersonalCode = \App\Services\CouponService::formatPersonalCouponCode($appliNo);
+                                        $last7 = strlen($appliNo) >= 7 ? substr($appliNo, -7) : $appliNo;
                                         $last8 = strlen($appliNo) >= 8 ? substr($appliNo, -8) : $appliNo;
                                         $candidateName = $std->student_name ?? $std->name ?? 'Candidate';
                                         $phone = $std->mobile ?? $std->phoneno ?? '';
@@ -576,16 +593,19 @@
 
                                         // Lookup real payment details or calculate
                                         $payRecord = $payDetails->get($appliNo);
-                                        $persCouponObj = $personalCoupons->get($appliNo) ?? $personalCoupons->firstWhere('couponsno', $last8);
+                                        $persCouponObj = $personalCoupons->get($appliNo)
+                                            ?? $personalCoupons->firstWhere('couponsno', $expectedPersonalCode)
+                                            ?? $personalCoupons->first(fn($c) => !empty($c->couponsno) && str_contains($c->couponsno, $last7))
+                                            ?? $personalCoupons->firstWhere('couponsno', $last8);
 
                                         $defaultCoupon = $payRecord?->defcoupon ?? '27EARLYB100';
-                                        $defaultDiscount = (float) ($payRecord?->defcouponamount ?? 5000.00);
+                                        $defaultDiscount = (float) ($payRecord?->defcouponamount ?? 500.00);
 
                                         $personalCoupon = $payRecord?->percoupon ?? ($persCouponObj ? $persCouponObj->couponsno : null);
                                         $personalDiscount = (float) ($payRecord?->percouponamount ?? ($persCouponObj ? $persCouponObj->discountamount : 0.00));
 
-                                        $baseFee = (float) ($payRecord?->feepayable ?? 25000.00);
-                                        $totalDiscount = $defaultDiscount + $personalDiscount;
+                                        $baseFee = (float) ($payRecord?->feepayable ?? 1200.00);
+                                        $totalDiscount = min($baseFee, $defaultDiscount + $personalDiscount);
                                         $paidAmount = $payRecord?->paidamount ?? max(0, $baseFee - $totalDiscount);
 
                                         $isPaid = ($std->stage1 === 'paid' || ($payRecord && $payRecord->txnstatus === 'success'));
@@ -617,13 +637,16 @@
                                     @endphp
                                     <tr class="coupon-track-row" data-search="{{ strtolower($appliNo . ' ' . $candidateName . ' ' . $defaultCoupon . ' ' . ($personalCoupon ?? '')) }}">
                                         <td>
-                                            <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
-                                            <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">{{ $candidateName }}</div>
-                                            <div style="font-size: 0.70rem; color: #94a3b8;">Last 8: <code>{{ $last8 }}</code></div>
+                                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                                <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
+                                                <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;" title="Branch CRM ID">{{ $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($appliNo) }}</span>
+                                            </div>
+                                            <div style="font-size: 0.74rem; color: #64748b; font-weight: 500; margin-top: 2px;">{{ $candidateName }} • {{ $programName }}</div>
+                                            <div style="font-size: 0.70rem; color: #94a3b8;">Code: <code>{{ $expectedPersonalCode }}</code></div>
                                         </td>
                                         <td>
                                             @if($isPaid)
-                                                <span class="badge-status badge-paid">✓ Paid (PayU)</span>
+                                                 <span class="badge-status badge-paid">✓ Paid (PayU)</span>
                                             @else
                                                 <span class="badge-status" style="background: #fef3c7; color: #d97706; border: 1px solid #fde68a;">Pending</span>
                                             @endif
@@ -640,9 +663,9 @@
                                                 <div style="font-size: 0.72rem; color: #6366f1; font-weight: 700; margin-top: 0.2rem;">- ₹ {{ number_format($personalDiscount, 0) }}</div>
                                             @else
                                                 <button type="button" 
-                                                        onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $last8 }}')"
+                                                        onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $expectedPersonalCode }}')"
                                                         style="background: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;">
-                                                    + Assign ({{ $last8 }})
+                                                    + Assign ({{ $expectedPersonalCode }})
                                                 </button>
                                             @endif
                                         </td>
@@ -665,7 +688,7 @@
                                                 @if(!$personalCoupon)
                                                     <button type="button" 
                                                             class="btn-action-sm" 
-                                                            onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $last8 }}')"
+                                                            onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $expectedPersonalCode }}', '{{ $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($appliNo) }}', '{{ addslashes($candidateName) }}', '{{ $programName }}')"
                                                             style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe;"
                                                             title="Generate Personal Coupon">
                                                         🎟️
@@ -701,46 +724,56 @@
                             <div style="padding: 1.5rem;">
                                 <div style="margin-bottom: 1.25rem;">
                                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; text-transform: uppercase;">
-                                        Candidate Application Number *
+                                        Candidate Application Number or CRM ID *
                                     </label>
                                     <input type="text" 
                                            id="modalAppliNo" 
                                            name="applino" 
                                            class="form-input" 
-                                           placeholder="e.g. 20261106333" 
-                                           oninput="updateModalLast8(this.value)"
+                                           placeholder="e.g. 20261106333 or V-SAT-0001" 
+                                           oninput="updateModalCouponCode(this.value)"
                                            required 
                                            style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">
+                                    <div id="modalCandidateBadge" style="display: none; margin-top: 6px; font-size: 0.76rem; color: #047857; font-weight: 600; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 6px;"></div>
                                 </div>
 
                                 <div style="margin-bottom: 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
-                                    <div style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code (Auto-Derived Last 8 Digits):</div>
-                                    <div id="modalCouponPreview" style="font-size: 1.15rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
-                                        61106333
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code:</span>
+                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: V-SAT-0001</span>
+                                    </div>
+                                    <div id="modalCouponPreview" style="font-size: 1.18rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+                                        261106333P1
                                     </div>
                                     <div style="font-size: 0.70rem; color: #60a5fa; margin-top: 2px;">
-                                        This coupon code will be tied to this candidate in <code>finance.couponinfo</code>.
+                                        Generated dynamically with branch-wise CRM ID (B.Tech &rarr; V-SAT, M.Tech &rarr; MTECH, PhD &rarr; PHD).
                                     </div>
                                 </div>
 
                                 <div style="margin-bottom: 1.25rem;">
-                                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; text-transform: uppercase;">
-                                        Concession / Discount Amount (₹) *
-                                    </label>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase;">
+                                            Concession / Discount Amount (₹) *
+                                        </label>
+                                        <span style="font-size: 0.72rem; color: #059669; font-weight: 700; background: #ecfdf5; padding: 2px 8px; border-radius: 6px;">
+                                            Max Remaining: ₹700 (Fee ₹1,200 - EarlyBird ₹500)
+                                        </span>
+                                    </div>
                                     <input type="number" 
+                                           id="modalDiscountAmount"
                                            name="discount_amount" 
                                            class="form-input" 
-                                           placeholder="e.g. 5000" 
-                                           value="5000" 
-                                           min="100" 
-                                           max="25000" 
-                                           step="100" 
+                                           placeholder="e.g. 500" 
+                                           value="500" 
+                                           min="50" 
+                                           max="700" 
+                                           step="50" 
                                            required 
                                            style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-weight: 700; color: #059669;">
                                 </div>
 
                                 <div style="font-size: 0.78rem; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                                    ℹ️ When candidate pays at Stage 1, this personal discount (-₹5,000) will combine with the active early bird tier (<code>27EARLYB100</code>: -₹5,000) for a total discount of <strong>₹10,000</strong>!
+                                    ℹ️ Admission Fee: <strong>₹1,200</strong>. Active default coupon (<code>27EARLYB100</code>) provides <strong>-₹500</strong> concession. Remaining balance is <strong>₹700</strong>. The personal concession is cross-checked against this remaining amount so the student's net payable cannot be negative.
                                 </div>
                             </div>
 
@@ -755,14 +788,44 @@
                 </div>
 
                 <script>
-                    function openPersonalCouponModal(appliNo = '', last8 = '') {
+                    const candidateCrmMap = {
+                        @foreach($allStudents as $std)
+                            @php
+                                $aNo = $std->applinano ?? $std->application_no ?? '';
+                                $cId = $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($aNo);
+                                $pCode = \App\Services\CouponService::formatPersonalCouponCode($aNo);
+                                $cName = addslashes($std->name ?? $std->student_name ?? '');
+                                $pName = addslashes($std->program?->program_short_name ?? $std->programlevel ?? 'B.Tech');
+                            @endphp
+                            '{{ $aNo }}': { applino: '{{ $aNo }}', crmid: '{{ $cId }}', name: '{{ $cName }}', prog: '{{ $pName }}', code: '{{ $pCode }}' },
+                            '{{ $cId }}': { applino: '{{ $aNo }}', crmid: '{{ $cId }}', name: '{{ $cName }}', prog: '{{ $pName }}', code: '{{ $pCode }}' },
+                        @endforeach
+                    };
+
+                    function formatPersonalCouponPreview(val) {
+                        val = (val || '').trim();
+                        if (!val) return '--------';
+                        if (candidateCrmMap[val]) {
+                            return candidateCrmMap[val].code;
+                        }
+                        let clean = val.replace(/\D/g, '');
+                        let core = clean;
+                        if (clean.startsWith('20') && clean.length >= 9) {
+                            core = clean.substring(2);
+                        } else if (clean.length === 7) {
+                            core = '26' + clean;
+                        }
+                        return (core ? core + 'P1' : val).toUpperCase();
+                    }
+
+                    function openPersonalCouponModal(appliNo = '', previewCode = '', crmId = '', name = '', prog = '') {
                         const modal = document.getElementById('personalCouponModal');
                         if (!modal) return;
                         modal.style.display = 'flex';
                         const input = document.getElementById('modalAppliNo');
                         if (input) {
                             input.value = appliNo || '20261106333';
-                            updateModalLast8(input.value);
+                            updateModalCouponCode(input.value);
                         }
                     }
 
@@ -771,12 +834,25 @@
                         if (modal) modal.style.display = 'none';
                     }
 
-                    function updateModalLast8(val) {
-                        val = val.trim();
-                        const last8 = val.length >= 8 ? val.slice(-8) : val;
+                    function updateModalCouponCode(val) {
+                        val = (val || '').trim();
                         const preview = document.getElementById('modalCouponPreview');
-                        if (preview) {
-                            preview.textContent = last8 || '--------';
+                        const crmTag = document.getElementById('modalCrmIdTag');
+                        const candBadge = document.getElementById('modalCandidateBadge');
+
+                        let derivedCode = formatPersonalCouponPreview(val);
+                        if (preview) preview.textContent = derivedCode;
+
+                        const matched = candidateCrmMap[val];
+                        if (matched) {
+                            if (crmTag) crmTag.textContent = `CRM ID: ${matched.crmid}`;
+                            if (candBadge) {
+                                candBadge.style.display = 'block';
+                                candBadge.innerHTML = `👤 <strong>${matched.name}</strong> • ${matched.prog} • App: <code>${matched.applino}</code>`;
+                            }
+                        } else {
+                            if (crmTag) crmTag.textContent = val.includes('-') ? `CRM ID: ${val}` : 'CRM ID: V-SAT-XXXX';
+                            if (candBadge) candBadge.style.display = 'none';
                         }
                     }
                 </script>
@@ -1136,45 +1212,89 @@
             <form id="assignEnquiryForm" onsubmit="event.preventDefault(); submitAllotment();">
                 <input type="hidden" id="modalTargetAppliNoInput" value="">
                 
-                <!-- 1. Select Employee Dropdown -->
+                <!-- 1. Select Telecaller Dropdown (Filtered by Role 4) -->
                 <div class="form-group-custom">
                     <label for="assignEmployeeSelect" class="form-label-custom">
-                        Select Employee <span class="required-asterisk">*</span>
+                        Select Telecaller (Role: Tele Caller) <span class="required-asterisk">*</span>
                     </label>
                     <div class="select-wrapper-custom">
                         <select id="assignEmployeeSelect" class="form-control-custom" required>
-                            <option value="">-- Choose Employee --</option>
-                            @foreach($employees as $emp)
-                                <option value="{{ $emp->full_name }}" data-code="{{ $emp->emp_code }}">
-                                    {{ $emp->full_name }} ({{ $emp->emp_code }}{{ $emp->emp_type ? ' - ' . $emp->emp_type : '' }})
-                                </option>
-                            @endforeach
+                            <option value="">-- Choose Telecaller --</option>
+                            @if(isset($telecallers) && $telecallers->isNotEmpty())
+                                <optgroup label="📞 Telecallers (Role: Tele Caller)">
+                                    @foreach($telecallers as $tc)
+                                        <option value="{{ $tc->emp_code }}" data-code="{{ $tc->emp_code }}" data-name="{{ $tc->full_name }}">
+                                            {{ $tc->full_name }} ({{ $tc->emp_code }}) - Tele Caller
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @php
+                                $otherStaff = $employees->whereNotIn('emp_code', $telecallers?->pluck('emp_code') ?? collect());
+                            @endphp
+                            @if($otherStaff->isNotEmpty())
+                                <optgroup label="👥 Other Admissions Staff">
+                                    @foreach($otherStaff as $emp)
+                                        <option value="{{ $emp->emp_code }}" data-code="{{ $emp->emp_code }}" data-name="{{ $emp->full_name }}">
+                                            {{ $emp->full_name }} ({{ $emp->emp_code }}{{ $emp->emp_type ? ' - ' . $emp->emp_type : '' }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                     </div>
+                    <span class="input-hint" style="color: #059669; font-weight: 600;">Directly allocates leads to telecaller's queue in crm.telecaller_leads</span>
                 </div>
 
-                <!-- 2. Allot Mode Dropdown with the 4 required options -->
+                <!-- 2. Allot Mode Dropdown -->
                 <div class="form-group-custom">
                     <label for="assignAllotModeSelect" class="form-label-custom">
                         Allot Mode <span class="required-asterisk">*</span>
                     </label>
                     <div class="select-wrapper-custom">
                         <select id="assignAllotModeSelect" class="form-control-custom" onchange="onAllotModeChange(this.value)" required>
-                            <option value="datewise">Date-wise (Target Date)</option>
+                            <option value="unallocated">All Unallocated Leads ({{ $unallocatedLeadsCount ?? 0 }} Leads)</option>
                             <option value="first 50">First 50 Leads</option>
                             <option value="first 100">First 100 Leads</option>
-                            <option value="custom">Custom Batch Count</option>
+                            <option value="custom">Custom Lead Count</option>
+                            <option value="datewise">Date-wise (Target Date)</option>
                         </select>
                     </div>
                     <!-- Dedicated Info Callout Box -->
                     <div class="mode-help-banner" id="modeHelpBanner">
                         <span class="banner-info-icon">ℹ️</span>
-                        <span id="modeHelpText">Allots enquiries based on the selected date.</span>
+                        <span id="modeHelpText">Allots unallocated candidate leads to the selected telecaller.</span>
                     </div>
                 </div>
 
+                <!-- 3. Assign Initial Step / Task to Telecaller (Stored in crm.telecaller_leads_tasks) -->
+                <div class="form-group-custom">
+                    <label for="assignStageSelect" class="form-label-custom">
+                        Assign Initial Step / Task <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="select-wrapper-custom">
+                        <select id="assignStageSelect" class="form-control-custom" required>
+                            <option value="Stage 1: Calling & Verification">Stage 1: Calling &amp; Verification</option>
+                            <option value="Stage 1: Fee Payment Follow-up">Stage 1: Fee Payment Follow-up</option>
+                            <option value="Stage 2: Personal Profile Completion">Stage 2: Personal Profile Completion</option>
+                            <option value="Stage 3: Academic Details Entry">Stage 3: Academic Details Entry</option>
+                            <option value="Stage 4: Document Verification">Stage 4: Document Verification</option>
+                            <option value="Stage 5: Scholarship & Concession Grant">Stage 5: Scholarship &amp; Concession Grant</option>
+                        </select>
+                    </div>
+                    <span class="input-hint">Persisted into <code>crm.telecaller_leads_tasks</code> for telecaller tracking.</span>
+                </div>
+
+                <!-- 4. Remarks Field -->
+                <div class="form-group-custom">
+                    <label for="assignRemarksInput" class="form-label-custom">
+                        Telecaller Task Remarks
+                    </label>
+                    <input type="text" id="assignRemarksInput" class="form-control-custom" placeholder="e.g. Call candidate regarding provisional seat and early bird concession" value="Initial telecalling allocation for admission counseling">
+                </div>
+
                 <!-- Dynamic Extra Field: Datewise Input -->
-                <div id="datewiseFieldGroup" class="form-group-custom" style="display: flex;">
+                <div id="datewiseFieldGroup" class="form-group-custom" style="display: none;">
                     <label for="allotDatewiseInput" class="form-label-custom">
                         Target Enquiry Date:
                     </label>
@@ -1837,119 +1957,54 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modeKey === 'datewise') {
             if (dateGroup) dateGroup.style.display = 'flex';
             if (customGroup) customGroup.style.display = 'none';
-            if (helpText) helpText.textContent = 'Allots enquiries received on the chosen date to the employee.';
+            if (helpText) helpText.textContent = 'Allots enquiries received on the chosen date to the telecaller.';
+        } else if (modeKey === 'unallocated') {
+            if (dateGroup) dateGroup.style.display = 'none';
+            if (customGroup) customGroup.style.display = 'none';
+            if (helpText) helpText.textContent = 'Allots all pending unallocated student leads to the selected telecaller.';
         } else if (modeKey === 'first 50') {
             if (dateGroup) dateGroup.style.display = 'none';
             if (customGroup) customGroup.style.display = 'none';
-            if (helpText) helpText.textContent = 'Allots the first 50 enquiries to the selected employee.';
+            if (helpText) helpText.textContent = 'Allots the first 50 enquiries to the selected telecaller in crm.telecaller_leads.';
         } else if (modeKey === 'first 100') {
             if (dateGroup) dateGroup.style.display = 'none';
             if (customGroup) customGroup.style.display = 'none';
-            if (helpText) helpText.textContent = 'Allots the first 100 enquiries to the selected employee.';
+            if (helpText) helpText.textContent = 'Allots the first 100 enquiries to the selected telecaller in crm.telecaller_leads.';
         } else if (modeKey === 'custom') {
             if (dateGroup) dateGroup.style.display = 'none';
             if (customGroup) customGroup.style.display = 'flex';
-            if (helpText) helpText.textContent = 'Allots the specified custom quantity of enquiries to the employee.';
+            if (helpText) helpText.textContent = 'Allots the specified custom quantity of enquiries to the telecaller.';
         }
     };
 
     window.submitAllotment = function () {
         const empSelect = document.getElementById('assignEmployeeSelect');
-        const empName = (empSelect?.value || '').trim();
+        const empOption = empSelect?.options[empSelect.selectedIndex];
+        const empCode = (empOption?.getAttribute('data-code') || empSelect?.value || '').trim();
+        const empName = (empOption?.getAttribute('data-name') || empOption?.textContent?.trim() || empCode).trim();
 
-        if (!empName) {
-            alert('Please select an employee before clicking Allot.');
+        if (!empCode) {
+            alert('Please select a telecaller from the dropdown before clicking Allot.');
             empSelect?.focus();
             return;
         }
 
         const allotModeSelect = document.getElementById('assignAllotModeSelect');
-        const allotMode = allotModeSelect?.value || 'datewise';
+        const allotMode = allotModeSelect?.value || 'unallocated';
         const targetAppli = (document.getElementById('modalTargetAppliNoInput')?.value || '').trim();
         const dateVal = document.getElementById('allotDatewiseInput')?.value || '';
         const customCount = parseInt(document.getElementById('allotCustomCountInput')?.value || '25', 10);
+        const stageSelect = document.getElementById('assignStageSelect');
+        const stageName = stageSelect?.value || 'Stage 1: Calling & Verification';
+        const remarksInput = document.getElementById('assignRemarksInput');
+        const stageRemark = (remarksInput?.value || '').trim();
 
-        const allRows = Array.from(document.querySelectorAll('.enquiry-row'));
-        let rowsToAllot = [];
-
-        if (allotMode === 'datewise') {
-            rowsToAllot = allRows.filter(r => (r.getAttribute('data-date') || '') === dateVal);
-            if (rowsToAllot.length === 0 && targetAppli) {
-                rowsToAllot = allRows.filter(r => {
-                    const cell = r.querySelector('.assign-cell-content');
-                    return cell && cell.getAttribute('data-appli') === targetAppli;
-                });
-            }
-        } else if (allotMode === 'first 50') {
-            rowsToAllot = allRows.slice(0, 50);
-        } else if (allotMode === 'first 100') {
-            rowsToAllot = allRows.slice(0, 100);
-        } else if (allotMode === 'custom') {
-            rowsToAllot = allRows.slice(0, Math.max(1, customCount));
+        const btnSubmit = document.getElementById('btnSubmitAllotment');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = 'Allotting...';
         }
 
-        // If target application specified and not included, ensure it is added
-        if (targetAppli) {
-            const hasTarget = rowsToAllot.some(r => {
-                const cell = r.querySelector('.assign-cell-content');
-                return cell && cell.getAttribute('data-appli') === targetAppli;
-            });
-            if (!hasTarget) {
-                const targetRow = allRows.find(r => {
-                    const cell = r.querySelector('.assign-cell-content');
-                    return cell && cell.getAttribute('data-appli') === targetAppli;
-                });
-                if (targetRow) rowsToAllot.push(targetRow);
-            }
-        }
-
-        if (rowsToAllot.length === 0 && allRows.length > 0) {
-            rowsToAllot = [allRows[0]];
-        }
-
-        const modeDisplay = allotMode.charAt(0).toUpperCase() + allotMode.slice(1);
-        let localStore = {};
-        try {
-            localStore = JSON.parse(localStorage.getItem('crm_allotted_enquiries') || '{}');
-        } catch (e) {}
-
-        rowsToAllot.forEach(row => {
-            const cell = row.querySelector('.assign-cell-content');
-            if (!cell) return;
-            const appli = cell.getAttribute('data-appli') || targetAppli;
-            const candidateName = row.querySelector('td:nth-child(2) div:first-child')?.textContent?.trim() || 'Candidate';
-
-            // Display employee name very properly
-            cell.innerHTML = `
-                <div class="assigned-emp-pill">
-                    <div class="assigned-emp-avatar">👤</div>
-                    <div class="assigned-emp-details">
-                        <span class="assigned-emp-name">${escapeHtml(empName)}</span>
-                        <span class="assigned-emp-meta">Allotted • ${escapeHtml(modeDisplay)}</span>
-                    </div>
-                    <button type="button" 
-                            class="btn-change-emp" 
-                            onclick="openAssignBox('${escapeHtml(appli)}', '${escapeHtml(candidateName)}')" 
-                            title="Change allotment">
-                        Change
-                    </button>
-                </div>
-            `;
-
-            if (appli) {
-                localStore[appli] = {
-                    employee: empName,
-                    mode: modeDisplay,
-                    date: new Date().toLocaleDateString('en-GB')
-                };
-            }
-        });
-
-        try {
-            localStorage.setItem('crm_allotted_enquiries', JSON.stringify(localStore));
-        } catch (e) {}
-
-        // Sync with session backend
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         fetch('/crm/allot-leads', {
             method: 'POST',
@@ -1959,13 +2014,76 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
+                employee_code: empCode,
                 employee_name: empName,
-                allot_mode: allotMode,
+                allot_mode: targetAppli ? 'single' : allotMode,
                 application_no: targetAppli,
                 allot_date: dateVal,
-                allot_count: customCount
+                allot_count: customCount,
+                stage_name: stageName,
+                stage_remark: stageRemark
             })
-        }).catch(e => console.log('Session sync notice:', e));
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Allot`;
+            }
+
+            if (!data.success) {
+                alert(data.message || 'Error allotting leads.');
+                return;
+            }
+
+            // Close modal
+            closeAssignBox();
+
+            // Update matched row cells
+            const apps = data.applications || (targetAppli ? [targetAppli] : []);
+            const resolvedEmp = data.employee_name || empName;
+            const modeDisplay = (data.mode || allotMode).toUpperCase();
+
+            apps.forEach(appli => {
+                const cell = document.querySelector(`.assign-cell-content[data-appli="${appli}"]`);
+                if (cell) {
+                    cell.innerHTML = `
+                        <div class="assigned-emp-pill">
+                            <div class="assigned-emp-avatar">👤</div>
+                            <div class="assigned-emp-details">
+                                <span class="assigned-emp-name">${escapeHtml(resolvedEmp)}</span>
+                                <span class="assigned-emp-meta">Telecaller • ${escapeHtml(modeDisplay)}</span>
+                            </div>
+                            <button type="button" 
+                                    class="btn-change-emp" 
+                                    onclick="openAssignBox('${escapeHtml(appli)}', '')" 
+                                    title="Change allotment">
+                                Change
+                            </button>
+                        </div>
+                    `;
+                }
+            });
+
+            // Update top metric for unallocated
+            const topMetric = document.getElementById('topMetricUnallocated');
+            if (topMetric && data.count) {
+                const current = parseInt(topMetric.textContent.replace(/,/g, '') || '0', 10);
+                topMetric.textContent = Math.max(0, current - data.count);
+            }
+
+            // Show toast notification
+            showToastNotification(`✓ ${data.message}`);
+        })
+        .catch(err => {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Allot`;
+            }
+            console.error('Allotment error:', err);
+            alert('Failed to connect to server. Please try again.');
+        });
+    };
 
         // Close modal
         closeAssignBox();
