@@ -54,8 +54,7 @@ class PayUController extends Controller
 
         // Net payable amount after applying coupons (always enforce server-side calculation)
         $amount = max(0.00, (float) $breakdown['net_payable']);
-        $cleanAppliSuffix = substr(preg_replace('/[^a-zA-Z0-9]/', '', $applino), -6);
-        $txnid = date('dmYHis') . ($cleanAppliSuffix ?: rand(100000, 999999));
+        $txnid = 'TXN' . date('ymdHis') . rand(1000, 9999);
 
         // If coupons cover 100% of the admission fee (payable = ₹0), settle immediately in DB without hitting PayU
         if ($amount <= 0) {
@@ -99,6 +98,7 @@ class PayUController extends Controller
         ];
 
         $params['hash'] = $this->payuService->generateHash($params);
+        $params['service_provider'] = 'payu_paisa';
 
         // Pre-record initiated transaction in finance.paydetails via Eloquent (with 0.00 defaults for numeric cells)
         try {

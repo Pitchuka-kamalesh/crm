@@ -13,7 +13,7 @@ class PayUService
     {
         $this->key = config('services.payu.key', 'TrOeqi');
         $this->salt = config('services.payu.salt', 'oUwlPbUgo653mTYzLfv2flsuCRdYqfkv');
-        $this->envProd = (int) config('services.payu.env_prod', 1);
+        $this->envProd = (int) config('services.payu.env_prod', 0);
         $this->gatewayUrl = $this->envProd === 1 
             ? 'https://secure.payu.in/_payment' 
             : 'https://test.payu.in/_payment';

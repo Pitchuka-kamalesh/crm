@@ -59,7 +59,7 @@ return [
     'payu' => [
         'key' => env('PAYU_KEY', 'TrOeqi'),
         'salt' => env('PAYU_SALT', 'oUwlPbUgo653mTYzLfv2flsuCRdYqfkv'),
-        'env_prod' => (int) env('PAYU_ENV_PROD', 1),
+        'env_prod' => (int) env('PAYU_ENV_PROD', 0),
     ],
 
 ];

@@ -112,23 +112,27 @@
         .stat-icon-amber { background: #fffbeb; border-color: #fef3c7; color: #d97706; }
         .stat-icon-purple { background: #faf5ff; border-color: #f3e8ff; color: #9333ea; }
 
+        .main-body {
+            padding: 0.9rem 1.15rem !important;
+        }
+
         /* Portal Table Card */
         .portal-card-shell {
             background: #ffffff;
             border: 1px solid var(--card-border);
-            border-radius: 0.85rem;
+            border-radius: 0.75rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
             overflow: hidden;
         }
 
         .portal-card-topbar {
-            padding: 1.1rem 1.4rem;
+            padding: 0.65rem 0.95rem;
             border-bottom: 1px solid var(--card-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.65rem;
             background: #ffffff;
         }
 
@@ -171,7 +175,7 @@
 
         .tele-table th {
             background: #f8fafc;
-            padding: 0.75rem 1.25rem;
+            padding: 0.55rem 0.85rem;
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -182,7 +186,7 @@
         }
 
         .tele-table td {
-            padding: 0.95rem 1.25rem;
+            padding: 0.55rem 0.85rem;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             color: var(--text-body);
@@ -311,10 +315,10 @@
         .allocation-command-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 1.4rem;
-            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
+            padding: 0.65rem 0.95rem;
+            margin-bottom: 0.65rem;
+            box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
             transition: all 0.2s ease;
         }
 
@@ -1455,7 +1459,8 @@
                 </div>
             @endif
 
-            <!-- 4 METRIC STAT CARDS WITH SVG ICONS -->
+            <!-- 4 METRIC STAT CARDS WITH SVG ICONS (Hidden on Allocation and Allotted Tabs) -->
+            @if($activeTab !== 'allocation' && $activeTab !== 'allotted')
             <div class="telecaller-stats-row">
                 <div class="stat-card-modern">
                     <div class="stat-meta">
@@ -1520,48 +1525,18 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- LEADS INCHARGE ALLOCATION CONTROL PANEL (Shown on Leads Allocation tab) -->
             @if($activeTab === 'allocation')
-                <div class="allocation-command-card">
-                    <!-- Header -->
-                    <div class="incharge-header-wrap">
-                        <div class="incharge-brand-box">
-                            <div class="incharge-icon-emblem">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                    <polyline points="16 11 18 13 22 9"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="incharge-title-text">
-                                    <span>Leads Allocation &bull; Unallocated Queue</span>
-                                </h3>
-                                <p class="incharge-sub-text">
-                                    Select leads below and allocate to a telecaller. Once allocated, leads clear from this queue automatically and reflect in <strong>Lead input</strong>.
-                                </p>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                            <div class="incharge-selection-badge" id="selectedCountBadgeBox">
-                                <span class="incharge-badge-dot"></span>
-                                <span id="selectedCountBadge">0 Leads Selected</span>
-                            </div>
-                            <a href="{{ route('leads.input', ['tab' => 'input']) }}" style="font-size: 0.78rem; font-weight: 700; color: #2563eb; text-decoration: none; padding: 0.45rem 0.85rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.45rem;">
-                                View Lead Input &rarr;
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Form Body -->
-                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); submitInchargeAllocation();">
-                        <!-- Row 1: 3 Balanced Wide Columns -->
-                        <div class="incharge-controls-grid">
+                <div class="allocation-command-card" style="padding: 0.65rem 0.95rem; margin-bottom: 0.65rem;">
+                    <!-- Single-line form: Select Telecaller, Allocation Target, Allocate button -->
+                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); submitInchargeAllocation();" style="margin: 0; padding: 0;">
+                        <div style="display: flex; align-items: flex-end; gap: 0.85rem; flex-wrap: wrap;">
                             <!-- 1. Select Telecaller -->
-                            <div class="incharge-field-group">
-                                <label for="inchargeTelecallerSelect" class="incharge-label">
-                                    <span>Select Telecaller (Role 4)<span class="required-dot">*</span></span>
+                            <div style="flex: 1; min-width: 250px;">
+                                <label for="inchargeTelecallerSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
+                                    <span>Select Telecaller<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
                                 <div class="incharge-control-shell">
                                     <span class="input-icon-left">
@@ -1573,85 +1548,41 @@
                                         <option value="">-- Choose Telecaller --</option>
                                         @foreach($telecallers as $tc)
                                             <option value="{{ $tc->emp_code }}">
-                                                {{ $tc->full_name }} ({{ $tc->emp_code }}) - Tele Caller
+                                                {{ $tc->full_name }} ({{ $tc->emp_code }})
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
-                            <!-- 2. Allocation Scope / Mode -->
-                            <div class="incharge-field-group">
-                                <label for="inchargeTargetSelect" class="incharge-label">
-                                    <span>Allocation Target<span class="required-dot">*</span></span>
-                                </label>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <div class="incharge-control-shell" style="flex: 1;">
-                                        <span class="input-icon-left">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                        </span>
-                                        <select id="inchargeTargetSelect" class="incharge-select" onchange="onInchargeTargetChange(this.value)" required>
-                                            <option value="selected">Selected Checked Leads</option>
-                                            <option value="unallocated">All Unallocated Leads ({{ $unallocatedCount ?? 0 }})</option>
-                                            <option value="first 10">First 10 Leads</option>
-                                            <option value="first 25">First 25 Leads</option>
-                                            <option value="first 50">First 50 Leads</option>
-                                            <option value="custom">Custom Quantity...</option>
-                                        </select>
-                                    </div>
-                                    <div id="inchargeCustomCountGroup" style="display: none; width: 85px;">
-                                        <input type="number" id="inchargeCustomCount" class="incharge-input incharge-input-no-icon" min="1" max="500" value="15" title="Number of leads to allot" placeholder="Qty">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 3. Assign Step / Stage -->
-                            <div class="incharge-field-group">
-                                <label for="inchargeStageSelect" class="incharge-label">
-                                    <span>Assign Step / Stage<span class="required-dot">*</span></span>
+                            <!-- 2. Allocation Target with bucket sizes 100, 300, 500, 1000 -->
+                            <div style="flex: 1; min-width: 250px;">
+                                <label for="inchargeTargetSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
+                                    <span>Allocation Target<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
                                 <div class="incharge-control-shell">
                                     <span class="input-icon-left">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="9 11 12 14 22 4"/>
-                                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="9" cy="7" r="4"/>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                         </svg>
                                     </span>
-                                    <select id="inchargeStageSelect" class="incharge-select" required>
-                                        <option value="Stage 1: Fee Payment">Stage 1: Fee Payment</option>
-                                        <option value="Stage 2: Personal Profile">Stage 2: Personal Profile</option>
-                                        <option value="Stage 3: Academic Info">Stage 3: Academic Info</option>
-                                        <option value="Stage 4: Doc Upload">Stage 4: Doc Upload</option>
-                                        <option value="Stage 5: VSAT & Confirmation">Stage 5: VSAT &amp; Confirmation</option>
+                                    <select id="inchargeTargetSelect" class="incharge-select" required>
+                                        <option value="selected">Selected Checked Leads</option>
+                                        <option value="100">Bucket: 100 Leads</option>
+                                        <option value="300">Bucket: 300 Leads</option>
+                                        <option value="500">Bucket: 500 Leads</option>
+                                        <option value="1000">Bucket: 1000 Leads</option>
+                                        <option value="unallocated">All Unallocated Leads</option>
                                     </select>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Row 2: Full Width Remarks + Pinned Allocate Button -->
-                        <div class="incharge-action-row">
-                            <div class="incharge-field-group">
-                                <label for="inchargeRemarksInput" class="incharge-label">
-                                    <span>Step Remarks</span>
-                                    <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 500;">Saved into crm.telecaller_leads_tasks</span>
-                                </label>
-                                <div class="incharge-control-shell">
-                                    <span class="input-icon-left">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                        </svg>
-                                    </span>
-                                    <input type="text" id="inchargeRemarksInput" class="incharge-input" placeholder="e.g. Call student for admission confirmation & seat booking" value="Initial telecalling allocation for admission counseling">
-                                </div>
-                            </div>
-
-                            <div>
-                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit">
+                            <!-- 3. Allocate Button -->
+                            <div style="flex-shrink: 0;">
+                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 42px; margin: 0; padding: 0 1.5rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
@@ -1664,7 +1595,7 @@
                     </form>
                 </div>
             @elseif($activeTab === 'input')
-                <div class="allocation-command-card" style="padding: 1.15rem 1.5rem;">
+                <div class="allocation-command-card" style="padding: 0.85rem 1.15rem; margin-bottom: 0.65rem;">
                     <div class="incharge-header-wrap" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
                         <div class="incharge-brand-box">
                             <div class="incharge-icon-emblem">
@@ -1697,54 +1628,98 @@
             <!-- PORTAL TABLE CARD -->
             <div class="portal-card-shell">
                 <!-- Top Toolbar -->
-                <div class="portal-card-topbar" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem;">
+                <div class="portal-card-topbar" style="padding: 0.55rem 0.95rem; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem; width: 100%;">
                         <div class="filter-nav-pills" id="statusFilterPills">
-                            <button type="button" onclick="applyStatusFilter('all', this)" class="filter-nav-pill {{ ($statusFilter ?? 'all') === 'all' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
-                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                </svg>All Leads
-                            </button>
-                            <button type="button" onclick="applyStatusFilter('stage1', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage1' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 1: Fee Payment</button>
-                            <button type="button" onclick="applyStatusFilter('stage2', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage2' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 2: Personal Profile</button>
-                            <button type="button" onclick="applyStatusFilter('stage3', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage3' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 3: Academic Info</button>
-                            <button type="button" onclick="applyStatusFilter('stage4', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage4' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 4: Doc Upload</button>
-                            <button type="button" onclick="applyStatusFilter('stage5', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'stage5' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Step 5: VSAT &amp; Confirm</button>
+                            @if($activeTab === 'input')
+                                <button type="button" onclick="applyStatusFilter('all', this)" class="filter-nav-pill {{ ($statusFilter ?? 'all') === 'all' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>All Leads
+                                </button>
+                                <button type="button" onclick="applyStatusFilter('telecaller', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'telecaller' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Telecaller Stage</button>
+                                <button type="button" onclick="applyStatusFilter('register', this)" class="filter-nav-pill {{ ($statusFilter ?? '') === 'register' ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Register Form</button>
+                                <button type="button" onclick="applyStatusFilter('payment', this)" class="filter-nav-pill {{ in_array(($statusFilter ?? ''), ['payment', 'stage1']) ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Payment Stage</button>
+                                <button type="button" onclick="applyStatusFilter('personal', this)" class="filter-nav-pill {{ in_array(($statusFilter ?? ''), ['personal', 'stage2']) ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Personal Details</button>
+                                <button type="button" onclick="applyStatusFilter('academic', this)" class="filter-nav-pill {{ in_array(($statusFilter ?? ''), ['academic', 'stage3']) ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Academic Details</button>
+                            @elseif($activeTab === 'allotted')
+                                <div style="font-size: 0.84rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                                    <span>📋</span> My Allotted Leads
+                                </div>
+                            @else
+                                <div style="font-size: 0.84rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                                    <span>📋</span> Leads Table Directory
+                                </div>
+                            @endif
                         </div>
 
-                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                            @if($activeTab === 'input')
-                                <select id="allocStatusFilterSelect" onchange="applyExtraFilter('alloc_status', this.value)" style="padding: 0.42rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
+                        <div style="display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap;">
+                            @if($activeTab !== 'allotted')
+                                <select id="allocStatusFilterSelect" onchange="applyExtraFilter('alloc_status', this.value)" style="padding: 0.38rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
                                     <option value="all" {{ ($allocStatusFilter ?? 'all') === 'all' ? 'selected' : '' }}>Status: All Leads</option>
-                                    <option value="allocated" {{ ($allocStatusFilter ?? '') === 'allocated' ? 'selected' : '' }}>Allocated Only</option>
-                                    <option value="unallocated" {{ ($allocStatusFilter ?? '') === 'unallocated' ? 'selected' : '' }}>Unallocated Only</option>
+                                    <option value="unallocated" {{ ($allocStatusFilter ?? '') === 'unallocated' ? 'selected' : '' }}>Unallocated (empcode = 0)</option>
+                                    <option value="allocated" {{ ($allocStatusFilter ?? '') === 'allocated' ? 'selected' : '' }}>Allocated (empcode != 0)</option>
                                 </select>
 
-                                <select id="callerFilterSelect" onchange="applyExtraFilter('caller', this.value)" style="padding: 0.42rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
+                                <select id="callerFilterSelect" onchange="applyExtraFilter('caller', this.value)" style="padding: 0.38rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
                                     <option value="all">Telecaller: All</option>
                                     @foreach($telecallers as $tc)
-                                        <option value="{{ $tc->emp_code }}" {{ ($callerFilter ?? '') === $tc->emp_code ? 'selected' : '' }}>{{ $tc->full_name }}</option>
+                                        <option value="{{ $tc->emp_code }}" {{ ($callerFilter ?? '') === $tc->emp_code ? 'selected' : '' }}>{{ $tc->full_name }} ({{ $tc->emp_code }})</option>
                                     @endforeach
                                 </select>
                             @endif
 
-                            <select id="programFilterSelect" onchange="applyExtraFilter('program', this.value)" style="padding: 0.42rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
-                                <option value="all">Program: All</option>
-                                @foreach($availablePrograms as $prog)
-                                    <option value="{{ $prog->program_id }}" {{ (string)($programFilter ?? '') === (string)$prog->program_id ? 'selected' : '' }}>{{ $prog->program_short_name }}</option>
-                                @endforeach
-                            </select>
+                            @if($activeTab === 'input')
+                                <select id="programFilterSelect" onchange="applyExtraFilter('program', this.value)" style="padding: 0.38rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
+                                    <option value="all">Program: All</option>
+                                    @foreach($availablePrograms as $prog)
+                                        <option value="{{ $prog->program_id }}" {{ (string)($programFilter ?? '') === (string)$prog->program_id ? 'selected' : '' }}>{{ $prog->program_short_name }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
 
+                            <!-- Search Input -->
                             <div style="position: relative; display: flex; align-items: center;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px;">
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 </svg>
-                                <input type="text" id="liveSearchInput" value="{{ $searchQuery ?? '' }}" oninput="handleLiveSearch(this.value)" placeholder="Search name, phone, app #, CRM ID..." style="padding: 0.45rem 2rem 0.45rem 2rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.8rem; width: 240px; outline: none; transition: border-color 0.15s ease;">
+                                <input type="text" id="liveSearchInput" value="{{ $searchQuery ?? '' }}" oninput="handleLiveSearch(this.value)" placeholder="{{ $activeTab === 'allocation' ? 'Search phone, empcode...' : 'Search name, phone, app #, CRM ID...' }}" style="padding: 0.4rem 2rem 0.4rem 2rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; width: 190px; outline: none; transition: border-color 0.15s ease;">
                                 <div class="live-search-spinner" id="searchSpinner"></div>
+                            </div>
+
+                            <!-- Filter Reset Button (Right of Search) -->
+                            <button type="button" 
+                                    id="btnResetFilters" 
+                                    onclick="resetAllFilters()" 
+                                    title="Reset all search & filters to default" 
+                                    style="padding: 0.4rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #475569; background: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; outline: none; transition: all 0.15s ease;"
+                                    onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a';"
+                                    onmouseout="this.style.background='#ffffff'; this.style.color='#475569';">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                </svg>
+                                <span>Reset</span>
+                            </button>
+
+                            <!-- Table Size (Limit Enforced: Max Leads Table Size) (Right of Search) -->
+                            <div style="display: inline-flex; align-items: center; gap: 4px; background: #ffffff; border: 1.5px solid var(--card-border); border-radius: 0.45rem; padding: 0.1rem 0.45rem; height: 32px;" title="Rows per page (Limit up to leads table size: {{ $maxPageLimit ?? 100 }})">
+                                <label for="tablePageSizeInput" style="font-size: 0.74rem; font-weight: 700; color: #64748b; margin: 0; white-space: nowrap;">Size:</label>
+                                <input type="number" 
+                                       id="tablePageSizeInput" 
+                                       min="1" 
+                                       max="{{ $maxPageLimit ?? 100 }}" 
+                                       value="{{ $perPage ?? request('per_page', 25) }}" 
+                                       oninput="enforcePageSizeLimit(this)" 
+                                       onchange="handlePageSizeChange(this.value)" 
+                                       onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handlePageSizeChange(this.value); }" 
+                                       placeholder="25" 
+                                       title="Enter number of rows per page (Max limit: {{ $maxPageLimit ?? 100 }})" 
+                                       style="width: 65px; border: none; font-size: 0.78rem; font-weight: 700; color: #0f172a; text-align: center; outline: none; background: transparent; padding: 0;">
                             </div>
                         </div>
                     </div>
@@ -1759,9 +1734,9 @@
     </div>
 </div>
 
-<!-- ================= POPUP WIZARD MODAL ================= -->
+<!-- ================= POPUP ACTION MODAL ================= -->
 <div class="wizard-overlay" id="wizardModal" onclick="closeWizardModalOnBackdrop(event)">
-    <div class="wizard-modal-box">
+    <div class="wizard-modal-box" style="max-width: 580px;">
         <!-- Header -->
         <div class="wizard-modal-header">
             <div>
@@ -1771,162 +1746,77 @@
                 </div>
                 <div class="candidate-header-sub" id="modalCandidateSub">Program: B.Tech | +91 9912996788</div>
             </div>
-            <button type="button" class="btn-close-modal" onclick="closeWizardModal()" title="Close Wizard">✕</button>
-        </div>
-
-        <!-- 5-Step Stepper Track -->
-        <div class="stepper-nav-bar" id="modalStepperTrack">
-            <!-- Dynamically injected tabs -->
+            <button type="button" class="btn-close-modal" onclick="closeWizardModal()" title="Close Dialog">✕</button>
         </div>
 
         <!-- Modal Body Content -->
-        <div class="modal-body-content">
-            <div class="assessment-panel">
-                <div class="assessment-header">
-                    <div>
-                        <div class="stage-heading-title" id="activeStepTitle">
-                            <span>Stage 1: Registration & Fee Payment</span>
-                        </div>
-                        <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;" id="activeStepDesc">
-                            Verify whether candidate completed the initial admission registration and submitted fee.
-                        </div>
-                    </div>
-                    <span class="step-state-tag tag-progress" id="activeStepCurrentPill">STATUS: IN PROGRESS</span>
-                </div>
-
-                <div style="font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.4rem;">
-                    Stage Status:
-                </div>
-
-                <div class="assessment-status-options">
-                    <label class="status-choice-card" id="label-completed" onclick="selectStatusOption('completed')">
-                        <input type="radio" name="modal_stage_status" value="completed" style="accent-color: #10b981; margin-top: 3px;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span>Completed / Approved</span>
-                            </div>
-                            <div style="font-size: 0.72rem; color: #64748b; font-weight: 400; margin-top: 2px;">Candidate finished this step</div>
-                        </div>
+        <div class="modal-body-content" style="padding: 1.25rem 1.5rem;">
+            <!-- Stage Call Task Details (Logged to crm.telecaller_leads_tasks) -->
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem;">
+                <div>
+                    <label for="modalStageNameSelect" style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                        Stage Name <span style="color: #ef4444;">*</span>
                     </label>
-
-                    <label class="status-choice-card" id="label-inprogress" onclick="selectStatusOption('in_progress')">
-                        <input type="radio" name="modal_stage_status" value="in_progress" style="accent-color: #2563eb; margin-top: 3px;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                                <span>In Progress</span>
-                            </div>
-                            <div style="font-size: 0.72rem; color: #64748b; font-weight: 400; margin-top: 2px;">Candidate working on it</div>
-                        </div>
-                    </label>
-
-                    <label class="status-choice-card" id="label-locked" onclick="selectStatusOption('locked')">
-                        <input type="radio" name="modal_stage_status" value="locked" style="accent-color: #94a3b8; margin-top: 3px;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                </svg>
-                                <span>Locked / Pending</span>
-                            </div>
-                            <div style="font-size: 0.72rem; color: #64748b; font-weight: 400; margin-top: 2px;">Next sequential stage</div>
-                        </div>
-                    </label>
+                    <select id="modalStageNameSelect" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
+                        <option value="Telecaller Stage">Telecaller Stage</option>
+                        <option value="Register Form">Register Form</option>
+                        <option value="Payment Stage">Payment Stage</option>
+                        <option value="Personal Details">Personal Details</option>
+                        <option value="Academic Details">Academic Details</option>
+                    </select>
                 </div>
 
-                <!-- Stage Call Task Details (Logged to crm.telecaller_leads_tasks) -->
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 1.15rem;">
-                    <div>
-                        <label for="modalStageNameSelect" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
-                            Stage Name
-                        </label>
-                        <select id="modalStageNameSelect" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
-                            <option value="Stage 1: Fee Payment">Stage 1: Fee Payment</option>
-                            <option value="Stage 2: Personal Profile">Stage 2: Personal Profile</option>
-                            <option value="Stage 3: Academic Info">Stage 3: Academic Info</option>
-                            <option value="Stage 4: Doc Upload">Stage 4: Doc Upload</option>
-                            <option value="Stage 5: VSAT & Confirm">Stage 5: VSAT &amp; Confirm</option>
-                            <option value="Calling & Verification">Calling &amp; Verification</option>
-                            <option value="Follow-up Counseling Call">Follow-up Counseling Call</option>
-                            <option value="Fee & Concession Discussion">Fee &amp; Concession Discussion</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="modalStageCallPerson" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
-                            Stage Call Person
-                        </label>
-                        <select id="modalStageCallPerson" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
-                            <option value="Student / Candidate">Student / Candidate</option>
-                            <option value="Father">Father</option>
-                            <option value="Mother">Mother</option>
-                            <option value="Guardian">Guardian</option>
-                            <option value="Brother / Sister">Brother / Sister</option>
-                            <option value="Other Family Member">Other Family Member</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="modalStageCallTime" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
-                            Stage Call Date &amp; Time
-                        </label>
-                        <input type="datetime-local" id="modalStageCallTime" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
-                    </div>
-
-                    <div>
-                        <label for="modalCallDuration" style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
-                            Call Duration
-                        </label>
-                        <input type="text" id="modalCallDuration" list="durationPresetsList" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;" placeholder="e.g. 5 mins" value="5 mins">
-                        <datalist id="durationPresetsList">
-                            <option value="1 min">
-                            <option value="2 mins">
-                            <option value="5 mins">
-                            <option value="10 mins">
-                            <option value="15 mins">
-                            <option value="20+ mins">
-                            <option value="Not Connected / Callback">
-                        </datalist>
-                    </div>
-                </div>
-
-                <!-- Remarks (Optional) -->
-                <div class="remarks-field-box">
-                    <label for="modalStageRemarks" style="font-size: 0.78rem; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: space-between;">
-                        <span>Telecaller Calling Remarks</span>
-                        <span style="font-size: 0.68rem; color: #64748b; font-weight: 500; background: #e2e8f0; padding: 0.1rem 0.45rem; border-radius: 4px;">Saved in DB</span>
+                <div>
+                    <label for="modalStageCallPerson" style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                        Stage Call Person
                     </label>
-                    <textarea id="modalStageRemarks" class="remarks-textarea" rows="2" placeholder="Enter counseling notes, discussion summary, or callback details..."></textarea>
+                    <select id="modalStageCallPerson" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
+                        <option value="Student / Candidate">Student / Candidate</option>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Guardian">Guardian</option>
+                        <option value="Brother / Sister">Brother / Sister</option>
+                        <option value="Other Family Member">Other Family Member</option>
+                    </select>
                 </div>
+
+                <div>
+                    <label for="modalStageCallTime" style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                        Stage Call Date &amp; Time
+                    </label>
+                    <input type="datetime-local" id="modalStageCallTime" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
+                </div>
+
+                <div>
+                    <label for="modalCallDuration" style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                        Call Duration
+                    </label>
+                    <input type="text" id="modalCallDuration" list="durationPresetsList" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;" placeholder="e.g. 5 mins" value="5 mins">
+                    <datalist id="durationPresetsList">
+                        <option value="1 min">
+                        <option value="2 mins">
+                        <option value="5 mins">
+                        <option value="10 mins">
+                        <option value="15 mins">
+                        <option value="20+ mins">
+                        <option value="Not Connected / Callback">
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Remarks -->
+            <div class="remarks-field-box" style="margin-top: 1rem;">
+                <label for="modalStageRemarks" style="font-size: 0.78rem; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                    <span>Telecaller Calling Remarks</span>
+                    <span style="font-size: 0.68rem; color: #64748b; font-weight: 500; background: #e2e8f0; padding: 0.1rem 0.45rem; border-radius: 4px;">Saved in DB</span>
+                </label>
+                <textarea id="modalStageRemarks" class="remarks-textarea" rows="3" placeholder="Enter counseling notes, discussion summary, or callback details..."></textarea>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="wizard-modal-footer">
-            <div style="display: flex; gap: 0.5rem;">
-                <button type="button" class="tele-btn-action" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 0.5rem 0.85rem;" id="btnPrevStage" onclick="navigateStep(-1)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    <span>Previous Stage</span>
-                </button>
-                <button type="button" class="tele-btn-action" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 0.5rem 0.85rem;" id="btnNextStage" onclick="navigateStep(1)">
-                    <span>Next Stage</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </button>
-            </div>
-
+            <div></div>
             <div style="display: flex; gap: 0.6rem; align-items: center;">
                 <button type="button" class="tele-btn-action" style="background: #f8fafc; border: 1px solid var(--card-border); color: #475569; padding: 0.5rem 1rem;" onclick="closeWizardModal()">
                     Cancel
@@ -2003,17 +1893,7 @@
 <script>
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    const STAGES_META = [
-        { key: 'stage1', num: 1, name: 'Fee Payment', desc: 'Seat confirmation registration fee payment via PayU and concession coupon allocation.' },
-        { key: 'stage2', num: 2, name: 'Personal Profile', desc: 'Candidate personal info, parent details, permanent address, contact numbers, and category.' },
-        { key: 'stage3', num: 3, name: 'Academic Info', desc: 'SSC / 10th and Intermediate / 12th / Diploma hall ticket numbers, board, and marks.' },
-        { key: 'stage4', num: 4, name: 'Doc Upload', desc: 'Aadhaar card, 10th & 12th marks memos, study certificates, and photo upload verification.' },
-        { key: 'stage5', num: 5, name: 'VSAT & Confirm', desc: 'VSAT rank verification, branch eligibility check, and provisional admission confirmation.' }
-    ];
-
     let currentCandidate = null;
-    let currentStepIndex = 0;
-    let selectedStatus = 'completed';
 
     function showToast(msg, isError = false) {
         const toast = document.getElementById('teleToast');
@@ -2024,21 +1904,39 @@
         setTimeout(() => { toast.style.display = 'none'; }, 2800);
     }
 
-    function openWizardModal(applinano, name, phone, program, stages, remarks = '') {
-        currentCandidate = { applinano, name, phone, program, stages, remarks: remarks || '' };
-        currentStepIndex = 0;
+    function openWizardModal(applinano, name, phone, program, stages = {}, remarks = '', currentStage = '') {
+        currentCandidate = { applinano, name, phone, program, stages, remarks: remarks || '', currentStage: currentStage || '' };
 
-        document.getElementById('modalCandidateName').textContent = name;
-        document.getElementById('modalCandidateAppNo').textContent = `APP: ${applinano}`;
-        document.getElementById('modalCandidateSub').textContent = `Program: ${program} | Contact: +91 ${phone}`;
+        document.getElementById('modalCandidateName').textContent = name || 'Candidate Lead';
+        document.getElementById('modalCandidateAppNo').textContent = (applinano && applinano !== '0') ? `APP: ${applinano}` : `PHONE: ${phone}`;
+        document.getElementById('modalCandidateSub').textContent = `Program: ${program || 'UG'} | Contact: +91 ${phone}`;
 
         const callTimeInput = document.getElementById('modalStageCallTime');
-        if (callTimeInput) callTimeInput.value = '';
+        if (callTimeInput) {
+            const now = new Date();
+            const offsetMs = now.getTimezoneOffset() * 60000;
+            callTimeInput.value = new Date(now.getTime() - offsetMs).toISOString().slice(0, 16);
+        }
+
         const durationInput = document.getElementById('modalCallDuration');
         if (durationInput && !durationInput.value) durationInput.value = '5 mins';
 
-        renderModalStepper();
-        loadStepDetail(0);
+        const remarksInput = document.getElementById('modalStageRemarks');
+        if (remarksInput) {
+            remarksInput.value = remarks || '';
+        }
+
+        const stageSelect = document.getElementById('modalStageNameSelect');
+        if (stageSelect && currentStage) {
+            const norm = currentStage.toLowerCase().trim();
+            for (let i = 0; i < stageSelect.options.length; i++) {
+                const optVal = stageSelect.options[i].value.toLowerCase();
+                if (norm.includes(optVal) || optVal.includes(norm) || (norm.includes('not paid') && optVal.includes('payment'))) {
+                    stageSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
 
         document.getElementById('wizardModal').classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -2055,112 +1953,9 @@
         }
     }
 
-    function renderModalStepper() {
-        const track = document.getElementById('modalStepperTrack');
-        track.innerHTML = '';
-
-        STAGES_META.forEach((stg, idx) => {
-            const raw = (currentCandidate.stages[stg.key] || 'locked').toLowerCase();
-            const isDone = ['completed', 'paid', 'approved'].includes(raw);
-            const isInProg = ['in_progress', 'active', 'not_started', 'not_paid'].includes(raw);
-            
-            const tab = document.createElement('div');
-            tab.className = `stepper-tab-item ${idx === currentStepIndex ? 'is-selected' : ''} ${isDone ? 'is-completed' : ''}`;
-            tab.onclick = () => {
-                currentStepIndex = idx;
-                renderModalStepper();
-                loadStepDetail(idx);
-            };
-
-            const tagClass = isDone ? 'tag-done' : (isInProg ? 'tag-progress' : 'tag-locked');
-            const tagText = isDone ? 'Done' : (isInProg ? 'In Prog' : 'Lock');
-
-            tab.innerHTML = `
-                <div class="step-index-circle">${isDone ? '✓' : stg.num}</div>
-                <div class="step-title-text">${stg.name}</div>
-                <span class="step-state-tag ${tagClass}">${tagText}</span>
-            `;
-            track.appendChild(tab);
-        });
-    }
-
-    function loadStepDetail(idx) {
-        const stg = STAGES_META[idx];
-        document.getElementById('activeStepTitle').textContent = `Stage ${stg.num}: ${stg.name}`;
-        document.getElementById('activeStepDesc').textContent = stg.desc;
-
-        const currentVal = (currentCandidate.stages[stg.key] || 'locked').toLowerCase();
-        const isDone = ['completed', 'paid', 'approved'].includes(currentVal);
-        const isInProg = ['in_progress', 'active', 'not_started', 'not_paid'].includes(currentVal);
-
-        const pill = document.getElementById('activeStepCurrentPill');
-        if (isDone) {
-            pill.className = 'step-state-tag tag-done';
-            pill.textContent = 'STATUS: COMPLETED';
-            selectStatusOption('completed');
-        } else if (isInProg) {
-            pill.className = 'step-state-tag tag-progress';
-            pill.textContent = 'STATUS: IN PROGRESS';
-            selectStatusOption('in_progress');
-        } else {
-            pill.className = 'step-state-tag tag-locked';
-            pill.textContent = 'STATUS: LOCKED';
-            selectStatusOption('locked');
-        }
-
-        document.getElementById('btnPrevStage').disabled = (idx === 0);
-        document.getElementById('btnNextStage').disabled = (idx === STAGES_META.length - 1);
-
-        const stageNameSelect = document.getElementById('modalStageNameSelect');
-        if (stageNameSelect) {
-            const matchedLabel = `Stage ${stg.num}: ${stg.name}`;
-            if (Array.from(stageNameSelect.options).some(o => o.value === matchedLabel)) {
-                stageNameSelect.value = matchedLabel;
-            }
-        }
-
-        const callTimeInput = document.getElementById('modalStageCallTime');
-        if (callTimeInput && !callTimeInput.value) {
-            const now = new Date();
-            const offsetMs = now.getTimezoneOffset() * 60000;
-            callTimeInput.value = new Date(now.getTime() - offsetMs).toISOString().slice(0, 16);
-        }
-
-        const remarksInput = document.getElementById('modalStageRemarks');
-        if (remarksInput) {
-            remarksInput.value = currentCandidate.remarks || '';
-        }
-    }
-
-    function selectStatusOption(val) {
-        selectedStatus = val;
-        document.querySelectorAll('.status-choice-card').forEach(el => el.classList.remove('active-completed', 'active-progress', 'active-locked'));
-        
-        const radio = document.querySelector(`input[name="modal_stage_status"][value="${val}"]`);
-        if (radio) radio.checked = true;
-
-        if (val === 'completed') {
-            document.getElementById('label-completed').classList.add('active-completed');
-        } else if (val === 'in_progress') {
-            document.getElementById('label-inprogress').classList.add('active-progress');
-        } else {
-            document.getElementById('label-locked').classList.add('active-locked');
-        }
-    }
-
-    function navigateStep(direction) {
-        const nextIdx = currentStepIndex + direction;
-        if (nextIdx >= 0 && nextIdx < STAGES_META.length) {
-            currentStepIndex = nextIdx;
-            renderModalStepper();
-            loadStepDetail(nextIdx);
-        }
-    }
-
     function saveActiveStageUpdate() {
         if (!currentCandidate) return;
-        const stg = STAGES_META[currentStepIndex];
-        const stageNameVal = document.getElementById('modalStageNameSelect')?.value || `Stage ${stg.num}: ${stg.name}`;
+        const stageNameVal = document.getElementById('modalStageNameSelect')?.value || 'Telecaller Stage';
         const callPersonVal = document.getElementById('modalStageCallPerson')?.value || 'Student / Candidate';
         const callTimeVal = document.getElementById('modalStageCallTime')?.value || '';
         const callDurationVal = document.getElementById('modalCallDuration')?.value || '';
@@ -2174,8 +1969,6 @@
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                stage: stg.key,
-                status: selectedStatus,
                 stage_name: stageNameVal,
                 stage_callperson: callPersonVal,
                 stage_calltime: callTimeVal,
@@ -2186,11 +1979,8 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                showToast(`✓ ${stageNameVal} logged & saved!`);
-                currentCandidate.stages[stg.key] = selectedStatus;
-                currentCandidate.remarks = data.remarks || remarksVal;
-                renderModalStepper();
-                loadStepDetail(currentStepIndex);
+                showToast(`✓ ${stageNameVal} saved successfully!`);
+                closeWizardModal();
                 
                 // Immediately refresh table in the background live without full page reload
                 fetchLeadsTable(1, false);
@@ -2228,7 +2018,7 @@
         });
     }
 
-    // ================= LIVE SEARCH & FILTERING WITH 25 PAGINATION =================
+    // ================= LIVE SEARCH & FILTERING WITH DYNAMIC PAGINATION =================
     let searchDebounceTimer = null;
     const activeTabName = '{{ $activeTab ?? "input" }}';
     let activeFilterStatus = '{{ $statusFilter ?? "all" }}';
@@ -2236,7 +2026,61 @@
     let activeCallerFilter = '{{ $callerFilter ?? "all" }}';
     let activeProgramFilter = '{{ $programFilter ?? "all" }}';
     let currentSearchTerm = '{{ $searchQuery ?? "" }}';
+    let activePerPage = parseInt('{{ $perPage ?? request("per_page", 25) }}', 10) || 25;
+    const maxTableLimit = parseInt('{{ $maxPageLimit ?? 100 }}', 10) || 100;
     let currentPage = 1;
+
+    function enforcePageSizeLimit(input) {
+        let val = parseInt(input.value, 10);
+        if (isNaN(val)) return;
+        if (val > maxTableLimit) {
+            input.value = maxTableLimit;
+        } else if (val < 1 && input.value !== '') {
+            input.value = 1;
+        }
+    }
+
+    function handlePageSizeChange(val) {
+        let parsed = parseInt(val, 10);
+        if (isNaN(parsed) || parsed < 1) parsed = 25;
+        if (parsed > maxTableLimit) parsed = maxTableLimit;
+
+        const input = document.getElementById('tablePageSizeInput');
+        if (input) input.value = parsed;
+
+        activePerPage = parsed;
+        fetchLeadsTable(1, true);
+    }
+
+    function resetAllFilters() {
+        currentSearchTerm = '';
+        const searchInput = document.getElementById('liveSearchInput');
+        if (searchInput) searchInput.value = '';
+
+        activeFilterStatus = 'all';
+        document.querySelectorAll('#statusFilterPills .filter-nav-pill').forEach(btn => btn.classList.remove('is-active'));
+        const allBtn = document.querySelector('#statusFilterPills .filter-nav-pill');
+        if (allBtn) allBtn.classList.add('is-active');
+
+        activeAllocStatus = 'all';
+        const allocSelect = document.getElementById('allocStatusFilterSelect');
+        if (allocSelect) allocSelect.value = 'all';
+
+        activeCallerFilter = 'all';
+        const callerSelect = document.getElementById('callerFilterSelect');
+        if (callerSelect) callerSelect.value = 'all';
+
+        activeProgramFilter = 'all';
+        const progSelect = document.getElementById('programFilterSelect');
+        if (progSelect) progSelect.value = 'all';
+
+        activePerPage = 25;
+        const sizeInput = document.getElementById('tablePageSizeInput');
+        if (sizeInput) sizeInput.value = 25;
+
+        fetchLeadsTable(1, true);
+        showToast('✓ All filters reset to default');
+    }
 
     function handleLiveSearch(query) {
         clearTimeout(searchDebounceTimer);
@@ -2287,6 +2131,9 @@
         }
         if (currentSearchTerm.trim()) {
             url.searchParams.set('q', currentSearchTerm.trim());
+        }
+        if (activePerPage) {
+            url.searchParams.set('per_page', activePerPage);
         }
         if (page > 1) {
             url.searchParams.set('page', page);
@@ -2435,15 +2282,14 @@
         }
 
         const targetMode = document.getElementById('inchargeTargetSelect')?.value || 'selected';
-        const stageName = document.getElementById('inchargeStageSelect')?.value || 'Stage 1: Fee Payment';
-        const remarks = document.getElementById('inchargeRemarksInput')?.value || '';
-        const customCount = parseInt(document.getElementById('inchargeCustomCount')?.value || '15', 10);
+        const stageName = 'Stage 1: Calling & Verification';
+        const remarks = 'Allocated via Leads Incharge allocation portal';
 
         let leadKeys = [];
         if (targetMode === 'selected') {
             const checkedBoxes = Array.from(document.querySelectorAll('.lead-select-chk:checked'));
             if (checkedBoxes.length === 0) {
-                alert('Please select at least one lead from the table using the checkboxes.');
+                alert('Please select at least one lead from the table using checkboxes, or choose a bucket size (100, 300, 500, 1000).');
                 return;
             }
             leadKeys = checkedBoxes.map(chk => ({
@@ -2469,7 +2315,6 @@
                 empcode: empCode,
                 allot_mode: targetMode,
                 lead_keys: leadKeys,
-                allot_count: customCount,
                 stage_name: stageName,
                 stage_remark: remarks
             })
@@ -2483,19 +2328,7 @@
 
             if (data.success) {
                 showToast(`✓ ${data.message}`);
-                if (data.metrics) {
-                    const sAllot = document.getElementById('statAllottedCount');
-                    const sUnalloc = document.getElementById('statUnallocatedCount');
-                    const sTasks = document.getElementById('statTasksCount');
-                    if (sAllot) sAllot.textContent = data.metrics.total_allocated ?? sAllot.textContent;
-                    if (sUnalloc) sUnalloc.textContent = data.metrics.unallocated ?? sUnalloc.textContent;
-                    if (sTasks) sTasks.textContent = data.metrics.total_tasks ?? sTasks.textContent;
-                    const unallocOpt = document.querySelector('#inchargeTargetSelect option[value="unallocated"]');
-                    if (unallocOpt && data.metrics.unallocated !== undefined) {
-                        unallocOpt.textContent = `All Unallocated Leads (${data.metrics.unallocated})`;
-                    }
-                }
-                // Refresh table live from page 1 so allocated rows immediately clear from Leads Allocation
+                // Refresh table live from page 1 so allocated rows move down to last
                 fetchLeadsTable(1, true);
                 // Reset selected checkboxes count
                 const badge = document.getElementById('selectedCountBadge');

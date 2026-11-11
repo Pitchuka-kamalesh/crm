@@ -249,9 +249,9 @@
     <div class="sidebar-footer">
         <div class="theme-section-title">APPEARANCE &amp; THEME</div>
         <div class="theme-controls-capsule">
-            <!-- 4 Color Dots -->
+            <!-- 4 Color Dots (Dark Maroon replaced Red) -->
             <div class="theme-color-palette" role="radiogroup" aria-label="Color Palette">
-                <button type="button" class="theme-color-dot dot-red is-active" data-color="red" onclick="setAppThemeColor('red')" title="Red Theme" aria-label="Red Theme">
+                <button type="button" class="theme-color-dot dot-maroon is-active" data-color="maroon" onclick="setAppThemeColor('maroon')" title="Dark Maroon Theme" aria-label="Dark Maroon Theme">
                     <span class="theme-dot-check">✓</span>
                 </button>
                 <button type="button" class="theme-color-dot dot-blue" data-color="blue" onclick="setAppThemeColor('blue')" title="Blue Theme" aria-label="Blue Theme">
@@ -377,11 +377,15 @@
 
     // Appearance & Theme Management
     (function() {
-        const DEFAULT_COLOR = 'red';
+        const DEFAULT_COLOR = 'maroon';
         const DEFAULT_MODE = 'light';
 
         function applyThemePreferences() {
-            const color = localStorage.getItem('crm_theme_color') || DEFAULT_COLOR;
+            let color = localStorage.getItem('crm_theme_color') || DEFAULT_COLOR;
+            if (color === 'red') {
+                color = 'maroon';
+                localStorage.setItem('crm_theme_color', 'maroon');
+            }
             const mode = localStorage.getItem('crm_theme_mode') || DEFAULT_MODE;
             
             document.documentElement.setAttribute('data-theme-color', color);
@@ -389,7 +393,8 @@
 
             // Update color dots UI
             document.querySelectorAll('.theme-color-dot').forEach(dot => {
-                if (dot.getAttribute('data-color') === color) {
+                const dotColor = dot.getAttribute('data-color');
+                if (dotColor === color || (color === 'maroon' && dotColor === 'red')) {
                     dot.classList.add('is-active');
                 } else {
                     dot.classList.remove('is-active');

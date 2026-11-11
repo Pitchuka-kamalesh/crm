@@ -17,6 +17,8 @@ class Lead extends Model
         'phoneno',
         'phnostatus',
         'enquirydate',
+        'empcode',
+        'allocated_at',
         'log_userid',
         'log_ipaddress',
         'log_timestamp',
@@ -26,6 +28,7 @@ class Lead extends Model
     {
         return [
             'enquirydate' => 'date',
+            'allocated_at' => 'datetime',
             'log_timestamp' => 'datetime',
         ];
     }

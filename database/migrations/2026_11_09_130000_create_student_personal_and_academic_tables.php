@@ -10,14 +10,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("
+        DB::unprepared("
             ALTER TABLE crm.student_registration DROP CONSTRAINT IF EXISTS pk_student_registration CASCADE;
             ALTER TABLE crm.student_registration DROP CONSTRAINT IF EXISTS pk_student_registration_composite CASCADE;
             ALTER TABLE crm.student_registration ALTER COLUMN phoneno SET NOT NULL;
             ALTER TABLE crm.student_registration ADD CONSTRAINT pk_student_registration_composite PRIMARY KEY (applinano, phoneno);
         ");
 
-        DB::statement("
+        DB::unprepared("
             CREATE TABLE IF NOT EXISTS crm.student_personal_info (
                 crmid VARCHAR(50) PRIMARY KEY,
                 applino VARCHAR(20) NOT NULL,
@@ -45,7 +45,7 @@ return new class extends Migration
             );
         ");
 
-        DB::statement("
+        DB::unprepared("
             CREATE TABLE IF NOT EXISTS crm.student_academic_details (
                 crmid VARCHAR(50), 
                 applino VARCHAR(20) NOT NULL,
