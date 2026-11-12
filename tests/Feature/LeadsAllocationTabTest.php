@@ -770,8 +770,21 @@ class LeadsAllocationTabTest extends TestCase
         $tasks = TelecallerLeadTask::where('phoneno', $testPhone)->orderBy('leadtaskid')->get();
         $this->assertCount(2, $tasks);
         $this->assertEquals('0', $tasks[0]->crmid);
+        $this->assertEquals('4 mins', $tasks[0]->stage_call_duration);
+        $this->assertEquals('Parent asked to call tomorrow', $tasks[0]->stage_remark);
         $this->assertEquals('0', $tasks[1]->crmid);
         $this->assertEquals(1, TelecallerLead::where('phoneno', $testPhone)->count());
+
+        // Verify GET /leads/{appli}/history returns the previous tasks for this student
+        $historyResp = $this->actingAs($telecallerUser)->getJson("/leads/{$testAppli}/history?phone={$testPhone}");
+        $historyResp->assertStatus(200)
+            ->assertJson(['success' => true])
+            ->assertJsonCount(2, 'history')
+            ->assertJsonFragment([
+                'stage_name' => 'Register Form completed',
+                'stage_call_duration' => '4 mins',
+                'stage_remark' => 'Parent asked to call tomorrow',
+            ]);
 
         $studentFresh = \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->first();
         $this->assertEquals('not_paid', $studentFresh->stage1);

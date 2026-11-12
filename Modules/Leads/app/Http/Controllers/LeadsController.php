@@ -484,9 +484,6 @@ class LeadsController extends Controller
         $remarks = trim((string) $request->input('remarks', ''));
 
         $fullRemark = $remarks ?: ('Stage status updated to ' . $customStageName);
-        if ($callDuration !== '') {
-            $fullRemark = "[Duration: {$callDuration}] " . $fullRemark;
-        }
 
         $user = auth()->user();
         $roleId = $user ? $user->getActiveRoleId() : 4;
@@ -543,6 +540,7 @@ class LeadsController extends Controller
                 'empcode' => $tEmpcode,
                 'stage_name' => $customStageName,
                 'stage_calltime' => $callTime ?: now(),
+                'stage_call_duration' => $callDuration,
                 'stage_remark' => $fullRemark,
                 'stage_callperson' => $callPerson ?: ($student?->name ?: 'Student / Candidate'),
                 'log_userid' => auth()->user()?->usercode ?? '02598',
@@ -727,6 +725,93 @@ class LeadsController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id) {}
+
+    /**
+     * Fetch previous telecaller task history from crm.telecaller_leads_tasks for a lead.
+     */
+    public function taskHistory(Request $request, string $applinano): \Illuminate\Http\JsonResponse
+    {
+        $cleanAppli = trim(str_replace('APP', '', $applinano));
+        $phone = trim((string) $request->query('phone', ''));
+        $user = auth()->user();
+        $roleId = $user ? $user->getActiveRoleId() : 4;
+
+        if ($roleId === 4 && $user) {
+            $empCode = $user->usercode;
+            $isAllocated = TelecallerLead::where('empcode', $empCode)
+                ->where(function ($q) use ($cleanAppli, $phone) {
+                    if ($cleanAppli !== '' && $cleanAppli !== '0') {
+                        $q->where('applino', $cleanAppli)->orWhere('phoneno', $cleanAppli);
+                    }
+                    if ($phone !== '' && $phone !== '0') {
+                        $q->orWhere('phoneno', $phone);
+                    }
+                })
+                ->exists();
+
+            if (!$isAllocated) {
+                return response()->json([
+                    'success' => false,
+                    'history' => [],
+                    'message' => 'Unauthorized.',
+                ], 403);
+            }
+        }
+
+        $query = \App\Models\TelecallerLeadTask::query();
+        $hasFilter = false;
+        $query->where(function ($q) use ($cleanAppli, $phone, &$hasFilter) {
+            if ($phone !== '' && $phone !== '0') {
+                $q->orWhere('phoneno', $phone);
+                $hasFilter = true;
+            }
+            if ($cleanAppli !== '' && $cleanAppli !== '0') {
+                $q->orWhere('applino', $cleanAppli);
+                if (!$phone) {
+                    $q->orWhere('phoneno', $cleanAppli);
+                }
+                $hasFilter = true;
+            }
+        });
+
+        if (!$hasFilter) {
+            return response()->json(['success' => true, 'history' => []]);
+        }
+
+        $tasks = $query->orderBy('leadtaskid', 'desc')
+            ->limit(25)
+            ->get([
+                'leadtaskid',
+                'stage_name',
+                'stage_calltime',
+                'stage_call_duration',
+                'stage_callperson',
+                'stage_remark',
+                'empcode',
+                'log_timestamp',
+            ])
+            ->map(function ($t) {
+                $callTime = $t->stage_calltime
+                    ? $t->stage_calltime->format('d-m-Y h:i A')
+                    : ($t->log_timestamp ? $t->log_timestamp->format('d-m-Y h:i A') : '');
+
+                return [
+                    'id' => $t->leadtaskid,
+                    'stage_name' => $t->stage_name ?: 'Telecaller Stage',
+                    'stage_calltime' => $callTime,
+                    'stage_call_duration' => $t->stage_call_duration ?: '-',
+                    'stage_callperson' => $t->stage_callperson ?: '-',
+                    'stage_remark' => $t->stage_remark ?: '',
+                    'empcode' => $t->empcode ?: '',
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'history' => $tasks,
+        ]);
+    }
 
     /**
      * Remove the specified resource from storage.
