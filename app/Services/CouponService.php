@@ -23,9 +23,15 @@ class CouponService
     public static function getActiveDefaultCoupon(): ?CouponInfo
     {
         try {
-            $coupon = CouponInfo::where('coupontype', 'DEFAULT')
+            $coupon = CouponInfo::where(function ($q) {
+                    $q->where('coupontype', 'DEFAULT')
+                      ->orWhere('coupontype', 'BATCH');
+                })
                 ->where('coupstatus', 'ACTIVE')
-                ->whereColumn('coupcurrcount', '<', 'coupcount')
+                ->where(function ($q) {
+                    $q->whereNull('coupcount')
+                      ->orWhereColumn('coupcurrcount', '<', 'coupcount');
+                })
                 ->orderBy('id', 'asc')
                 ->first();
 
@@ -38,9 +44,8 @@ class CouponService
 
     /**
      * Format a personal coupon code derived from candidate application number:
-     * - Uses last 7 digits of the application number
-     * - Retains year prefix (e.g. 26 for 2026-27 batch)
-     * - Appends P1 suffix (e.g. 20261106333 -> 261106333P1)
+     * - Takes the 8 digits of the application number (e.g. 2027000005 -> 27000005 or 2027000001 -> 27000001)
+     * - Appends P1 suffix (e.g. 2027000005 -> 27000005P1)
      */
     public static function formatPersonalCouponCode(string $applino): string
     {
@@ -48,31 +53,36 @@ class CouponService
         $clean = preg_replace('/\D/', '', $applino);
 
         if (empty($clean)) {
-            return $applino ? strtoupper(trim($applino)) : '260000001P1';
+            return $applino ? strtoupper(trim($applino)) : '27000001P1';
         }
 
-        // If it already ends with P\d+ (e.g. 261106333P1), keep as-is
+        // If it already ends with P\d+ (e.g. 27000005P1 or 261106333P1), keep as-is
         if (preg_match('/P\d+$/i', $applino)) {
             return strtoupper($applino);
         }
 
-        // If application number starts with 20 and has 10+ digits (e.g. 20261106333)
-        // Dropping 20 yields 261106333 (batch 26 + last 7 digits 1106333)
-        if (str_starts_with($clean, '20') && strlen($clean) >= 10) {
+        // If application number has 10 digits starting with 20 (e.g. 2027000001 or 2027000005),
+        // take the eight digits (dropping '20') -> 27000001 or 27000005 -> 27000005P1
+        if (str_starts_with($clean, '20') && strlen($clean) === 10) {
             $core = substr($clean, 2);
+        } elseif (str_starts_with($clean, '20') && strlen($clean) > 10) {
+            // For longer legacy numbers, also strip leading 20
+            $core = substr($clean, 2);
+        } elseif (strlen($clean) >= 8) {
+            // Take the 8 digits
+            $core = substr($clean, -8);
         } elseif (strlen($clean) === 7) {
-            // Exactly 7 digits (e.g. 1106333) -> prepend current batch 26
             $core = '26' . $clean;
         } else {
             $core = $clean;
         }
 
-        return $core . 'P1';
+        return strtoupper($core . 'P1');
     }
 
     /**
      * Get personal coupon for a student based on application number via Eloquent.
-     * Looks up personal coupon by application number or formatted coupon code (e.g. 261106333P1).
+     * Looks up personal coupon by application number or formatted coupon code (e.g. 27000005P1).
      */
     public static function getPersonalCouponForStudent(string $applino): ?CouponInfo
     {
@@ -82,15 +92,21 @@ class CouponService
 
         $applino = trim($applino);
         $formattedCode = self::formatPersonalCouponCode($applino);
-        $last7 = strlen($applino) >= 7 ? substr($applino, -7) : $applino;
-        $last8 = strlen($applino) >= 8 ? substr($applino, -8) : $applino;
+        $clean = preg_replace('/\D/', '', $applino);
+        $last7 = strlen($clean) >= 7 ? substr($clean, -7) : $clean;
+        $last8 = strlen($clean) >= 8 ? substr($clean, -8) : $clean;
+        $eightDigits = (str_starts_with($clean, '20') && strlen($clean) === 10) ? substr($clean, 2) : $last8;
 
         try {
             return CouponInfo::where('coupontype', 'PERSONAL')
-                ->where(function ($q) use ($applino, $formattedCode, $last7, $last8) {
+                ->where(function ($q) use ($applino, $formattedCode, $clean, $last7, $last8, $eightDigits) {
                     $q->where('applino', $applino)
+                      ->orWhere('applino', $clean)
                       ->orWhere('couponsno', $formattedCode)
+                      ->orWhere('couponsno', $eightDigits . 'P1')
+                      ->orWhere('couponsno', $eightDigits)
                       ->orWhere('couponsno', $last8)
+                      ->orWhere('couponsno', 'LIKE', '%' . $last8 . '%')
                       ->orWhere('couponsno', 'LIKE', '%' . $last7 . '%')
                       ->orWhere('couponsno', $applino);
                 })
@@ -107,7 +123,7 @@ class CouponService
      * Generate a personal coupon for an applicant by the CRM Incharge via Eloquent.
      * Enforces that the personal discount cross-checks the student's remaining amount
      * after applying the default early-bird coupon on the ₹1,200 admission fee.
-     * Application number: e.g. 20261106333 -> formatted coupon: 261106333P1.
+     * Application number: e.g. 2027000005 -> formatted coupon: 27000005P1.
      */
     public static function generatePersonalCoupon(string $applino, float $discountAmount, string $userId = '03141', string $ip = '127.0.0.1'): array
     {
@@ -121,8 +137,10 @@ class CouponService
         }
 
         $couponCode = self::formatPersonalCouponCode($applino);
-        $last7 = strlen($applino) >= 7 ? substr($applino, -7) : $applino;
-        $last8 = strlen($applino) >= 8 ? substr($applino, -8) : $applino;
+        $clean = preg_replace('/\D/', '', $applino);
+        $last7 = strlen($clean) >= 7 ? substr($clean, -7) : $clean;
+        $last8 = strlen($clean) >= 8 ? substr($clean, -8) : $clean;
+        $eightDigits = (str_starts_with($clean, '20') && strlen($clean) === 10) ? substr($clean, 2) : $last8;
 
         // Cross-check student remaining amount after active default coupon
         $baseFee = self::DEFAULT_ADMISSION_FEE;
@@ -137,10 +155,14 @@ class CouponService
 
         // Check if personal coupon already exists for this candidate via Eloquent
         $existing = CouponInfo::where('coupontype', 'PERSONAL')
-            ->where(function ($q) use ($applino, $couponCode, $last7, $last8) {
+            ->where(function ($q) use ($applino, $couponCode, $clean, $last7, $last8, $eightDigits) {
                 $q->where('applino', $applino)
+                  ->orWhere('applino', $clean)
                   ->orWhere('couponsno', $couponCode)
+                  ->orWhere('couponsno', $eightDigits . 'P1')
+                  ->orWhere('couponsno', $eightDigits)
                   ->orWhere('couponsno', $last8)
+                  ->orWhere('couponsno', 'LIKE', '%' . $last8 . '%')
                   ->orWhere('couponsno', 'LIKE', '%' . $last7 . '%');
             })
             ->first();
@@ -155,6 +177,7 @@ class CouponService
                 'currentcouponcode' => $couponCode,
                 'discountamount' => $discountAmount,
                 'coupstatus' => 'ACTIVE',
+                'applino' => $applino,
                 'log_userid' => $userId,
                 'log_ipaddress' => $ip,
                 'log_timestamp' => now(),
@@ -197,18 +220,30 @@ class CouponService
             'code' => $couponCode,
             'discount' => $discountAmount,
             'crmid' => $crmId,
-            'message' => "Personal coupon [{$couponCode}] generated successfully for {$crmId} (App #{$applino}) with ₹" . number_format($discountAmount) . " concession (Remaining after ₹" . number_format($defAmount) . " default tier)! ",
+            'message' => "Personal coupon [{$couponCode}] generated successfully for {$crmId} (App #{$applino}) with ₹" . number_format($discountAmount) . " concession (Remaining after ₹" . number_format($defAmount) . " default tier)!",
         ];
+    }
+
+    /**
+     * Primary entrypoint: Apply a personal coupon code for a candidate.
+     */
+    public static function applyPersonalCoupon(string $code, ?string $applino = null): array
+    {
+        return self::validateAndApplyPersonalCoupon($code, (string) ($applino ?? ''));
     }
 
     /**
      * Validate and apply a personal coupon entered by the candidate on Stage 1 via Eloquent.
      * Enforces all checks: existence, status, application number match, and remaining balance cap.
      */
-    public static function validateAndApplyPersonalCoupon(string $code, string $applino): array
+    public static function validateAndApplyPersonalCoupon(string $code, string $applino = ''): array
     {
         $code = strtoupper(trim($code));
         $applino = trim($applino);
+
+        if (empty($applino) && auth()->check()) {
+            $applino = auth()->user()->usercode ?? '';
+        }
 
         if (empty($code)) {
             return [
@@ -252,7 +287,11 @@ class CouponService
         if (!empty($coupon->applino) && !empty($applino)) {
             $cleanApp = preg_replace('/\D/', '', $applino);
             $couponApp = preg_replace('/\D/', '', (string)$coupon->applino);
-            if ($cleanApp !== $couponApp && substr($cleanApp, -7) !== substr($couponApp, -7)) {
+            $matches = ($cleanApp === $couponApp)
+                || (strlen($cleanApp) >= 8 && strlen($couponApp) >= 8 && substr($cleanApp, -8) === substr($couponApp, -8))
+                || (strlen($cleanApp) >= 7 && strlen($couponApp) >= 7 && substr($cleanApp, -7) === substr($couponApp, -7));
+
+            if (!$matches) {
                 return [
                     'success' => false,
                     'message' => "Personal coupon [{$coupon->couponsno}] is allocated to Application #{$coupon->applino}.",
@@ -284,6 +323,9 @@ class CouponService
             'discount' => $personalDiscount,
             'def_discount' => $defAmount,
             'def_coupon' => $defCoupon?->couponsno ?? '27EARLYB100',
+            'def_coupon_code' => $defCoupon?->couponsno ?? '27EARLYB100',
+            'per_coupon_code' => $coupon->couponsno,
+            'per_discount' => $personalDiscount,
             'total_discount' => $totalDiscount,
             'net_payable' => $netPayable,
             'message' => "Personal coupon [{$coupon->couponsno}] applied successfully! -₹" . number_format($personalDiscount) . " concession granted.",
@@ -324,11 +366,14 @@ class CouponService
         $perCode = '';
         $perAmount = 0.00;
 
-        $candidatePer = self::getPersonalCouponForStudent($applino);
-        if ($candidatePer && $candidatePer->coupstatus === 'ACTIVE') {
-            $perCoupon = $candidatePer;
-            $perCode = $perCoupon->couponsno ?? '';
-            $perAmount = (float) ($perCoupon->discountamount ?? 0.00);
+        // Check if candidate already has an allocated personal coupon
+        if (!empty($applino)) {
+            $candidatePer = self::getPersonalCouponForStudent($applino);
+            if ($candidatePer && $candidatePer->coupstatus === 'ACTIVE') {
+                $perCoupon = $candidatePer;
+                $perCode = $perCoupon->couponsno ?? '';
+                $perAmount = (float) ($perCoupon->discountamount ?? 0.00);
+            }
         }
 
         // Cap personal discount to remaining balance after default coupon
@@ -343,8 +388,10 @@ class CouponService
         return [
             'base_fee' => $baseFee,
             'def_coupon' => $defCode,
+            'def_coupon_code' => $defCode,
             'def_discount' => $defAmount,
             'per_coupon' => $perCode,
+            'per_coupon_code' => $perCode,
             'per_discount' => $perAmount,
             'total_discount' => $totalDiscount,
             'net_payable' => $netPayable,
@@ -354,18 +401,54 @@ class CouponService
     }
 
     /**
+     * Calculate admission fee breakdown with session coupon support.
+     */
+    public static function calculateAdmissionFee(?string $applino = null): array
+    {
+        if (empty($applino) && auth()->check()) {
+            $applino = auth()->user()->usercode ?? '';
+        }
+
+        $breakdown = self::calculateFeeBreakdown((string)($applino ?? ''), self::DEFAULT_ADMISSION_FEE);
+
+        // Check if an applied coupon exists in session and not explicitly removed
+        if (session()->has('applied_coupon_code') && !session('applied_coupon_removed')) {
+            $sessionCode = (string) session('applied_coupon_code');
+            $sessionDiscount = (float) session('applied_coupon_discount', 0.0);
+            $breakdown['per_coupon'] = $sessionCode;
+            $breakdown['per_coupon_code'] = $sessionCode;
+            $breakdown['per_discount'] = $sessionDiscount;
+            $breakdown['total_discount'] = min($breakdown['base_fee'], $breakdown['def_discount'] + $sessionDiscount);
+            $breakdown['net_payable'] = max(0, $breakdown['base_fee'] - $breakdown['total_discount']);
+        }
+
+        return $breakdown;
+    }
+
+    /**
+     * Record coupon redemption upon successful payment.
+     */
+    public static function recordCouponRedemption(string $applino, ?string $perCode = null, ?string $defCode = null): void
+    {
+        self::recordCouponUsage($defCode, $perCode);
+    }
+
+    /**
      * Record coupon usage upon successful fee payment via Eloquent.
      */
     public static function recordCouponUsage(?string $defCode, ?string $perCode): void
     {
         if ($defCode) {
             $def = CouponInfo::where('couponsno', $defCode)
-                ->where('coupontype', 'DEFAULT')
+                ->where(function ($q) {
+                    $q->where('coupontype', 'DEFAULT')
+                      ->orWhere('coupontype', 'BATCH');
+                })
                 ->first();
 
             if ($def) {
                 $newCount = $def->coupcurrcount + 1;
-                $newStatus = ($newCount >= $def->coupcount) ? 'COMPLETED' : 'ACTIVE';
+                $newStatus = ($def->coupcount && $newCount >= $def->coupcount) ? 'COMPLETED' : 'ACTIVE';
 
                 $def->update([
                     'coupcurrcount' => $newCount,

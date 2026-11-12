@@ -85,5 +85,23 @@ class CrmStudentRegistration extends Model
     {
         return $this->hasMany(TelecallerLeadTask::class, 'applino', 'applinano');
     }
+
+    /**
+     * Generate the next 10-digit application number starting from 2027000001.
+     */
+    public static function generateNextApplicationNumber(): string
+    {
+        try {
+            $maxApp = self::where('applinano', 'like', '2027%')
+                ->whereRaw('length(applinano) = 10')
+                ->max('applinano');
+
+            if ($maxApp && is_numeric($maxApp)) {
+                return (string) ((int) $maxApp + 1);
+            }
+        } catch (\Throwable $e) {}
+
+        return '2027000001';
+    }
 }
 

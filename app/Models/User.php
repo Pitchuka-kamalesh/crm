@@ -128,6 +128,16 @@ class User extends Authenticatable
         return $this->phnno ?: 'Applicant';
     }
 
+    public function roleAssigned(): HasOne
+    {
+        return $this->hasOne(RoleAssigned::class, 'emp_id', 'usercode');
+    }
+
+    public function assignedRoles()
+    {
+        return $this->hasMany(RoleAssigned::class, 'emp_id', 'usercode');
+    }
+
     public function getActiveRoleId(): int
     {
         $sessionRole = session('user.role_id');
@@ -135,25 +145,34 @@ class User extends Authenticatable
             return (int) $sessionRole;
         }
 
+        // 1. Direct role_id on login
         if (!empty($this->role_id)) {
             return (int) $this->role_id;
         }
 
+        // 2. Look up master.roles_assigned in DB
+        try {
+            $assigned = RoleAssigned::where('emp_id', $this->usercode)
+                ->where(function ($q) {
+                    $q->whereNull('end_date')
+                        ->orWhere('end_date', '>=', now()->toDateString());
+                })
+                ->orderBy('roles_role_id')
+                ->first();
+
+            if ($assigned && !empty($assigned->roles_role_id)) {
+                return (int) $assigned->roles_role_id;
+            }
+        } catch (\Throwable $e) {}
+
+        // 3. Look up master.employees role_id in DB
         try {
             if ($this->employee && !empty($this->employee->role_id)) {
                 return (int) $this->employee->role_id;
             }
         } catch (\Throwable $e) {}
 
-        // Predefined staff role mapping without touching database tables
-        if ($this->usercode === '03141' || str_contains($this->officialmail ?? '', 'dean')) {
-            return 3; // CRM DEAN
-        }
-
-        if ($this->usercode === '03434' || str_contains($this->officialmail ?? '', 'mgt')) {
-            return 2; // CRM Incharge
-        }
-
+        // 4. Default by user type (strictly database-driven, no hardcoded user codes)
         return $this->user_type === 2 ? 1 : 5;
     }
 

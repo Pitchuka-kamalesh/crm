@@ -28,4 +28,5 @@ Thumbs.db
 /.playwright-mcp/
 /scratch/
 *.sql
+*.backup
 

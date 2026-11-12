@@ -18,17 +18,23 @@ class CouponInfo extends Model
         'campuscode',
         'coupontype',
         'couponname',
+        'applino',
+        'crmid',
         'coupcount',
         'coucharcount',
-        'coupcurrcount',
-        'discountamount',
         'couponcodestart',
         'currentcouponcode',
+        'discountamount',
+        'discount',
+        'coupcurrcount',
         'coupstatus',
-        'applino',
+        'usercode',
+        'user_ip',
         'log_userid',
         'log_ipaddress',
         'log_timestamp',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
@@ -36,7 +42,8 @@ class CouponInfo extends Model
         'coupcount' => 'integer',
         'coucharcount' => 'integer',
         'coupcurrcount' => 'integer',
-        'discountamount' => 'decimal:2',
+        'discountamount' => 'float',
+        'discount' => 'float',
         'log_timestamp' => 'datetime',
     ];
 
@@ -45,4 +52,3 @@ class CouponInfo extends Model
         return $this->belongsTo(CrmStudentRegistration::class, 'applino', 'applinano');
     }
 }
-

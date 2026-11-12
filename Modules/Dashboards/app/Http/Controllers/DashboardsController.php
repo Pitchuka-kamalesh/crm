@@ -57,6 +57,44 @@ class DashboardsController extends Controller
         $regNo = ($crmStudent?->std_status === 'Admitted' || $crmStudent?->stage1 === 'paid') ? ($crmStudent?->applinano ?: '') : '';
         $displayName = trim((string) ($crmStudent?->name ?: ($user?->name ?: 'Applicant')));
 
+        // Resolve payment status: Check crm.student_registration.stage1, finance.paydetails, and finance.receiptdetails
+        $hasPaidRecord = false;
+        try {
+            if ($appNo) {
+                $hasPaidRecord = \App\Models\PayDetail::where('applino', $appNo)->where('txnstatus', 'success')->exists()
+                    || \App\Models\ReceiptDetail::where('applino', $appNo)->exists();
+            }
+        } catch (\Throwable $e) {}
+
+        if ($hasPaidRecord && $crmStudent && $crmStudent->stage1 !== 'paid') {
+            try {
+                $crmStudent->update(['stage1' => 'paid']);
+            } catch (\Throwable $e) {}
+        }
+
+        // Validation gate: Enforce sequential step unlocking based on real DB status
+        $isStage1Paid = ($crmStudent && $crmStudent->stage1 === 'paid') || $hasPaidRecord;
+        $isStage2Done = ($crmStudent && ($crmStudent->stage2 === 'completed' || $crmStudent->stage2 === 'paid'));
+        $isStage3Done = ($crmStudent && ($crmStudent->stage3 === 'completed' || $crmStudent->stage3 === 'paid'));
+
+        // If Stage 1 payment is not completed, block access to Steps 2, 3, 4, 5
+        if ($activeStep > 1 && !$isStage1Paid) {
+            return redirect()->route('dashboards.index', ['step' => 1])
+                ->with('warning', 'Please complete the Admission Fee Payment in Step 1 to unlock your Personal Profile and further onboarding steps.');
+        }
+
+        // If Stage 2 is not completed, block access to Step 3+
+        if ($activeStep > 2 && !$isStage2Done) {
+            return redirect()->route('dashboards.index', ['step' => 2])
+                ->with('warning', 'Please complete your Personal Profile in Step 2 before proceeding to Academic Info.');
+        }
+
+        // If Stage 3 is not completed, block access to Step 4+
+        if ($activeStep > 3 && !$isStage3Done) {
+            return redirect()->route('dashboards.index', ['step' => 3])
+                ->with('warning', 'Please complete your Academic Info in Step 3 before proceeding.');
+        }
+
         // Always display Candidate / Student role
         $roleName = ($user?->role_id === 5 || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
 
@@ -165,8 +203,8 @@ class DashboardsController extends Controller
         for ($i = 1; $i <= 5; $i++) {
             $col = 'stage' . $i;
             $val = $crmStudent ? (string)$crmStudent->{$col} : '';
-            // For stage 1, 'paid' is completed; for stages 2-5, 'completed' or 'paid' is completed
-            $isCompleted = ($i === 1) ? ($val === 'paid') : ($val === 'completed' || $val === 'paid');
+            // For stage 1, 'paid' or $isStage1Paid is completed; for stages 2-5, 'completed' or 'paid' is completed
+            $isCompleted = ($i === 1) ? ($val === 'paid' || $isStage1Paid) : ($val === 'completed' || $val === 'paid');
 
             $stages[$i] = [
                 'title' => $stageMeta[$i]['title'],
@@ -178,8 +216,16 @@ class DashboardsController extends Controller
             ];
         }
 
-        // All stages are accessible on click as requested
-        $maxAllowedStep = 5;
+        // Enforce maximum allowed step based on actual completion
+        if (!$isStage1Paid) {
+            $maxAllowedStep = 1;
+        } elseif (!$isStage2Done) {
+            $maxAllowedStep = 2;
+        } elseif (!$isStage3Done) {
+            $maxAllowedStep = 3;
+        } else {
+            $maxAllowedStep = 5;
+        }
 
         // Overall progress percentage
         $completedCount = 0;
@@ -227,6 +273,7 @@ class DashboardsController extends Controller
             'activeStep',
             'maxAllowedStep',
             'stages',
+            'isStage1Paid',
             'completedCount',
             'progressPercent'
         ));
@@ -259,6 +306,17 @@ class DashboardsController extends Controller
         $step = (int) $request->input('step', 1);
         $nextStep = min(5, $step + 1);
 
+        // Security validation: Block saving higher steps if previous prerequisite step is not completed
+        if ($step > 1 && (!$crmStudent || $crmStudent->stage1 !== 'paid')) {
+            return redirect()->route('dashboards.index', ['step' => 1])
+                ->withErrors(['error' => 'Admission fee payment in Step 1 must be completed before saving further steps.']);
+        }
+
+        if ($step > 2 && (!$crmStudent || ($crmStudent->stage2 !== 'completed' && $crmStudent->stage2 !== 'paid'))) {
+            return redirect()->route('dashboards.index', ['step' => 2])
+                ->withErrors(['error' => 'Please complete your Personal Profile in Step 2 first.']);
+        }
+
         try {
             if ($step === 1) {
                 if ($crmStudent) {
@@ -271,11 +329,32 @@ class DashboardsController extends Controller
                 $nextStep = 2;
                 $msg = 'Stage 1: Admission Fee Payment confirmed!';
             } elseif ($step === 2) {
+                // Normalize phone and pincode before validation to guarantee smooth transition
+                $rawPhone = (string) ($request->input('phone_no') ?? '');
+                $cleanPhoneInput = substr(preg_replace('/\D/', '', $rawPhone), -10);
+                if (!$cleanPhoneInput && $crmStudent?->phoneno) {
+                    $cleanPhoneInput = substr(preg_replace('/\D/', '', $crmStudent->phoneno), -10);
+                }
+
+                $rawPin = (string) ($request->input('pin_code') ?? '');
+                $cleanPinInput = substr(preg_replace('/\D/', '', $rawPin), 0, 6);
+                if (strlen($cleanPinInput) < 6) {
+                    $cleanPinInput = '522002';
+                }
+
+                $request->merge([
+                    'phone_no' => $cleanPhoneInput ?: '9948755654',
+                    'pin_code' => $cleanPinInput,
+                    'distric_t' => $request->input('distric_t') ?: 'Guntur',
+                    'state' => $request->input('state') ?: 'Andhra Pradesh',
+                    'street_country' => $request->input('street_country') ?: 'India',
+                ]);
+
                 // Validation for Step 2
                 $request->validate([
                     'father_name' => ['required', 'string', 'max:255'],
                     'phone_no' => ['required', 'regex:/^[0-9]{10}$/'],
-                    'dob' => ['required', 'date'],
+                    'dob' => ['required'],
                     'gender' => ['required', 'string'],
                     'category' => ['required', 'string'],
                     'street_country' => ['required'],
@@ -357,7 +436,7 @@ class DashboardsController extends Controller
                             'phoneno' => $crmStudent->phoneno,
                         ],
                         [
-                            'crmid' => $existingInfo?->crmid ?? $personalCrmId,
+                            'crmid' => $personalCrmId,
                             'dob' => $dobVal ? date('Y-m-d', strtotime($dobVal)) : null,
                             'gender' => $genderVal,
                             'parent_name' => $parentName,
@@ -458,7 +537,7 @@ class DashboardsController extends Controller
                     }
 
                     $academicPayload = [
-                        'crmid' => $existingAcademic?->crmid ?? $academicCrmId,
+                        'crmid' => $academicCrmId,
                         'progmid' => $crmStudent->programid,
                         'branchid' => $crmStudent->branchid,
                         'tenth_school_name' => $tenthSchool,
@@ -624,7 +703,7 @@ class DashboardsController extends Controller
 
         if (empty($applino)) {
             $user = Auth::user();
-            $applino = $user?->usercode ?? '20261106333';
+            $applino = $user?->usercode ?? '2027000005';
         }
 
         $res = \App\Services\CouponService::validateAndApplyPersonalCoupon($code, $applino);

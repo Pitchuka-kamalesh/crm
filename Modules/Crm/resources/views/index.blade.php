@@ -538,10 +538,10 @@
                     <div class="card-header-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div>
                             <div class="card-title">🎟️ Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</div>
-                            <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Personal Coupons (Last 7 Digits + 26 Prefix &amp; P1 Suffix, e.g. 261106333P1)</div>
+                            <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Personal Coupons (Derived from 8 Digits of Application No + P1 Suffix, e.g. 27000005P1)</div>
                         </div>
                         <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; cursor: pointer;">
-                            + 🎟️ Generate Personal Coupon (e.g. 261106333P1)
+                            + 🎟️ Generate Personal Coupon (e.g. 27000005P1)
                         </button>
                     </div>
                     <!-- Search Toolbar with Live Search -->
@@ -586,7 +586,8 @@
                                         $candidateName = $std->student_name ?? $std->name ?? 'Candidate';
                                         $phone = $std->mobile ?? $std->phoneno ?? '';
                                         $email = $std->personal_email ?? $std->emailid ?? ($phone ? $phone . '@student.vignan.ac.in' : 'student@vignan.ac.in');
-                                        $programName = $std->program?->program_short_name ?? $std->program?->program_name ?? 'B.Tech';
+                                        $programName = $std->program?->program_short_name ?? $std->program?->program_name ?? $std->programlevel ?? $std->branch?->branch_short_name ?? 'B.Tech';
+                                        $stdCrmId = $std->crmid ?: \App\Services\CrmIdService::getOrGenerateByAppli($appliNo);
                                         $regulation = $std->regulation ?? 'R25';
                                         $timestamp = $std->log_timestamp;
                                         $dateTimeFormatted = $timestamp ? \Carbon\Carbon::parse($timestamp)->format('d M Y, h:i A') : now()->format('d M Y, h:i A');
@@ -615,6 +616,7 @@
 
                                         $paymentPayload = [
                                             'appli_no' => $appliNo,
+                                            'crm_id' => $stdCrmId,
                                             'student_name' => $candidateName,
                                             'phone' => $phone ?: '7780579012',
                                             'email' => $email,
@@ -639,7 +641,7 @@
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                                 <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
-                                                <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;" title="Branch CRM ID">{{ $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($appliNo) }}</span>
+                                                <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;" title="Branch CRM ID">{{ $stdCrmId }}</span>
                                             </div>
                                             <div style="font-size: 0.74rem; color: #64748b; font-weight: 500; margin-top: 2px;">{{ $candidateName }} • {{ $programName }}</div>
                                             <div style="font-size: 0.70rem; color: #94a3b8;">Code: <code>{{ $expectedPersonalCode }}</code></div>
@@ -681,8 +683,10 @@
                                             <div style="display: flex; gap: 6px; justify-content: center;">
                                                 <button type="button" 
                                                         class="btn-action-sm btn-verify" 
-                                                        onclick='openPaymentWizard(@json($paymentPayload))' 
-                                                        title="View Payment Breakdown &amp; Receipt Wizard">
+                                                        onclick="openPaymentWizard(this)" 
+                                                        data-payload="{{ base64_encode(json_encode($paymentPayload)) }}"
+                                                        title="View Official Payment Receipt"
+                                                        style="height: 32px; padding: 0 12px; font-size: 0.82rem; font-weight: 700; background: #1e40af; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);">
                                                     <span>💳</span> Receipt
                                                 </button>
                                                 @if(!$personalCoupon)
@@ -730,7 +734,7 @@
                                            id="modalAppliNo" 
                                            name="applino" 
                                            class="form-input" 
-                                           placeholder="e.g. 20261106333 or V-SAT-0001" 
+                                           placeholder="e.g. 2027000005 or V-SAT-0002" 
                                            oninput="updateModalCouponCode(this.value)"
                                            required 
                                            style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">
@@ -740,10 +744,10 @@
                                 <div style="margin-bottom: 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code:</span>
-                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: V-SAT-0001</span>
+                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: V-SAT-0002</span>
                                     </div>
                                     <div id="modalCouponPreview" style="font-size: 1.18rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
-                                        261106333P1
+                                        27000005P1
                                     </div>
                                     <div style="font-size: 0.70rem; color: #60a5fa; margin-top: 2px;">
                                         Generated dynamically with branch-wise CRM ID (B.Tech &rarr; V-SAT, M.Tech &rarr; MTECH, PhD &rarr; PHD).
@@ -795,7 +799,7 @@
                                 $cId = $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($aNo);
                                 $pCode = \App\Services\CouponService::formatPersonalCouponCode($aNo);
                                 $cName = addslashes($std->name ?? $std->student_name ?? '');
-                                $pName = addslashes($std->program?->program_short_name ?? $std->programlevel ?? 'B.Tech');
+                                $pName = addslashes($std->program?->program_short_name ?? $std->program?->program_name ?? $std->programlevel ?? $std->branch?->branch_short_name ?? 'B.Tech');
                             @endphp
                             '{{ $aNo }}': { applino: '{{ $aNo }}', crmid: '{{ $cId }}', name: '{{ $cName }}', prog: '{{ $pName }}', code: '{{ $pCode }}' },
                             '{{ $cId }}': { applino: '{{ $aNo }}', crmid: '{{ $cId }}', name: '{{ $cName }}', prog: '{{ $pName }}', code: '{{ $pCode }}' },
@@ -810,8 +814,12 @@
                         }
                         let clean = val.replace(/\D/g, '');
                         let core = clean;
-                        if (clean.startsWith('20') && clean.length >= 9) {
+                        if (clean.startsWith('20') && clean.length === 10) {
+                            core = clean.substring(2); // exactly 8 digits: e.g. 27000005
+                        } else if (clean.startsWith('20') && clean.length > 10) {
                             core = clean.substring(2);
+                        } else if (clean.length >= 8) {
+                            core = clean.slice(-8);
                         } else if (clean.length === 7) {
                             core = '26' + clean;
                         }
@@ -824,7 +832,7 @@
                         modal.style.display = 'flex';
                         const input = document.getElementById('modalAppliNo');
                         if (input) {
-                            input.value = appliNo || '20261106333';
+                            input.value = appliNo || '2027000005';
                             updateModalCouponCode(input.value);
                         }
                     }
@@ -855,6 +863,96 @@
                             if (candBadge) candBadge.style.display = 'none';
                         }
                     }
+
+                    @if(request()->is('*percoupongen*') || request()->has('generate') || request()->has('openModal'))
+                    document.addEventListener('DOMContentLoaded', function() {
+                        openPersonalCouponModal('{{ request('applino', '') }}');
+                    });
+                    @endif
+
+                    window.openPaymentWizard = function (source) {
+                        let data = null;
+                        try {
+                            if (source && source.dataset && source.dataset.payload) {
+                                data = JSON.parse(atob(source.dataset.payload));
+                            } else if (typeof source === 'string') {
+                                try {
+                                    data = JSON.parse(source);
+                                } catch (e) {
+                                    const btn = document.querySelector(`button[data-payload*="${source}"]`);
+                                    if (btn && btn.dataset && btn.dataset.payload) {
+                                        data = JSON.parse(atob(btn.dataset.payload));
+                                    }
+                                }
+                            } else if (typeof source === 'object') {
+                                data = source;
+                            }
+                        } catch (err) {
+                            console.error('Error reading receipt payload:', err);
+                        }
+
+                        if (!data) {
+                            console.warn('Receipt data could not be parsed.');
+                            return;
+                        }
+
+                        const modal = document.getElementById('paymentWizardBackdrop');
+                        if (!modal) {
+                            console.error('#paymentWizardBackdrop element not found in DOM.');
+                            return;
+                        }
+
+                        const setTxt = (id, val) => {
+                            const el = document.getElementById(id);
+                            if (el) el.textContent = val || '';
+                        };
+
+                        setTxt('wizReceiptNo', data.receipt_no || 'REC-2026-00101');
+                        setTxt('wizTxnId', data.transaction_id || 'TXN-VU-83A912F0');
+                        setTxt('wizDateTime', data.payment_date || '');
+                        setTxt('wizStudentName', data.student_name || 'Candidate');
+                        setTxt('wizAppliNo', data.appli_no || '');
+                        setTxt('wizCrmId', data.crm_id || 'V-SAT-0001');
+                        setTxt('wizPhone', data.phone ? ('+91 ' + data.phone) : '+91 7780579012');
+                        setTxt('wizEmail', data.email || 'student@vignan.ac.in');
+                        setTxt('wizProgram', data.program || 'B.Tech');
+                        setTxt('wizRegulation', 'Academic Batch 2026-2027');
+                        setTxt('wizBaseFee', data.base_fee || '1,200.00');
+                        setTxt('wizDefaultCoupon', data.default_coupon || '27EARLYB100');
+                        setTxt('wizDefaultDiscount', data.default_discount || '500.00');
+                        setTxt('wizPersonalCoupon', (data.personal_coupon && data.personal_coupon !== 'None Assigned') ? data.personal_coupon : 'None Assigned');
+                        setTxt('wizPersonalDiscount', data.personal_discount || '0.00');
+                        setTxt('wizTotalDiscount', data.total_discount || '500.00');
+                        setTxt('wizPaidAmount', data.paid_amount || '700.00');
+                        setTxt('wizPaymentMode', data.payment_mode || 'PayU Online Gateway');
+                        setTxt('wizBankRef', data.bank_ref || 'PAY_OK_99418294');
+
+                        const statusEl = document.getElementById('wizStatus');
+                        if (statusEl) {
+                            const isPaid = (data.status && data.status.toUpperCase().includes('PAID'));
+                            statusEl.textContent = isPaid ? '✓ PAID / VERIFIED' : 'PENDING';
+                            statusEl.className = isPaid ? 'badge-status badge-paid' : 'badge-status';
+                            statusEl.style.background = isPaid ? '#ecfdf5' : '#fef3c7';
+                            statusEl.style.color = isPaid ? '#047857' : '#d97706';
+                            statusEl.style.border = isPaid ? '1px solid #a7f3d0' : '1px solid #fde68a';
+                        }
+
+                        modal.style.display = 'flex';
+                    };
+
+                    window.closePaymentWizard = function (event) {
+                        const modal = document.getElementById('paymentWizardBackdrop');
+                        if (event && event.target && event.target !== modal && !event.target.classList.contains('btn-modal-close') && !event.target.closest('.btn-wizard-close')) {
+                            return;
+                        }
+                        if (modal) {
+                            modal.style.display = 'none';
+                        }
+                    };
+
+                    window.printPaymentWizard = function () {
+                        window.print();
+                    };
                 </script>
 
             @elseif(($activeTab ?? '') === 'employeelist')
@@ -1329,25 +1427,20 @@
 <!-- ==========================================================================
      PAYMENT & COUPON RECEIPT WIZARD MODAL (Opens when clicking Action in Coupon Info)
      ========================================================================== -->
-<div id="paymentWizardBackdrop" class="modal-backdrop-custom" style="display: none;" onclick="closePaymentWizard(event)">
-    <div class="payment-wizard-card" onclick="event.stopPropagation()">
+<div id="paymentWizardBackdrop" class="modal-backdrop-custom" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 1.5rem; box-sizing: border-box;" onclick="closePaymentWizard(event)">
+    <div class="payment-wizard-card" onclick="event.stopPropagation()" style="width: 95%; max-width: 820px; max-height: 92vh; background: #ffffff; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; overflow: hidden;">
         <!-- Wizard Header -->
-        <div class="wizard-card-header">
-            <div class="wizard-header-brand">
-                <div class="wizard-brand-emblem">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        <circle cx="12" cy="11" r="3"/>
-                        <line x1="12" y1="8" x2="12" y2="14"/>
-                        <line x1="9" y1="11" x2="15" y2="11"/>
-                    </svg>
+        <div class="wizard-card-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 1.15rem 1.75rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="wizard-header-brand" style="display: flex; align-items: center; gap: 14px;">
+                <div style="background: #ffffff; border-radius: 8px; padding: 4px 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                    <img src="/images/vignan-logo.png" alt="Vignan's University" style="height: 36px; object-fit: contain;">
                 </div>
                 <div>
-                    <div class="wizard-uni-name">VIGNAN'S FOUNDATION FOR SCIENCE, TECHNOLOGY &amp; RESEARCH</div>
-                    <h3 class="wizard-title">Admission Fee Payment &amp; Coupon Receipt Wizard</h3>
+                    <div class="wizard-uni-name" style="color: #94a3b8; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">VIGNAN'S FOUNDATION FOR SCIENCE, TECHNOLOGY &amp; RESEARCH</div>
+                    <h3 class="wizard-title" style="color: #ffffff; font-size: 1.15rem; font-weight: 800; margin: 0; letter-spacing: -0.01em;">Admission Fee Payment &amp; Concession Receipt</h3>
                 </div>
             </div>
-            <button type="button" class="btn-modal-close no-print" onclick="closePaymentWizard()" title="Close dialog">&times;</button>
+            <button type="button" class="btn-modal-close no-print" onclick="closePaymentWizard()" title="Close dialog" style="color: #cbd5e1; font-size: 1.7rem; background: transparent; border: none; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
         <!-- Wizard Stepper Indicator -->
@@ -1374,7 +1467,31 @@
         </div>
 
         <!-- Wizard Body Content -->
-        <div class="wizard-card-body" id="printablePaymentArea">
+        <div class="wizard-card-body" id="printablePaymentArea" style="overflow-y: auto; padding: 1.5rem 1.75rem; background: #ffffff;">
+            <!-- Official University Letterhead Banner -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; border-bottom: 2px solid #1e3a8a; margin-bottom: 1.25rem; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 55px; max-width: 170px; object-fit: contain;">
+                    <div style="border-left: 2px solid #e2e8f0; padding-left: 14px;">
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25;">
+                            Vignan's Foundation for Science, Technology &amp; Research
+                        </div>
+                        <div style="font-size: 0.76rem; color: #475569; font-weight: 600; margin-top: 2px;">
+                            (Deemed to be University estd. u/s 3 of UGC Act 1956) • NAAC 'A+' Accredited
+                        </div>
+                        <div style="font-size: 0.72rem; color: #64748b; font-weight: 500;">
+                            Vadlamudi, Guntur - 522 213, Andhra Pradesh, India
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                    <img src="/images/vignan-shield-logo.png" alt="VFSTR Shield" style="height: 50px; object-fit: contain;">
+                    <span style="font-size: 0.68rem; font-weight: 800; color: #1e3a8a; background: #e0f2fe; padding: 3px 8px; border-radius: 4px; margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid #bfdbfe;">
+                        Official E-Receipt
+                    </span>
+                </div>
+            </div>
+
             <!-- Official Watermark / Badge Banner -->
             <div class="receipt-meta-banner">
                 <div class="meta-item">
@@ -1402,11 +1519,15 @@
             <div class="wizard-grid-info">
                 <div class="info-cell">
                     <span class="cell-label">Student Name:</span>
-                    <strong class="cell-val" id="wizStudentName">Hemanth Kumar Vucha</strong>
+                    <strong class="cell-val" id="wizStudentName">Candidate</strong>
                 </div>
                 <div class="info-cell">
                     <span class="cell-label">Application Number:</span>
-                    <strong class="cell-val cell-code" id="wizAppliNo">20########</strong>
+                    <strong class="cell-val cell-code" id="wizAppliNo">20261106333</strong>
+                </div>
+                <div class="info-cell">
+                    <span class="cell-label">Branch CRM ID:</span>
+                    <strong class="cell-val cell-code" id="wizCrmId" style="color: #1d4ed8; background: #eff6ff; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe;">V-SAT-0001</strong>
                 </div>
                 <div class="info-cell">
                     <span class="cell-label">Mobile Number:</span>
@@ -1414,13 +1535,13 @@
                 </div>
                 <div class="info-cell">
                     <span class="cell-label">Email ID:</span>
-                    <span class="cell-val" id="wizEmail">7780579012@student.vignan.ac.in</span>
+                    <span class="cell-val" id="wizEmail">student@vignan.ac.in</span>
                 </div>
                 <div class="info-cell">
                     <span class="cell-label">Enrolled Program:</span>
-                    <strong class="cell-val" id="wizProgram">B.Tech (CSE)</strong>
+                    <strong class="cell-val" id="wizProgram">B.Tech</strong>
                 </div>
-                <div class="info-cell">
+                <div class="info-cell" style="grid-column: span 3;">
                     <span class="cell-label">Academic Batch:</span>
                     <span class="cell-val" id="wizRegulation">Academic Batch 2026-2027</span>
                 </div>
@@ -1445,29 +1566,29 @@
                             <div class="breakdown-sub">Official prospectus and entrance assessment processing</div>
                         </td>
                         <td><span class="breakdown-plain">—</span></td>
-                        <td style="text-align: right; font-weight: 700;">₹ <span id="wizBaseFee">2,000.00</span></td>
+                        <td style="text-align: right; font-weight: 700;">₹ <span id="wizBaseFee">1,200.00</span></td>
                     </tr>
                     <tr class="discount-row">
                         <td>
-                            <strong>Default Institutional Merit Waiver</strong>
+                            <strong>Institutional Early Bird Waiver</strong>
                             <div class="breakdown-sub">VFSTR 2026 Open Campus Early Incentive</div>
                         </td>
-                        <td><span class="coupon-tag-badge" id="wizDefaultCoupon">VIGNAN2026</span></td>
+                        <td><span class="coupon-tag-badge" id="wizDefaultCoupon">27EARLYB100</span></td>
                         <td style="text-align: right; color: #059669; font-weight: 700;">- ₹ <span id="wizDefaultDiscount">500.00</span></td>
                     </tr>
                     <tr class="discount-row">
                         <td>
-                            <strong>Personal / Referral Candidate Coupon</strong>
+                            <strong>Personal Concession Coupon</strong>
                             <div class="breakdown-sub">Special admission council referral redemption</div>
                         </td>
-                        <td><span class="coupon-tag-badge badge-personal-tag" id="wizPersonalCoupon">PERS-A84F2B</span></td>
-                        <td style="text-align: right; color: #059669; font-weight: 700;">- ₹ <span id="wizPersonalDiscount">300.00</span></td>
+                        <td><span class="coupon-tag-badge badge-personal-tag" id="wizPersonalCoupon">261106333P1</span></td>
+                        <td style="text-align: right; color: #059669; font-weight: 700;">- ₹ <span id="wizPersonalDiscount">600.00</span></td>
                     </tr>
                     <tr class="subtotal-row">
                         <td colspan="2">
-                            <strong>Total Coupon Discount Applied</strong>
+                            <strong>Total Concession Applied</strong>
                         </td>
-                        <td style="text-align: right; color: #059669; font-weight: 800;">- ₹ <span id="wizTotalDiscount">800.00</span></td>
+                        <td style="text-align: right; color: #059669; font-weight: 800;">- ₹ <span id="wizTotalDiscount">1,100.00</span></td>
                     </tr>
                     <tr class="net-total-row">
                         <td colspan="2">
@@ -1475,7 +1596,7 @@
                             <div class="net-subtitle">Confirmed by Payment Gateway • No Additional Dues</div>
                         </td>
                         <td style="text-align: right;">
-                            <div class="net-amount">₹ <span id="wizPaidAmount">1,200.00</span></div>
+                            <div class="net-amount">₹ <span id="wizPaidAmount">100.00</span></div>
                         </td>
                     </tr>
                 </tbody>
@@ -1485,7 +1606,7 @@
             <div class="wizard-gateway-strip">
                 <div class="gateway-item">
                     <span class="gw-label">Payment Gateway:</span>
-                    <strong class="gw-val" id="wizPaymentMode">Online Gateway (Razorpay / SBI e-Pay)</strong>
+                    <strong class="gw-val" id="wizPaymentMode">PayU Online Gateway</strong>
                 </div>
                 <div class="gateway-item">
                     <span class="gw-label">Bank Reference / UTR:</span>
@@ -1493,18 +1614,18 @@
                 </div>
                 <div class="gateway-item">
                     <span class="gw-label">Reconciliation:</span>
-                    <span class="gw-val" style="color: #059669; font-weight: 700;">✓ Auto-Reconciled</span>
+                    <span class="gw-val" style="color: #059669; font-weight: 700;">✓ Auto-Reconciled &amp; Accounts Audited</span>
                 </div>
             </div>
 
             <!-- Authentic Seal Footer -->
-            <div class="wizard-seal-footer">
-                <div class="seal-text-group">
-                    <div class="seal-icon">🏛️</div>
+            <div class="wizard-seal-footer" style="margin-top: 1.25rem;">
+                <div class="seal-text-group" style="display: flex; align-items: center; gap: 12px;">
+                    <img src="/images/vignan-shield-logo.png" alt="VFSTR Seal" style="height: 44px; object-fit: contain;">
                     <div>
-                        <div class="seal-heading">Admissions Accounts &amp; Financial Division</div>
-                        <div class="seal-sub">VFSTR Deemed to be University, Vadlamudi, Guntur, AP - 522213</div>
-                        <div class="seal-note">This document is an electronically verified admission payment receipt. Valid without physical signature.</div>
+                        <div class="seal-heading" style="font-size: 0.82rem; font-weight: 700; color: #1e3a8a;">Admissions Accounts &amp; Financial Division</div>
+                        <div class="seal-sub" style="font-size: 0.74rem; color: #475569;">VFSTR Deemed to be University, Vadlamudi, Guntur, AP - 522213</div>
+                        <div class="seal-note" style="font-size: 0.70rem; color: #64748b; margin-top: 2px;">This document is an electronically verified admission payment receipt. Valid without physical signature under IT Act 2000.</div>
                     </div>
                 </div>
                 <div class="seal-stamp-box">
@@ -1517,16 +1638,16 @@
         </div>
 
         <!-- Down Wizard Actions: Print and Close (Strictly Required Options) -->
-        <div class="wizard-actions-footer no-print">
-            <button type="button" class="btn-wizard-print" onclick="printPaymentWizard()" title="Print Payment Receipt">
+        <div class="wizard-actions-footer no-print" style="padding: 1rem 1.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" class="btn-wizard-print" onclick="printPaymentWizard()" title="Print Payment Receipt" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; background: #1e3a8a; color: #ffffff; border: none; font-weight: 700; cursor: pointer; font-size: 0.88rem;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="6 9 6 2 18 2 18 9"/>
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
                     <rect x="6" y="14" width="12" height="8"/>
                 </svg>
-                <span>Print</span>
+                <span>Print Receipt</span>
             </button>
-            <button type="button" class="btn-wizard-close" onclick="closePaymentWizard()" title="Close Wizard">
+            <button type="button" class="btn-wizard-close" onclick="closePaymentWizard()" title="Close Wizard" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 600; cursor: pointer; font-size: 0.88rem;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>
@@ -1791,51 +1912,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
-    // =========================================================================
-    // PAYMENT & COUPON RECEIPT WIZARD MODAL
-    // =========================================================================
-    window.openPaymentWizard = function (data) {
-        if (!data) return;
-        const modal = document.getElementById('paymentWizardBackdrop');
-        if (!modal) return;
-
-        const setTxt = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = val || '';
-        };
-
-        setTxt('wizReceiptNo', data.receipt_no || 'REC-2026-00101');
-        setTxt('wizTxnId', data.transaction_id || 'TXN-VU-00000000');
-        setTxt('wizDateTime', data.payment_date || '');
-        setTxt('wizStudentName', data.student_name || 'Candidate');
-        setTxt('wizAppliNo', data.appli_no || '');
-        setTxt('wizPhone', data.phone ? ('+91 ' + data.phone) : '+91 7780579012');
-        setTxt('wizEmail', data.email || 'N/A');
-        setTxt('wizProgram', (data.program || 'B.Tech') + ' (Engineering)');
-        setTxt('wizRegulation', 'Academic Batch 2026-2027');
-        setTxt('wizBaseFee', data.base_fee || '2,000.00');
-        setTxt('wizDefaultCoupon', data.default_coupon || 'VIGNAN2026');
-        setTxt('wizDefaultDiscount', data.default_discount || '500.00');
-        setTxt('wizPersonalCoupon', data.personal_coupon || 'PERS-COUPON');
-        setTxt('wizPersonalDiscount', data.personal_discount || '300.00');
-        setTxt('wizTotalDiscount', data.total_discount || '800.00');
-        setTxt('wizPaidAmount', data.paid_amount || '1,200.00');
-        setTxt('wizPaymentMode', data.payment_mode || 'Online Gateway (Razorpay / SBI e-Pay)');
-        setTxt('wizBankRef', data.bank_ref || 'PAY_OK_99418294');
-
-        modal.style.display = 'flex';
-    };
-
-    window.closePaymentWizard = function (event) {
-        const modal = document.getElementById('paymentWizardBackdrop');
-        if (event && event.target !== modal) return;
-        if (modal) modal.style.display = 'none';
-    };
-
-    window.printPaymentWizard = function () {
-        window.print();
-    };
 
     // Live search for Employee Directory
     const empSearchInput = document.getElementById('employeeListSearchInput');

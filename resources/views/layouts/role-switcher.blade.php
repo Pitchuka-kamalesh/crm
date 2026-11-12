@@ -6,14 +6,27 @@
     $activeRoleId = $roleId ?? ($currentUser ? $currentUser->getActiveRoleId() : 1);
     $activeRoleName = $roleName ?? ($currentUser ? $currentUser->role_label : 'Results Coordinator');
 
-    $allRolesList = $availableRoles ?? \App\Models\Role::orderBy('role_id')->get();
-    if ($allRolesList->isEmpty()) {
+    // Strictly show ONLY the roles assigned to this specific user in master.roles_assigned
+    $userAssignedRoles = [];
+    if ($currentUser && !empty($currentUser->usercode)) {
+        $userAssignedRoles = \App\Services\RoleService::getAssignedRoles($currentUser->usercode);
+    }
+
+    if (!empty($userAssignedRoles)) {
+        $allRolesList = collect($userAssignedRoles)->map(fn($r) => (object)[
+            'role_id' => (int)$r['role_id'],
+            'role_name' => $r['role_name'],
+        ]);
+    } elseif (isset($availableRoles) && $availableRoles->isNotEmpty()) {
+        $allRolesList = $availableRoles;
+    } else {
+        $singleRoleId = $currentUser ? $currentUser->getActiveRoleId() : 1;
+        $singleRole = \App\Models\Role::find($singleRoleId);
         $allRolesList = collect([
-            (object)['role_id' => 3, 'role_name' => 'CRM DEAN'],
-            (object)['role_id' => 2, 'role_name' => 'CRM Incharge'],
-            (object)['role_id' => 4, 'role_name' => 'Tele Caller'],
-            (object)['role_id' => 1, 'role_name' => 'Admin / Employee'],
-            (object)['role_id' => 5, 'role_name' => 'Student Candidate'],
+            (object)[
+                'role_id' => $singleRoleId,
+                'role_name' => $singleRole?->role_name ?? 'Employee',
+            ]
         ]);
     }
 

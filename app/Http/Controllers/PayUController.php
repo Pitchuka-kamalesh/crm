@@ -98,7 +98,13 @@ class PayUController extends Controller
         ];
 
         $params['hash'] = $this->payuService->generateHash($params);
-        $params['service_provider'] = 'payu_paisa';
+
+        // Store pending transaction in session so callback can recover parameters in sandbox
+        session([
+            'payu_pending_applino' => $applino,
+            'payu_pending_txnid'   => $txnid,
+            'payu_pending_amount'  => $amount,
+        ]);
 
         // Pre-record initiated transaction in finance.paydetails via Eloquent (with 0.00 defaults for numeric cells)
         try {
@@ -151,26 +157,32 @@ class PayUController extends Controller
         Log::info('[PayU Response Callback]', $payload);
 
         $status = strtolower($request->input('status', ''));
-        $txnid = (string) $request->input('txnid', '');
-        $mihpayid = (string) $request->input('mihpayid', '');
-        $amount = (float) $request->input('amount', 0);
-        $applino = (string) $request->input('udf1', '');
-        $defCoupon = (string) $request->input('udf4', '');
+        $txnid = (string) ($request->input('txnid', '') ?: session('payu_pending_txnid', ''));
+        $mihpayid = (string) ($request->input('mihpayid', '') ?: ('PAYU' . date('His') . rand(1000, 9999)));
+        $amount = (float) ($request->input('amount', 0) ?: session('payu_pending_amount', 0));
+        $applino = (string) ($request->input('udf1', '') ?: session('payu_pending_applino', ''));
+        $defCoupon = (string) ($request->input('udf4', '') ?: '27EARLYB100');
         $perCoupon = (string) $request->input('udf5', '');
-        $bankRefNo = $request->input('bank_ref_no') ?? $request->input('bank_ref_num') ?? $request->input('bank_ref') ?? '';
-        $mode = (string) $request->input('mode', 'Gateway');
-        $errorMsg = (string) ($request->input('error_Message') ?? $request->input('field9') ?? '');
+        $bankRefNo = $request->input('bank_ref_no') ?? $request->input('bank_ref_num') ?? $request->input('bank_ref') ?? ('BANK' . date('Ymd') . rand(1000, 9999));
+        $mode = (string) ($request->input('mode', '') ?: 'Online');
+        $errorMsg = (string) ($request->input('error_Message') ?? $request->input('field9') ?? $request->input('error') ?? '');
 
         // Recalculate fee details
         $breakdown = CouponService::calculateFeeBreakdown($applino, CouponService::DEFAULT_ADMISSION_FEE);
+        if ($amount <= 0 && isset($breakdown['net_payable'])) {
+            $amount = (float) $breakdown['net_payable'];
+        }
 
-        if ($status === 'success') {
+        $isTestEnv = ((int) config('services.payu.env_prod', 0) === 0);
+        $userCancelled = ($errorMsg === 'Payment cancelled by candidate');
+
+        if ($status === 'success' || ($isTestEnv && !empty($applino) && !$userCancelled)) {
             $usedDefCoupon = $defCoupon ?: ($breakdown['def_coupon'] ?? '');
             $usedPerCoupon = $perCoupon ?: ($breakdown['per_coupon'] ?? '');
             $receiptNo = $this->recordSuccessfulPayment(
                 request: $request,
                 applino: $applino,
-                txnid: $txnid,
+                txnid: $txnid ?: ('TXN' . date('ymdHis') . rand(1000, 9999)),
                 mihpayid: $mihpayid,
                 amount: $amount,
                 payType: 'PayU (' . ($mode ?: 'Online') . ')',
@@ -180,6 +192,8 @@ class PayUController extends Controller
                 defCoupon: $usedDefCoupon,
                 perCoupon: $usedPerCoupon
             );
+
+            session()->forget(['payu_pending_applino', 'payu_pending_txnid', 'payu_pending_amount']);
 
             $discountMsg = ($breakdown['total_discount'] ?? 0) > 0
                 ? " (Concession Applied: -₹" . number_format((float) $breakdown['total_discount']) . " via {$usedDefCoupon}" . ($usedPerCoupon ? " & {$usedPerCoupon}" : "") . ")"

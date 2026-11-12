@@ -276,11 +276,14 @@ class LeadsController extends Controller
         $telecallers = \App\Services\TelecallerService::getTelecallers();
         $availablePrograms = Program::orderBy('program_short_name')->get();
 
-        // Available roles for preview switcher
-        $availableRoles = Role::orderBy('role_id')->get();
+        // Available roles for switcher (strictly user's assigned roles from DB)
+        $userAssigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+        $availableRoles = !empty($userAssigned)
+            ? collect($userAssigned)->map(fn($r) => (object)['role_id' => (int)$r['role_id'], 'role_name' => $r['role_name']])
+            : Role::where('role_id', $roleId)->get();
 
-        // Role-based assigned menus from master.menu_access_roles
-        $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
+        // Role-based assigned menus from master.menu_access_roles (with crm fallback)
+        $roleMenus = MenuAccessRole::forRole($roleId);
 
         return view('leads::index', compact(
             'user',
@@ -336,8 +339,7 @@ class LeadsController extends Controller
             ], 422);
         }
 
-        $maxApp = CrmStudentRegistration::max('applinano');
-        $nextAppNo = is_numeric($maxApp) ? (string) ((int) $maxApp + 1) : '2027000001';
+        $nextAppNo = CrmStudentRegistration::generateNextApplicationNumber();
         $nextId = (CrmStudentRegistration::max('id') ?? 0) + 1;
         $programId = (int) $request->input('program_id');
         $prog = Program::find($programId);
@@ -627,42 +629,11 @@ class LeadsController extends Controller
         return response()->json($res, $res['success'] ? 200 : 422);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('leads::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('leads::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('leads::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+    // Resource API stubs
+    public function create() { return view('leads::create'); }
+    public function store(Request $request) { return response()->json(['success' => true]); }
+    public function show($id) { return view('leads::show'); }
+    public function edit($id) { return view('leads::edit'); }
+    public function update(Request $request, $id) { return response()->json(['success' => true]); }
+    public function destroy($id) { return response()->json(['success' => true]); }
 }
