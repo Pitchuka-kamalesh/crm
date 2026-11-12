@@ -128,11 +128,77 @@ class User extends Authenticatable
         return $this->phnno ?: 'Applicant';
     }
 
+    /**
+     * Strict Mode: Retrieve raw role IDs assigned to this user in master.roles_assigned.
+     *
+     * @return array<int>
+     */
+    public function getAssignedRoleIds(): array
+    {
+        if ($this->user_type === 1 || (int)$this->role_id === 5) {
+            return [5];
+        }
+
+        $empCode = $this->usercode;
+        if (empty($empCode) || $empCode === '0') {
+            try {
+                $emp = Employee::where('phone_primary', $this->phnno)
+                    ->orWhere('phone_secondary', $this->phnno)
+                    ->first();
+                $empCode = $emp?->emp_code;
+            } catch (\Throwable $e) {}
+        }
+
+        if (!empty($empCode)) {
+            try {
+                $assigned = RoleAssigned::where('emp_id', $empCode)
+                    ->where(function ($q) {
+                        $q->whereNull('end_date')->orWhere('end_date', '>=', now());
+                    })
+                    ->orderBy('roles_role_id')
+                    ->pluck('roles_role_id')
+                    ->map(fn($id) => (int)$id)
+                    ->toArray();
+
+                if (!empty($assigned)) {
+                    return array_values(array_unique($assigned));
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if (!empty($this->role_id)) {
+            return [(int)$this->role_id];
+        }
+
+        try {
+            if ($this->employee && !empty($this->employee->role_id)) {
+                return [(int)$this->employee->role_id];
+            }
+        } catch (\Throwable $e) {}
+
+        return [$this->user_type === 2 ? 1 : 5];
+    }
+
     public function getActiveRoleId(): int
     {
+        $allowedRoleIds = $this->getAssignedRoleIds();
+
+        // Option A (Strict Mode): Only honor session role if employee is actually assigned that role
         $sessionRole = session('user.role_id');
         if (!empty($sessionRole)) {
-            return (int) $sessionRole;
+            $sessionRoleId = (int) $sessionRole;
+            if (in_array($sessionRoleId, $allowedRoleIds, true)) {
+                return $sessionRoleId;
+            }
+            // Clear unauthorized or stale session role
+            try {
+                session()->forget('user.role_id');
+            } catch (\Throwable $e) {}
+        }
+
+        // Return first assigned role from master.roles_assigned
+        if (!empty($allowedRoleIds)) {
+            return (int) $allowedRoleIds[0];
         }
 
         if (!empty($this->role_id)) {
@@ -145,16 +211,16 @@ class User extends Authenticatable
             }
         } catch (\Throwable $e) {}
 
-        // Predefined staff role mapping without touching database tables
-        if ($this->usercode === '03141' || str_contains($this->officialmail ?? '', 'dean')) {
-            return 3; // CRM DEAN
-        }
-
-        if ($this->usercode === '03434' || str_contains($this->officialmail ?? '', 'mgt')) {
-            return 2; // CRM Incharge
-        }
-
         return $this->user_type === 2 ? 1 : 5;
+    }
+
+    /**
+     * Strict Mode: Retrieve only roles actually assigned to this user in master.roles_assigned.
+     */
+    public function getAssignedRoles(): \Illuminate\Support\Collection
+    {
+        $assignedRoleIds = $this->getAssignedRoleIds();
+        return Role::whereIn('role_id', $assignedRoleIds)->orderBy('role_id')->get();
     }
 
     public function role(): BelongsTo

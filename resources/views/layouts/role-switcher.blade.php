@@ -6,15 +6,11 @@
     $activeRoleId = $roleId ?? ($currentUser ? $currentUser->getActiveRoleId() : 1);
     $activeRoleName = $roleName ?? ($currentUser ? $currentUser->role_label : 'Results Coordinator');
 
-    $allRolesList = $availableRoles ?? \App\Models\Role::orderBy('role_id')->get();
-    if ($allRolesList->isEmpty()) {
-        $allRolesList = collect([
-            (object)['role_id' => 3, 'role_name' => 'CRM DEAN'],
-            (object)['role_id' => 2, 'role_name' => 'CRM Incharge'],
-            (object)['role_id' => 4, 'role_name' => 'Tele Caller'],
-            (object)['role_id' => 1, 'role_name' => 'Admin / Employee'],
-            (object)['role_id' => 5, 'role_name' => 'Student Candidate'],
-        ]);
+    // Option A (Strict Mode): Only fetch roles actually assigned to this employee in master.roles_assigned
+    $allRolesList = $currentUser ? $currentUser->getAssignedRoles() : collect();
+    if ($allRolesList->isEmpty() && $currentUser) {
+        $singleRoleId = (int) $currentUser->getActiveRoleId();
+        $allRolesList = \App\Models\Role::where('role_id', $singleRoleId)->get();
     }
 
     $roleIcons = [
@@ -59,32 +55,53 @@
                 Role switching is not permitted for student accounts.
             </div>
         @else
-            <div class="role-dropdown-header">
-                <span class="role-dropdown-label">SWITCH ACTIVE ROLE</span>
-                <span class="role-dropdown-hint">Select a role to preview portal view</span>
-            </div>
+            @if($allRolesList->count() > 1)
+                <div class="role-dropdown-header">
+                    <span class="role-dropdown-label">SWITCH ACTIVE ROLE</span>
+                    <span class="role-dropdown-hint">Select an authorized role</span>
+                </div>
 
-            <!-- Available Roles List -->
-            <div class="role-dropdown-items-list">
-                @foreach($allRolesList as $r)
-                    @php
-                        $rId = (int)$r->role_id;
-                        $isCurrent = ((int)$activeRoleId === $rId);
-                        $icon = $roleIcons[$rId] ?? '👤';
-                    @endphp
-                    <form action="{{ route('role.switch') }}" method="POST" class="role-switch-item-form">
-                        @csrf
-                        <input type="hidden" name="role_id" value="{{ $rId }}">
-                        <button type="submit" class="role-menu-item {{ $isCurrent ? 'is-active-role' : '' }}">
+                <!-- Available Authorized Roles List -->
+                <div class="role-dropdown-items-list">
+                    @foreach($allRolesList as $r)
+                        @php
+                            $rId = (int)$r->role_id;
+                            $isCurrent = ((int)$activeRoleId === $rId);
+                            $icon = $roleIcons[$rId] ?? '👤';
+                        @endphp
+                        <form action="{{ route('role.switch') }}" method="POST" class="role-switch-item-form">
+                            @csrf
+                            <input type="hidden" name="role_id" value="{{ $rId }}">
+                            <button type="submit" class="role-menu-item {{ $isCurrent ? 'is-active-role' : '' }}">
+                                <span class="role-menu-icon">{{ $icon }}</span>
+                                <span class="role-menu-text">{{ $r->role_name }}</span>
+                                @if($isCurrent)
+                                    <span class="role-check-mark">✓</span>
+                                @endif
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            @else
+                <div class="role-dropdown-header">
+                    <span class="role-dropdown-label">ASSIGNED ROLE</span>
+                    <span class="role-dropdown-hint">{{ $currentUser->usercode ?? '' }} &bull; {{ $activeRoleName }}</span>
+                </div>
+
+                <div class="role-dropdown-items-list">
+                    @foreach($allRolesList as $r)
+                        @php
+                            $rId = (int)$r->role_id;
+                            $icon = $roleIcons[$rId] ?? '👤';
+                        @endphp
+                        <div class="role-menu-item is-active-role" style="cursor: default;">
                             <span class="role-menu-icon">{{ $icon }}</span>
                             <span class="role-menu-text">{{ $r->role_name }}</span>
-                            @if($isCurrent)
-                                <span class="role-check-mark">✓</span>
-                            @endif
-                        </button>
-                    </form>
-                @endforeach
-            </div>
+                            <span class="role-check-mark">✓</span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         @endif
 
         <div class="role-dropdown-divider"></div>

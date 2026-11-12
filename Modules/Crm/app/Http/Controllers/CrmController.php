@@ -42,7 +42,7 @@ class CrmController extends Controller
                     'crm.couponinfo', 'crm.coupoungenration' => 'couponinfo',
                     'crm.employeelist' => 'employeelist',
                     'kpi.index', 'kpi.studentkpi' => 'kpi',
-                    default => 'overview',
+                    default => 'stddata', // Default to Student Data (Enquiries) instead of overview dashboard
                 };
             }
         }
@@ -178,11 +178,8 @@ class CrmController extends Controller
             $branches = Branch::take(50)->get();
         } catch (\Throwable $e) {}
 
-        // Available roles for UI role switcher
-        $availableRoles = collect();
-        try {
-            $availableRoles = Role::orderBy('role_id')->get();
-        } catch (\Throwable $e) {}
+        // Available roles for UI role switcher (Strict Mode: only assigned roles)
+        $availableRoles = $user ? $user->getAssignedRoles() : collect();
 
         // Role-based assigned menus from master.menu_access_roles
         $roleMenus = collect();
