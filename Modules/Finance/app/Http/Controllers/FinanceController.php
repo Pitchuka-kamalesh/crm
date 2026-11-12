@@ -63,8 +63,8 @@ class FinanceController extends Controller
             } catch (\Throwable $e) {}
         }
 
-        // Available roles for preview switcher
-        $availableRoles = Role::orderBy('role_id')->get();
+        // Available roles for preview switcher (Strict Mode: only assigned roles)
+        $availableRoles = $user ? $user->getAssignedRoles() : collect();
 
         // Role-based assigned menus from master.menu_access_roles
         $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();

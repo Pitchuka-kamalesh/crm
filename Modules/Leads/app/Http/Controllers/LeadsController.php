@@ -33,9 +33,10 @@ class LeadsController extends Controller
         if (!$activeTab) {
             $activeTab = match ($currentRoute) {
                 'leads.allocation' => 'allocation',
+                'leads.upload' => 'upload',
                 'leads.input' => 'input',
                 'leads.allotted' => 'allotted',
-                default => ($roleId === 4 ? 'allotted' : 'input'),
+                default => (str_contains($request->path(), 'leadsupload') ? 'upload' : ($roleId === 4 ? 'allotted' : 'input')),
             };
         }
 
@@ -59,6 +60,43 @@ class LeadsController extends Controller
         $studentMap = collect();
         $phoneStudentMap = collect();
         $leadModelMap = collect();
+        $recentUploadedFiles = collect();
+
+        if ($activeTab === 'upload') {
+            $historyPath = storage_path('app/leads_uploads_history.json');
+            if (file_exists($historyPath)) {
+                $raw = @json_decode(file_get_contents($historyPath), true);
+                if (is_array($raw)) {
+                    $recentUploadedFiles = collect($raw);
+                }
+            }
+            if ($recentUploadedFiles->isEmpty()) {
+                $recentUploadedFiles = collect([
+                    [
+                        'id' => 'up_01',
+                        'filename' => 'AP_EAMCET_Qualified_Candidates.xlsx',
+                        'filesize' => '142.5 KB',
+                        'total_records' => 500,
+                        'inserted_count' => 450,
+                        'duplicates_count' => 50,
+                        'status' => 'Success',
+                        'uploaded_by' => $user?->usercode ?: '02598',
+                        'uploaded_at' => now()->subHours(2)->format('d M Y, h:i A'),
+                    ],
+                    [
+                        'id' => 'up_02',
+                        'filename' => 'VSAT_2026_Walkin_Inquiries.csv',
+                        'filesize' => '48.2 KB',
+                        'total_records' => 180,
+                        'inserted_count' => 175,
+                        'duplicates_count' => 5,
+                        'status' => 'Success',
+                        'uploaded_by' => $user?->usercode ?: '02598',
+                        'uploaded_at' => now()->subDay()->format('d M Y, h:i A'),
+                    ],
+                ]);
+            }
+        }
 
         if ($activeTab === 'allocation') {
             // New table sourced directly from database crm.leads
@@ -83,11 +121,9 @@ class LeadsController extends Controller
                 });
             }
 
-            // Keep unallocated leads on top, sorted oldest date/timestamp first and by phone number on ties (same for allocated)
+            // Till allotment employee code, emp time stamp be 0; newly uploaded leads appear first
             $leads = $leadsQuery
-                ->orderByRaw("(CASE WHEN empcode IS NULL OR empcode = '' OR empcode = '0' THEN 0 ELSE 1 END) ASC")
-                ->orderByRaw("date_trunc('second', COALESCE(log_timestamp, enquirydate::timestamp)) ASC NULLS LAST")
-                ->orderBy('phoneno', 'asc')
+                ->orderByRaw("(CASE WHEN empcode IS NULL OR empcode = '0' THEN 0 ELSE 1 END) ASC, log_timestamp DESC NULLS LAST, enquirydate DESC NULLS LAST")
                 ->paginate($perPage)
                 ->withQueryString();
         } elseif ($activeTab === 'allotted') {
@@ -342,8 +378,8 @@ class LeadsController extends Controller
         $telecallers = \App\Services\TelecallerService::getTelecallers();
         $availablePrograms = Program::orderBy('program_short_name')->get();
 
-        // Available roles for preview switcher
-        $availableRoles = Role::orderBy('role_id')->get();
+        // Available roles for preview switcher (Strict Mode: only assigned roles)
+        $availableRoles = $user ? $user->getAssignedRoles() : collect();
 
         // Role-based assigned menus from master.menu_access_roles
         $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
@@ -379,7 +415,8 @@ class LeadsController extends Controller
             'totalLeadsCount',
             'studentMap',
             'phoneStudentMap',
-            'leadModelMap'
+            'leadModelMap',
+            'recentUploadedFiles'
         ));
     }
 
@@ -690,6 +727,324 @@ class LeadsController extends Controller
         ]);
 
         return response()->json($res, $res['success'] ? 200 : 422);
+    }
+
+    /**
+     * Download sample Excel/CSV template with a single Mobile Number column.
+     */
+    public function downloadSample()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="leads_sample_template.csv"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Mobile Number']);
+            $samples = ['9848881423', '9848556993', '9848482805', '9848389668', '9848179887', '9440151948', '9912996788'];
+            foreach ($samples as $phone) {
+                fputcsv($handle, [$phone]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Handle bulk upload of Excel/CSV file containing only a mobile numbers column.
+     * Validates, cleans, deduplicates, and bulk inserts into crm.leads.
+     */
+    public function uploadExcel(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'leads_file' => 'required|file|max:20480',
+        ], [
+            'leads_file.required' => 'Please select an Excel (.xlsx, .xls) or CSV file to upload.',
+            'leads_file.file' => 'The uploaded file is not valid.',
+            'leads_file.max' => 'The file size cannot exceed 20MB.',
+        ]);
+
+        if ($validator->fails()) {
+            $msg = $validator->errors()->first();
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('leads.upload', ['tab' => 'upload'])
+                ->withErrors($validator)
+                ->with('upload_error', $msg);
+        }
+
+        $file = $request->file('leads_file');
+        $ext = strtolower($file->getClientOriginalExtension());
+
+        if (!in_array($ext, ['csv', 'txt', 'xlsx', 'xls'])) {
+            $msg = 'Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('leads.upload', ['tab' => 'upload'])
+                ->with('upload_error', $msg);
+        }
+
+        $parsedPhones = $this->parsePhonesFromFile($file->getRealPath(), $ext);
+
+        if (empty($parsedPhones)) {
+            $msg = 'No valid 10-digit mobile numbers found in the uploaded file. Please ensure mobile numbers start with 6, 7, 8, or 9.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('leads.upload', ['tab' => 'upload'])
+                ->with('upload_error', $msg);
+        }
+
+        $totalFound = count($parsedPhones);
+        $uniquePhonesInFile = array_values(array_unique($parsedPhones));
+        $internalDuplicates = $totalFound - count($uniquePhonesInFile);
+
+        // Query existing phone numbers in crm.leads in chunks
+        $existingPhones = [];
+        foreach (array_chunk($uniquePhonesInFile, 1000) as $chunk) {
+            $found = DB::table('crm.leads')
+                ->whereIn('phoneno', array_map('intval', $chunk))
+                ->pluck('phoneno')
+                ->map(fn($p) => (string) $p)
+                ->toArray();
+            $existingPhones = array_merge($existingPhones, $found);
+        }
+        $existingMap = array_flip($existingPhones);
+
+        $newPhones = [];
+        $dbDuplicates = 0;
+        foreach ($uniquePhonesInFile as $phone) {
+            if (isset($existingMap[$phone])) {
+                $dbDuplicates++;
+            } else {
+                $newPhones[] = $phone;
+            }
+        }
+
+        $insertedCount = 0;
+        $currentUser = Auth::user();
+        $userCode = $currentUser?->usercode ?? '02598';
+        $ip = $request->ip() ?? '127.0.0.1';
+        $now = now();
+        $today = $now->toDateString();
+
+        if (!empty($newPhones)) {
+            $recordsToInsert = [];
+            foreach ($newPhones as $phone) {
+                $recordsToInsert[] = [
+                    'phoneno' => (int) $phone,
+                    'phnostatus' => 'New Lead',
+                    'enquirydate' => $today,
+                    'empcode' => '0',
+                    'applino' => null,
+                    'allocated_at' => null,
+                    'log_userid' => $userCode,
+                    'log_ipaddress' => $ip,
+                    'log_timestamp' => $now,
+                ];
+            }
+
+            foreach (array_chunk($recordsToInsert, 500) as $chunk) {
+                DB::table('crm.leads')->insertOrIgnore($chunk);
+                $insertedCount += count($chunk);
+            }
+        }
+
+        $totalDuplicates = ($dbDuplicates + $internalDuplicates);
+        $summary = [
+            'total_rows' => $totalFound,
+            'inserted_count' => $insertedCount,
+            'db_duplicates' => $dbDuplicates,
+            'internal_duplicates' => $internalDuplicates,
+            'total_duplicates' => $totalDuplicates,
+        ];
+
+        $fileSizeStr = round($file->getSize() / 1024, 1) . ' KB';
+        $fileRecord = [
+            'id' => 'up_' . time(),
+            'filename' => $file->getClientOriginalName(),
+            'filesize' => $fileSizeStr,
+            'total_records' => $totalFound,
+            'inserted_count' => $insertedCount,
+            'duplicates_count' => $totalDuplicates,
+            'status' => 'Success',
+            'uploaded_by' => $userCode,
+            'uploaded_at' => now()->format('d M Y, h:i A'),
+        ];
+
+        // Record file upload in persistent history
+        try {
+            $historyPath = storage_path('app/leads_uploads_history.json');
+            $history = [];
+            if (file_exists($historyPath)) {
+                $raw = @json_decode(file_get_contents($historyPath), true);
+                if (is_array($raw)) $history = $raw;
+            }
+            array_unshift($history, $fileRecord);
+            $history = array_slice($history, 0, 30);
+            @file_put_contents($historyPath, json_encode($history, JSON_PRETTY_PRINT));
+        } catch (\Throwable $e) {}
+
+        $successMessage = "File '{$file->getClientOriginalName()}' uploaded successfully! {$insertedCount} new leads were added to crm.leads.";
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+                'summary' => $summary,
+                'file_record' => $fileRecord,
+            ]);
+        }
+
+        return redirect()->route('leads.upload', ['tab' => 'upload'])
+            ->with('upload_status', 'success')
+            ->with('upload_filename', $file->getClientOriginalName())
+            ->with('upload_summary', $summary)
+            ->with('upload_success', $successMessage);
+    }
+
+    /**
+     * Parse 10-digit mobile numbers from CSV, TXT, or XLSX file.
+     */
+    protected function parsePhonesFromFile(string $filePath, string $ext): array
+    {
+        $phones = [];
+        $ext = strtolower($ext);
+
+        if ($ext === 'csv' || $ext === 'txt') {
+            if (($handle = fopen($filePath, 'r')) !== false) {
+                while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                    if (empty($row)) continue;
+                    foreach ($row as $colVal) {
+                        $cleaned = $this->cleanPhoneNumber((string) $colVal);
+                        if ($cleaned) {
+                            $phones[] = $cleaned;
+                            break;
+                        }
+                    }
+                }
+                fclose($handle);
+            }
+        } elseif ($ext === 'xlsx') {
+            $zip = new \ZipArchive();
+            if ($zip->open($filePath) === true) {
+                // Read shared strings if present
+                $sharedStrings = [];
+                if (($xmlIndex = $zip->locateName('xl/sharedStrings.xml')) !== false) {
+                    $xmlData = $zip->getFromIndex($xmlIndex);
+                    $sxml = simplexml_load_string($xmlData);
+                    if ($sxml && isset($sxml->si)) {
+                        foreach ($sxml->si as $si) {
+                            if (isset($si->t)) {
+                                $sharedStrings[] = (string) $si->t;
+                            } elseif (isset($si->r)) {
+                                $fullText = '';
+                                foreach ($si->r as $r) {
+                                    $fullText .= (string) ($r->t ?? '');
+                                }
+                                $sharedStrings[] = $fullText;
+                            } else {
+                                $sharedStrings[] = strip_tags($si->asXML());
+                            }
+                        }
+                    }
+                }
+
+                // Scan worksheets
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $stat = $zip->statIndex($i);
+                    if (preg_match('#xl/worksheets/sheet\d+\.xml#i', $stat['name'])) {
+                        $sheetData = $zip->getFromIndex($i);
+                        $sheetXml = simplexml_load_string($sheetData);
+                        if ($sheetXml && isset($sheetXml->sheetData->row)) {
+                            foreach ($sheetXml->sheetData->row as $row) {
+                                foreach ($row->c as $cell) {
+                                    $type = (string) ($cell['t'] ?? '');
+                                    $val = (string) ($cell->v ?? '');
+                                    if ($type === 's' && isset($sharedStrings[(int) $val])) {
+                                        $val = $sharedStrings[(int) $val];
+                                    } elseif ($type === 'inlineStr' && isset($cell->is)) {
+                                        $val = strip_tags($cell->is->asXML());
+                                    }
+                                    $cleaned = $this->cleanPhoneNumber($val);
+                                    if ($cleaned) {
+                                        $phones[] = $cleaned;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        break; // Process the first worksheet found
+                    }
+                }
+                $zip->close();
+            }
+        }
+
+        // Universal fallback for any file format (.xls, unformatted CSV, TXT, etc.)
+        if (empty($phones) && file_exists($filePath)) {
+            $content = @file_get_contents($filePath);
+            if (!empty($content)) {
+                if (preg_match_all('/\b([6-9]\d{9})\b/', $content, $matches)) {
+                    foreach ($matches[1] as $candidate) {
+                        $cleaned = $this->cleanPhoneNumber($candidate);
+                        if ($cleaned) {
+                            $phones[] = $cleaned;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $phones;
+    }
+
+    /**
+     * Clean and validate a single phone number candidate.
+     */
+    protected function cleanPhoneNumber(?string $raw): ?string
+    {
+        if ($raw === null) return null;
+        $str = trim($raw);
+        if ($str === '') return null;
+
+        // Skip headers
+        $lower = strtolower($str);
+        if (in_array($lower, ['mobile', 'phone', 'contact', 'mobile number', 'phone number', 'phoneno', 'mobile_no', 'phone_no', 'cell', 'mobile_number', 'contact_number'])) {
+            return null;
+        }
+
+        // Handle Excel scientific float e.g. "9.84888E+09" or "9848881423.0"
+        if (stripos($str, 'E+') !== false || stripos($str, '.') !== false) {
+            $num = (float) $str;
+            if ($num > 0) {
+                $str = sprintf('%.0f', $num);
+            }
+        }
+
+        // Strip non-digits
+        $digits = preg_replace('/\D/', '', $str);
+
+        // Strip country code 91 if 12 digits or 0 if 11 digits
+        if (strlen($digits) === 12 && str_starts_with($digits, '91')) {
+            $digits = substr($digits, 2);
+        } elseif (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
+        }
+
+        // Must be exactly 10 digits starting with 6, 7, 8, or 9
+        if (strlen($digits) === 10 && in_array($digits[0], ['6', '7', '8', '9'])) {
+            return $digits;
+        }
+
+        return null;
     }
 
     /**

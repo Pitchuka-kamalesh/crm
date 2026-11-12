@@ -48,8 +48,8 @@
                 </div>
             @endif
 
-            <!-- ROLE-SPECIFIC METRIC CARDS (DASHBOARD ONLY) -->
-            @if(($activeTab ?? 'overview') === 'overview' || empty($activeTab))
+            <!-- ROLE-SPECIFIC METRIC CARDS (DASHBOARD ONLY - HIDDEN BY DEFAULT) -->
+            @if(($activeTab ?? '') === 'overview')
             <div class="metrics-grid">
                 @if($roleId == 3)
                     <!-- CRM DEAN METRICS -->
@@ -163,62 +163,25 @@
             @if(($activeTab ?? '') === 'stddata')
                 <!-- TAB: ENQUIRY LIST -->
                 <div class="content-card">
-                    <!-- 3 LIVE FILTERS: PHONE NUMBER, STATUS, DATE -->
+                    <!-- LIVE SINGLE SEARCH: APPLICATION NO, PHONE NUMBER, STUDENT NAME -->
                     <div class="enquiry-filter-toolbar">
                         <div class="filter-inputs-row">
-                            <!-- 1. Phone Number Filter -->
-                            <div class="filter-control-group">
-                                <label for="liveFilterPhone" class="filter-label">
-                                    <span class="filter-icon">📞</span> Phone Number
+                            <!-- Unified Search Filter -->
+                            <div class="filter-control-group filter-control-search">
+                                <label for="liveFilterSearch" class="filter-label">
+                                    <span class="filter-icon">🔍</span> Search Enquiries
                                 </label>
                                 <div class="input-with-icon">
                                     <input type="text" 
-                                           id="liveFilterPhone" 
+                                           id="liveFilterSearch" 
                                            class="filter-input" 
-                                           placeholder="Filter by phone (e.g. 7780...)" 
-                                           value="{{ $filterPhone ?? '' }}" 
-                                           autocomplete="off">
-                                    <button type="button" class="btn-clear-input" onclick="clearFilterInput('liveFilterPhone')" title="Clear phone">&times;</button>
+                                           placeholder="Search application no, phone, name..." 
+                                           value="{{ $searchQuery ?? $filterPhone ?? '' }}" 
+                                           autocomplete="off"
+                                           oninput="window.handleEnquiryLiveSearch(this.value)"
+                                           onkeyup="if(event.key==='Escape'){ window.clearFilterInput('liveFilterSearch'); }">
+                                    <button type="button" class="btn-clear-input" onclick="clearFilterInput('liveFilterSearch')" title="Clear search">&times;</button>
                                 </div>
-                            </div>
-
-                            <!-- 2. Status Filter -->
-                            <div class="filter-control-group">
-                                <label for="liveFilterStatus" class="filter-label">
-                                    <span class="filter-icon">🏷️</span> Status
-                                </label>
-                                <select id="liveFilterStatus" class="filter-select">
-                                    <option value="">All Statuses</option>
-                                    @foreach($availableStatuses as $statusOption)
-                                        <option value="{{ $statusOption }}" {{ strtolower($filterStatus ?? '') === strtolower($statusOption) ? 'selected' : '' }}>
-                                            {{ $statusOption }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- 3. Date Filter -->
-                            <div class="filter-control-group">
-                                <label for="liveFilterDate" class="filter-label">
-                                    <span class="filter-icon">📅</span> Enquiry Date
-                                </label>
-                                <div class="input-with-icon">
-                                    <input type="date" 
-                                           id="liveFilterDate" 
-                                           class="filter-input" 
-                                           value="{{ $filterDate ?? '' }}">
-                                    <button type="button" class="btn-clear-input" onclick="clearFilterInput('liveFilterDate')" title="Clear date">&times;</button>
-                                </div>
-                            </div>
-
-                            <!-- Actions: Reset Filter & Bulk Allot -->
-                            <div class="filter-actions-group">
-                                <button type="button" id="btnResetFilters" class="btn-filter-reset" title="Reset all 3 filters">
-                                    <span style="font-size: 0.9rem;">↺</span> Reset Filters
-                                </button>
-                                <button type="button" class="btn-filter-allot" onclick="openAssignBox('', 'All Enquiries (Bulk)')" title="Allot Enquiries to Staff">
-                                    <span>📤</span> Allot Enquiries
-                                </button>
                             </div>
                         </div>
 
@@ -243,9 +206,7 @@
                                     <th>Phone / WhatsApp</th>
                                     <th>Email ID</th>
                                     <th>Program / Branch</th>
-                                    <th>Status</th>
                                     <th>Enquiry Date</th>
-                                    <th>Assign</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -259,39 +220,22 @@
                                         $timeFormatted = $timestamp ? \Carbon\Carbon::parse($timestamp)->format('h:i A') : '';
                                         $appliKey = $std->application_no ?? $std->applinano ?? '';
                                         $candidateName = $std->student_name ?? $std->name ?? 'Candidate';
-                                        
-                                        $assignedInfo = null;
-                                        if (isset($dbAllocations[$appliKey])) {
-                                            $alloc = $dbAllocations[$appliKey];
-                                            $assignedInfo = [
-                                                'employee' => $alloc->emp_name ?? $alloc->empcode,
-                                                'empcode' => $alloc->empcode,
-                                                'leadcount' => $alloc->leadcount ?? 1,
-                                                'mode' => 'Telecaller (#' . ($alloc->leadcount ?? 1) . ')',
-                                                'allotted_at' => $alloc->assigndatetime ? date('d M Y, h:i A', strtotime($alloc->assigndatetime)) : '',
-                                            ];
-                                        } elseif (isset($leadAssignments[$appliKey])) {
-                                            $assignedInfo = $leadAssignments[$appliKey];
-                                        } elseif (isset($leadAssignments['_last_bulk'])) {
-                                            $assignedInfo = $leadAssignments['_last_bulk'];
-                                        }
-                                        
-                                        $badgeClass = match(strtolower($rawStatus)) {
-                                            'applied' => 'badge-applied',
-                                            'verified' => 'badge-verified',
-                                            'paid', 'fee paid', 'registered' => 'badge-paid',
-                                            'pending', 'not_paid' => 'badge-pending',
-                                            default => 'badge-applied',
-                                        };
+                                        $emailVal = $std->personal_email ?? $std->emailid ?? '';
+                                        $programName = $std->program?->program_short_name ?? 'B.Tech';
+                                        $branchLabel = $std->branch?->branch_long_name ?? $std->branch?->branch_short_name ?? '';
+                                        $searchString = strtolower(trim("{$appliKey} " . ($std->register_no ?? '') . " {$candidateName} {$phone} {$emailVal} {$programName} {$branchLabel}"));
                                     @endphp
                                     <tr class="enquiry-row" 
+                                        data-search="{{ $searchString }}"
                                         data-phone="{{ $phone }}" 
+                                        data-appli="{{ strtolower($appliKey) }}"
+                                        data-name="{{ strtolower($candidateName) }}"
                                         data-status="{{ strtolower($rawStatus) }}" 
                                         data-date="{{ $dateYmd }}">
                                         <td>
                                             <strong>{{ $std->application_no ?? $std->applinano ?? 'N/A' }}</strong>
                                             @if(!empty($std->register_no))
-                                                <div style="font-size: 0.72rem; color: #64748b;">Reg: {{ $std->register_no }}</div>
+                                                 <div style="font-size: 0.72rem; color: #64748b;">Reg: {{ $std->register_no }}</div>
                                             @endif
                                         </td>
                                         <td>
@@ -308,15 +252,9 @@
                                         </td>
                                         <td>
                                             <div style="font-weight: 600; color: #0f172a;">{{ $std->program?->program_short_name ?? 'B.Tech' }}</div>
-                                            @php
-                                                $branchLabel = $std->branch?->branch_long_name ?? $std->branch?->branch_short_name;
-                                            @endphp
                                             @if(!empty($branchLabel))
                                                 <div style="font-size: 0.72rem; color: #64748b; font-weight: 500;">{{ $branchLabel }}</div>
                                             @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge-status {{ $badgeClass }}">{{ $rawStatus }}</span>
                                         </td>
                                         <td>
                                             <div style="font-weight: 600; color: #0f172a; font-size: 0.8rem;">{{ $dateFormatted }}</div>
@@ -324,36 +262,10 @@
                                                 <div style="font-size: 0.72rem; color: #64748b;">{{ $timeFormatted }}</div>
                                             @endif
                                         </td>
-                                        <td class="assign-action-cell">
-                                            <div class="assign-cell-content" data-appli="{{ $appliKey }}">
-                                                @if($assignedInfo)
-                                                    <div class="assigned-emp-pill">
-                                                        <div class="assigned-emp-avatar">👤</div>
-                                                        <div class="assigned-emp-details">
-                                                            <span class="assigned-emp-name">{{ $assignedInfo['employee'] }}</span>
-                                                            <span class="assigned-emp-meta">Allotted • {{ $assignedInfo['mode'] ?? 'Assigned' }}</span>
-                                                        </div>
-                                                        <button type="button" 
-                                                                class="btn-change-emp" 
-                                                                onclick="openAssignBox('{{ $appliKey }}', '{{ addslashes($candidateName) }}')" 
-                                                                title="Change allotment">
-                                                            Change
-                                                        </button>
-                                                    </div>
-                                                @else
-                                                    <button type="button" 
-                                                            class="btn-assign" 
-                                                            onclick="openAssignBox('{{ $appliKey }}', '{{ addslashes($candidateName) }}')"
-                                                            title="Allot to Counselor or Telecaller">
-                                                        <span>👤</span> Assign
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </td>
                                     </tr>
                                 @empty
                                     <tr id="emptyTableInitialRow">
-                                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                                        <td colspan="6" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
                                             No enquiry records found in the database.
                                         </td>
                                     </tr>
@@ -361,18 +273,118 @@
 
                                 <!-- LIVE FILTER NO RESULTS PLACEHOLDER -->
                                 <tr id="noFilterMatchesRow" style="display: none;">
-                                    <td colspan="8" style="text-align: center; padding: 2.5rem 1rem; background: #fafafa;">
+                                    <td colspan="6" style="text-align: center; padding: 2.5rem 1rem; background: #fafafa;">
                                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔍</div>
                                         <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">No enquiries match the selected filters</div>
-                                        <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;" id="noMatchesDetailText">Try adjusting or clearing your Phone, Status, or Date filter.</div>
-                                        <button type="button" onclick="resetFilters()" class="btn-action-sm btn-verify" style="margin: 0 auto; display: inline-flex;">
-                                            ↺ Reset All Filters
+                                        <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;" id="noMatchesDetailText">No records match search.</div>
+                                        <button type="button" onclick="window.clearFilterInput('liveFilterSearch')" class="btn-action-sm btn-verify" style="margin: 0 auto; display: inline-flex;">
+                                            ↺ Clear Search
                                         </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Direct Dedicated Live Filter Script for Enquiry List -->
+                    <script>
+                        window.handleEnquiryLiveSearch = function(rawQuery) {
+                            var input = document.getElementById('liveFilterSearch');
+                            var query = (rawQuery !== undefined ? rawQuery : (input ? input.value : '')).trim().toLowerCase();
+                            var countBadge = document.getElementById('filterCountBadge');
+                            var noMatchRow = document.getElementById('noFilterMatchesRow');
+                            var noMatchesDetail = document.getElementById('noMatchesDetailText');
+                            var table = document.getElementById('enquiriesTable');
+                            if (!table) return;
+
+                            var rows = table.querySelectorAll('tbody tr.enquiry-row');
+                            var totalCount = rows.length;
+                            if (!totalCount) return;
+
+                            var tokens = query ? query.split(/\s+/).filter(Boolean) : [];
+                            var visibleCount = 0;
+
+                            for (var i = 0; i < rows.length; i++) {
+                                var row = rows[i];
+                                if (!tokens.length) {
+                                    row.style.display = '';
+                                    visibleCount++;
+                                    continue;
+                                }
+
+                                var dataSearch = row.getAttribute('data-search') || '';
+                                var rowText = row.innerText || row.textContent || '';
+                                var haystack = (dataSearch + ' ' + rowText).toLowerCase();
+
+                                var matches = true;
+                                for (var t = 0; t < tokens.length; t++) {
+                                    if (haystack.indexOf(tokens[t]) === -1) {
+                                        matches = false;
+                                        break;
+                                    }
+                                }
+
+                                if (matches) {
+                                    row.style.display = '';
+                                    visibleCount++;
+                                } else {
+                                    row.style.display = 'none';
+                                }
+                            }
+
+                            if (countBadge) {
+                                if (tokens.length) {
+                                    countBadge.innerHTML = '<strong>' + visibleCount + '</strong> of ' + totalCount + ' enquiries matched';
+                                    countBadge.style.background = '#dbeafe';
+                                    countBadge.style.color = '#1e40af';
+                                } else {
+                                    countBadge.textContent = 'Showing ' + totalCount + ' of ' + totalCount + ' enquiries';
+                                    countBadge.style.background = '#f1f5f9';
+                                    countBadge.style.color = '#475569';
+                                }
+                            }
+
+                            if (noMatchRow) {
+                                if (visibleCount === 0 && totalCount > 0) {
+                                    noMatchRow.style.display = '';
+                                    if (noMatchesDetail) {
+                                        noMatchesDetail.textContent = 'No records match search: "' + query + '"';
+                                    }
+                                } else {
+                                    noMatchRow.style.display = 'none';
+                                }
+                            }
+                        };
+
+                        window.clearFilterInput = function(inputId) {
+                            var input = document.getElementById(inputId || 'liveFilterSearch');
+                            if (input) {
+                                input.value = '';
+                                window.handleEnquiryLiveSearch('');
+                                input.focus();
+                            }
+                        };
+
+                        window.resetFilters = function() {
+                            window.clearFilterInput('liveFilterSearch');
+                        };
+
+                        // Immediately wire listeners
+                        (function() {
+                            var input = document.getElementById('liveFilterSearch');
+                            if (input) {
+                                input.addEventListener('input', function() {
+                                    window.handleEnquiryLiveSearch(this.value);
+                                });
+                                input.addEventListener('keyup', function() {
+                                    window.handleEnquiryLiveSearch(this.value);
+                                });
+                                if (input.value && input.value.trim()) {
+                                    window.handleEnquiryLiveSearch(input.value);
+                                }
+                            }
+                        })();
+                    </script>
                 </div>
 
             @elseif(($activeTab ?? '') === 'stdsearch')
@@ -395,7 +407,9 @@
 
                         <div class="tracking-legend">
                             <span class="legend-item"><span class="legend-dot dot-done"></span> Completed</span>
-                            <span class="legend-item"><span class="legend-dot dot-pending"></span> In Progress / Pending</span>
+                            <span class="legend-item"><span class="legend-dot dot-pending"></span> In Progress</span>
+                            <span class="legend-item"><span class="legend-dot dot-danger"></span> Fee Due</span>
+                            <span class="legend-item"><span class="legend-dot dot-awaiting"></span> Locked / Awaiting</span>
                         </div>
                     </div>
 
@@ -420,8 +434,84 @@
                                         $phone = $std->mobile ?? $std->phoneno ?? '';
                                         $appliNo = $std->application_no ?? $std->applinano ?? 'N/A';
                                         $name = $std->student_name ?? $std->name ?? 'Candidate';
-                                        $isPaid = strtolower($std->std_status ?? '') === 'paid' || in_array(strtolower($std->std_status ?? ''), ['applied', 'verified', 'registered']);
-                                        $isEnrolled = !empty($std->register_no) || in_array(strtolower($std->std_status ?? ''), ['applied', 'verified', 'registered']);
+
+                                        // Real stages from crm.student_registration
+                                        $s1 = strtolower(trim((string)($std->stage1 ?? '')));
+                                        $s2 = strtolower(trim((string)($std->stage2 ?? '')));
+                                        $s3 = strtolower(trim((string)($std->stage3 ?? '')));
+                                        $s4 = strtolower(trim((string)($std->stage4 ?? '')));
+                                        $s5 = strtolower(trim((string)($std->stage5 ?? '')));
+                                        $s6 = strtolower(trim((string)($std->stage6 ?? '')));
+
+                                        // Step 1: Registration & Fee Payment
+                                        if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
+                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done'; $st1Sub = 'Fee Paid';
+                                        } elseif (in_array($s1, ['in_progress', 'partial', 'pending_verification'])) {
+                                            $st1Pill = 'pill-pending'; $st1Icon = '⏳'; $st1Text = 'In Progress'; $st1Sub = 'In Progress';
+                                        } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
+                                            $st1Pill = 'pill-danger'; $st1Icon = '❌'; $st1Text = 'Fee Due'; $st1Sub = 'Not Paid';
+                                        } else {
+                                            $st1Pill = 'pill-awaiting'; $st1Icon = '🔒'; $st1Text = 'Pending'; $st1Sub = 'Registration';
+                                        }
+
+                                        // Step 2: Personal Profile
+                                        if (in_array($s2, ['completed', 'approved', 'done'])) {
+                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done'; $st2Sub = 'Personal Details';
+                                        } elseif (in_array($s2, ['in_progress', 'partial', 'draft'])) {
+                                            $st2Pill = 'pill-pending'; $st2Icon = '⏳'; $st2Text = 'In Progress'; $st2Sub = 'Personal Details';
+                                        } elseif (in_array($s2, ['locked', 'na', 'not_applicable'])) {
+                                            $st2Pill = 'pill-awaiting'; $st2Icon = '🔒'; $st2Text = 'Locked'; $st2Sub = 'Personal Details';
+                                        } else {
+                                            $st2Pill = 'pill-awaiting'; $st2Icon = '⏳'; $st2Text = 'Pending'; $st2Sub = 'Personal Details';
+                                        }
+
+                                        // Step 3: Academic Details
+                                        if (in_array($s3, ['completed', 'approved', 'done'])) {
+                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done'; $st3Sub = 'Academic Info';
+                                        } elseif (in_array($s3, ['in_progress', 'partial', 'draft'])) {
+                                            $st3Pill = 'pill-pending'; $st3Icon = '⏳'; $st3Text = 'In Progress'; $st3Sub = 'Academic Info';
+                                        } elseif (in_array($s3, ['locked', 'na', 'not_applicable'])) {
+                                            $st3Pill = 'pill-awaiting'; $st3Icon = '🔒'; $st3Text = 'Locked'; $st3Sub = 'Academic Info';
+                                        } else {
+                                            $st3Pill = 'pill-awaiting'; $st3Icon = '⏳'; $st3Text = 'Pending'; $st3Sub = 'Academic Info';
+                                        }
+
+                                        // Step 4: Application Download
+                                        if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
+                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done'; $st4Sub = 'Application';
+                                        } elseif (in_array($s4, ['in_progress', 'ready'])) {
+                                            $st4Pill = 'pill-pending'; $st4Icon = '⏳'; $st4Text = 'Ready'; $st4Sub = 'Application';
+                                        } elseif (in_array($s4, ['na', 'not_applicable'])) {
+                                            $st4Pill = 'pill-awaiting'; $st4Icon = '—'; $st4Text = 'N/A'; $st4Sub = 'Application';
+                                        } else {
+                                            $st4Pill = 'pill-awaiting'; $st4Icon = '🔒'; $st4Text = 'Locked'; $st4Sub = 'Application';
+                                        }
+
+                                        // Step 5: VSAT Result / Entrance Exam
+                                        if (in_array($s5, ['completed', 'approved', 'done', 'qualified'])) {
+                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done'; $st5Sub = 'VSAT Result';
+                                        } elseif (in_array($s5, ['in_progress', 'scheduled', 'pending'])) {
+                                            $st5Pill = 'pill-pending'; $st5Icon = '⏳'; $st5Text = 'In Progress'; $st5Sub = 'VSAT Result';
+                                        } elseif (in_array($s5, ['na', 'not_applicable'])) {
+                                            $st5Pill = 'pill-awaiting'; $st5Icon = '—'; $st5Text = 'N/A'; $st5Sub = 'VSAT Result';
+                                        } else {
+                                            $st5Pill = 'pill-awaiting'; $st5Icon = '🔒'; $st5Text = 'Locked'; $st5Sub = 'VSAT Result';
+                                        }
+
+                                        // Step 6: Enrollment Confirmation
+                                        $isAdmitted = in_array($s6, ['completed', 'approved', 'done', 'admitted', 'enrolled'])
+                                            || !empty($std->register_no)
+                                            || in_array(strtolower($std->std_status ?? ''), ['admitted', 'enrolled']);
+
+                                        if ($isAdmitted) {
+                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done'; $st6Sub = 'Enrollment';
+                                        } elseif (in_array($s6, ['in_progress', 'seat_allotted', 'counseling'])) {
+                                            $st6Pill = 'pill-pending'; $st6Icon = '⏳'; $st6Text = 'In Progress'; $st6Sub = 'Enrollment';
+                                        } elseif (in_array($s6, ['na', 'not_applicable'])) {
+                                            $st6Pill = 'pill-awaiting'; $st6Icon = '—'; $st6Text = 'N/A'; $st6Sub = 'Enrollment';
+                                        } else {
+                                            $st6Pill = 'pill-awaiting'; $st6Icon = '🔒'; $st6Text = 'Locked'; $st6Sub = 'Enrollment';
+                                        }
                                     @endphp
                                     <tr class="register-track-row" 
                                         data-search="{{ strtolower($appliNo . ' ' . $name . ' ' . $phone) }}">
@@ -439,38 +529,38 @@
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill pill-done">✓ Done</span>
-                                                <div class="step-sub-text">Registration</div>
+                                                <span class="tracking-pill {{ $st1Pill }}">{{ $st1Icon }} {{ $st1Text }}</span>
+                                                <div class="step-sub-text">{{ $st1Sub }}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill pill-done">✓ Done</span>
-                                                <div class="step-sub-text">Academic</div>
+                                                <span class="tracking-pill {{ $st2Pill }}">{{ $st2Icon }} {{ $st2Text }}</span>
+                                                <div class="step-sub-text">{{ $st2Sub }}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill pill-done">✓ Done</span>
-                                                <div class="step-sub-text">KYC Verified</div>
+                                                <span class="tracking-pill {{ $st3Pill }}">{{ $st3Icon }} {{ $st3Text }}</span>
+                                                <div class="step-sub-text">{{ $st3Sub }}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $isPaid ? 'pill-done' : 'pill-pending' }}">{{ $isPaid ? '✓ Done' : '⏳ Pending' }}</span>
-                                                <div class="step-sub-text">{{ $isPaid ? 'Fee Paid' : 'Fee Due' }}</div>
+                                                <span class="tracking-pill {{ $st4Pill }}">{{ $st4Icon }} {{ $st4Text }}</span>
+                                                <div class="step-sub-text">{{ $st4Sub }}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill pill-done">✓ Done</span>
-                                                <div class="step-sub-text">{{ $std->program?->program_short_name ?? 'B.Tech' }}</div>
+                                                <span class="tracking-pill {{ $st5Pill }}">{{ $st5Icon }} {{ $st5Text }}</span>
+                                                <div class="step-sub-text">{{ $st5Sub }}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $isEnrolled ? 'pill-done' : 'pill-pending' }}">{{ $isEnrolled ? '✓ Done' : '⏳ Pending' }}</span>
-                                                <div class="step-sub-text">Enrollment</div>
+                                                <span class="tracking-pill {{ $st6Pill }}">{{ $st6Icon }} {{ $st6Text }}</span>
+                                                <div class="step-sub-text">{{ $st6Sub }}</div>
                                             </div>
                                         </td>
                                     </tr>
@@ -484,6 +574,27 @@
                             </tbody>
                         </table>
                     </div>
+                    <script>
+                        (function() {
+                            const input = document.getElementById('registerListSearchInput');
+                            if (!input) return;
+                            const table = document.getElementById('registerListTable');
+                            if (!table) return;
+                            const rows = Array.from(table.querySelectorAll('tbody tr.register-track-row'));
+                            const filterRows = function(q) {
+                                const term = (q || '').trim().toLowerCase();
+                                rows.forEach(row => {
+                                    const text = (row.getAttribute('data-search') || row.innerText || '').toLowerCase();
+                                    row.style.display = !term || text.includes(term) ? '' : 'none';
+                                });
+                            };
+                            input.addEventListener('input', function() { filterRows(this.value); });
+                            input.addEventListener('keyup', function() { filterRows(this.value); });
+                            if (input.value && input.value.trim()) {
+                                filterRows(input.value);
+                            }
+                        })();
+                    </script>
                 </div>
 
             @elseif(($activeTab ?? '') === 'couponinfo')
@@ -1114,8 +1225,8 @@
                     </div>
                 </div>
 
-            @else
-                <!-- DEFAULT TAB: OVERVIEW DASHBOARD -->
+            @elseif(($activeTab ?? '') === 'overview')
+                <!-- TAB: OVERVIEW DASHBOARD (HIDDEN BY DEFAULT) -->
                 <div class="content-card">
                     <div class="card-header-bar">
                         <div>
@@ -1658,138 +1769,53 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const phoneInput = document.getElementById('liveFilterPhone');
-    const statusInput = document.getElementById('liveFilterStatus');
-    const dateInput = document.getElementById('liveFilterDate');
-    const resetBtn = document.getElementById('btnResetFilters');
-    const countBadge = document.getElementById('filterCountBadge');
-    const noMatchRow = document.getElementById('noFilterMatchesRow');
-    const noMatchesDetail = document.getElementById('noMatchesDetailText');
-    const rows = Array.from(document.querySelectorAll('.enquiry-row'));
-
-    function applyLiveFilters() {
-        const phoneVal = (phoneInput?.value || '').trim().toLowerCase();
-        const statusVal = (statusInput?.value || '').trim().toLowerCase();
-        const dateVal = (dateInput?.value || '').trim();
-
-        let visibleCount = 0;
-
-        rows.forEach(function (row) {
-            const rowPhone = (row.getAttribute('data-phone') || '').toLowerCase();
-            const rowStatus = (row.getAttribute('data-status') || '').toLowerCase();
-            const rowDate = row.getAttribute('data-date') || '';
-
-            // 1. Phone match: empty or phone contains substring
-            const matchPhone = !phoneVal || rowPhone.includes(phoneVal);
-
-            // 2. Status match: empty or matches status
-            const matchStatus = !statusVal || rowStatus === statusVal;
-
-            // 3. Date match: empty or matches YYYY-MM-DD
-            const matchDate = !dateVal || rowDate === dateVal;
-
-            if (matchPhone && matchStatus && matchDate) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
+    const searchInput = document.getElementById('liveFilterSearch');
+    if (searchInput && window.handleEnquiryLiveSearch) {
+        searchInput.addEventListener('input', function() {
+            window.handleEnquiryLiveSearch(this.value);
         });
-
-        // Update counter badge
-        if (countBadge) {
-            if (phoneVal || statusVal || dateVal) {
-                countBadge.innerHTML = `<strong>${visibleCount}</strong> of ${rows.length} enquiries matched`;
-                countBadge.style.background = '#dbeafe';
-                countBadge.style.color = '#1e40af';
-            } else {
-                countBadge.textContent = `Showing all ${rows.length} enquiries`;
-                countBadge.style.background = '#f1f5f9';
-                countBadge.style.color = '#475569';
-            }
+        searchInput.addEventListener('keyup', function() {
+            window.handleEnquiryLiveSearch(this.value);
+        });
+        if (searchInput.value && searchInput.value.trim()) {
+            window.handleEnquiryLiveSearch(searchInput.value);
         }
-
-        // Show/hide no matching rows message
-        if (noMatchRow) {
-            if (visibleCount === 0 && rows.length > 0) {
-                noMatchRow.style.display = '';
-                if (noMatchesDetail) {
-                    const activeFilters = [];
-                    if (phoneVal) activeFilters.push(`Phone: "${phoneVal}"`);
-                    if (statusVal) activeFilters.push(`Status: "${statusVal}"`);
-                    if (dateVal) activeFilters.push(`Date: "${dateVal}"`);
-                    noMatchesDetail.textContent = `No records match filters: ${activeFilters.join(', ')}`;
-                }
-            } else {
-                noMatchRow.style.display = 'none';
-            }
-        }
-    }
-
-    // Live event listeners
-    if (phoneInput) {
-        phoneInput.addEventListener('input', applyLiveFilters);
-        phoneInput.addEventListener('keyup', applyLiveFilters);
-    }
-    if (statusInput) {
-        statusInput.addEventListener('change', applyLiveFilters);
-    }
-    if (dateInput) {
-        dateInput.addEventListener('input', applyLiveFilters);
-        dateInput.addEventListener('change', applyLiveFilters);
-    }
-
-    // Reset handlers
-    window.resetFilters = function () {
-        if (phoneInput) phoneInput.value = '';
-        if (statusInput) statusInput.value = '';
-        if (dateInput) dateInput.value = '';
-        applyLiveFilters();
-        if (phoneInput) phoneInput.focus();
-    };
-
-    window.clearFilterInput = function (inputId) {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.value = '';
-            applyLiveFilters();
-            input.focus();
-        }
-    };
-
-    if (resetBtn) {
-        resetBtn.addEventListener('click', window.resetFilters);
-    }
-
-    // Trigger on page load in case pre-filled values exist
-    if (rows.length > 0) {
-        applyLiveFilters();
     }
 
     // Live search for Register List (Student Tracking)
     const registerSearchInput = document.getElementById('registerListSearchInput');
     const registerRows = Array.from(document.querySelectorAll('.register-track-row'));
     if (registerSearchInput && registerRows.length > 0) {
-        registerSearchInput.addEventListener('input', function () {
-            const query = this.value.trim().toLowerCase();
+        const filterRegister = function () {
+            const query = registerSearchInput.value.trim().toLowerCase();
             registerRows.forEach(row => {
                 const searchData = (row.getAttribute('data-search') || '').toLowerCase();
                 row.style.display = !query || searchData.includes(query) ? '' : 'none';
             });
-        });
+        };
+        registerSearchInput.addEventListener('input', filterRegister);
+        registerSearchInput.addEventListener('keyup', filterRegister);
+        if (registerSearchInput.value && registerSearchInput.value.trim()) {
+            filterRegister();
+        }
     }
 
     // Live search for Coupon Info (Payment & Coupon Tracking)
     const couponSearchInput = document.getElementById('couponListSearchInput');
     const couponRows = Array.from(document.querySelectorAll('.coupon-track-row'));
     if (couponSearchInput && couponRows.length > 0) {
-        couponSearchInput.addEventListener('input', function () {
-            const query = this.value.trim().toLowerCase();
+        const filterCoupons = function () {
+            const query = couponSearchInput.value.trim().toLowerCase();
             couponRows.forEach(row => {
                 const searchData = (row.getAttribute('data-search') || '').toLowerCase();
                 row.style.display = !query || searchData.includes(query) ? '' : 'none';
             });
-        });
+        };
+        couponSearchInput.addEventListener('input', filterCoupons);
+        couponSearchInput.addEventListener('keyup', filterCoupons);
+        if (couponSearchInput.value && couponSearchInput.value.trim()) {
+            filterCoupons();
+        }
     }
 
     // =========================================================================
@@ -2083,13 +2109,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Allotment error:', err);
             alert('Failed to connect to server. Please try again.');
         });
-    };
-
-        // Close modal
-        closeAssignBox();
-
-        // Show toast
-        showToastNotification(`✓ Successfully allotted to ${empName} (${modeDisplay})!`);
     };
 
     function showToastNotification(msg) {

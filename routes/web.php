@@ -46,6 +46,9 @@ Route::post('/crm/coupons/generate-personal', [\Modules\Crm\Http\Controllers\Crm
 Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
 Route::get('/leads/allottedleads', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allotted');
 Route::get('/leads/leadsallocation', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.allocation');
+Route::get('/leads/leadsupload', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.upload');
+Route::post('/leads/upload-excel', [\Modules\Leads\Http\Controllers\LeadsController::class, 'uploadExcel'])->middleware('auth')->name('leads.uploadExcel');
+Route::get('/leads/download-sample', [\Modules\Leads\Http\Controllers\LeadsController::class, 'downloadSample'])->middleware('auth')->name('leads.downloadSample');
 Route::get('/leads/leads input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth')->name('leads.input');
 Route::get('/leads/leadsinput', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
 Route::get('/leads/leads-input', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');
