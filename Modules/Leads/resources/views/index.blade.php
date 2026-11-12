@@ -1985,6 +1985,17 @@
                 </button>
             </div>
         </div>
+
+        <!-- Student Previous Task History (shown when records exist in crm.telecaller_leads_tasks) -->
+        <div id="modalStudentHistorySection" style="display: none; border-top: 1px solid var(--card-border); background: #f8fafc; padding: 0.9rem 1.75rem 1.15rem; max-height: 210px; overflow-y: auto;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem;">
+                <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #334155;">
+                    Previous Telecaller History
+                </span>
+                <span id="modalHistoryCount" style="font-size: 0.7rem; font-weight: 700; color: #475569; background: #e2e8f0; padding: 1px 7px; border-radius: 999px;">0</span>
+            </div>
+            <div id="modalStudentHistoryList" style="display: flex; flex-direction: column; gap: 0.45rem;"></div>
+        </div>
     </div>
 </div>
 
@@ -2115,6 +2126,58 @@
 
         document.getElementById('wizardModal').classList.add('active');
         document.body.style.overflow = 'hidden';
+        loadModalStudentHistory(applinano, phone);
+    }
+
+    function escapeHistoryHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function loadModalStudentHistory(applinano, phone) {
+        const section = document.getElementById('modalStudentHistorySection');
+        const list = document.getElementById('modalStudentHistoryList');
+        const countEl = document.getElementById('modalHistoryCount');
+        if (!section || !list) return;
+
+        section.style.display = 'none';
+        list.innerHTML = '';
+        if (countEl) countEl.textContent = '0';
+
+        const targetAppli = (applinano && applinano !== '') ? applinano : '0';
+        const url = `/leads/${encodeURIComponent(targetAppli)}/history?phone=${encodeURIComponent(phone || '')}`;
+
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data || !data.success || !Array.isArray(data.history) || data.history.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                if (countEl) countEl.textContent = String(data.history.length);
+                list.innerHTML = data.history.map(item => `
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.55rem 0.75rem; font-size: 0.76rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-weight: 700; color: #0f172a;">${escapeHistoryHtml(item.stage_name)}</span>
+                            <span style="font-size: 0.7rem; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+                                ${escapeHistoryHtml(item.stage_calltime)} &bull; ${escapeHistoryHtml(item.stage_call_duration)}
+                            </span>
+                        </div>
+                        <div style="margin-top: 0.2rem; color: #475569; font-size: 0.73rem;">
+                            <strong>Person:</strong> ${escapeHistoryHtml(item.stage_callperson)}${item.stage_remark ? ` &nbsp;|&nbsp; <strong>Remarks:</strong> ${escapeHistoryHtml(item.stage_remark)}` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                section.style.display = 'block';
+            })
+            .catch(() => {
+                section.style.display = 'none';
+            });
     }
 
     const durationRollerState = { hrs: 0, mins: 5, secs: 0, initialized: false };

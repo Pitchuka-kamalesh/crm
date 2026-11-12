@@ -376,6 +376,7 @@ class TelecallerService
         $taskCrmId = !empty($personalCrmId) ? (string) $personalCrmId : '0';
 
         $taskEmpCode = $empCode !== '' ? $empCode : (string) ($lead->empcode ?: '0');
+        $callDuration = trim((string) ($params['stage_call_duration'] ?? $params['call_duration'] ?? ''));
 
         $task = TelecallerLeadTask::create([
             'applino' => $taskApplino,
@@ -384,6 +385,7 @@ class TelecallerService
             'empcode' => $taskEmpCode,
             'stage_name' => $stageName,
             'stage_calltime' => $callTime,
+            'stage_call_duration' => $callDuration !== '' ? $callDuration : null,
             'stage_remark' => $remark,
             'stage_callperson' => $callPerson ?: 'Student / Candidate',
             'log_userid' => $logUser,
