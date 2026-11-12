@@ -25,7 +25,7 @@ class LeadsController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $roleId = $user ? $user->getActiveRoleId() : 4;
+        $roleId = $user ? $user->getActiveRoleId() : \App\Services\RoleService::telecallerRoleId();
         $roleName = $user ? $user->role_label : 'Tele Caller';
 
         $currentRoute = $request->route() ? $request->route()->getName() : '';
@@ -36,7 +36,7 @@ class LeadsController extends Controller
                 'leads.upload' => 'upload',
                 'leads.input' => 'input',
                 'leads.allotted' => 'allotted',
-                default => (str_contains($request->path(), 'leadsupload') ? 'upload' : ($roleId === 4 ? 'allotted' : 'input')),
+                default => (str_contains($request->path(), 'leadsupload') ? 'upload' : (\App\Services\RoleService::isTelecaller($roleId) ? 'allotted' : 'input')),
             };
         }
 
@@ -69,32 +69,6 @@ class LeadsController extends Controller
                 if (is_array($raw)) {
                     $recentUploadedFiles = collect($raw);
                 }
-            }
-            if ($recentUploadedFiles->isEmpty()) {
-                $recentUploadedFiles = collect([
-                    [
-                        'id' => 'up_01',
-                        'filename' => 'AP_EAMCET_Qualified_Candidates.xlsx',
-                        'filesize' => '142.5 KB',
-                        'total_records' => 500,
-                        'inserted_count' => 450,
-                        'duplicates_count' => 50,
-                        'status' => 'Success',
-                        'uploaded_by' => $user?->usercode ?: '02598',
-                        'uploaded_at' => now()->subHours(2)->format('d M Y, h:i A'),
-                    ],
-                    [
-                        'id' => 'up_02',
-                        'filename' => 'VSAT_2026_Walkin_Inquiries.csv',
-                        'filesize' => '48.2 KB',
-                        'total_records' => 180,
-                        'inserted_count' => 175,
-                        'duplicates_count' => 5,
-                        'status' => 'Success',
-                        'uploaded_by' => $user?->usercode ?: '02598',
-                        'uploaded_at' => now()->subDay()->format('d M Y, h:i A'),
-                    ],
-                ]);
             }
         }
 
@@ -265,8 +239,8 @@ class LeadsController extends Controller
                 $leadsQuery->where('program_id', $programFilter);
             }
 
-            // If logged in as Tele Caller (Role 4) and on allotted tab, show assigned leads or all if not assigned
-            if ($roleId === 4 && $activeTab === 'allotted' && $user) {
+            // If logged in as Tele Caller and on allotted tab, show assigned leads or all if not assigned
+            if (\App\Services\RoleService::isTelecaller($roleId) && $activeTab === 'allotted' && $user) {
                 $assignedApplis = TelecallerLead::where('empcode', $user->usercode)->pluck('applino');
                 if ($assignedApplis->isNotEmpty()) {
                     $leadsQuery->whereIn('applinano', $assignedApplis);
@@ -288,9 +262,9 @@ class LeadsController extends Controller
         $totalAllotted = $metrics['total_allocated'];
         $unallocatedCount = $metrics['unallocated'];
         $totalTasksCount = $metrics['total_tasks'];
-        $callsMadeToday = $totalTasksCount ?: 14;
-        $followupsScheduled = CrmStudentRegistration::where('std_status', 'Follow-up')->count() ?: 6;
-        $converted = CrmStudentRegistration::whereIn('std_status', ['Fee Paid', 'Registered'])->count() ?: 3;
+        $callsMadeToday = $totalTasksCount;
+        $followupsScheduled = CrmStudentRegistration::where('std_status', 'Follow-up')->count();
+        $converted = CrmStudentRegistration::whereIn('std_status', ['Fee Paid', 'Registered'])->count();
 
         // DB allocations and page-scoped latest tasks from crm.telecaller_leads / crm.telecaller_leads_tasks
         $dbAllocations = collect();
@@ -465,7 +439,7 @@ class LeadsController extends Controller
             'stage3' => 'locked',
             'stage4' => 'locked',
             'stage5' => 'locked',
-            'log_userid' => auth()->user()?->usercode ?? '02598',
+            'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
             'log_ipaddress' => $request->ip() ?: '127.0.0.1',
             'log_timestamp' => now(),
         ]);
@@ -481,7 +455,7 @@ class LeadsController extends Controller
                 'phoneno' => $student->phoneno,
                 'stage_name' => 'Stage 1: Calling & Verification',
                 'stage_remark' => 'Assigned directly on Lead input',
-                'log_userid' => auth()->user()?->usercode ?? '02598',
+                'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
                 'log_ipaddress' => $request->ip() ?: '127.0.0.1',
             ]);
         }
@@ -558,7 +532,7 @@ class LeadsController extends Controller
 
         $tApplino = $telecallerLead?->applino ?: ($student?->applinano ?: $applinano);
         $tPhoneno = $telecallerLead?->phoneno ?: ($student?->phoneno ?: $cleanTarget);
-        $tEmpcode = $telecallerLead?->empcode ?: (auth()->user()?->usercode ?? '02598');
+        $tEmpcode = $telecallerLead?->empcode ?: (auth()->user()?->usercode ?? '');
 
         $validationAppli = ($student?->applinano && $student->applinano !== '0')
             ? (string) $student->applinano
@@ -582,7 +556,7 @@ class LeadsController extends Controller
                 'stage_call_duration' => $callDuration,
                 'stage_remark' => $fullRemark,
                 'stage_callperson' => $callPerson ?: ($student?->name ?: 'Student / Candidate'),
-                'log_userid' => auth()->user()?->usercode ?? '02598',
+                'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
                 'log_ipaddress' => $request->ip() ?: '127.0.0.1',
             ]);
         } catch (\Throwable $e) {
@@ -651,7 +625,7 @@ class LeadsController extends Controller
 
         $tApplino = $telecallerLead?->applino ?: ($student?->applinano ?: '0');
         $tPhoneno = $telecallerLead?->phoneno ?: ($student?->phoneno ?: $cleanTarget);
-        $tEmpcode = $telecallerLead?->empcode ?: ($user?->usercode ?? '03434');
+        $tEmpcode = $telecallerLead?->empcode ?: ($user?->usercode ?? '');
 
         // Record status update action strictly in crm.telecaller_leads_tasks
         try {
@@ -662,7 +636,7 @@ class LeadsController extends Controller
                 'stage_name' => 'Call Status: ' . $status,
                 'stage_remark' => 'Lead call status updated to ' . $status,
                 'stage_callperson' => $student?->name ?: 'Student / Candidate',
-                'log_userid' => $user?->usercode ?? '02598',
+                'log_userid' => $user?->usercode ?? 'SYSTEM',
                 'log_ipaddress' => $request->ip() ?: '127.0.0.1',
             ]);
         } catch (\Throwable $e) {
@@ -692,7 +666,7 @@ class LeadsController extends Controller
     {
         $res = \App\Services\TelecallerService::allocateLeads([
             'empcode' => $request->input('empcode'),
-            'crmid' => auth()->user()?->usercode ?? '02598',
+            'crmid' => auth()->user()?->usercode ?? 'SYSTEM',
             'allot_mode' => $request->input('allot_mode', 'selected'),
             'applino' => $request->input('applino'),
             'phoneno' => $request->input('phoneno'),
@@ -701,7 +675,7 @@ class LeadsController extends Controller
             'allot_date' => $request->input('allot_date'),
             'stage_name' => $request->input('stage_name', 'Stage 1: Calling & Verification'),
             'stage_remark' => $request->input('stage_remark', 'Allocated via Leads Incharge allocation portal'),
-            'log_userid' => auth()->user()?->usercode ?? '02598',
+            'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
             'log_ipaddress' => $request->ip() ?: '127.0.0.1',
         ]);
 
@@ -720,11 +694,11 @@ class LeadsController extends Controller
         $res = \App\Services\TelecallerService::logLeadTask([
             'applino' => $request->input('applino'),
             'phoneno' => $request->input('phoneno'),
-            'empcode' => $request->input('empcode') ?: (auth()->user()?->usercode ?? '03434'),
+            'empcode' => $request->input('empcode') ?: (auth()->user()?->usercode ?? ''),
             'stage_name' => $request->input('stage_name', 'Telecaller Follow-up'),
             'stage_remark' => $request->input('stage_remark', ''),
             'stage_callperson' => $request->input('stage_callperson', ''),
-            'log_userid' => auth()->user()?->usercode ?? '02598',
+            'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
             'log_ipaddress' => $request->ip() ?: '127.0.0.1',
         ]);
 
@@ -737,5 +711,402 @@ class LeadsController extends Controller
     public function show($id) { return view('leads::show'); }
     public function edit($id) { return view('leads::edit'); }
     public function update(Request $request, $id) { return response()->json(['success' => true]); }
+    /**
+     * Fetch previous telecaller task history from crm.telecaller_leads_tasks for a lead.
+     */
+    public function taskHistory(Request $request, string $applinano): \Illuminate\Http\JsonResponse
+    {
+        $cleanAppli = trim(str_replace('APP', '', $applinano));
+        $phone = trim((string) $request->query('phone', ''));
+        $user = auth()->user();
+        $roleId = $user ? $user->getActiveRoleId() : null;
+
+        if (\App\Services\RoleService::isTelecaller($roleId) && $user) {
+            $empCode = $user->usercode;
+            $isAllocated = TelecallerLead::where('empcode', $empCode)
+                ->where(function ($q) use ($cleanAppli, $phone) {
+                    if ($cleanAppli !== '' && $cleanAppli !== '0') {
+                        $q->where('applino', $cleanAppli)->orWhere('phoneno', $cleanAppli);
+                    }
+                    if ($phone !== '' && $phone !== '0') {
+                        $q->orWhere('phoneno', $phone);
+                    }
+                })
+                ->exists();
+
+            if (!$isAllocated) {
+                return response()->json([
+                    'success' => false,
+                    'history' => [],
+                    'message' => 'Unauthorized.',
+                ], 403);
+            }
+        }
+
+        $query = \App\Models\TelecallerLeadTask::query();
+        $hasFilter = false;
+        $query->where(function ($q) use ($cleanAppli, $phone, &$hasFilter) {
+            if ($phone !== '' && $phone !== '0') {
+                $q->orWhere('phoneno', $phone);
+                $hasFilter = true;
+            }
+            if ($cleanAppli !== '' && $cleanAppli !== '0') {
+                $q->orWhere('applino', $cleanAppli);
+                if (!$phone) {
+                    $q->orWhere('phoneno', $cleanAppli);
+                }
+                $hasFilter = true;
+            }
+        });
+
+        if (!$hasFilter) {
+            return response()->json(['success' => true, 'history' => []]);
+        }
+
+        $tasks = $query->orderBy('leadtaskid', 'desc')
+            ->limit(25)
+            ->get([
+                'leadtaskid',
+                'stage_name',
+                'stage_calltime',
+                'stage_call_duration',
+                'stage_callperson',
+                'stage_remark',
+                'empcode',
+                'log_timestamp',
+            ])
+            ->map(function ($t) {
+                $callTime = $t->stage_calltime
+                    ? $t->stage_calltime->format('d-m-Y h:i A')
+                    : ($t->log_timestamp ? $t->log_timestamp->format('d-m-Y h:i A') : '');
+
+                return [
+                    'id' => $t->leadtaskid,
+                    'stage_name' => $t->stage_name ?: 'Telecaller Stage',
+                    'stage_calltime' => $callTime,
+                    'stage_call_duration' => $t->stage_call_duration ?: '-',
+                    'stage_callperson' => $t->stage_callperson ?: '-',
+                    'stage_remark' => $t->stage_remark ?: '',
+                    'empcode' => $t->empcode ?: '',
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'history' => $tasks,
+        ]);
+    }
+
+    /**
+     * Download sample Excel/CSV template with a single Mobile Number column.
+     */
+    public function downloadSample()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="leads_sample_template.csv"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Mobile Number']);
+            $samples = ['9848881423', '9848556993', '9848482805', '9848389668', '9848179887', '9440151948', '9912996788'];
+            foreach ($samples as $phone) {
+                fputcsv($handle, [$phone]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Handle bulk upload of Excel/CSV file containing only a mobile numbers column.
+     * Validates, cleans, deduplicates, and bulk inserts into crm.leads.
+     */
+    public function uploadExcel(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'leads_file' => 'required|file|max:20480',
+        ], [
+            'leads_file.required' => 'Please select an Excel (.xlsx, .xls) or CSV file to upload.',
+            'leads_file.file' => 'The uploaded file is not valid.',
+            'leads_file.max' => 'The file size cannot exceed 20MB.',
+        ]);
+
+        if ($validator->fails()) {
+            $msg = $validator->errors()->first();
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('leads.upload', ['tab' => 'upload'])
+                ->withErrors($validator)
+                ->with('upload_error', $msg);
+        }
+
+        $file = $request->file('leads_file');
+        $ext = strtolower($file->getClientOriginalExtension());
+
+        if (!in_array($ext, ['csv', 'txt', 'xlsx', 'xls'])) {
+            $msg = 'Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('leads.upload', ['tab' => 'upload'])
+                ->with('upload_error', $msg);
+        }
+
+        $parsedPhones = $this->parsePhonesFromFile($file->getRealPath(), $ext);
+
+        if (empty($parsedPhones)) {
+            $msg = 'No valid 10-digit mobile numbers found in the uploaded file. Please ensure mobile numbers start with 6, 7, 8, or 9.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('leads.upload', ['tab' => 'upload'])
+                ->with('upload_error', $msg);
+        }
+
+        $totalFound = count($parsedPhones);
+        $uniquePhonesInFile = array_values(array_unique($parsedPhones));
+        $internalDuplicates = $totalFound - count($uniquePhonesInFile);
+
+        // Query existing phone numbers in crm.leads in chunks
+        $existingPhones = [];
+        foreach (array_chunk($uniquePhonesInFile, 1000) as $chunk) {
+            $found = DB::table('crm.leads')
+                ->whereIn('phoneno', array_map('intval', $chunk))
+                ->pluck('phoneno')
+                ->map(fn($p) => (string) $p)
+                ->toArray();
+            $existingPhones = array_merge($existingPhones, $found);
+        }
+        $existingMap = array_flip($existingPhones);
+
+        $newPhones = [];
+        $dbDuplicates = 0;
+        foreach ($uniquePhonesInFile as $phone) {
+            if (isset($existingMap[$phone])) {
+                $dbDuplicates++;
+            } else {
+                $newPhones[] = $phone;
+            }
+        }
+
+        $insertedCount = 0;
+        $currentUser = Auth::user();
+        $userCode = $currentUser?->usercode ?? 'SYSTEM';
+        $ip = $request->ip() ?? '127.0.0.1';
+        $now = now();
+        $today = $now->toDateString();
+
+        if (!empty($newPhones)) {
+            $recordsToInsert = [];
+            foreach ($newPhones as $phone) {
+                $recordsToInsert[] = [
+                    'phoneno' => (int) $phone,
+                    'phnostatus' => 'New Lead',
+                    'enquirydate' => $today,
+                    'empcode' => '0',
+                    'applino' => null,
+                    'allocated_at' => null,
+                    'log_userid' => $userCode,
+                    'log_ipaddress' => $ip,
+                    'log_timestamp' => $now,
+                ];
+            }
+
+            foreach (array_chunk($recordsToInsert, 500) as $chunk) {
+                DB::table('crm.leads')->insertOrIgnore($chunk);
+                $insertedCount += count($chunk);
+            }
+        }
+
+        $totalDuplicates = ($dbDuplicates + $internalDuplicates);
+        $summary = [
+            'total_rows' => $totalFound,
+            'inserted_count' => $insertedCount,
+            'db_duplicates' => $dbDuplicates,
+            'internal_duplicates' => $internalDuplicates,
+            'total_duplicates' => $totalDuplicates,
+        ];
+
+        $fileSizeStr = round($file->getSize() / 1024, 1) . ' KB';
+        $fileRecord = [
+            'id' => 'up_' . time(),
+            'filename' => $file->getClientOriginalName(),
+            'filesize' => $fileSizeStr,
+            'total_records' => $totalFound,
+            'inserted_count' => $insertedCount,
+            'duplicates_count' => $totalDuplicates,
+            'status' => 'Success',
+            'uploaded_by' => $userCode,
+            'uploaded_at' => now()->format('d M Y, h:i A'),
+        ];
+
+        // Record file upload in persistent history
+        try {
+            $historyPath = storage_path('app/leads_uploads_history.json');
+            $history = [];
+            if (file_exists($historyPath)) {
+                $raw = @json_decode(file_get_contents($historyPath), true);
+                if (is_array($raw)) $history = $raw;
+            }
+            array_unshift($history, $fileRecord);
+            $history = array_slice($history, 0, 30);
+            @file_put_contents($historyPath, json_encode($history, JSON_PRETTY_PRINT));
+        } catch (\Throwable $e) {}
+
+        $successMessage = "File '{$file->getClientOriginalName()}' uploaded successfully! {$insertedCount} new leads were added to crm.leads.";
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+                'summary' => $summary,
+                'file_record' => $fileRecord,
+            ]);
+        }
+
+        return redirect()->route('leads.upload', ['tab' => 'upload'])
+            ->with('upload_status', 'success')
+            ->with('upload_filename', $file->getClientOriginalName())
+            ->with('upload_summary', $summary)
+            ->with('upload_success', $successMessage);
+    }
+
+    /**
+     * Parse 10-digit mobile numbers from CSV, TXT, or XLSX file.
+     */
+    protected function parsePhonesFromFile(string $filePath, string $ext): array
+    {
+        $phones = [];
+        $ext = strtolower($ext);
+
+        if ($ext === 'csv' || $ext === 'txt') {
+            if (($handle = fopen($filePath, 'r')) !== false) {
+                while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                    if (empty($row)) continue;
+                    foreach ($row as $colVal) {
+                        $cleaned = $this->cleanPhoneNumber((string) $colVal);
+                        if ($cleaned) {
+                            $phones[] = $cleaned;
+                            break;
+                        }
+                    }
+                }
+                fclose($handle);
+            }
+        } elseif ($ext === 'xlsx') {
+            $zip = new \ZipArchive();
+            if ($zip->open($filePath) === true) {
+                $sharedStrings = [];
+                if (($xmlIndex = $zip->locateName('xl/sharedStrings.xml')) !== false) {
+                    $xmlData = $zip->getFromIndex($xmlIndex);
+                    $sxml = simplexml_load_string($xmlData);
+                    if ($sxml && isset($sxml->si)) {
+                        foreach ($sxml->si as $si) {
+                            if (isset($si->t)) {
+                                $sharedStrings[] = (string) $si->t;
+                            } elseif (isset($si->r)) {
+                                $fullText = '';
+                                foreach ($si->r as $r) {
+                                    $fullText .= (string) ($r->t ?? '');
+                                }
+                                $sharedStrings[] = $fullText;
+                            } else {
+                                $sharedStrings[] = strip_tags($si->asXML());
+                            }
+                        }
+                    }
+                }
+
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $stat = $zip->statIndex($i);
+                    if (preg_match('#xl/worksheets/sheet\d+\.xml#i', $stat['name'])) {
+                        $sheetData = $zip->getFromIndex($i);
+                        $sheetXml = simplexml_load_string($sheetData);
+                        if ($sheetXml && isset($sheetXml->sheetData->row)) {
+                            foreach ($sheetXml->sheetData->row as $row) {
+                                foreach ($row->c as $cell) {
+                                    $type = (string) ($cell['t'] ?? '');
+                                    $val = (string) ($cell->v ?? '');
+                                    if ($type === 's' && isset($sharedStrings[(int) $val])) {
+                                        $val = $sharedStrings[(int) $val];
+                                    } elseif ($type === 'inlineStr' && isset($cell->is)) {
+                                        $val = strip_tags($cell->is->asXML());
+                                    }
+                                    $cleaned = $this->cleanPhoneNumber($val);
+                                    if ($cleaned) {
+                                        $phones[] = $cleaned;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                $zip->close();
+            }
+        }
+
+        if (empty($phones) && file_exists($filePath)) {
+            $content = @file_get_contents($filePath);
+            if (!empty($content)) {
+                if (preg_match_all('/\b([6-9]\d{9})\b/', $content, $matches)) {
+                    foreach ($matches[1] as $candidate) {
+                        $cleaned = $this->cleanPhoneNumber($candidate);
+                        if ($cleaned) {
+                            $phones[] = $cleaned;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $phones;
+    }
+
+    /**
+     * Clean and validate a single phone number candidate.
+     */
+    protected function cleanPhoneNumber(?string $raw): ?string
+    {
+        if ($raw === null) return null;
+        $str = trim($raw);
+        if ($str === '') return null;
+
+        $lower = strtolower($str);
+        if (in_array($lower, ['mobile', 'phone', 'contact', 'mobile number', 'phone number', 'phoneno', 'mobile_no', 'phone_no', 'cell', 'mobile_number', 'contact_number'])) {
+            return null;
+        }
+
+        if (stripos($str, 'E+') !== false || stripos($str, '.') !== false) {
+            $num = (float) $str;
+            if ($num > 0) {
+                $str = sprintf('%.0f', $num);
+            }
+        }
+
+        $digits = preg_replace('/\D/', '', $str);
+
+        if (strlen($digits) === 12 && str_starts_with($digits, '91')) {
+            $digits = substr($digits, 2);
+        } elseif (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
+        }
+
+        if (strlen($digits) === 10 && in_array($digits[0], ['6', '7', '8', '9'])) {
+            return $digits;
+        }
+
+        return null;
+    }
+
     public function destroy($id) { return response()->json(['success' => true]); }
 }

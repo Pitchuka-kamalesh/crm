@@ -10,6 +10,57 @@ use Illuminate\Support\Facades\Log;
 
 class RoleService
 {
+    /** @var array<string, int|null> */
+    private static array $roleIdCache = [];
+
+    /**
+     * Resolve a role_id dynamically from master.roles by role_name.
+     */
+    public static function getRoleIdByName(string $roleName): ?int
+    {
+        $key = strtolower(trim($roleName));
+        if (array_key_exists($key, self::$roleIdCache)) {
+            return self::$roleIdCache[$key];
+        }
+
+        try {
+            $roleId = Role::whereRaw('LOWER(role_name) = ?', [$key])
+                ->where('role_status', 1)
+                ->value('role_id');
+
+            return self::$roleIdCache[$key] = ($roleId !== null ? (int) $roleId : null);
+        } catch (\Throwable $e) {
+            return self::$roleIdCache[$key] = null;
+        }
+    }
+
+    public static function telecallerRoleId(): ?int
+    {
+        return self::getRoleIdByName('Tele Caller');
+    }
+
+    public static function studentRoleId(): ?int
+    {
+        return self::getRoleIdByName('Student');
+    }
+
+    public static function employeeRoleId(): ?int
+    {
+        return self::getRoleIdByName('Employee');
+    }
+
+    public static function isTelecaller(?int $roleId): bool
+    {
+        $telecallerId = self::telecallerRoleId();
+        return $roleId !== null && $telecallerId !== null && $roleId === $telecallerId;
+    }
+
+    public static function isStudent(?int $roleId): bool
+    {
+        $studentId = self::studentRoleId();
+        return $roleId !== null && $studentId !== null && $roleId === $studentId;
+    }
+
     /**
      * Get all ACTIVE roles assigned to an employee/user from master.roles_assigned.
      */

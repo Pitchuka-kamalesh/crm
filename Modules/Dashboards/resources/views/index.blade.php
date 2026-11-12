@@ -1939,7 +1939,7 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">passing year : <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year ?: 2024 }}" placeholder="2024" min="2000" max="2030" required>
+                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year ?? '' }}" placeholder="2024" min="2000" max="2030" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Evaluation Type / Marks: <span style="color:#ef4444;">*</span></label>
@@ -2036,7 +2036,7 @@
 
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?: 2026 }}" placeholder="2026" min="2000" max="2030">
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? '' }}" placeholder="2026" min="2000" max="2030">
                                     </div>
                                 </div>
 
@@ -2081,7 +2081,7 @@
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="ug_passed_year" class="mockup-input" value="{{ $academicDetails?->ug_passed_year ?: 2024 }}" placeholder="2024" min="2000" max="2030">
+                                        <input type="number" name="ug_passed_year" class="mockup-input" value="{{ $academicDetails?->ug_passed_year ?? '' }}" placeholder="2024" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Aggregate CGPA / %: <span style="color:#ef4444;">*</span></label>
@@ -2122,7 +2122,7 @@
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year ?: 2026 }}" placeholder="2026" min="2000" max="2030">
+                                        <input type="number" name="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year ?? '' }}" placeholder="2026" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">PG CGPA / %: <span style="color:#ef4444;">*</span></label>

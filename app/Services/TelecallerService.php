@@ -18,35 +18,35 @@ use Illuminate\Support\Facades\Log;
 class TelecallerService
 {
     /**
-     * Get list of telecaller employees (Role ID 4 in roles_assigned or employees).
+     * Get list of telecaller employees resolved dynamically from master.roles / master.roles_assigned / master.employees.
      */
     public static function getTelecallers(): Collection
     {
         try {
-            $telecallerCodes = RoleAssigned::where('roles_role_id', 4)
+            $telecallerRoleId = RoleService::telecallerRoleId();
+            if ($telecallerRoleId === null) {
+                return collect();
+            }
+
+            $telecallerCodes = RoleAssigned::where('roles_role_id', $telecallerRoleId)
                 ->pluck('emp_id')
                 ->filter()
                 ->unique();
 
             $query = Employee::query();
             if ($telecallerCodes->isNotEmpty()) {
-                $query->whereIn('emp_code', $telecallerCodes)
-                    ->orWhere('role_id', 4);
+                $query->where(function ($q) use ($telecallerCodes, $telecallerRoleId) {
+                    $q->whereIn('emp_code', $telecallerCodes)
+                        ->orWhere('role_id', $telecallerRoleId);
+                });
             } else {
-                $query->where('role_id', 4);
+                $query->where('role_id', $telecallerRoleId);
             }
 
-            $telecallers = $query->orderBy('full_name')->get();
-
-            if ($telecallers->isEmpty()) {
-                // Fallback to active employees
-                $telecallers = Employee::where('is_active', true)->orderBy('full_name')->take(15)->get();
-            }
-
-            return $telecallers;
+            return $query->orderBy('full_name')->get();
         } catch (\Throwable $e) {
             Log::error('Error fetching telecallers: ' . $e->getMessage());
-            return Employee::take(10)->get();
+            return collect();
         }
     }
 
@@ -63,7 +63,7 @@ class TelecallerService
         $allotMode = trim($params['allot_mode'] ?? 'single');
         $stageName = trim($params['stage_name'] ?? 'Stage 1: Calling & Verification');
         $stageRemark = trim($params['stage_remark'] ?? 'Lead assigned to telecaller for admission follow-up');
-        $logUser = trim($params['log_userid'] ?? auth()->user()?->usercode ?? '02598');
+        $logUser = trim($params['log_userid'] ?? auth()->user()?->usercode ?? 'SYSTEM');
         $ipAddress = trim($params['log_ipaddress'] ?? request()->ip() ?? '127.0.0.1');
 
         if (empty($empCode)) {
@@ -304,11 +304,11 @@ class TelecallerService
     {
         $applino = trim((string) ($params['applino'] ?? ''));
         $phoneno = trim((string) ($params['phoneno'] ?? ''));
-        $empCode = trim((string) ($params['empcode'] ?? auth()->user()?->usercode ?? '02598'));
+        $empCode = trim((string) ($params['empcode'] ?? auth()->user()?->usercode ?? ''));
         $stageName = trim((string) ($params['stage_name'] ?? 'Calling & Verification'));
         $remark = trim((string) ($params['stage_remark'] ?? ''));
         $callPerson = trim((string) ($params['stage_callperson'] ?? ''));
-        $logUser = trim((string) ($params['log_userid'] ?? auth()->user()?->usercode ?? '02598'));
+        $logUser = trim((string) ($params['log_userid'] ?? auth()->user()?->usercode ?? 'SYSTEM'));
         $ip = trim((string) ($params['log_ipaddress'] ?? request()->ip() ?? '127.0.0.1'));
 
         $student = null;

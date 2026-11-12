@@ -2039,7 +2039,7 @@
                                         </td>
                                         <td>
                                             <span style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">
-                                                {{ $file['uploaded_by'] ?? '02598' }}
+                                                {{ $file['uploaded_by'] ?? '-' }}
                                             </span>
                                         </td>
                                         <td>
