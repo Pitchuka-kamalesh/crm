@@ -373,11 +373,12 @@ class LoginController extends Controller
         }
 
         // Detect or record lead in crm.leads
+        $existingLead = null;
         try {
             $leadPhone = (int)$cleanPhone;
             $existingLead = Lead::where('phoneno', $leadPhone)->first();
             if (!$existingLead) {
-                Lead::create([
+                $existingLead = Lead::create([
                     'phoneno' => $leadPhone,
                     'phnostatus' => 'New Lead',
                     'enquirydate' => now()->toDateString(),
@@ -390,11 +391,102 @@ class LoginController extends Controller
             Log::warning('Error detecting/saving crm.leads in sendOtp: ' . $e->getMessage());
         }
 
+        // Determine if this mobile number / code belongs to an employee or a student
+        $isEmployee = false;
+        if ($employeeByCode) {
+            $isEmployee = true;
+        } else {
+            try {
+                $empCount = Employee::where('phone_primary', $cleanPhone)
+                    ->orWhere('phone_secondary', $cleanPhone)
+                    ->orWhere('emp_code', $rawInput)
+                    ->count();
+                if ($empCount > 0) {
+                    $isEmployee = true;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if (!$isEmployee) {
+            try {
+                $existingEmp = User::where(function ($q) use ($cleanPhone, $rawInput) {
+                    $q->where('phnno', $cleanPhone);
+                    if (!empty($rawInput)) {
+                        $q->orWhere('usercode', $rawInput);
+                    }
+                })->where('user_type', 2)->first();
+
+                if ($existingEmp) {
+                    $isEmployee = true;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // Fill master.login table (if he was a student)
         $user = null;
-        try {
-            $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawInput);
-        } catch (\Throwable $e) {
-            Log::warning('Error resolving user in sendOtp: ' . $e->getMessage());
+        if (!$isEmployee) {
+            try {
+                // Phone number is the unique key
+                $user = User::where('phnno', $cleanPhone)->first();
+
+                // Check if student has already completed registration form
+                $crmStudent = null;
+                try {
+                    $crmStudent = CrmStudentRegistration::where('phoneno', $cleanPhone)->first();
+                } catch (\Throwable $e) {}
+
+                $registeredCode = ($crmStudent && !empty($crmStudent->applinano) && $crmStudent->applinano !== '0')
+                    ? (string) $crmStudent->applinano
+                    : null;
+
+                if ($user) {
+                    // If user already has a generated code from completed registration, keep it;
+                    // otherwise it should be zero ('0') until the registration form is filled!
+                    $currentUsercode = ($user->usercode && $user->usercode !== '0')
+                        ? $user->usercode
+                        : ($registeredCode ?: '0');
+
+                    $user->update([
+                        'usercode'      => $currentUsercode,
+                        'phnno'         => $cleanPhone,
+                        'user_type'     => 1,
+                        'role_id'       => $user->role_id ?: 5,
+                        'is_active'     => true,
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                } else {
+                    // New student entry before filling registration form:
+                    // If they already have an existing registered code from crm.student_registration, use it;
+                    // otherwise usercode MUST be '0' until registration form is filled!
+                    $usercode = $registeredCode ?: '0';
+
+                    $user = User::create([
+                        'usercode'       => $usercode,
+                        'phnno'          => $cleanPhone,
+                        'personalmail'   => $crmStudent?->emailid,
+                        'officialmail'   => $crmStudent?->emailid,
+                        'user_type'      => 1, // Student Candidate
+                        'role_id'        => 5, // Student role
+                        'campus_id'      => (string) ($crmStudent?->campuscode ?? '1'),
+                        'is_active'      => true,
+                        'pwd'            => bcrypt('123456'),
+                        'lock_status'    => 0,
+                        'log_userid'     => 'PORTAL',
+                        'log_ipaddress'  => $request->ip(),
+                        'log_timestamp'  => now(),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Error creating/updating student in master.login in sendOtp: ' . $e->getMessage());
+            }
+        } else {
+            // Employee: resolve existing employee user without treating as a student
+            try {
+                $user = $this->resolveUserByPhoneOrCode($cleanPhone, $rawInput);
+            } catch (\Throwable $e) {
+                Log::warning('Error resolving employee in sendOtp: ' . $e->getMessage());
+            }
         }
 
         if ($user && !$user->is_active) {
@@ -404,15 +496,7 @@ class LoginController extends Controller
             ], 403);
         }
 
-        // Foreign key fk_login_otp_usercode requires usercode to exist in master.login or be null.
-        $targetUsercode = null;
-        if ($user && !empty($user->usercode)) {
-            try {
-                if (User::where('usercode', $user->usercode)->exists()) {
-                    $targetUsercode = $user->usercode;
-                }
-            } catch (\Throwable $e) {}
-        }
+        $targetUsercode = $user ? $user->usercode : '0';
         $targetName = 'Prospective Applicant';
         $targetRole = 'New Candidate';
         try {
@@ -649,13 +733,18 @@ class LoginController extends Controller
                 $userCode = $student->register_no ?: $student->application_no;
                 $user = User::where('usercode', $userCode)->first();
                 if (!$user) {
-                    $user = new User([
-                        'usercode' => $userCode,
-                        'phnno' => $cleanPhone ?: $student->mobile,
-                        'personalmail' => $student->personal_email,
-                        'user_type' => 1,
-                        'is_active' => true,
-                        'role_id' => 5,
+                    $user = User::create([
+                        'usercode'       => (string)$userCode,
+                        'phnno'          => $cleanPhone ?: $student->mobile,
+                        'personalmail'   => $student->personal_email,
+                        'officialmail'   => $student->personal_email,
+                        'user_type'      => 1,
+                        'is_active'      => true,
+                        'role_id'        => 5,
+                        'pwd'            => bcrypt('123456'),
+                        'lock_status'    => 0,
+                        'log_userid'     => 'PORTAL',
+                        'log_timestamp'  => now(),
                     ]);
                 }
                 return $user;
@@ -674,14 +763,19 @@ class LoginController extends Controller
             if ($crmStudent && !empty($crmStudent->applinano)) {
                 $user = User::where('usercode', $crmStudent->applinano)->first();
                 if (!$user) {
-                    $user = new User([
-                        'usercode' => $crmStudent->applinano,
-                        'phnno' => $cleanPhone ?: $crmStudent->phoneno,
-                        'personalmail' => $crmStudent->emailid,
-                        'user_type' => 1,
-                        'is_active' => true,
-                        'role_id' => 5,
-                        'campus_id' => (string)($crmStudent->campuscode ?: '1'),
+                    $user = User::create([
+                        'usercode'       => (string)$crmStudent->applinano,
+                        'phnno'          => $cleanPhone ?: $crmStudent->phoneno,
+                        'personalmail'   => $crmStudent->emailid,
+                        'officialmail'   => $crmStudent->emailid,
+                        'user_type'      => 1,
+                        'is_active'      => true,
+                        'role_id'        => 5,
+                        'campus_id'      => (string)($crmStudent->campuscode ?: '1'),
+                        'pwd'            => bcrypt('123456'),
+                        'lock_status'    => 0,
+                        'log_userid'     => 'PORTAL',
+                        'log_timestamp'  => now(),
                     ]);
                 }
                 return $user;
@@ -694,16 +788,20 @@ class LoginController extends Controller
         try {
             if (!empty($cleanPhone) && ctype_digit($cleanPhone)) {
                 $lead = Lead::where('phoneno', (int)$cleanPhone)->first();
-                if ($lead) {
-                    $leadCode = $lead->applino ? (string)$lead->applino : ('LEAD' . $cleanPhone);
+                if ($lead && !empty($lead->applino)) {
+                    $leadCode = (string)$lead->applino;
                     $user = User::where('usercode', $leadCode)->first();
                     if (!$user) {
-                        $user = new User([
-                            'usercode' => $leadCode,
-                            'phnno' => $cleanPhone,
-                            'user_type' => 1,
-                            'is_active' => true,
-                            'role_id' => 5,
+                        $user = User::create([
+                            'usercode'       => $leadCode,
+                            'phnno'          => $cleanPhone,
+                            'user_type'      => 1,
+                            'is_active'      => true,
+                            'role_id'        => 5,
+                            'pwd'            => bcrypt('123456'),
+                            'lock_status'    => 0,
+                            'log_userid'     => 'PORTAL',
+                            'log_timestamp'  => now(),
                         ]);
                     }
                     return $user;
@@ -717,18 +815,25 @@ class LoginController extends Controller
     }
 
     /**
-     * In-memory student representation without modifying database tables.
+     * Provision candidate student in master.login.
      */
     protected function provisionCandidateStudent(string $cleanPhone): User
     {
-        $regNo = '261FA' . substr($cleanPhone, -5);
+        $existing = User::where('phnno', $cleanPhone)->first();
+        if ($existing) {
+            return $existing;
+        }
 
-        return new User([
-            'usercode'  => $regNo,
-            'phnno'     => $cleanPhone,
-            'user_type' => 1,
-            'is_active' => true,
-            'role_id'   => 5,
+        return User::create([
+            'usercode'       => '0', // Zero until registration form is filled
+            'phnno'          => $cleanPhone,
+            'user_type'      => 1,
+            'is_active'      => true,
+            'role_id'        => 5,
+            'pwd'            => bcrypt('123456'),
+            'lock_status'    => 0,
+            'log_userid'     => 'PORTAL',
+            'log_timestamp'  => now(),
         ]);
     }
 

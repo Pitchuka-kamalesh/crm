@@ -8,8 +8,11 @@ use App\Models\Country;
 use App\Models\CrmStudentRegistration;
 use App\Models\District;
 use App\Models\Lead;
+use App\Models\LoginOtp;
 use App\Models\Program;
 use App\Models\State;
+use App\Models\TelecallerLead;
+use App\Models\TelecallerLeadTask;
 use App\Models\User;
 use App\Services\SmsService;
 use App\Services\WhatsAppService;
@@ -146,14 +149,14 @@ class RegistrationController extends Controller
         } catch (\Throwable $e) {}
 
         $appliNano = null;
-        if ($crmRecord && !empty($crmRecord->applinano)) {
-            $appliNano = $crmRecord->applinano;
+        if ($crmRecord && !empty($crmRecord->applinano) && $crmRecord->applinano !== '0') {
+            $appliNano = (string) $crmRecord->applinano;
         } else {
-            // Generate unique application number from official crm sequence
+            // Generate user code only after filling the registration form
             try {
                 $seqRow = DB::selectOne("SELECT nextval('crm.student_registration_applinano_seq'::regclass)::text as applinano");
                 if ($seqRow && !empty($seqRow->applinano) && !str_contains($seqRow->applinano, '#')) {
-                    $appliNano = $seqRow->applinano;
+                    $appliNano = (string) $seqRow->applinano;
                 }
             } catch (\Throwable $e) {}
 
@@ -207,47 +210,173 @@ class RegistrationController extends Controller
                     'log_timestamp'=> now(),
                 ]);
             }
-            if ($crmRecord) {
-                \App\Services\CrmIdService::generateForStudent($crmRecord);
-            }
         } catch (Exception $e) {
             Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
         }
 
-        // 3. Create or update user account in master.login
-        $user = User::updateOrCreate(
-            ['usercode' => $appliNano],
-            [
-                'phnno'          => $cleanMobile,
+        // 3. In master.login: use phone number as unique, and replace user code zero with generated code
+        $user = User::where('phnno', $cleanMobile)->first();
+        if ($user) {
+            $user->update([
+                'usercode'       => $appliNano, // Replaces '0' with the generated code!
                 'personalmail'   => $email,
                 'officialmail'   => $email,
                 'user_type'      => 1, // Student Candidate
                 'role_id'        => 5, // Student role
                 'campus_id'      => (string) $request->campus_id,
                 'is_active'      => true,
+                'log_ipaddress'  => $request->ip(),
+                'log_timestamp'  => now(),
+            ]);
+        } else {
+            $user = User::create([
+                'usercode'       => $appliNano,
+                'phnno'          => $cleanMobile,
+                'personalmail'   => $email,
+                'officialmail'   => $email,
+                'user_type'      => 1,
+                'role_id'        => 5,
+                'campus_id'      => (string) $request->campus_id,
+                'is_active'      => true,
                 'pwd'            => bcrypt($defaultPassword),
                 'log_ipaddress'  => $request->ip(),
                 'log_timestamp'  => now(),
-            ]
-        );
+            ]);
+        }
 
-        // 3b. Sync lead entry into crm.leads
+        // Sync master.login_otp usercode if it was zero or unlinked
+        try {
+            LoginOtp::where('identifier', $cleanMobile)
+                ->where(function ($q) {
+                    $q->where('usercode', '0')
+                      ->orWhereNull('usercode')
+                      ->orWhere('usercode', '');
+                })
+                ->update(['usercode' => (string) $appliNano]);
+        } catch (\Throwable $e) {
+            Log::warning('[RegistrationController] OTP sync error: ' . $e->getMessage());
+        }
+
+        // 3b. Sync lead entry into crm.leads (preserve fixed log_timestamp from first entry)
         try {
             $phoneInt = (int) $cleanMobile;
             $applinoInt = is_numeric($appliNano) ? (int) $appliNano : null;
-            Lead::updateOrCreate(
-                ['phoneno' => $phoneInt],
-                [
+            $existingLead = Lead::where('phoneno', $phoneInt)->first();
+            if ($existingLead) {
+                $existingLead->update([
+                    'applino'       => $applinoInt,
+                    'phnostatus'    => 'Registered',
+                    'log_userid'    => 'SELF_REGISTER',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                    // log_timestamp is fixed from when lead entered first time; do NOT overwrite!
+                ]);
+            } else {
+                Lead::create([
+                    'phoneno'       => $phoneInt,
                     'applino'       => $applinoInt,
                     'phnostatus'    => 'Registered',
                     'enquirydate'   => now()->toDateString(),
+                    'empcode'       => '0',
+                    'allocated_at'  => null,
                     'log_userid'    => 'SELF_REGISTER',
                     'log_ipaddress' => $request->ip() ?? '127.0.0.1',
-                    'log_timestamp' => now(),
-                ]
-            );
+                    'log_timestamp' => now(), // Initial entry timestamp
+                ]);
+            }
         } catch (\Throwable $e) {
             Log::info('[RegistrationController] Lead sync notice: ' . $e->getMessage());
+        }
+
+        // 3c. Fill / update application number in crm.telecaller_leads table
+        try {
+            $cleanMobileStr = (string) $cleanMobile;
+            $appliNanoStr = (string) $appliNano;
+            $personalCrmId = DB::table('crm.student_personal_info')
+                ->where(function ($q) use ($appliNanoStr, $cleanMobileStr) {
+                    $q->where('applino', $appliNanoStr)
+                      ->orWhere('phoneno', $cleanMobileStr);
+                })
+                ->whereNotNull('crmid')
+                ->where('crmid', '!=', '')
+                ->where('crmid', '!=', '0')
+                ->value('crmid');
+            $studentCrmId = $personalCrmId ? (string) $personalCrmId : '0';
+
+            // Check if there is an existing telecaller_leads record for this student's phone
+            $existingTcLead = DB::table('crm.telecaller_leads')
+                ->where('phoneno', $cleanMobileStr)
+                ->first();
+
+            if ($existingTcLead) {
+                // If a record already exists with the new applino, ensure crmid is up-to-date and clean up any placeholder '0' row
+                $hasNewAppli = DB::table('crm.telecaller_leads')
+                    ->where('applino', $appliNanoStr)
+                    ->where('phoneno', $cleanMobileStr)
+                    ->exists();
+
+                if ($hasNewAppli) {
+                    DB::table('crm.telecaller_leads')
+                        ->where('applino', $appliNanoStr)
+                        ->where('phoneno', $cleanMobileStr)
+                        ->update([
+                            'crmid'         => $studentCrmId,
+                            'log_timestamp' => now(),
+                        ]);
+
+                    // Remove placeholder row if present
+                    DB::table('crm.telecaller_leads')
+                        ->where('applino', '0')
+                        ->where('phoneno', $cleanMobileStr)
+                        ->delete();
+                } else {
+                    // Update the application number from '0' to newly generated $appliNano
+                    DB::table('crm.telecaller_leads')
+                        ->where('phoneno', $cleanMobileStr)
+                        ->where(function ($q) {
+                            $q->where('applino', '0')
+                              ->orWhereNull('applino')
+                              ->orWhere('applino', '');
+                        })
+                        ->update([
+                            'applino'       => $appliNanoStr,
+                            'crmid'         => $studentCrmId,
+                            'log_timestamp' => now(),
+                        ]);
+                }
+
+                // Sync tasks in crm.telecaller_leads_tasks
+                DB::table('crm.telecaller_leads_tasks')
+                    ->where('phoneno', $cleanMobileStr)
+                    ->where(function ($q) {
+                        $q->where('applino', '0')
+                          ->orWhereNull('applino')
+                          ->orWhere('applino', '');
+                    })
+                    ->update([
+                        'applino'       => $appliNanoStr,
+                        'crmid'         => $studentCrmId,
+                        'log_timestamp' => now(),
+                    ]);
+            } else {
+                // If not in telecaller_leads yet, create the record with generated applino
+                $leadRow = Lead::where('phoneno', (int) $cleanMobile)->first();
+                $assignedEmp = ($leadRow && !empty($leadRow->empcode) && $leadRow->empcode !== '0') ? (string) $leadRow->empcode : '0';
+                $empMax = (int) DB::table('crm.telecaller_leads')->where('empcode', $assignedEmp)->max('leadcount');
+
+                DB::table('crm.telecaller_leads')->insert([
+                    'applino'        => $appliNanoStr,
+                    'phoneno'        => $cleanMobileStr,
+                    'crmid'          => $studentCrmId,
+                    'empcode'        => $assignedEmp,
+                    'leadcount'      => $empMax + 1,
+                    'assigndatetime' => now(),
+                    'log_userid'     => 'SELF_REGISTER',
+                    'log_ipaddress'  => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp'  => now(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[RegistrationController] Telecaller leads sync error: ' . $e->getMessage());
         }
 
         // 4. Dispatch WhatsApp & SMS (if configured)

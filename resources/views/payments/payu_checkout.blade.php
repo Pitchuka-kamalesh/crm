@@ -257,7 +257,19 @@
         </div>
 
         <div>
-            <form action="{{ route('payu.response') }}" method="POST" id="payuCompleteForm">
+            <!-- Official Live PayU Gateway Form -->
+            <form action="{{ $gatewayUrl }}" method="POST" id="payuGatewayForm" onsubmit="const b=document.getElementById('btnPayNow'); if(b){ b.disabled=true; b.innerHTML='⏳ Connecting to PayU Gateway...'; }">
+                @foreach($params as $key => $val)
+                    <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                @endforeach
+
+                <button type="submit" id="btnPayNow" class="btn-pay-now">
+                    <span>🔒 Proceed to Official PayU Payment Gateway &rarr;</span>
+                </button>
+            </form>
+
+            <!-- Test Mode Simulator Option -->
+            <form action="{{ route('payu.response') }}" method="POST" id="payuCompleteForm" style="margin-top: 0.65rem;">
                 @csrf
                 <input type="hidden" name="status" value="success">
                 <input type="hidden" name="txnid" value="{{ $txnid }}">
@@ -267,12 +279,12 @@
                 <input type="hidden" name="udf5" value="{{ $params['udf5'] ?? '' }}">
                 <input type="hidden" name="mihpayid" value="PAYU{{ date('His') }}{{ rand(1000, 9999) }}">
                 <input type="hidden" name="bank_ref_no" value="BANK{{ date('Ymd') }}{{ rand(1000, 9999) }}">
-                <input type="hidden" name="mode" id="selectedPayModeInput" value="UPI">
+                <input type="hidden" name="mode" value="Demo/Test">
                 <input type="hidden" name="firstname" value="{{ $name }}">
                 <input type="hidden" name="email" value="{{ $email }}">
 
-                <button type="button" id="btnPayNow" class="btn-pay-now" onclick="processPayUPayment()">
-                    <span>🔒 Pay ₹{{ number_format($amount, 2) }} Securely via PayU &rarr;</span>
+                <button type="submit" style="background: none; border: 1px dashed #cbd5e1; color: #64748b; padding: 6px 12px; border-radius: 8px; font-size: 0.74rem; cursor: pointer; width: 100%;">
+                    ⚡ Test Simulator: Mark as Paid without Real Gateway
                 </button>
             </form>
 

@@ -25,12 +25,13 @@
     --card-bg: #ffffff;
 }
 
-/* 4 Theme Color Variations */
-[data-theme-color="red"] {
-    --theme-accent: #dc2626;
-    --theme-accent-hover: #b91c1c;
-    --theme-accent-light: #fef2f2;
-    --theme-accent-ring: rgba(220, 38, 38, 0.35);
+/* 4 Theme Color Variations (Dark Maroon replaced Red) */
+[data-theme-color="red"],
+[data-theme-color="maroon"] {
+    --theme-accent: #670014;
+    --theme-accent-hover: #4a000e;
+    --theme-accent-light: #fdf2f4;
+    --theme-accent-ring: rgba(103, 0, 20, 0.35);
 }
 
 [data-theme-color="blue"] {
@@ -55,11 +56,12 @@
 }
 
 /* Dark Mode Theme Color Accents (High Contrast) */
-[data-theme-mode="dark"][data-theme-color="red"] {
-    --theme-accent: #ef4444;
-    --theme-accent-hover: #dc2626;
-    --theme-accent-light: rgba(239, 68, 68, 0.18);
-    --theme-accent-ring: rgba(239, 68, 68, 0.35);
+[data-theme-mode="dark"][data-theme-color="red"],
+[data-theme-mode="dark"][data-theme-color="maroon"] {
+    --theme-accent: #9b112c;
+    --theme-accent-hover: #7d0e23;
+    --theme-accent-light: rgba(155, 17, 44, 0.22);
+    --theme-accent-ring: rgba(155, 17, 44, 0.35);
 }
 
 [data-theme-mode="dark"][data-theme-color="blue"] {
@@ -702,9 +704,10 @@ html.sidebar-is-collapsed .topbar-toggle-sidebar-btn {
     transform: scale(1.12);
 }
 
-.theme-color-dot.dot-red {
-    background: #dc2626;
-    --dot-color: #dc2626;
+.theme-color-dot.dot-red,
+.theme-color-dot.dot-maroon {
+    background: #670014;
+    --dot-color: #670014;
 }
 
 .theme-color-dot.dot-blue {

@@ -12,7 +12,7 @@ class User extends Authenticatable
     use Notifiable;
 
     protected $table = 'master.login';
-    protected $primaryKey = 'usercode';
+    protected $primaryKey = 'phnno';
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
@@ -20,6 +20,8 @@ class User extends Authenticatable
     protected $fillable = [
         'usercode',
         'phnno',
+        'aadharno',
+        'dob',
         'personalmail',
         'officialmail',
         'pwd',
@@ -64,12 +66,12 @@ class User extends Authenticatable
 
     public function getAuthIdentifierName(): string
     {
-        return 'usercode';
+        return 'phnno';
     }
 
     public function getAuthIdentifier(): mixed
     {
-        return $this->usercode;
+        return $this->phnno;
     }
 
     public function getRememberToken(): ?string
@@ -119,7 +121,11 @@ class User extends Authenticatable
             // Gracefully fallback
         }
 
-        return $this->usercode ?: 'Applicant';
+        if ($this->usercode && $this->usercode !== '0') {
+            return $this->usercode;
+        }
+
+        return $this->phnno ?: 'Applicant';
     }
 
     public function getActiveRoleId(): int
