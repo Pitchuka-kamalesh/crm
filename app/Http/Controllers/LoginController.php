@@ -37,49 +37,7 @@ class LoginController extends Controller
             return redirect($this->getLandingUrlForUser(Auth::user()));
         }
 
-        // Roles & test logins strictly matching master.login and master.employees
-        $sampleUsers = [
-            [
-                'role' => 'Mani (Tele Caller & CRM Incharge)',
-                'role_id' => 4,
-                'name' => 'Mani',
-                'usercode' => '31420',
-                'phone' => '9876531420',
-                'landing' => '/leads',
-            ],
-            [
-                'role' => 'Tele Caller',
-                'role_id' => 4,
-                'name' => 'Y.BHANUPRASAD',
-                'usercode' => '02598',
-                'phone' => '9912996788',
-                'landing' => '/crm/stddata',
-            ],
-            [
-                'role' => 'CRM DEAN',
-                'role_id' => 3,
-                'name' => 'Kamalesh',
-                'usercode' => '03141',
-                'phone' => '7075624098',
-                'landing' => '/crm/stddata',
-            ],
-            [
-                'role' => 'Tele Caller',
-                'role_id' => 4,
-                'name' => 'Ganesh kumar',
-                'usercode' => '03434',
-                'phone' => '9391364210',
-                'landing' => '/leads',
-            ],
-            [
-                'role' => 'Student Candidate',
-                'role_id' => 5,
-                'name' => 'Registered Candidate',
-                'usercode' => '20261106333',
-                'phone' => '7780579012',
-                'landing' => '/dashboards',
-            ],
-        ];
+        $sampleUsers = [];
 
         return view('auth.login', compact('sampleUsers'));
     }
@@ -446,7 +404,7 @@ class LoginController extends Controller
                         'usercode'      => $currentUsercode,
                         'phnno'         => $cleanPhone,
                         'user_type'     => 1,
-                        'role_id'       => $user->role_id ?: 5,
+                        'role_id'       => $user->role_id ?: \App\Services\RoleService::studentRoleId(),
                         'is_active'     => true,
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
@@ -652,12 +610,12 @@ class LoginController extends Controller
     {
         $user = Auth::user();
         // Students cannot switch roles
-        if ($user && ($user->user_type === 1 || (int)$user->role_id === 5 || (int)$user->getActiveRoleId() === 5)) {
+        if ($user && ($user->user_type === 1 || \App\Services\RoleService::isStudent((int) $user->role_id) || \App\Services\RoleService::isStudent((int) $user->getActiveRoleId()))) {
             return back()->withErrors(['role_id' => 'Students are not authorized to switch roles.']);
         }
 
         $request->validate([
-            'role_id' => ['required', 'integer', 'in:1,2,3,4,5'],
+            'role_id' => ['required', 'integer', 'exists:App\Models\Role,role_id'],
         ]);
 
         $roleId = (int) $request->input('role_id');
@@ -668,7 +626,7 @@ class LoginController extends Controller
             ? array_column($assigned, 'role_id')
             : [(int)$user->getActiveRoleId()];
 
-        if (!in_array($roleId, $allowedRoleIds, true) && (int)$user->role_id !== 1) {
+        if (!in_array($roleId, $allowedRoleIds, true) && (int)$user->role_id !== \App\Services\RoleService::employeeRoleId()) {
             return back()->withErrors(['role_id' => 'You are not assigned to this role.']);
         }
 
@@ -718,7 +676,7 @@ class LoginController extends Controller
                         'personalmail' => $employee->personal_mailid,
                         'user_type' => 2,
                         'is_active' => (bool)$employee->is_active,
-                        'role_id' => $employee->role_id ?: 1,
+                        'role_id' => $employee->role_id ?: \App\Services\RoleService::employeeRoleId(),
                         'campus_id' => (string)($employee->campus_id ?: '1'),
                     ]);
                 }

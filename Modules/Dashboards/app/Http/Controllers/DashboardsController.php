@@ -96,7 +96,7 @@ class DashboardsController extends Controller
         }
 
         // Always display Candidate / Student role
-        $roleName = ($user?->role_id === 5 || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
+        $roleName = (\App\Services\RoleService::isStudent($user?->role_id) || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
 
         // Resolve Program and Branch dynamically from DB (empty if not filled)
         $progId = $crmStudent?->programid;
@@ -567,30 +567,30 @@ class DashboardsController extends Controller
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
                     if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
-                        $academicPayload['ug_college_name'] = $request->input('ug_college_name') ?: "Vignan's Lara Institute of Tech & Science";
-                        $academicPayload['ug_university_board'] = $request->input('ug_university_board') ?: 'JNTUK / Andhra University';
-                        $academicPayload['ug_college_city'] = $request->input('ug_college_city') ?: 'Guntur';
-                        $academicPayload['ug_college_district'] = $request->input('ug_college_district') ?: 'Guntur';
-                        $academicPayload['ug_roll_no'] = $request->input('ug_roll_no') ?: '201FA04001';
-                        $academicPayload['ug_passed_year'] = (int)($request->input('ug_passed_year') ?: 2024);
-                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: 'CGPA';
-                        $academicPayload['ug_marks'] = is_numeric($request->input('ug_marks')) ? (float)$request->input('ug_marks') : null;
-                        $academicPayload['ug_cgpa'] = is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : 8.75;
-                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: 'Completed';
+                        $academicPayload['ug_college_name'] = $request->input('ug_college_name') ?: null;
+                        $academicPayload['ug_university_board'] = $request->input('ug_university_board') ?: null;
+                        $academicPayload['ug_college_city'] = $request->input('ug_college_city') ?: null;
+                        $academicPayload['ug_college_district'] = $request->input('ug_college_district') ?: null;
+                        $academicPayload['ug_roll_no'] = $request->input('ug_roll_no') ?: null;
+                        $academicPayload['ug_passed_year'] = $request->filled('ug_passed_year') ? (int) $request->input('ug_passed_year') : null;
+                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: null;
+                        $academicPayload['ug_marks'] = is_numeric($request->input('ug_marks')) ? (float) $request->input('ug_marks') : null;
+                        $academicPayload['ug_cgpa'] = is_numeric($request->input('ug_cgpa')) ? (float) $request->input('ug_cgpa') : null;
+                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: null;
                     }
 
                     // If Degree level is PhD, save PG (M.Tech) details
                     if ($request->filled('pg_college_name') || $request->input('degree_level') === 'phd') {
-                        $academicPayload['pg_college_name'] = $request->input('pg_college_name') ?: 'VFSTR University';
-                        $academicPayload['pg_university_board'] = $request->input('pg_university_board') ?: 'VFSTR';
-                        $academicPayload['pg_college_city'] = $request->input('pg_college_city') ?: 'Vadlamudi, Guntur';
-                        $academicPayload['pg_college_district'] = $request->input('pg_college_district') ?: 'Guntur';
-                        $academicPayload['pg_roll_no'] = $request->input('pg_roll_no') ?: '241FK01001';
-                        $academicPayload['pg_passed_year'] = (int)($request->input('pg_passed_year') ?: 2026);
-                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: 'CGPA';
-                        $academicPayload['pg_marks'] = is_numeric($request->input('pg_marks')) ? (float)$request->input('pg_marks') : null;
-                        $academicPayload['pg_cgpa'] = is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : 9.10;
-                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
+                        $academicPayload['pg_college_name'] = $request->input('pg_college_name') ?: null;
+                        $academicPayload['pg_university_board'] = $request->input('pg_university_board') ?: null;
+                        $academicPayload['pg_college_city'] = $request->input('pg_college_city') ?: null;
+                        $academicPayload['pg_college_district'] = $request->input('pg_college_district') ?: null;
+                        $academicPayload['pg_roll_no'] = $request->input('pg_roll_no') ?: null;
+                        $academicPayload['pg_passed_year'] = $request->filled('pg_passed_year') ? (int) $request->input('pg_passed_year') : null;
+                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: null;
+                        $academicPayload['pg_marks'] = is_numeric($request->input('pg_marks')) ? (float) $request->input('pg_marks') : null;
+                        $academicPayload['pg_cgpa'] = is_numeric($request->input('pg_cgpa')) ? (float) $request->input('pg_cgpa') : null;
+                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: null;
                     }
 
                     StudentAcademicDetail::updateOrCreate(

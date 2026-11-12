@@ -1143,34 +1143,23 @@
                                         $email = $emp->ofc_mailid ?: ($empCode . '@vignan.ac.in');
                                         $personalMail = $emp->personal_mailid ?: (strtolower(str_replace(' ', '', $fullName)) . '@gmail.com');
                                         $phone = $emp->phone_primary ?: 'N/A';
-                                        $phoneSecondary = $emp->phone_secondary ?: '0863-2344700';
-                                        $empType = $emp->emp_type ?: 'PERMANENT';
-                                        $campusName = 'VFSTR Vadlamudi Main Campus';
-                                        
-                                        $designation = match($empCode) {
-                                            '03141' => 'Dean of Admissions',
-                                            '03434' => 'Admissions Incharge & Operations Head',
-                                            '02598' => 'Counselor & Staff Coordinator',
-                                            default => 'Admissions Officer',
-                                        };
+                                        $phoneSecondary = $emp->phone_secondary ?: 'N/A';
+                                        $empType = $emp->emp_type ?: 'N/A';
+                                        $campusName = $emp->campus_id ? ('Campus #' . $emp->campus_id) : 'N/A';
 
-                                        $department = match($empCode) {
-                                            '03141' => 'Office of the Dean (Admissions)',
-                                            '03434' => 'Management Studies & CRM Cell',
-                                            '02598' => 'Training & Outreach Division',
-                                            default => 'Admissions Directorate',
-                                        };
+                                        $assignedRoleNames = collect(\App\Services\RoleService::getAssignedRoles($empCode))
+                                            ->pluck('role_name')
+                                            ->filter()
+                                            ->values();
+                                        $primaryRoleName = $assignedRoleNames->first() ?? 'Staff';
 
-                                        $roleTag = match($empCode) {
-                                            '03141' => 'CRM DEAN',
-                                            '03434' => 'CRM INCHARGE',
-                                            '02598' => 'COUNSELOR',
-                                            default => 'STAFF',
-                                        };
+                                        $designation = $emp->designation_id ? ('Designation #' . $emp->designation_id) : $primaryRoleName;
+                                        $department = $emp->department_id ? ('Department #' . $emp->department_id) : 'N/A';
+                                        $roleTag = strtoupper($primaryRoleName);
 
-                                        $roleTagClass = match($empCode) {
-                                            '03141' => 'badge-role-dean',
-                                            '03434' => 'badge-role-incharge',
+                                        $roleTagClass = match (true) {
+                                            str_contains(strtolower($primaryRoleName), 'dean') => 'badge-role-dean',
+                                            str_contains(strtolower($primaryRoleName), 'incharge') => 'badge-role-incharge',
                                             default => 'badge-role-staff',
                                         };
 

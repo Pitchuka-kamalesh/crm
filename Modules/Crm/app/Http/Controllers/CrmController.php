@@ -342,7 +342,7 @@ class CrmController extends Controller
         }
 
         $user = Auth::user();
-        $crmId = $user ? $user->usercode : '02598';
+        $crmId = $user ? $user->usercode : 'SYSTEM';
 
         // Call TelecallerService
         $allocResult = \App\Services\TelecallerService::allocateLeads([

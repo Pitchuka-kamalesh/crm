@@ -138,6 +138,40 @@ class User extends Authenticatable
         return $this->hasMany(RoleAssigned::class, 'emp_id', 'usercode');
     }
 
+    /**
+     * Retrieve all active role IDs assigned to this user in master.roles_assigned.
+     *
+     * @return array<int, int>
+     */
+    public function getAssignedRoleIds(): array
+    {
+        if (empty($this->usercode) || $this->usercode === '0') {
+            return !empty($this->role_id) ? [(int) $this->role_id] : [];
+        }
+
+        try {
+            $ids = RoleAssigned::where('emp_id', $this->usercode)
+                ->where(function ($q) {
+                    $q->whereNull('end_date')
+                        ->orWhere('end_date', '>=', now()->toDateString());
+                })
+                ->orderBy('roles_role_id')
+                ->pluck('roles_role_id')
+                ->map(fn ($id): int => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+
+            if (!empty($ids)) {
+                return $ids;
+            }
+        } catch (\Throwable $e) {
+            // Gracefully fallback below
+        }
+
+        return !empty($this->role_id) ? [(int) $this->role_id] : [];
+    }
+
     public function getActiveRoleId(): int
     {
         $allowedRoleIds = $this->getAssignedRoleIds();
