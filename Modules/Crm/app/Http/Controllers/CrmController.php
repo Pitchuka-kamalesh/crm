@@ -294,7 +294,7 @@ class CrmController extends Controller
 
     /**
      * Allot admission enquiries to a telecaller employee.
-     * Persists into crm.telecaller_leads and logs into crm.telecaller_leads_tasks.
+     * Persists into crm.telecaller_leads.
      */
     public function allotLeads(Request $request)
     {
