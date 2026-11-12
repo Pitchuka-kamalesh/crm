@@ -103,10 +103,9 @@ class LeadsAllocationTabTest extends TestCase
         $this->assertEquals('0', $tcLead->crmid);
         $this->assertEquals($empCode, $tcLead->empcode);
 
-        // Check task logged
+        // Check NO task logged on allocation (tasks only recorded when telecaller performs an action)
         $task = TelecallerLeadTask::where('phoneno', (string) $testPhone)->first();
-        $this->assertNotNull($task);
-        $this->assertEquals($empCode, $task->empcode);
+        $this->assertNull($task);
 
         // Cleanup
         Lead::where('phoneno', $testPhone)->delete();
@@ -649,25 +648,25 @@ class LeadsAllocationTabTest extends TestCase
         $stage2 = \App\Services\TelecallerService::determineLeadStage('0', '02598');
         $this->assertEquals('Telecaller Stage', $stage2);
 
-        // 3. If he has application number but not assigned to telecaller -> Register Form
+        // 3. Registered (application number created, not assigned) -> Register Form completed
         $stage3 = \App\Services\TelecallerService::determineLeadStage('2026110001', '0');
-        $this->assertEquals('Register Form', $stage3);
+        $this->assertEquals('Register Form completed', $stage3);
 
-        // 4. If application number not paid -> Payment Stage (Not Paid)
+        // 4. Registered & assigned, but not paid -> Register Form completed
         $stage4 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'not_paid');
-        $this->assertEquals('Payment Stage', $stage4);
+        $this->assertEquals('Register Form completed', $stage4);
 
-        // 5. If application number but not filled personal details -> Personal Details
+        // 5. Paid, personal details not filled -> Payment Stage completed
         $stage5 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'paid', 'NA');
-        $this->assertEquals('Personal Details', $stage5);
+        $this->assertEquals('Payment Stage completed', $stage5);
 
-        // 6. If application number but not filled academic details -> Academic Details
+        // 6. Personal details filled, academic details not filled -> Personal Details completed
         $stage6 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'paid', 'completed', 'NA');
-        $this->assertEquals('Academic Details', $stage6);
+        $this->assertEquals('Personal Details completed', $stage6);
 
-        // 7. If academic details filled -> Academic Details Completed
+        // 7. Academic details filled -> Academic Details completed
         $stage7 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'paid', 'completed', 'completed');
-        $this->assertEquals('Academic Details Completed', $stage7);
+        $this->assertEquals('Academic Details completed', $stage7);
     }
 
     public function test_action_modal_and_stage_dropdown_on_leads_page()
@@ -679,10 +678,10 @@ class LeadsAllocationTabTest extends TestCase
 
         // Dropdown contains the 5 requested stages
         $response->assertSee('Telecaller Stage');
-        $response->assertSee('Register Form');
-        $response->assertSee('Payment Stage');
-        $response->assertSee('Personal Details');
-        $response->assertSee('Academic Details');
+        $response->assertSee('Register Form completed');
+        $response->assertSee('Payment Stage completed');
+        $response->assertSee('Personal Details completed');
+        $response->assertSee('Academic Details completed');
 
         // Removed items must not be in modal
         $response->assertDontSee('STATUS: LOCKED');
@@ -690,5 +689,288 @@ class LeadsAllocationTabTest extends TestCase
         $response->assertDontSee('Next sequential stage');
         $response->assertDontSee('Previous Stage');
         $response->assertDontSee('Next Stage');
+    }
+
+    public function test_telecaller_action_records_only_in_telecaller_leads_tasks()
+    {
+        $testPhone = '9876598765';
+        $testAppli = '2026990001';
+        $empCode = '03434';
+
+        TelecallerLeadTask::where('phoneno', $testPhone)->delete();
+        TelecallerLead::where('phoneno', $testPhone)->delete();
+        \App\Models\CrmStudentRegistration::where('phoneno', $testPhone)->delete();
+        Lead::where('phoneno', (int) $testPhone)->delete();
+
+        Lead::create([
+            'phoneno' => (int) $testPhone,
+            'applino' => (int) $testAppli,
+            'phnostatus' => 'New Lead',
+            'empcode' => '0',
+            'enquirydate' => now()->toDateString(),
+        ]);
+
+        \App\Models\CrmStudentRegistration::create([
+            'id' => 999901,
+            'applinano' => $testAppli,
+            'phoneno' => $testPhone,
+            'name' => 'Task Only Student',
+            'program_id' => 1,
+            'campus_id' => 1,
+            'std_status' => 'Interested',
+            'stage1' => 'not_paid',
+            'remarks' => 'Original remark',
+        ]);
+
+        // 1. CRM incharge assigns student -> creates telecaller_leads only, no telecaller_leads_tasks row
+        $alloc = \App\Services\TelecallerService::allocateLeads([
+            'empcode' => $empCode,
+            'allot_mode' => 'single',
+            'applino' => $testAppli,
+            'phoneno' => $testPhone,
+        ]);
+        $this->assertTrue($alloc['success']);
+        $this->assertEquals(1, TelecallerLead::where('phoneno', $testPhone)->count());
+        $this->assertEquals(0, TelecallerLeadTask::where('phoneno', $testPhone)->count());
+
+        $telecallerUser = User::where('usercode', $empCode)->first();
+        if (!$telecallerUser) {
+            $telecallerUser = User::create([
+                'usercode' => $empCode,
+                'phnno' => $testPhone,
+                'role_id' => 4,
+                'user_type' => 2,
+                'is_active' => true,
+            ]);
+        }
+
+        // 2. Payment Stage completed is blocked (422) until receiptdetails row exists; Register Form completed succeeds (200) -> recorded ONLY in telecaller_leads_tasks
+        $blockedResp = $this->actingAs($telecallerUser)->postJson("/leads/{$testAppli}/update-stage", [
+            'stage_name' => 'Payment Stage completed',
+            'remarks' => 'Should be rejected without receipt',
+        ]);
+        $blockedResp->assertStatus(422);
+
+        $stageResp = $this->actingAs($telecallerUser)->postJson("/leads/{$testAppli}/update-stage", [
+            'stage_name' => 'Register Form completed',
+            'stage_callperson' => 'Father',
+            'call_duration' => '4 mins',
+            'remarks' => 'Parent asked to call tomorrow',
+        ]);
+        $stageResp->assertStatus(200)->assertJson(['success' => true]);
+
+        // 3. Telecaller performs status action -> recorded ONLY in telecaller_leads_tasks
+        $statusResp = $this->actingAs($telecallerUser)->postJson("/leads/{$testAppli}/update-status", [
+            'status' => 'Follow-up',
+        ]);
+        $statusResp->assertStatus(200)->assertJson(['success' => true]);
+
+        // Verify telecaller_leads_tasks has both actions, crmid is '0' when no student_personal_info exists,
+        // and student_registration, leads, and telecaller_leads were untouched by telecaller actions
+        $tasks = TelecallerLeadTask::where('phoneno', $testPhone)->orderBy('leadtaskid')->get();
+        $this->assertCount(2, $tasks);
+        $this->assertEquals('0', $tasks[0]->crmid);
+        $this->assertEquals('0', $tasks[1]->crmid);
+        $this->assertEquals(1, TelecallerLead::where('phoneno', $testPhone)->count());
+
+        $studentFresh = \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->first();
+        $this->assertEquals('not_paid', $studentFresh->stage1);
+        $this->assertEquals('Interested', $studentFresh->std_status);
+        $this->assertEquals('Original remark', $studentFresh->remarks);
+
+        $leadFresh = Lead::where('phoneno', (int) $testPhone)->first();
+        $this->assertEquals('New Lead', $leadFresh->phnostatus);
+
+        // Cleanup
+        TelecallerLeadTask::where('phoneno', $testPhone)->delete();
+        TelecallerLead::where('phoneno', $testPhone)->delete();
+        \App\Models\CrmStudentRegistration::where('phoneno', $testPhone)->delete();
+        Lead::where('phoneno', (int) $testPhone)->delete();
+    }
+
+    public function test_action_stage_dropdown_eligibility_validates_against_tables()
+    {
+        $testPhone = '9876511122';
+        $testAppli = '2026990002';
+        $empCode = '03434';
+
+        \App\Models\StudentAcademicDetail::where('applino', $testAppli)->delete();
+        \App\Models\StudentPersonalInfo::where('applino', $testAppli)->delete();
+        \App\Models\ReceiptDetail::where('applino', $testAppli)->delete();
+        TelecallerLeadTask::where('phoneno', $testPhone)->delete();
+        TelecallerLead::where('phoneno', $testPhone)->delete();
+        \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->delete();
+        Lead::where('phoneno', (int) $testPhone)->delete();
+
+        // 1. Unregistered lead (applino = 0): only Telecaller Stage is allowed
+        $none = \App\Services\TelecallerService::getAllowedStagesForLead('0');
+        $this->assertTrue($none['Telecaller Stage']);
+        $this->assertFalse($none['Register Form completed']);
+        $this->assertFalse($none['Payment Stage completed']);
+        $this->assertFalse($none['Personal Details completed']);
+        $this->assertFalse($none['Academic Details completed']);
+
+        // 2. Registered in student_registration: Register Form completed enabled; others locked
+        \App\Models\CrmStudentRegistration::create([
+            'id' => 999902,
+            'applinano' => $testAppli,
+            'phoneno' => $testPhone,
+            'name' => 'Stage Check Student',
+            'program_id' => 1,
+            'campus_id' => 1,
+            'std_status' => 'Interested',
+        ]);
+
+        $step1 = \App\Services\TelecallerService::getAllowedStagesForLead($testAppli);
+        $this->assertTrue($step1['Telecaller Stage']);
+        $this->assertTrue($step1['Register Form completed']);
+        $this->assertFalse($step1['Payment Stage completed']);
+        $this->assertFalse($step1['Personal Details completed']);
+        $this->assertFalse($step1['Academic Details completed']);
+
+        // 3. Receipt in finance.receiptdetails: Payment Stage completed enabled
+        \App\Models\ReceiptDetail::create([
+            'id' => (\App\Models\ReceiptDetail::max('id') ?? 0) + 100,
+            'applino' => $testAppli,
+            'receiptno' => 'RCPT-TEST-990002',
+            'paytype' => 'Online',
+            'feepayable' => 1200,
+        ]);
+
+        $step2 = \App\Services\TelecallerService::getAllowedStagesForLead($testAppli);
+        $this->assertTrue($step2['Payment Stage completed']);
+        $this->assertFalse($step2['Personal Details completed']);
+        $this->assertFalse($step2['Academic Details completed']);
+
+        // 4. Personal info in crm.student_personal_info: Personal Details completed enabled
+        \App\Models\StudentPersonalInfo::create([
+            'crmid' => 'CRMP_TEST_990002',
+            'applino' => $testAppli,
+            'phoneno' => $testPhone,
+            'gender' => 'Male',
+        ]);
+
+        $step3 = \App\Services\TelecallerService::getAllowedStagesForLead($testAppli);
+        $this->assertTrue($step3['Personal Details completed']);
+        $this->assertFalse($step3['Academic Details completed']);
+
+        // 5. Academic details in crm.student_academic_details: Academic Details completed enabled
+        \App\Models\StudentAcademicDetail::create([
+            'crmid' => 'CRMA_TEST_990002',
+            'applino' => $testAppli,
+            'phoneno' => $testPhone,
+        ]);
+
+        $step4 = \App\Services\TelecallerService::getAllowedStagesForLead($testAppli);
+        $this->assertTrue($step4['Academic Details completed']);
+
+        // 6. Verify /leads page omits Completed option in modal and shows Academic Details completed without symbols
+        Lead::create([
+            'phoneno' => (int) $testPhone,
+            'applino' => (int) $testAppli,
+            'empcode' => $empCode,
+            'allocated_at' => now(),
+            'enquirydate' => now()->toDateString(),
+        ]);
+        TelecallerLead::create([
+            'applino' => $testAppli,
+            'phoneno' => $testPhone,
+            'crmid' => '0',
+            'empcode' => $empCode,
+            'leadcount' => 1,
+            'assigndatetime' => now(),
+            'log_timestamp' => now(),
+        ]);
+
+        $telecallerUser = User::where('usercode', $empCode)->first();
+        $pageResp = $this->actingAs($telecallerUser)->get('/leads/allottedleads?q=' . $testPhone);
+        $pageResp->assertStatus(200);
+        $pageResp->assertSee($testAppli);
+        $pageResp->assertDontSee('<option value="Completed">Completed</option>', false);
+        $pageResp->assertDontSee('<span>🎓</span>', false);
+        $pageResp->assertDontSee('<span>📝</span>', false);
+
+        // 7. Verify POST /leads/{appli}/update-stage succeeds for Personal Details completed & Academic Details completed when records exist
+        $this->actingAs($telecallerUser)
+            ->postJson("/leads/{$testAppli}/update-stage", ['stage_name' => 'Personal Details completed'])
+            ->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        $this->actingAs($telecallerUser)
+            ->postJson("/leads/{$testAppli}/update-stage", ['stage_name' => 'Academic Details completed'])
+            ->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        $afterCompleteResp = $this->actingAs($telecallerUser)->get('/leads/allottedleads?q=' . $testPhone);
+        $afterCompleteResp->assertStatus(200);
+        $afterCompleteResp->assertSee('Academic Details completed');
+        $afterCompleteResp->assertDontSee('<span>🎓</span>', false);
+        $afterCompleteResp->assertSee('CRMP_TEST_990002');
+        $afterCompleteResp->assertDontSee('V-SAT-0001');
+
+        // Verify telecaller_leads_tasks.crmid is taken from crm.student_personal_info.crmid
+        $latestTask = TelecallerLeadTask::where('phoneno', $testPhone)->orderBy('leadtaskid', 'desc')->first();
+        $this->assertNotNull($latestTask);
+        $this->assertEquals('CRMP_TEST_990002', $latestTask->crmid);
+
+        // Cleanup
+        \App\Models\StudentAcademicDetail::where('applino', $testAppli)->delete();
+        \App\Models\StudentPersonalInfo::where('applino', $testAppli)->delete();
+        \App\Models\ReceiptDetail::where('applino', $testAppli)->delete();
+        TelecallerLeadTask::where('phoneno', $testPhone)->delete();
+        TelecallerLead::where('phoneno', $testPhone)->delete();
+        \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->delete();
+        Lead::where('phoneno', (int) $testPhone)->delete();
+    }
+
+    public function test_allotted_leads_crm_id_uses_table_only_and_never_generates_vsat_fallback()
+    {
+        $empCode = '03434';
+        $testPhone = '9900011199';
+        $testAppli = '2026990009';
+
+        \App\Models\StudentPersonalInfo::where('phoneno', $testPhone)->delete();
+        TelecallerLead::where('phoneno', $testPhone)->delete();
+        \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->delete();
+        Lead::where('phoneno', (int) $testPhone)->delete();
+
+        \App\Models\CrmStudentRegistration::create([
+            'applinano' => $testAppli,
+            'name' => 'No CrmId Student',
+            'phoneno' => $testPhone,
+            'emailid' => 'nocrm@example.com',
+            'programlevel' => 'UG',
+            'stage1' => 'completed',
+            'log_userid' => 'TEST',
+            'log_ipaddress' => '127.0.0.1',
+            'log_timestamp' => now(),
+        ]);
+        Lead::create([
+            'phoneno' => (int) $testPhone,
+            'name' => 'No CrmId Student',
+            'applino' => (int) $testAppli,
+            'empcode' => $empCode,
+            'allocated_at' => now(),
+            'enquirydate' => now()->toDateString(),
+        ]);
+        TelecallerLead::create([
+            'applino' => $testAppli,
+            'phoneno' => $testPhone,
+            'crmid' => '0',
+            'empcode' => $empCode,
+            'leadcount' => 1,
+            'assigndatetime' => now(),
+            'log_timestamp' => now(),
+        ]);
+
+        $telecallerUser = User::where('usercode', $empCode)->first();
+        $resp = $this->actingAs($telecallerUser)->get('/leads/allottedleads?q=' . $testPhone);
+        $resp->assertStatus(200);
+        $resp->assertSee($testAppli);
+        $resp->assertDontSee('V-SAT-0001');
+
+        TelecallerLead::where('phoneno', $testPhone)->delete();
+        \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->delete();
+        Lead::where('phoneno', (int) $testPhone)->delete();
     }
 }

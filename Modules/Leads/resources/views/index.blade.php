@@ -1274,6 +1274,155 @@
             border-color: #1e293b;
         }
 
+        /* Call Duration Roller Popover */
+        .duration-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .duration-roller-trigger {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #475569;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .duration-roller-trigger:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .duration-roller-popover {
+            position: fixed;
+            display: none;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.22);
+            padding: 8px;
+            z-index: 100100;
+            user-select: none;
+            width: 184px;
+        }
+
+        .duration-roller-popover.open {
+            display: block;
+        }
+
+        .duration-roller-headers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .duration-roller-hdr {
+            text-align: center;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .duration-roller-cols {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .duration-roller-col {
+            height: 192px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-snap-type: y proximity;
+            border-radius: 4px;
+        }
+
+        .duration-roller-col::-webkit-scrollbar {
+            display: none;
+        }
+
+        .duration-roller-item {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #0f172a;
+            border-radius: 4px;
+            cursor: pointer;
+            scroll-snap-align: start;
+            transition: background 0.1s ease;
+        }
+
+        .duration-roller-item:hover {
+            background: #f1f5f9;
+        }
+
+        .duration-roller-item.is-selected {
+            background: #d1d5db;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .duration-roller-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #e2e8f0;
+            gap: 6px;
+        }
+
+        .duration-roller-done {
+            background: #7c0e23;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            cursor: pointer;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-popover {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-item {
+            color: #f8fafc;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-item:hover {
+            background: #334155;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-item.is-selected {
+            background: #475569;
+            color: #ffffff;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-footer {
+            border-color: #334155;
+        }
+
         /* ================= PRINT REPORT STYLES ================= */
         .print-only-header {
             display: none;
@@ -1727,7 +1876,13 @@
 
                 <!-- Clean Table Shell Container (Updated dynamically via Live Search) -->
                 <div id="leadsTableContainer">
-                    @include('leads::partials.leads_table', ['leads' => $leads, 'activeTab' => $activeTab])
+                    @include('leads::partials.leads_table', [
+                        'leads' => $leads,
+                        'activeTab' => $activeTab,
+                        'stageEligibilityMap' => $stageEligibilityMap ?? [],
+                        'latestStageTasksByPhone' => $latestStageTasksByPhone ?? collect(),
+                        'latestStageTasksByAppli' => $latestStageTasksByAppli ?? collect(),
+                    ])
                 </div>
             </div>
         </main>
@@ -1759,10 +1914,10 @@
                     </label>
                     <select id="modalStageNameSelect" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
                         <option value="Telecaller Stage">Telecaller Stage</option>
-                        <option value="Register Form">Register Form</option>
-                        <option value="Payment Stage">Payment Stage</option>
-                        <option value="Personal Details">Personal Details</option>
-                        <option value="Academic Details">Academic Details</option>
+                        <option value="Register Form completed">Register Form completed</option>
+                        <option value="Payment Stage completed">Payment Stage completed</option>
+                        <option value="Personal Details completed">Personal Details completed</option>
+                        <option value="Academic Details completed">Academic Details completed</option>
                     </select>
                 </div>
 
@@ -1791,16 +1946,15 @@
                     <label for="modalCallDuration" style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
                         Call Duration
                     </label>
-                    <input type="text" id="modalCallDuration" list="durationPresetsList" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;" placeholder="e.g. 5 mins" value="5 mins">
-                    <datalist id="durationPresetsList">
-                        <option value="1 min">
-                        <option value="2 mins">
-                        <option value="5 mins">
-                        <option value="10 mins">
-                        <option value="15 mins">
-                        <option value="20+ mins">
-                        <option value="Not Connected / Callback">
-                    </datalist>
+                    <div class="duration-input-wrap" id="durationInputWrap">
+                        <input type="text" id="modalCallDuration" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem; padding-right: 2.1rem; cursor: pointer;" placeholder="e.g. 5 mins" value="5 mins" onfocus="openDurationRoller()" onclick="openDurationRoller()">
+                        <button type="button" class="duration-roller-trigger" onclick="toggleDurationRoller(event)" title="Select call duration">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1886,6 +2040,25 @@
 </div>
 
 <!-- Toast -->
+<!-- Call Duration 3-Column Roller Popover -->
+<div id="durationRollerPopover" class="duration-roller-popover" role="dialog" aria-label="Call Duration Picker">
+    <div class="duration-roller-headers">
+        <div class="duration-roller-hdr">Hrs</div>
+        <div class="duration-roller-hdr">Min</div>
+        <div class="duration-roller-hdr">Sec</div>
+    </div>
+    <div class="duration-roller-cols">
+        <div class="duration-roller-col" id="rollerColHrs"></div>
+        <div class="duration-roller-col" id="rollerColMins"></div>
+        <div class="duration-roller-col" id="rollerColSecs"></div>
+    </div>
+    <div class="duration-roller-footer">
+        <span id="durationRollerPreview" style="font-size: 0.72rem; font-weight: 600; color: #475569;">00:05:00</span>
+        <button type="button" class="duration-roller-done" onclick="closeDurationRoller()">Done</button>
+    </div>
+</div>
+
+<!-- Clean Floating Toast Notification -->
 <div id="teleToast">
     <span id="toastMsg">Stage updated successfully!</span>
 </div>
@@ -1904,7 +2077,7 @@
         setTimeout(() => { toast.style.display = 'none'; }, 2800);
     }
 
-    function openWizardModal(applinano, name, phone, program, stages = {}, remarks = '', currentStage = '') {
+    function openWizardModal(applinano, name, phone, program, stages = {}, remarks = '', currentStage = '', allowedStages = null) {
         currentCandidate = { applinano, name, phone, program, stages, remarks: remarks || '', currentStage: currentStage || '' };
 
         document.getElementById('modalCandidateName').textContent = name || 'Candidate Lead';
@@ -1927,22 +2100,167 @@
         }
 
         const stageSelect = document.getElementById('modalStageNameSelect');
-        if (stageSelect && currentStage) {
-            const norm = currentStage.toLowerCase().trim();
+        if (stageSelect) {
+            const permissions = (allowedStages && typeof allowedStages === 'object') ? allowedStages : {};
             for (let i = 0; i < stageSelect.options.length; i++) {
-                const optVal = stageSelect.options[i].value.toLowerCase();
-                if (norm.includes(optVal) || optVal.includes(norm) || (norm.includes('not paid') && optVal.includes('payment'))) {
-                    stageSelect.selectedIndex = i;
-                    break;
+                const opt = stageSelect.options[i];
+                if (opt.value === 'Telecaller Stage') {
+                    opt.disabled = false;
+                } else {
+                    opt.disabled = !(permissions[opt.value] === true);
                 }
             }
+            stageSelect.value = 'Telecaller Stage';
         }
 
         document.getElementById('wizardModal').classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
+    const durationRollerState = { hrs: 0, mins: 5, secs: 0, initialized: false };
+
+    function padTwo(val) {
+        return String(val).padStart(2, '0');
+    }
+
+    function formatDurationText(hrs, mins, secs) {
+        const parts = [];
+        if (hrs > 0) parts.push(`${hrs} ${hrs === 1 ? 'hr' : 'hrs'}`);
+        if (mins > 0 || (hrs === 0 && secs === 0)) parts.push(`${mins} ${mins === 1 ? 'min' : 'mins'}`);
+        if (secs > 0) parts.push(`${secs} ${secs === 1 ? 'sec' : 'secs'}`);
+        return parts.join(' ');
+    }
+
+    function parseDurationText(raw) {
+        const str = String(raw || '').trim().toLowerCase();
+        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)) {
+            const segs = str.split(':').map(n => parseInt(n, 10) || 0);
+            if (segs.length === 3) return { hrs: Math.min(23, segs[0]), mins: Math.min(59, segs[1]), secs: Math.min(59, segs[2]) };
+            return { hrs: 0, mins: Math.min(59, segs[0]), secs: Math.min(59, segs[1]) };
+        }
+        const hMatch = str.match(/(\d+)\s*h/);
+        const mMatch = str.match(/(\d+)\s*m/);
+        const sMatch = str.match(/(\d+)\s*s/);
+        const hrs = hMatch ? Math.min(23, parseInt(hMatch[1], 10)) : 0;
+        const mins = mMatch ? Math.min(59, parseInt(mMatch[1], 10)) : 0;
+        const secs = sMatch ? Math.min(59, parseInt(sMatch[1], 10)) : 0;
+        if (!hMatch && !mMatch && !sMatch) return { hrs: 0, mins: 5, secs: 0 };
+        return { hrs, mins, secs };
+    }
+
+    function buildRollerColumn(colId, maxVal, unitKey) {
+        const col = document.getElementById(colId);
+        if (!col) return;
+        col.innerHTML = '';
+        for (let i = 0; i <= maxVal; i++) {
+            const item = document.createElement('div');
+            item.className = 'duration-roller-item';
+            item.dataset.val = String(i);
+            item.textContent = padTwo(i);
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                durationRollerState[unitKey] = i;
+                syncDurationRollerUI(true);
+            });
+            col.appendChild(item);
+        }
+    }
+
+    function initDurationRoller() {
+        if (durationRollerState.initialized) return;
+        buildRollerColumn('rollerColHrs', 23, 'hrs');
+        buildRollerColumn('rollerColMins', 59, 'mins');
+        buildRollerColumn('rollerColSecs', 59, 'secs');
+        durationRollerState.initialized = true;
+
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('durationRollerPopover');
+            const wrap = document.getElementById('durationInputWrap');
+            if (!pop || !pop.classList.contains('open')) return;
+            if (!pop.contains(e.target) && (!wrap || !wrap.contains(e.target))) {
+                closeDurationRoller();
+            }
+        });
+    }
+
+    function syncDurationRollerUI(updateInput = false) {
+        const { hrs, mins, secs } = durationRollerState;
+        const map = [
+            { colId: 'rollerColHrs', val: hrs },
+            { colId: 'rollerColMins', val: mins },
+            { colId: 'rollerColSecs', val: secs },
+        ];
+        map.forEach(({ colId, val }) => {
+            const col = document.getElementById(colId);
+            if (!col) return;
+            const items = col.querySelectorAll('.duration-roller-item');
+            items.forEach((el) => {
+                const isSel = parseInt(el.dataset.val, 10) === val;
+                el.classList.toggle('is-selected', isSel);
+                if (isSel) {
+                    const targetTop = Math.max(0, el.offsetTop - 32);
+                    col.scrollTo({ top: targetTop, behavior: 'smooth' });
+                }
+            });
+        });
+
+        const preview = document.getElementById('durationRollerPreview');
+        if (preview) preview.textContent = `${padTwo(hrs)}:${padTwo(mins)}:${padTwo(secs)}`;
+
+        if (updateInput) {
+            const input = document.getElementById('modalCallDuration');
+            if (input) input.value = formatDurationText(hrs, mins, secs);
+        }
+    }
+
+    function positionDurationRoller() {
+        const pop = document.getElementById('durationRollerPopover');
+        const input = document.getElementById('modalCallDuration');
+        if (!pop || !input) return;
+        const rect = input.getBoundingClientRect();
+        const popHeight = 254;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const topPos = spaceBelow >= popHeight + 12 ? rect.bottom + 6 : Math.max(8, rect.top - popHeight - 6);
+        const leftPos = Math.min(window.innerWidth - 196, Math.max(8, rect.right - 184));
+        pop.style.top = `${topPos}px`;
+        pop.style.left = `${leftPos}px`;
+    }
+
+    function openDurationRoller() {
+        initDurationRoller();
+        const input = document.getElementById('modalCallDuration');
+        const parsed = parseDurationText(input ? input.value : '5 mins');
+        durationRollerState.hrs = parsed.hrs;
+        durationRollerState.mins = parsed.mins;
+        durationRollerState.secs = parsed.secs;
+        const pop = document.getElementById('durationRollerPopover');
+        if (pop) {
+            if (pop.parentElement !== document.body) {
+                document.body.appendChild(pop);
+            }
+            positionDurationRoller();
+            pop.classList.add('open');
+            syncDurationRollerUI(false);
+        }
+    }
+
+    function closeDurationRoller() {
+        const pop = document.getElementById('durationRollerPopover');
+        if (pop) pop.classList.remove('open');
+    }
+
+    function toggleDurationRoller(e) {
+        if (e) e.stopPropagation();
+        const pop = document.getElementById('durationRollerPopover');
+        if (pop && pop.classList.contains('open')) {
+            closeDurationRoller();
+        } else {
+            openDurationRoller();
+        }
+    }
+
     function closeWizardModal() {
+        closeDurationRoller();
         document.getElementById('wizardModal').classList.remove('active');
         document.body.style.overflow = '';
     }

@@ -210,9 +210,6 @@ class RegistrationController extends Controller
                     'log_timestamp'=> now(),
                 ]);
             }
-            if ($crmRecord) {
-                \App\Services\CrmIdService::generateForStudent($crmRecord);
-            }
         } catch (Exception $e) {
             Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
         }
@@ -292,9 +289,18 @@ class RegistrationController extends Controller
 
         // 3c. Fill / update application number in crm.telecaller_leads table
         try {
-            $studentCrmId = (string) ($crmRecord?->crmid ?? '0');
             $cleanMobileStr = (string) $cleanMobile;
             $appliNanoStr = (string) $appliNano;
+            $personalCrmId = DB::table('crm.student_personal_info')
+                ->where(function ($q) use ($appliNanoStr, $cleanMobileStr) {
+                    $q->where('applino', $appliNanoStr)
+                      ->orWhere('phoneno', $cleanMobileStr);
+                })
+                ->whereNotNull('crmid')
+                ->where('crmid', '!=', '')
+                ->where('crmid', '!=', '0')
+                ->value('crmid');
+            $studentCrmId = $personalCrmId ? (string) $personalCrmId : '0';
 
             // Check if there is an existing telecaller_leads record for this student's phone
             $existingTcLead = DB::table('crm.telecaller_leads')

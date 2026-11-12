@@ -112,10 +112,9 @@
                         $leadAppli = (!empty($lead->student_applinano) && $lead->student_applinano !== '0') 
                             ? (string) $lead->student_applinano 
                             : ((!empty($lead->applino) && $lead->applino !== '0') ? (string) $lead->applino : '0');
-                        $leadCrmId = (!empty($lead->crmid) && $lead->crmid !== '0') ? (string) $lead->crmid : '0';
-                        if ($leadCrmId === '0' && !empty($leadAppli) && $leadAppli !== '0') {
-                            $leadCrmId = \App\Services\CrmIdService::getOrGenerateByAppli($leadAppli) ?: '0';
-                        }
+                        $leadCrmId = (!empty($lead->personal_crmid) && $lead->personal_crmid !== '0')
+                            ? (string) $lead->personal_crmid
+                            : ((!empty($lead->crmid) && $lead->crmid !== '0') ? (string) $lead->crmid : '0');
 
                         // 1. Student Created Timestamp taken directly from leads table column log_timestamp
                         $studentCreatedTs = '0';
@@ -141,19 +140,18 @@
                                 : date('Y-m-d H:i:s', strtotime($lead->lead_allocated_at));
                         }
 
-                        // 3. Current Step determined by user rules:
-                        // - if applino not created & not assigned -> New Lead
-                        // - if applino not created & assigned -> Telecaller Stage
-                        // - if applino created & not assigned -> Register Form
-                        // - if applino not paid -> Payment Stage
-                        // - if applino paid, personal not filled -> Personal Details
-                        // - if applino paid, personal filled, academic not filled -> Academic Details
-                        $currentStep = \App\Services\TelecallerService::determineLeadStage(
-                            $leadAppli,
+                        $allowedStages = ($leadAppli !== '0' && isset($stageEligibilityMap[$leadAppli]))
+                            ? $stageEligibilityMap[$leadAppli]
+                            : \App\Services\TelecallerService::defaultAllowedStages();
+
+                        $lastStageTask = ($leadPhone !== '0' && isset($latestStageTasksByPhone[$leadPhone]))
+                            ? $latestStageTasksByPhone[$leadPhone]
+                            : (($leadAppli !== '0' && isset($latestStageTasksByAppli[$leadAppli])) ? $latestStageTasksByAppli[$leadAppli] : null);
+
+                        $currentStep = \App\Services\TelecallerService::resolveCurrentStep(
                             $lead->empcode ?? null,
-                            $lead->student_stage1 ?? null,
-                            $lead->student_stage2 ?? null,
-                            $lead->student_stage3 ?? null
+                            $allowedStages,
+                            $lastStageTask?->stage_name ?? null
                         );
                         $badgeStyle = \App\Services\TelecallerService::getStageBadgeStyle($currentStep);
 
@@ -194,7 +192,7 @@
                         <!-- 4. Current Step -->
                         <td>
                             <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; background: {{ $badgeStyle['bg'] }}; color: {{ $badgeStyle['color'] }}; border: 1px solid {{ $badgeStyle['border'] }};">
-                                <span>{{ $badgeStyle['icon'] }}</span> {{ $currentStep }}
+                                {{ $currentStep }}
                             </span>
                         </td>
 
@@ -224,7 +222,7 @@
                         <td style="text-align: right;">
                             <button type="button" 
                                     class="tele-btn-action tele-btn-wizard" 
-                                    onclick="openWizardModal('{{ $leadAppli !== '0' ? $leadAppli : $leadPhone }}', '{{ addslashes($candidateName) }}', '{{ $leadPhone }}', '{{ addslashes($candidateProgram) }}', {}, '{{ addslashes($candidateRemarks) }}', '{{ addslashes($currentStep) }}')"
+                                    onclick="openWizardModal('{{ $leadAppli !== '0' ? $leadAppli : $leadPhone }}', '{{ addslashes($candidateName) }}', '{{ $leadPhone }}', '{{ addslashes($candidateProgram) }}', {}, '{{ addslashes($candidateRemarks) }}', '{{ addslashes($currentStep) }}', @js($allowedStages))"
                                     title="Open action wizard to log call & update status">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -291,7 +289,13 @@
                             }
                         }
                         $progressPct = round(($completedCount / 5) * 100);
-                        $leadCrmId = $lead->crmid ?? ($alloc?->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($leadAppNo));
+                        $leadCrmId = $lead->crmid ?? ($alloc?->crmid ?? '0');
+                        $realAppli = !empty($lead->applinano)
+                            ? (string) $lead->applinano
+                            : ((!empty($lead->applino) && $lead->applino !== '0') ? (string) $lead->applino : '0');
+                        $allowedStages = ($realAppli !== '0' && isset($stageEligibilityMap[$realAppli]))
+                            ? $stageEligibilityMap[$realAppli]
+                            : \App\Services\TelecallerService::defaultAllowedStages();
                     @endphp
                     <tr id="row-lead-{{ $leadAppNo }}">
                         <td style="text-align: center; vertical-align: middle;">
@@ -334,24 +338,25 @@
                             @endif
                         </td>
                         @php
-                            $leadStage = \App\Services\TelecallerService::determineLeadStage(
-                                $leadAppNo,
+                            $lastStageTask = (!empty($leadPhone) && isset($latestStageTasksByPhone[(string) $leadPhone]))
+                                ? $latestStageTasksByPhone[(string) $leadPhone]
+                                : (($realAppli !== '0' && isset($latestStageTasksByAppli[$realAppli])) ? $latestStageTasksByAppli[$realAppli] : null);
+                            $leadStage = \App\Services\TelecallerService::resolveCurrentStep(
                                 $alloc?->empcode ?? null,
-                                $lead->stage1 ?? null,
-                                $lead->stage2 ?? null,
-                                $lead->stage3 ?? null
+                                $allowedStages,
+                                $lastStageTask?->stage_name ?? null
                             );
                             $leadBadge = \App\Services\TelecallerService::getStageBadgeStyle($leadStage);
                         @endphp
                         <td>
                             <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; background: {{ $leadBadge['bg'] }}; color: {{ $leadBadge['color'] }}; border: 1px solid {{ $leadBadge['border'] }};">
-                                <span>{{ $leadBadge['icon'] }}</span> {{ $leadStage }}
+                                {{ $leadStage }}
                             </span>
                         </td>
                         <td style="text-align: right;">
                             <button type="button" 
                                     class="tele-btn-action tele-btn-wizard" 
-                                    onclick="openWizardModal('{{ $leadAppNo }}', '{{ addslashes($leadName) }}', '{{ $leadPhone }}', '{{ $leadProgram }}', {}, '{{ addslashes($lead->remarks ?? '') }}', '{{ addslashes($leadStage) }}')"
+                                    onclick="openWizardModal('{{ $leadAppNo }}', '{{ addslashes($leadName) }}', '{{ $leadPhone }}', '{{ $leadProgram }}', {}, '{{ addslashes($lead->remarks ?? '') }}', '{{ addslashes($leadStage) }}', @js($allowedStages))"
                                     title="Open action wizard to log call & update status">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
