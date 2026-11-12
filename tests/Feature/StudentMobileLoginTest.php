@@ -142,4 +142,28 @@ class StudentMobileLoginTest extends TestCase
             $this->assertNotEquals(1, $user->user_type, 'Employee should not have user_type 1 (Student)');
         }
     }
+
+    public function test_step4_documents_are_not_autofilled_and_application_pdf_downloads(): void
+    {
+        $studentUser = User::where('user_type', 1)->first();
+        $this->assertNotNull($studentUser, 'Expected at least one student user in vu_crm');
+
+        $step4Response = $this->actingAs($studentUser)->get('/dashboards?step=4');
+        $step4Response->assertStatus(200);
+        $step4Response->assertDontSee('SSC_Marks_Memo_Verified.pdf');
+        $step4Response->assertDontSee('Inter_Plus2_Memo_Verified.pdf');
+        $step4Response->assertDontSee('Aadhaar_Front_Back.pdf');
+        $step4Response->assertDontSee('Candidate_Passport_Photo.jpg');
+
+        $appId = $studentUser->usercode ?: '2027000010';
+
+        $showResponse = $this->actingAs($studentUser)->get("/application/{$appId}");
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('APPLICATION FORM');
+
+        $pdfResponse = $this->actingAs($studentUser)->get("/application/{$appId}/download");
+        $pdfResponse->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', (string) $pdfResponse->headers->get('content-type'));
+        $this->assertStringStartsWith('%PDF-', (string) $pdfResponse->getContent());
+    }
 }

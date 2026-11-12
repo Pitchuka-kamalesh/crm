@@ -89,3 +89,7 @@ Route::post('/payu/initiate', [\App\Http\Controllers\PayUController::class, 'ini
 Route::match(['get', 'post'], '/payu/response', [\App\Http\Controllers\PayUController::class, 'handleResponse'])->name('payu.response');
 Route::get('/payu/receipt', [\App\Http\Controllers\PayUController::class, 'receipt'])->middleware('auth')->name('payu.receipt');
 
+// Official A4 Application Form Preview & PDF Download
+Route::get('/application/{id}', [\App\Http\Controllers\ApplicationController::class, 'show'])->middleware('auth')->name('application.show');
+Route::get('/application/{id}/download', [\App\Http\Controllers\ApplicationController::class, 'download'])->middleware('auth')->name('application.download');
+

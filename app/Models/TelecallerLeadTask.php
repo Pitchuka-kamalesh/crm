@@ -18,6 +18,7 @@ class TelecallerLeadTask extends Model
         'empcode',
         'stage_name',
         'stage_calltime',
+        'stage_call_duration',
         'stage_remark',
         'stage_callperson',
         'log_userid',
