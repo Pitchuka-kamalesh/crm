@@ -420,12 +420,30 @@
                                     <th>Application Number</th>
                                     <th>Student Name</th>
                                     <th>Mobile Number</th>
-                                    <th style="text-align: center;">Step 1</th>
-                                    <th style="text-align: center;">Step 2</th>
-                                    <th style="text-align: center;">Step 3</th>
-                                    <th style="text-align: center;">Step 4</th>
-                                    <th style="text-align: center;">Step 5</th>
-                                    <th style="text-align: center;">Step 6</th>
+                                    <th style="text-align: center;">
+                                        <div>Step 1</div>
+                                        <div style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.03em; margin-top: 2px;">Registration Form</div>
+                                    </th>
+                                    <th style="text-align: center;">
+                                        <div>Step 2</div>
+                                        <div style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.03em; margin-top: 2px;">Payment</div>
+                                    </th>
+                                    <th style="text-align: center;">
+                                        <div>Step 3</div>
+                                        <div style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.03em; margin-top: 2px;">Personal Details</div>
+                                    </th>
+                                    <th style="text-align: center;">
+                                        <div>Step 4</div>
+                                        <div style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.03em; margin-top: 2px;">Academic Details</div>
+                                    </th>
+                                    <th style="text-align: center;">
+                                        <div>Step 5</div>
+                                        <div style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.03em; margin-top: 2px;">Application Download</div>
+                                    </th>
+                                    <th style="text-align: center;">
+                                        <div>Step 6</div>
+                                        <div style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.03em; margin-top: 2px;">VSAT Result</div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -443,74 +461,74 @@
                                         $s5 = strtolower(trim((string)($std->stage5 ?? '')));
                                         $s6 = strtolower(trim((string)($std->stage6 ?? '')));
 
-                                        // Step 1: Registration & Fee Payment
+                                        // Step 1: Registration Form
+                                        $hasAppli = (!empty($appliNo) && $appliNo !== 'N/A');
+                                        $stdStatus = strtolower(trim((string)($std->std_status ?? '')));
+                                        if ($hasAppli || in_array($stdStatus, ['applied', 'registered', 'verified', 'admitted', 'enrolled', 'completed'])) {
+                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done'; $st1Sub = 'Registration Form';
+                                        } elseif (in_array($stdStatus, ['in_progress', 'draft', 'pending'])) {
+                                            $st1Pill = 'pill-pending'; $st1Icon = '⏳'; $st1Text = 'In Progress'; $st1Sub = 'Registration Form';
+                                        } else {
+                                            $st1Pill = 'pill-awaiting'; $st1Icon = '🔒'; $st1Text = 'Pending'; $st1Sub = 'Registration Form';
+                                        }
+
+                                        // Step 2: Payment (stage1 fee payment)
                                         if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
-                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done'; $st1Sub = 'Fee Paid';
+                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done'; $st2Sub = 'Payment';
                                         } elseif (in_array($s1, ['in_progress', 'partial', 'pending_verification'])) {
-                                            $st1Pill = 'pill-pending'; $st1Icon = '⏳'; $st1Text = 'In Progress'; $st1Sub = 'In Progress';
+                                            $st2Pill = 'pill-pending'; $st2Icon = '⏳'; $st2Text = 'In Progress'; $st2Sub = 'Payment';
                                         } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st1Pill = 'pill-danger'; $st1Icon = '❌'; $st1Text = 'Fee Due'; $st1Sub = 'Not Paid';
+                                            $st2Pill = 'pill-danger'; $st2Icon = '❌'; $st2Text = 'Fee Due'; $st2Sub = 'Payment';
+                                        } elseif (in_array($s1, ['na', 'not_applicable'])) {
+                                            $st2Pill = 'pill-awaiting'; $st2Icon = '—'; $st2Text = 'N/A'; $st2Sub = 'Payment';
+                                        } elseif (in_array($s1, ['locked'])) {
+                                            $st2Pill = 'pill-awaiting'; $st2Icon = '🔒'; $st2Text = 'Locked'; $st2Sub = 'Payment';
                                         } else {
-                                            $st1Pill = 'pill-awaiting'; $st1Icon = '🔒'; $st1Text = 'Pending'; $st1Sub = 'Registration';
+                                            $st2Pill = 'pill-danger'; $st2Icon = '❌'; $st2Text = 'Fee Due'; $st2Sub = 'Payment';
                                         }
 
-                                        // Step 2: Personal Profile
+                                        // Step 3: Personal Details (stage2)
                                         if (in_array($s2, ['completed', 'approved', 'done'])) {
-                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done'; $st2Sub = 'Personal Details';
+                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done'; $st3Sub = 'Personal Details';
                                         } elseif (in_array($s2, ['in_progress', 'partial', 'draft'])) {
-                                            $st2Pill = 'pill-pending'; $st2Icon = '⏳'; $st2Text = 'In Progress'; $st2Sub = 'Personal Details';
-                                        } elseif (in_array($s2, ['locked', 'na', 'not_applicable'])) {
-                                            $st2Pill = 'pill-awaiting'; $st2Icon = '🔒'; $st2Text = 'Locked'; $st2Sub = 'Personal Details';
+                                            $st3Pill = 'pill-pending'; $st3Icon = '⏳'; $st3Text = 'In Progress'; $st3Sub = 'Personal Details';
+                                        } elseif (in_array($s2, ['na', 'not_applicable'])) {
+                                            $st3Pill = 'pill-awaiting'; $st3Icon = '—'; $st3Text = 'N/A'; $st3Sub = 'Personal Details';
                                         } else {
-                                            $st2Pill = 'pill-awaiting'; $st2Icon = '⏳'; $st2Text = 'Pending'; $st2Sub = 'Personal Details';
+                                            $st3Pill = 'pill-awaiting'; $st3Icon = '🔒'; $st3Text = 'Locked'; $st3Sub = 'Personal Details';
                                         }
 
-                                        // Step 3: Academic Details
+                                        // Step 4: Academic Details (stage3)
                                         if (in_array($s3, ['completed', 'approved', 'done'])) {
-                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done'; $st3Sub = 'Academic Info';
+                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done'; $st4Sub = 'Academic Details';
                                         } elseif (in_array($s3, ['in_progress', 'partial', 'draft'])) {
-                                            $st3Pill = 'pill-pending'; $st3Icon = '⏳'; $st3Text = 'In Progress'; $st3Sub = 'Academic Info';
-                                        } elseif (in_array($s3, ['locked', 'na', 'not_applicable'])) {
-                                            $st3Pill = 'pill-awaiting'; $st3Icon = '🔒'; $st3Text = 'Locked'; $st3Sub = 'Academic Info';
+                                            $st4Pill = 'pill-pending'; $st4Icon = '⏳'; $st4Text = 'In Progress'; $st4Sub = 'Academic Details';
+                                        } elseif (in_array($s3, ['na', 'not_applicable'])) {
+                                            $st4Pill = 'pill-awaiting'; $st4Icon = '—'; $st4Text = 'N/A'; $st4Sub = 'Academic Details';
                                         } else {
-                                            $st3Pill = 'pill-awaiting'; $st3Icon = '⏳'; $st3Text = 'Pending'; $st3Sub = 'Academic Info';
+                                            $st4Pill = 'pill-awaiting'; $st4Icon = '🔒'; $st4Text = 'Locked'; $st4Sub = 'Academic Details';
                                         }
 
-                                        // Step 4: Application Download
+                                        // Step 5: Application Download (stage4)
                                         if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
-                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done'; $st4Sub = 'Application';
+                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done'; $st5Sub = 'Application Download';
                                         } elseif (in_array($s4, ['in_progress', 'ready'])) {
-                                            $st4Pill = 'pill-pending'; $st4Icon = '⏳'; $st4Text = 'Ready'; $st4Sub = 'Application';
+                                            $st5Pill = 'pill-pending'; $st5Icon = '⏳'; $st5Text = 'Ready'; $st5Sub = 'Application Download';
                                         } elseif (in_array($s4, ['na', 'not_applicable'])) {
-                                            $st4Pill = 'pill-awaiting'; $st4Icon = '—'; $st4Text = 'N/A'; $st4Sub = 'Application';
+                                            $st5Pill = 'pill-awaiting'; $st5Icon = '—'; $st5Text = 'N/A'; $st5Sub = 'Application Download';
                                         } else {
-                                            $st4Pill = 'pill-awaiting'; $st4Icon = '🔒'; $st4Text = 'Locked'; $st4Sub = 'Application';
+                                            $st5Pill = 'pill-awaiting'; $st5Icon = '🔒'; $st5Text = 'Locked'; $st5Sub = 'Application Download';
                                         }
 
-                                        // Step 5: VSAT Result / Entrance Exam
+                                        // Step 6: VSAT Result (stage5)
                                         if (in_array($s5, ['completed', 'approved', 'done', 'qualified'])) {
-                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done'; $st5Sub = 'VSAT Result';
+                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done'; $st6Sub = 'VSAT Result';
                                         } elseif (in_array($s5, ['in_progress', 'scheduled', 'pending'])) {
-                                            $st5Pill = 'pill-pending'; $st5Icon = '⏳'; $st5Text = 'In Progress'; $st5Sub = 'VSAT Result';
+                                            $st6Pill = 'pill-pending'; $st6Icon = '⏳'; $st6Text = 'In Progress'; $st6Sub = 'VSAT Result';
                                         } elseif (in_array($s5, ['na', 'not_applicable'])) {
-                                            $st5Pill = 'pill-awaiting'; $st5Icon = '—'; $st5Text = 'N/A'; $st5Sub = 'VSAT Result';
+                                            $st6Pill = 'pill-awaiting'; $st6Icon = '—'; $st6Text = 'N/A'; $st6Sub = 'VSAT Result';
                                         } else {
-                                            $st5Pill = 'pill-awaiting'; $st5Icon = '🔒'; $st5Text = 'Locked'; $st5Sub = 'VSAT Result';
-                                        }
-
-                                        // Step 6: Enrollment Confirmation
-                                        $isAdmitted = in_array($s6, ['completed', 'approved', 'done', 'admitted', 'enrolled'])
-                                            || !empty($std->register_no)
-                                            || in_array(strtolower($std->std_status ?? ''), ['admitted', 'enrolled']);
-
-                                        if ($isAdmitted) {
-                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done'; $st6Sub = 'Enrollment';
-                                        } elseif (in_array($s6, ['in_progress', 'seat_allotted', 'counseling'])) {
-                                            $st6Pill = 'pill-pending'; $st6Icon = '⏳'; $st6Text = 'In Progress'; $st6Sub = 'Enrollment';
-                                        } elseif (in_array($s6, ['na', 'not_applicable'])) {
-                                            $st6Pill = 'pill-awaiting'; $st6Icon = '—'; $st6Text = 'N/A'; $st6Sub = 'Enrollment';
-                                        } else {
-                                            $st6Pill = 'pill-awaiting'; $st6Icon = '🔒'; $st6Text = 'Locked'; $st6Sub = 'Enrollment';
+                                            $st6Pill = 'pill-awaiting'; $st6Icon = '🔒'; $st6Text = 'Locked'; $st6Sub = 'VSAT Result';
                                         }
                                     @endphp
                                     <tr class="register-track-row" 
