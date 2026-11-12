@@ -144,8 +144,9 @@ class DashboardsController extends Controller
         $edu10th = null;
         $eduInter = null;
 
-        // Uploaded KYC documents
+        // Uploaded KYC documents from disk (public/uploads/documents/{appNo})
         $documents = collect();
+        $uploadedDocs = self::getUploadedDocuments((string) $appNo);
 
         // 5-Stage Metadata definitions (strictly aligned with master.menus)
         $stageMeta = [
@@ -260,6 +261,7 @@ class DashboardsController extends Controller
             'edu10th',
             'eduInter',
             'documents',
+            'uploadedDocs',
             'appNo',
             'regNo',
             'displayName',
@@ -607,16 +609,57 @@ class DashboardsController extends Controller
                 }
                 $nextStep = 4;
                 $msg = 'Stage 3: Academic Records saved successfully!';
-            } elseif ($step >= 4 && $step <= 5) {
+            } elseif ($step === 4) {
+                $request->validate([
+                    'docs' => ['nullable', 'array'],
+                    'docs.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                ], [
+                    'docs.*.mimes' => 'Documents must be PDF, JPG, JPEG, or PNG files.',
+                    'docs.*.max' => 'Each uploaded document must be 5MB or smaller.',
+                ]);
+
                 if ($crmStudent) {
+                    $allowedDocKeys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct'];
+                    $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
+                    $destDir = public_path('uploads/documents/' . $appliFolder);
+
+                    if ($request->hasFile('docs')) {
+                        if (!is_dir($destDir)) {
+                            mkdir($destDir, 0755, true);
+                        }
+                        foreach ($request->file('docs') as $docKey => $file) {
+                            if (!$file || !in_array((string) $docKey, $allowedDocKeys, true)) {
+                                continue;
+                            }
+                            foreach (glob($destDir . DIRECTORY_SEPARATOR . $docKey . '_*') ?: [] as $oldFile) {
+                                @unlink($oldFile);
+                            }
+                            $ext = strtolower($file->getClientOriginalExtension() ?: 'pdf');
+                            $base = preg_replace('/[^A-Za-z0-9_-]/', '_', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                            $base = trim((string) $base, '_') ?: $docKey;
+                            $fileName = $docKey . '_' . substr($base, 0, 40) . '.' . $ext;
+                            $file->move($destDir, $fileName);
+                        }
+                    }
+
                     $crmStudent->update([
-                        'stage' . $step => 'completed',
+                        'stage4' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
                 }
-                $nextStep = min(5, $step + 1);
-                $msg = 'Stage ' . $step . ' saved successfully!';
+                $nextStep = 5;
+                $msg = 'Stage 4 documents saved successfully!';
+            } elseif ($step === 5) {
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage5' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 5;
+                $msg = 'Stage 5 saved successfully!';
             } else {
                 $msg = 'Stage updated successfully!';
             }
@@ -629,6 +672,51 @@ class DashboardsController extends Controller
             return redirect()->route('dashboards.index', ['step' => $step])
                 ->withErrors(['error' => 'Failed to save stage details: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Scan uploaded documents for an application number from public/uploads/documents/{applino}.
+     *
+     * @return array<string, array{filename: string, path: string, url: string, mime: string, ext: string}>
+     */
+    public static function getUploadedDocuments(string $applino): array
+    {
+        $cleanAppli = preg_replace('/[^A-Za-z0-9_-]/', '', $applino);
+        if ($cleanAppli === '' || $cleanAppli === '0') {
+            return [];
+        }
+
+        $dir = public_path('uploads/documents/' . $cleanAppli);
+        if (!is_dir($dir)) {
+            return [];
+        }
+
+        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct'];
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+        ];
+        $found = [];
+
+        foreach ($keys as $key) {
+            $matches = glob($dir . DIRECTORY_SEPARATOR . $key . '_*');
+            if (!empty($matches) && is_file($matches[0])) {
+                $fullPath = $matches[0];
+                $filename = basename($fullPath);
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                $found[$key] = [
+                    'filename' => $filename,
+                    'path' => $fullPath,
+                    'url' => asset('uploads/documents/' . $cleanAppli . '/' . $filename),
+                    'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
+                    'ext' => $ext,
+                ];
+            }
+        }
+
+        return $found;
     }
 
     /**

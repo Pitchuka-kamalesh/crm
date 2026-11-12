@@ -201,9 +201,6 @@ class RegistrationController extends Controller
                     'log_timestamp'=> now(),
                 ]);
             }
-            if ($crmRecord) {
-                \App\Services\CrmIdService::generateForStudent($crmRecord);
-            }
         } catch (Exception $e) {
             Log::error('[RegistrationController] CrmStudentRegistration error: ' . $e->getMessage());
         }
@@ -283,9 +280,18 @@ class RegistrationController extends Controller
 
         // 3c. Fill / update application number in crm.telecaller_leads table
         try {
-            $studentCrmId = (string) ($crmRecord?->crmid ?? '0');
             $cleanMobileStr = (string) $cleanMobile;
             $appliNanoStr = (string) $appliNano;
+            $personalCrmId = DB::table('crm.student_personal_info')
+                ->where(function ($q) use ($appliNanoStr, $cleanMobileStr) {
+                    $q->where('applino', $appliNanoStr)
+                      ->orWhere('phoneno', $cleanMobileStr);
+                })
+                ->whereNotNull('crmid')
+                ->where('crmid', '!=', '')
+                ->where('crmid', '!=', '0')
+                ->value('crmid');
+            $studentCrmId = $personalCrmId ? (string) $personalCrmId : '0';
 
             // Check if there is an existing telecaller_leads record for this student's phone
             $existingTcLead = DB::table('crm.telecaller_leads')
@@ -342,23 +348,6 @@ class RegistrationController extends Controller
                         'crmid'         => $studentCrmId,
                         'log_timestamp' => now(),
                     ]);
-            } else {
-                // If not in telecaller_leads yet, create the record with generated applino
-                $leadRow = Lead::where('phoneno', (int) $cleanMobile)->first();
-                $assignedEmp = ($leadRow && !empty($leadRow->empcode) && $leadRow->empcode !== '0') ? (string) $leadRow->empcode : '0';
-                $empMax = (int) DB::table('crm.telecaller_leads')->where('empcode', $assignedEmp)->max('leadcount');
-
-                DB::table('crm.telecaller_leads')->insert([
-                    'applino'        => $appliNanoStr,
-                    'phoneno'        => $cleanMobileStr,
-                    'crmid'          => $studentCrmId,
-                    'empcode'        => $assignedEmp,
-                    'leadcount'      => $empMax + 1,
-                    'assigndatetime' => now(),
-                    'log_userid'     => 'SELF_REGISTER',
-                    'log_ipaddress'  => $request->ip() ?? '127.0.0.1',
-                    'log_timestamp'  => now(),
-                ]);
             }
         } catch (\Throwable $e) {
             Log::warning('[RegistrationController] Telecaller leads sync error: ' . $e->getMessage());

@@ -13,7 +13,7 @@
 <aside class="app-sidebar" id="appSidebar">
     <!-- 1. Top Brand Header -->
     <div class="sidebar-header">
-        <a href="{{ route('crm.alias') }}" class="brand-wrapper">
+        <a href="{{ route('crm.stddata') }}" class="brand-wrapper">
             <div class="brand-emblem">
                 <img src="/images/vignan-shield-logo.png" alt="Vignan Emblem" class="brand-logo-img">
             </div>
@@ -111,9 +111,10 @@
                     'crm/stddata' => route('crm.stddata', ['tab' => 'stddata']),
                     'crm/stdsearch' => route('crm.stdsearch', ['tab' => 'stdsearch']),
                     'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => route('crm.couponinfo', ['tab' => 'couponinfo']),
-                    'crm/index' => route('crm.alias', ['tab' => 'overview']),
+                    'crm/index' => route('crm.stddata', ['tab' => 'stddata']),
                     'leads/allottedleads' => route('leads.allotted'),
                     'leads/leadsallocation' => route('leads.allocation', ['tab' => 'allocation']),
+                    'leads/leadsupload' => route('leads.upload', ['tab' => 'upload']),
                     'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => route('leads.input', ['tab' => 'input']),
                     'leads/index' => route('leads.index'),
                     'finance/paiddetails' => route('finance.paiddetails', ['tab' => 'paiddetails']),
@@ -137,6 +138,7 @@
                     'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => $currentTab === 'couponinfo' || request()->routeIs('crm.couponinfo*') || request()->routeIs('crm.coupoungenration*') || str_contains($currentPath, 'coupoungenration') || str_contains($currentPath, 'coupon-info') || str_contains($currentPath, 'couponinfo'),
                     'leads/allottedleads' => request()->routeIs('leads.allotted') || str_contains($currentPath, 'allotted'),
                     'leads/leadsallocation' => $currentTab === 'allocation' || request()->routeIs('leads.allocation') || str_contains($currentPath, 'allocation'),
+                    'leads/leadsupload' => $currentTab === 'upload' || request()->routeIs('leads.upload') || str_contains($currentPath, 'leadsupload'),
                     'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => $currentTab === 'input' || request()->routeIs('leads.input') || str_contains($currentPath, 'leadsinput') || str_contains($currentPath, 'leads-input') || str_contains($currentPath, 'leads%20input') || str_contains($currentPath, 'leads input'),
                     'finance/paiddetails' => request()->routeIs('finance.paiddetails') || str_contains($currentPath, 'paiddetails'),
                     'finance/payfee' => str_contains($currentPath, 'payfee'),
@@ -169,19 +171,23 @@
         @endphp
 
         <!-- DYNAMIC ROLE-BASED MENUS (Strictly from database master.menus & master.menu_access_roles) -->
-        @if($roleId != 4)
-            <!-- PROMINENT ACTIVE PILL: DASHBOARD -->
-            @php
-                $dashboardRoute = route('crm.alias', ['tab' => 'overview']);
-            @endphp
-            <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
-                <svg viewBox="0 0 24 24">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                <span>Dashboard</span>
-            </a>
-        @endif
+        {{--
+            TEMPORARILY HIDDEN DASHBOARD BUTTON:
+            Hidden per user request. Can be restored by removing the Blade comment wrapper.
+
+            @if($roleId != 4)
+                @php
+                    $dashboardRoute = route('crm.alias', ['tab' => 'overview']);
+                @endphp
+                <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+            @endif
+        --}}
 
         @foreach($menuGroups as $mainId => $group)
             @php

@@ -1274,6 +1274,155 @@
             border-color: #1e293b;
         }
 
+        /* Call Duration Roller Popover */
+        .duration-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .duration-roller-trigger {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #475569;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .duration-roller-trigger:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .duration-roller-popover {
+            position: fixed;
+            display: none;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.22);
+            padding: 8px;
+            z-index: 100100;
+            user-select: none;
+            width: 184px;
+        }
+
+        .duration-roller-popover.open {
+            display: block;
+        }
+
+        .duration-roller-headers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .duration-roller-hdr {
+            text-align: center;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .duration-roller-cols {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .duration-roller-col {
+            height: 192px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-snap-type: y proximity;
+            border-radius: 4px;
+        }
+
+        .duration-roller-col::-webkit-scrollbar {
+            display: none;
+        }
+
+        .duration-roller-item {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #0f172a;
+            border-radius: 4px;
+            cursor: pointer;
+            scroll-snap-align: start;
+            transition: background 0.1s ease;
+        }
+
+        .duration-roller-item:hover {
+            background: #f1f5f9;
+        }
+
+        .duration-roller-item.is-selected {
+            background: #d1d5db;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .duration-roller-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #e2e8f0;
+            gap: 6px;
+        }
+
+        .duration-roller-done {
+            background: #7c0e23;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            cursor: pointer;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-popover {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-item {
+            color: #f8fafc;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-item:hover {
+            background: #334155;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-item.is-selected {
+            background: #475569;
+            color: #ffffff;
+        }
+
+        [data-theme-mode="dark"] .duration-roller-footer {
+            border-color: #334155;
+        }
+
         /* ================= PRINT REPORT STYLES ================= */
         .print-only-header {
             display: none;
@@ -1418,7 +1567,9 @@
                     <span class="breadcrumb-separator">/</span>
                     <span class="breadcrumb-active-tag">
                         <span class="breadcrumb-dot"></span>
-                        @if($activeTab === 'input')
+                        @if($activeTab === 'upload')
+                            <span>Leads Upload</span>
+                        @elseif($activeTab === 'input')
                             <span>Lead Input &bull; Complete Leads Directory</span>
                         @elseif($activeTab === 'allocation' || in_array($roleId, [2, 3]))
                             <span>Leads Allocation &bull; Unallocated Queue</span>
@@ -1453,14 +1604,43 @@
                 </div>
             </div>
 
+            @if($activeTab !== 'upload' && session('upload_success'))
+                <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #065f46; padding: 1rem 1.25rem; border-radius: 0.65rem; margin-bottom: 1.25rem; font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.4rem;">✅</span>
+                        <div>
+                            <div>{{ session('upload_success') }}</div>
+                            @if(session('upload_summary'))
+                                @php $sum = session('upload_summary'); @endphp
+                                <div style="font-size: 0.78rem; font-weight: 600; color: #047857; margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <span>📊 Total Found: <strong>{{ $sum['total_rows'] }}</strong></span>
+                                    <span>📥 Inserted New: <strong>{{ $sum['inserted_count'] }}</strong></span>
+                                    <span>⚠️ Duplicates Skipped: <strong>{{ $sum['total_duplicates'] }}</strong></span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" style="padding: 0.5rem 1.15rem; background: #059669; color: #ffffff; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                        Go to Leads Allocation &rarr;
+                    </a>
+                </div>
+            @endif
+
+            @if($activeTab !== 'upload' && session('upload_error'))
+                <div style="background: #fef2f2; border: 1.5px solid #fecaca; color: #991b1b; padding: 0.95rem 1.25rem; border-radius: 0.65rem; margin-bottom: 1.25rem; font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.3rem;">❌</span>
+                    <div>{{ session('upload_error') }}</div>
+                </div>
+            @endif
+
             @if(session('status'))
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 0.75rem 1.25rem; border-radius: 0.5rem; margin-bottom: 1.25rem; font-size: 0.82rem; font-weight: 600;">
                     ✓ {{ session('status') }}
                 </div>
             @endif
 
-            <!-- 4 METRIC STAT CARDS WITH SVG ICONS (Hidden on Allocation and Allotted Tabs) -->
-            @if($activeTab !== 'allocation' && $activeTab !== 'allotted')
+            <!-- 4 METRIC STAT CARDS WITH SVG ICONS (Hidden on Allocation, Allotted, and Upload Tabs) -->
+            @if($activeTab !== 'allocation' && $activeTab !== 'allotted' && $activeTab !== 'upload')
             <div class="telecaller-stats-row">
                 <div class="stat-card-modern">
                     <div class="stat-meta">
@@ -1625,8 +1805,581 @@
                 </div>
             @endif
 
-            <!-- PORTAL TABLE CARD -->
-            <div class="portal-card-shell">
+            @if($activeTab === 'upload')
+                <!-- TAB: LEADS UPLOAD (EXCEL / CSV INGESTION) -->
+                <div class="allocation-command-card" style="padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1.15rem; margin-bottom: 1.5rem;">
+                        <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.4rem;">📥</span>
+                            <span>Leads Upload</span>
+                        </div>
+                        <div>
+                            <a href="{{ route('leads.downloadSample') }}" 
+                               style="display: inline-flex; align-items: center; gap: 8px; padding: 0.65rem 1.25rem; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; color: #0f172a; font-size: 0.82rem; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s ease;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Download Sample Template</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Prominent Notifications for Upload (Session Alerts & AJAX Feedback) -->
+                    <div id="uploadNotificationArea">
+                        @if(session('upload_success'))
+                            <div class="upload-alert-box" style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(34,197,94,0.12);">
+                                <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #16a34a; flex-shrink: 0; font-weight: 800;">
+                                            ✓
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 1.15rem; font-weight: 800; color: #15803d;">
+                                                File Uploaded Successfully!
+                                            </div>
+                                            <div style="font-size: 0.9rem; font-weight: 600; color: #166534; margin-top: 4px;">
+                                                {{ session('upload_success') }}
+                                            </div>
+                                            @if(session('upload_summary'))
+                                                @php $sum = session('upload_summary'); @endphp
+                                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #bbf7d0; font-size: 0.82rem;">
+                                                    <span style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #0f172a;">
+                                                        📊 Total in File: <span style="color: #2563eb;">{{ number_format($sum['total_rows'] ?? 0) }}</span>
+                                                    </span>
+                                                    <span style="background: #ffffff; border: 1px solid #86efac; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #15803d;">
+                                                        🟢 New Leads Added: <span style="color: #16a34a;">{{ number_format($sum['inserted_count'] ?? 0) }}</span>
+                                                    </span>
+                                                    @if(($sum['total_duplicates'] ?? 0) > 0)
+                                                        <span style="background: #ffffff; border: 1px solid #fde047; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #854d0e;">
+                                                            ⚠️ Duplicates Skipped: <span style="color: #d97706;">{{ number_format($sum['total_duplicates']) }}</span>
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" style="padding: 0.65rem 1.25rem; background: #16a34a; color: #ffffff; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(22,163,74,0.3);">
+                                        <span>Go to Leads Allocation &rarr;</span>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(session('upload_error'))
+                            <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
+                                        ✕
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
+                                            Upload Failed / Error
+                                        </div>
+                                        <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
+                                            {{ session('upload_error') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($errors->any())
+                            <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
+                                        ✕
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
+                                            Validation Error
+                                        </div>
+                                        <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
+                                            @foreach($errors->all() as $err)
+                                                <div>&bull; {{ $err }}</div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Upload Form & Drag Drop Box -->
+                    <form action="{{ route('leads.uploadExcel') }}" method="POST" enctype="multipart/form-data" id="leadExcelUploadForm">
+                        @csrf
+                        <div style="max-width: 680px; margin: 0 auto;">
+                            <!-- Dropzone Box -->
+                            <div style="border: 2px dashed #93c5fd; background: #f8fafc; border-radius: 14px; padding: 2.75rem 2rem; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative;"
+                                 id="uploadDropzone"
+                                 onclick="document.getElementById('leadsFileInput').click()">
+                                <input type="file" 
+                                       name="leads_file" 
+                                       id="leadsFileInput" 
+                                       accept=".xlsx, .xls, .csv, .txt, .XLSX, .XLS, .CSV, .TXT" 
+                                       required 
+                                       style="display: none;"
+                                       onchange="handleLeadFileSelected(this)">
+                                
+                                <div style="width: 58px; height: 58px; margin: 0 auto 1rem auto; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;" id="dropzoneMainText">
+                                    Click to select Excel/CSV file or drag &amp; drop here
+                                </div>
+                                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem;" id="dropzoneSubText">
+                                    Supports .xlsx, .xls, .csv &bull; Max file size 20MB
+                                </div>
+                                <button type="button" class="btn-action-sm btn-verify" style="padding: 0.6rem 1.75rem; font-size: 0.86rem; pointer-events: none;">
+                                    Browse Computer
+                                </button>
+                            </div>
+
+                            <!-- Selected File Preview Badge -->
+                            <div id="fileSelectedBox" style="display: none; background: #ffffff; border: 1.5px solid #2563eb; border-radius: 10px; padding: 0.85rem 1.15rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(37,99,235,0.08);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 1.6rem;">📄</span>
+                                        <div style="text-align: left;">
+                                            <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem;" id="previewFileName">filename.xlsx</div>
+                                            <div style="font-size: 0.74rem; color: #64748b;" id="previewFileSize">128 KB &bull; Ready to upload</div>
+                                        </div>
+                                    </div>
+                                    <span style="font-size: 0.74rem; font-weight: 700; background: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                                        ✓ File Selected
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Upload Progress Status -->
+                            <div id="uploadProgressStatus" style="display: none; margin-top: 1rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e40af; font-size: 0.84rem; font-weight: 600; text-align: center;">
+                                ⏳ Uploading file and ingesting mobile numbers into <code>crm.leads</code>... Please wait.
+                            </div>
+
+                            <div style="margin-top: 1.5rem; text-align: center;">
+                                <button type="submit" id="btnSubmitUpload" class="incharge-btn-submit" style="min-width: 260px; height: 46px; margin: 0 auto; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);" disabled>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                        <path d="M12 12v9"></path>
+                                        <path d="m16 16-4-4-4 4"></path>
+                                    </svg>
+                                    <span>Upload &amp; Ingest Leads</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- RECENTLY UPLOADED FILES HISTORY TABLE -->
+                <div class="portal-card-shell" style="margin-top: 1.5rem;">
+                    <div class="portal-card-topbar" style="padding: 0.85rem 1.25rem;">
+                        <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <span>📁</span> Recently Uploaded Files
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="crm-table" id="recentUploadedFilesTable">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>File Size</th>
+                                    <th>Total Records</th>
+                                    <th>New Leads Added</th>
+                                    <th>Duplicates Skipped</th>
+                                    <th>Upload Status</th>
+                                    <th>Uploaded By</th>
+                                    <th>Upload Date &amp; Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentUploadedFiles as $file)
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="font-size: 1.25rem;">📄</span>
+                                                <strong style="font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: #0f172a;">
+                                                    {{ $file['filename'] ?? 'uploaded_leads.xlsx' }}
+                                                </strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">
+                                                {{ $file['filesize'] ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong style="font-size: 0.84rem; color: #0f172a;">
+                                                {{ number_format($file['total_records'] ?? 0) }} Leads
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <span class="tracking-pill pill-done" style="font-weight: 700;">
+                                                ✓ {{ number_format($file['inserted_count'] ?? 0) }} New
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if(($file['duplicates_count'] ?? 0) > 0)
+                                                <span class="tracking-pill pill-pending" style="font-weight: 700;">
+                                                    ⚠️ {{ number_format($file['duplicates_count']) }} Skipped
+                                                </span>
+                                            @else
+                                                <span class="tracking-pill pill-awaiting">0 Skipped</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="tracking-pill pill-done" style="font-weight: 700;">
+                                                ✓ Completed
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">
+                                                {{ $file['uploaded_by'] ?? '02598' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: 0.78rem; color: #64748b;">
+                                                {{ $file['uploaded_at'] ?? 'Just now' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr class="no-files-row">
+                                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                                            No files uploaded yet. Select an Excel or CSV file above to ingest leads.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <script>
+                    function escapeHtmlLead(text) {
+                        if (!text) return '';
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    }
+
+                    function handleLeadFileSelected(input) {
+                        const file = input.files ? input.files[0] : null;
+                        const btn = document.getElementById('btnSubmitUpload');
+                        const mainTxt = document.getElementById('dropzoneMainText');
+                        const subTxt = document.getElementById('dropzoneSubText');
+                        const filePreview = document.getElementById('fileSelectedBox');
+                        const previewName = document.getElementById('previewFileName');
+                        const previewSize = document.getElementById('previewFileSize');
+
+                        if (file) {
+                            mainTxt.innerHTML = '📄 Selected: <strong style="color: #2563eb;">' + escapeHtmlLead(file.name) + '</strong>';
+                            subTxt.textContent = 'Click to change file';
+                            if (previewName) previewName.textContent = file.name;
+                            if (previewSize) previewSize.textContent = (file.size / 1024).toFixed(1) + ' KB • Ready for upload';
+                            if (filePreview) filePreview.style.display = 'block';
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.style.pointerEvents = 'auto';
+                                btn.style.opacity = '1';
+                                btn.innerHTML = `
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                        <path d="M12 12v9"></path>
+                                        <path d="m16 16-4-4-4 4"></path>
+                                    </svg>
+                                    <span>Upload &amp; Ingest Leads (${escapeHtmlLead(file.name)})</span>
+                                `;
+                            }
+                        } else {
+                            mainTxt.textContent = 'Click to select Excel/CSV file or drag & drop here';
+                            subTxt.textContent = 'Supports .xlsx, .xls, .csv • Max file size 20MB';
+                            if (filePreview) filePreview.style.display = 'none';
+                            if (btn) {
+                                btn.disabled = true;
+                                btn.innerHTML = `
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                        <path d="M12 12v9"></path>
+                                        <path d="m16 16-4-4-4 4"></path>
+                                    </svg>
+                                    <span>Upload &amp; Ingest Leads</span>
+                                `;
+                            }
+                        }
+                    }
+
+                    // Form submit handler with AJAX and instant feedback
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const form = document.getElementById('leadExcelUploadForm');
+                        if (form) {
+                            form.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                const btn = document.getElementById('btnSubmitUpload');
+                                const input = document.getElementById('leadsFileInput');
+                                const notifyArea = document.getElementById('uploadNotificationArea');
+                                const progressDiv = document.getElementById('uploadProgressStatus');
+
+                                if (!input || !input.files || input.files.length === 0) {
+                                    alert('Please select an Excel or CSV file first.');
+                                    return;
+                                }
+
+                                const file = input.files[0];
+
+                                if (btn) {
+                                    btn.style.pointerEvents = 'none';
+                                    btn.style.opacity = '0.85';
+                                    btn.innerHTML = '<span>⏳</span> Uploading and validating leads... Please wait';
+                                }
+                                if (progressDiv) {
+                                    progressDiv.style.display = 'block';
+                                }
+
+                                const formData = new FormData(form);
+                                const tokenInput = form.querySelector('input[name="_token"]');
+                                const csrfToken = tokenInput ? tokenInput.value : '';
+
+                                fetch(form.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': csrfToken
+                                    }
+                                })
+                                .then(response => {
+                                    return response.json().then(data => ({
+                                        status: response.status,
+                                        ok: response.ok,
+                                        data: data
+                                    }));
+                                })
+                                .then(res => {
+                                    if (progressDiv) progressDiv.style.display = 'none';
+                                    if (btn) {
+                                        btn.style.pointerEvents = 'auto';
+                                        btn.style.opacity = '1';
+                                    }
+
+                                    if (res.ok && res.data && res.data.success) {
+                                        const d = res.data;
+                                        // Show green success alert box
+                                        if (notifyArea) {
+                                            notifyArea.innerHTML = `
+                                                <div class="upload-alert-box" style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(34,197,94,0.12); animation: fadeIn 0.3s ease;">
+                                                    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                                                        <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #16a34a; flex-shrink: 0; font-weight: 800;">
+                                                                ✓
+                                                            </div>
+                                                            <div>
+                                                                <div style="font-size: 1.15rem; font-weight: 800; color: #15803d;">
+                                                                    File Uploaded Successfully!
+                                                                </div>
+                                                                <div style="font-size: 0.9rem; font-weight: 600; color: #166534; margin-top: 4px;">
+                                                                    ${escapeHtmlLead(d.message)}
+                                                                </div>
+                                                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #bbf7d0; font-size: 0.82rem;">
+                                                                    <span style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #0f172a;">
+                                                                        📊 Total Records: <span style="color: #2563eb;">${d.summary.total_rows}</span>
+                                                                    </span>
+                                                                    <span style="background: #ffffff; border: 1px solid #86efac; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #15803d;">
+                                                                        🟢 New Leads Added: <span style="color: #16a34a;">${d.summary.inserted_count}</span>
+                                                                    </span>
+                                                                    ${d.summary.total_duplicates > 0 ? `
+                                                                        <span style="background: #ffffff; border: 1px solid #fde047; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #854d0e;">
+                                                                            ⚠️ Duplicates Skipped: <span style="color: #d97706;">${d.summary.total_duplicates}</span>
+                                                                        </span>
+                                                                    ` : ''}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" style="padding: 0.65rem 1.25rem; background: #16a34a; color: #ffffff; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(22,163,74,0.3);">
+                                                            <span>Go to Leads Allocation &rarr;</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            `;
+                                            notifyArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                        }
+
+                                        // Append to Recently Uploaded Files table
+                                        if (d.file_record) {
+                                            const tableBody = document.querySelector('#recentUploadedFilesTable tbody');
+                                            if (tableBody) {
+                                                const emptyRow = tableBody.querySelector('.no-files-row');
+                                                if (emptyRow) emptyRow.remove();
+
+                                                const tr = document.createElement('tr');
+                                                tr.innerHTML = `
+                                                    <td>
+                                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                                            <span style="font-size: 1.25rem;">📄</span>
+                                                            <strong style="font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: #0f172a;">
+                                                                ${escapeHtmlLead(d.file_record.filename)}
+                                                            </strong>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">
+                                                            ${escapeHtmlLead(d.file_record.filesize)}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <strong style="font-size: 0.84rem; color: #0f172a;">
+                                                            ${d.file_record.total_records} Leads
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        <span class="tracking-pill pill-done" style="font-weight: 700;">
+                                                            ✓ ${d.file_record.inserted_count} New
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        ${d.file_record.duplicates_count > 0 ? `
+                                                            <span class="tracking-pill pill-pending" style="font-weight: 700;">
+                                                                ⚠️ ${d.file_record.duplicates_count} Skipped
+                                                            </span>
+                                                        ` : `
+                                                            <span class="tracking-pill pill-awaiting">0 Skipped</span>
+                                                        `}
+                                                    </td>
+                                                    <td>
+                                                        <span class="tracking-pill pill-done" style="font-weight: 700;">
+                                                            ✓ Completed
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">
+                                                            ${escapeHtmlLead(d.file_record.uploaded_by)}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span style="font-size: 0.78rem; color: #64748b;">
+                                                            ${escapeHtmlLead(d.file_record.uploaded_at)}
+                                                        </span>
+                                                    </td>
+                                                `;
+                                                tableBody.insertBefore(tr, tableBody.firstChild);
+                                            }
+                                        }
+
+                                        // Reset form
+                                        form.reset();
+                                        handleLeadFileSelected(input);
+                                    } else {
+                                        const errMsg = (res.data && res.data.message) ? res.data.message : 'An error occurred during file upload.';
+                                        if (notifyArea) {
+                                            notifyArea.innerHTML = `
+                                                <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
+                                                    <div style="display: flex; align-items: center; gap: 14px;">
+                                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
+                                                            ✕
+                                                        </div>
+                                                        <div>
+                                                            <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
+                                                                Upload Failed / Error
+                                                            </div>
+                                                            <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
+                                                                ${escapeHtmlLead(errMsg)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                            notifyArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                        }
+                                        if (btn) {
+                                            btn.innerHTML = `
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                                    <path d="M12 12v9"></path>
+                                                    <path d="m16 16-4-4-4 4"></path>
+                                                </svg>
+                                                <span>Try Again (${escapeHtmlLead(file.name)})</span>
+                                            `;
+                                        }
+                                    }
+                                })
+                                .catch(err => {
+                                    if (progressDiv) progressDiv.style.display = 'none';
+                                    if (btn) {
+                                        btn.style.pointerEvents = 'auto';
+                                        btn.style.opacity = '1';
+                                        btn.disabled = false;
+                                        btn.innerHTML = `
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                                <path d="M12 12v9"></path>
+                                                <path d="m16 16-4-4-4 4"></path>
+                                            </svg>
+                                            <span>Upload &amp; Ingest Leads</span>
+                                        `;
+                                    }
+                                    if (notifyArea) {
+                                        notifyArea.innerHTML = `
+                                            <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                                                <div style="display: flex; align-items: center; gap: 14px;">
+                                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
+                                                        ✕
+                                                    </div>
+                                                    <div>
+                                                        <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
+                                                            Network / Server Error
+                                                        </div>
+                                                        <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
+                                                            Could not complete file upload. Please check your connection or file size.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                });
+                            });
+                        }
+
+                        // Drag and drop support
+                        const dz = document.getElementById('uploadDropzone');
+                        if (dz) {
+                            ['dragenter', 'dragover'].forEach(eventName => {
+                                dz.addEventListener(eventName, (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    dz.style.borderColor = '#2563eb';
+                                    dz.style.background = '#eff6ff';
+                                }, false);
+                            });
+                            ['dragleave', 'drop'].forEach(eventName => {
+                                dz.addEventListener(eventName, (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    dz.style.borderColor = '#93c5fd';
+                                    dz.style.background = '#f8fafc';
+                                }, false);
+                            });
+                            dz.addEventListener('drop', (e) => {
+                                const dt = e.dataTransfer;
+                                const files = dt.files;
+                                if (files.length > 0) {
+                                    const input = document.getElementById('leadsFileInput');
+                                    input.files = files;
+                                    handleLeadFileSelected(input);
+                                }
+                            }, false);
+                        }
+                    });
+                </script>
+            @else
+                <!-- PORTAL TABLE CARD -->
+                <div class="portal-card-shell">
                 <!-- Top Toolbar -->
                 <div class="portal-card-topbar" style="padding: 0.55rem 0.95rem; gap: 0.5rem;">
                     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem; width: 100%;">
@@ -1727,9 +2480,16 @@
 
                 <!-- Clean Table Shell Container (Updated dynamically via Live Search) -->
                 <div id="leadsTableContainer">
-                    @include('leads::partials.leads_table', ['leads' => $leads, 'activeTab' => $activeTab])
+                    @include('leads::partials.leads_table', [
+                        'leads' => $leads,
+                        'activeTab' => $activeTab,
+                        'stageEligibilityMap' => $stageEligibilityMap ?? [],
+                        'latestStageTasksByPhone' => $latestStageTasksByPhone ?? collect(),
+                        'latestStageTasksByAppli' => $latestStageTasksByAppli ?? collect(),
+                    ])
                 </div>
             </div>
+            @endif
         </main>
     </div>
 </div>
@@ -1759,10 +2519,10 @@
                     </label>
                     <select id="modalStageNameSelect" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
                         <option value="Telecaller Stage">Telecaller Stage</option>
-                        <option value="Register Form">Register Form</option>
-                        <option value="Payment Stage">Payment Stage</option>
-                        <option value="Personal Details">Personal Details</option>
-                        <option value="Academic Details">Academic Details</option>
+                        <option value="Register Form completed">Register Form completed</option>
+                        <option value="Payment Stage completed">Payment Stage completed</option>
+                        <option value="Personal Details completed">Personal Details completed</option>
+                        <option value="Academic Details completed">Academic Details completed</option>
                     </select>
                 </div>
 
@@ -1791,16 +2551,15 @@
                     <label for="modalCallDuration" style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
                         Call Duration
                     </label>
-                    <input type="text" id="modalCallDuration" list="durationPresetsList" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;" placeholder="e.g. 5 mins" value="5 mins">
-                    <datalist id="durationPresetsList">
-                        <option value="1 min">
-                        <option value="2 mins">
-                        <option value="5 mins">
-                        <option value="10 mins">
-                        <option value="15 mins">
-                        <option value="20+ mins">
-                        <option value="Not Connected / Callback">
-                    </datalist>
+                    <div class="duration-input-wrap" id="durationInputWrap">
+                        <input type="text" id="modalCallDuration" class="incharge-input incharge-input-no-icon" style="height: 38px; font-size: 0.8rem; padding-right: 2.1rem; cursor: pointer;" placeholder="e.g. 5 mins" value="5 mins" onfocus="openDurationRoller()" onclick="openDurationRoller()">
+                        <button type="button" class="duration-roller-trigger" onclick="toggleDurationRoller(event)" title="Select call duration">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1830,6 +2589,17 @@
                     <span>Save Stage Status</span>
                 </button>
             </div>
+        </div>
+
+        <!-- Student Previous Task History (shown when records exist in crm.telecaller_leads_tasks) -->
+        <div id="modalStudentHistorySection" style="display: none; border-top: 1px solid var(--card-border); background: #f8fafc; padding: 0.9rem 1.75rem 1.15rem; max-height: 210px; overflow-y: auto;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem;">
+                <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #334155;">
+                    Previous Telecaller History
+                </span>
+                <span id="modalHistoryCount" style="font-size: 0.7rem; font-weight: 700; color: #475569; background: #e2e8f0; padding: 1px 7px; border-radius: 999px;">0</span>
+            </div>
+            <div id="modalStudentHistoryList" style="display: flex; flex-direction: column; gap: 0.45rem;"></div>
         </div>
     </div>
 </div>
@@ -1886,6 +2656,25 @@
 </div>
 
 <!-- Toast -->
+<!-- Call Duration 3-Column Roller Popover -->
+<div id="durationRollerPopover" class="duration-roller-popover" role="dialog" aria-label="Call Duration Picker">
+    <div class="duration-roller-headers">
+        <div class="duration-roller-hdr">Hrs</div>
+        <div class="duration-roller-hdr">Min</div>
+        <div class="duration-roller-hdr">Sec</div>
+    </div>
+    <div class="duration-roller-cols">
+        <div class="duration-roller-col" id="rollerColHrs"></div>
+        <div class="duration-roller-col" id="rollerColMins"></div>
+        <div class="duration-roller-col" id="rollerColSecs"></div>
+    </div>
+    <div class="duration-roller-footer">
+        <span id="durationRollerPreview" style="font-size: 0.72rem; font-weight: 600; color: #475569;">00:05:00</span>
+        <button type="button" class="duration-roller-done" onclick="closeDurationRoller()">Done</button>
+    </div>
+</div>
+
+<!-- Clean Floating Toast Notification -->
 <div id="teleToast">
     <span id="toastMsg">Stage updated successfully!</span>
 </div>
@@ -1904,7 +2693,7 @@
         setTimeout(() => { toast.style.display = 'none'; }, 2800);
     }
 
-    function openWizardModal(applinano, name, phone, program, stages = {}, remarks = '', currentStage = '') {
+    function openWizardModal(applinano, name, phone, program, stages = {}, remarks = '', currentStage = '', allowedStages = null) {
         currentCandidate = { applinano, name, phone, program, stages, remarks: remarks || '', currentStage: currentStage || '' };
 
         document.getElementById('modalCandidateName').textContent = name || 'Candidate Lead';
@@ -1927,22 +2716,219 @@
         }
 
         const stageSelect = document.getElementById('modalStageNameSelect');
-        if (stageSelect && currentStage) {
-            const norm = currentStage.toLowerCase().trim();
+        if (stageSelect) {
+            const permissions = (allowedStages && typeof allowedStages === 'object') ? allowedStages : {};
             for (let i = 0; i < stageSelect.options.length; i++) {
-                const optVal = stageSelect.options[i].value.toLowerCase();
-                if (norm.includes(optVal) || optVal.includes(norm) || (norm.includes('not paid') && optVal.includes('payment'))) {
-                    stageSelect.selectedIndex = i;
-                    break;
+                const opt = stageSelect.options[i];
+                if (opt.value === 'Telecaller Stage') {
+                    opt.disabled = false;
+                } else {
+                    opt.disabled = !(permissions[opt.value] === true);
                 }
             }
+            stageSelect.value = 'Telecaller Stage';
         }
 
         document.getElementById('wizardModal').classList.add('active');
         document.body.style.overflow = 'hidden';
+        loadModalStudentHistory(applinano, phone);
+    }
+
+    function escapeHistoryHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function loadModalStudentHistory(applinano, phone) {
+        const section = document.getElementById('modalStudentHistorySection');
+        const list = document.getElementById('modalStudentHistoryList');
+        const countEl = document.getElementById('modalHistoryCount');
+        if (!section || !list) return;
+
+        section.style.display = 'none';
+        list.innerHTML = '';
+        if (countEl) countEl.textContent = '0';
+
+        const targetAppli = (applinano && applinano !== '') ? applinano : '0';
+        const url = `/leads/${encodeURIComponent(targetAppli)}/history?phone=${encodeURIComponent(phone || '')}`;
+
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data || !data.success || !Array.isArray(data.history) || data.history.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                if (countEl) countEl.textContent = String(data.history.length);
+                list.innerHTML = data.history.map(item => `
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.55rem 0.75rem; font-size: 0.76rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-weight: 700; color: #0f172a;">${escapeHistoryHtml(item.stage_name)}</span>
+                            <span style="font-size: 0.7rem; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+                                ${escapeHistoryHtml(item.stage_calltime)} &bull; ${escapeHistoryHtml(item.stage_call_duration)}
+                            </span>
+                        </div>
+                        <div style="margin-top: 0.2rem; color: #475569; font-size: 0.73rem;">
+                            <strong>Person:</strong> ${escapeHistoryHtml(item.stage_callperson)}${item.stage_remark ? ` &nbsp;|&nbsp; <strong>Remarks:</strong> ${escapeHistoryHtml(item.stage_remark)}` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                section.style.display = 'block';
+            })
+            .catch(() => {
+                section.style.display = 'none';
+            });
+    }
+
+    const durationRollerState = { hrs: 0, mins: 5, secs: 0, initialized: false };
+
+    function padTwo(val) {
+        return String(val).padStart(2, '0');
+    }
+
+    function formatDurationText(hrs, mins, secs) {
+        const parts = [];
+        if (hrs > 0) parts.push(`${hrs} ${hrs === 1 ? 'hr' : 'hrs'}`);
+        if (mins > 0 || (hrs === 0 && secs === 0)) parts.push(`${mins} ${mins === 1 ? 'min' : 'mins'}`);
+        if (secs > 0) parts.push(`${secs} ${secs === 1 ? 'sec' : 'secs'}`);
+        return parts.join(' ');
+    }
+
+    function parseDurationText(raw) {
+        const str = String(raw || '').trim().toLowerCase();
+        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)) {
+            const segs = str.split(':').map(n => parseInt(n, 10) || 0);
+            if (segs.length === 3) return { hrs: Math.min(23, segs[0]), mins: Math.min(59, segs[1]), secs: Math.min(59, segs[2]) };
+            return { hrs: 0, mins: Math.min(59, segs[0]), secs: Math.min(59, segs[1]) };
+        }
+        const hMatch = str.match(/(\d+)\s*h/);
+        const mMatch = str.match(/(\d+)\s*m/);
+        const sMatch = str.match(/(\d+)\s*s/);
+        const hrs = hMatch ? Math.min(23, parseInt(hMatch[1], 10)) : 0;
+        const mins = mMatch ? Math.min(59, parseInt(mMatch[1], 10)) : 0;
+        const secs = sMatch ? Math.min(59, parseInt(sMatch[1], 10)) : 0;
+        if (!hMatch && !mMatch && !sMatch) return { hrs: 0, mins: 5, secs: 0 };
+        return { hrs, mins, secs };
+    }
+
+    function buildRollerColumn(colId, maxVal, unitKey) {
+        const col = document.getElementById(colId);
+        if (!col) return;
+        col.innerHTML = '';
+        for (let i = 0; i <= maxVal; i++) {
+            const item = document.createElement('div');
+            item.className = 'duration-roller-item';
+            item.dataset.val = String(i);
+            item.textContent = padTwo(i);
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                durationRollerState[unitKey] = i;
+                syncDurationRollerUI(true);
+            });
+            col.appendChild(item);
+        }
+    }
+
+    function initDurationRoller() {
+        if (durationRollerState.initialized) return;
+        buildRollerColumn('rollerColHrs', 23, 'hrs');
+        buildRollerColumn('rollerColMins', 59, 'mins');
+        buildRollerColumn('rollerColSecs', 59, 'secs');
+        durationRollerState.initialized = true;
+
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('durationRollerPopover');
+            const wrap = document.getElementById('durationInputWrap');
+            if (!pop || !pop.classList.contains('open')) return;
+            if (!pop.contains(e.target) && (!wrap || !wrap.contains(e.target))) {
+                closeDurationRoller();
+            }
+        });
+    }
+
+    function syncDurationRollerUI(updateInput = false) {
+        const { hrs, mins, secs } = durationRollerState;
+        const map = [
+            { colId: 'rollerColHrs', val: hrs },
+            { colId: 'rollerColMins', val: mins },
+            { colId: 'rollerColSecs', val: secs },
+        ];
+        map.forEach(({ colId, val }) => {
+            const col = document.getElementById(colId);
+            if (!col) return;
+            const items = col.querySelectorAll('.duration-roller-item');
+            items.forEach((el) => {
+                const isSel = parseInt(el.dataset.val, 10) === val;
+                el.classList.toggle('is-selected', isSel);
+                if (isSel) {
+                    const targetTop = Math.max(0, el.offsetTop - 32);
+                    col.scrollTo({ top: targetTop, behavior: 'smooth' });
+                }
+            });
+        });
+
+        const preview = document.getElementById('durationRollerPreview');
+        if (preview) preview.textContent = `${padTwo(hrs)}:${padTwo(mins)}:${padTwo(secs)}`;
+
+        if (updateInput) {
+            const input = document.getElementById('modalCallDuration');
+            if (input) input.value = formatDurationText(hrs, mins, secs);
+        }
+    }
+
+    function positionDurationRoller() {
+        const pop = document.getElementById('durationRollerPopover');
+        const input = document.getElementById('modalCallDuration');
+        if (!pop || !input) return;
+        const rect = input.getBoundingClientRect();
+        const popHeight = 254;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const topPos = spaceBelow >= popHeight + 12 ? rect.bottom + 6 : Math.max(8, rect.top - popHeight - 6);
+        const leftPos = Math.min(window.innerWidth - 196, Math.max(8, rect.right - 184));
+        pop.style.top = `${topPos}px`;
+        pop.style.left = `${leftPos}px`;
+    }
+
+    function openDurationRoller() {
+        initDurationRoller();
+        const input = document.getElementById('modalCallDuration');
+        const parsed = parseDurationText(input ? input.value : '5 mins');
+        durationRollerState.hrs = parsed.hrs;
+        durationRollerState.mins = parsed.mins;
+        durationRollerState.secs = parsed.secs;
+        const pop = document.getElementById('durationRollerPopover');
+        if (pop) {
+            if (pop.parentElement !== document.body) {
+                document.body.appendChild(pop);
+            }
+            positionDurationRoller();
+            pop.classList.add('open');
+            syncDurationRollerUI(false);
+        }
+    }
+
+    function closeDurationRoller() {
+        const pop = document.getElementById('durationRollerPopover');
+        if (pop) pop.classList.remove('open');
+    }
+
+    function toggleDurationRoller(e) {
+        if (e) e.stopPropagation();
+        const pop = document.getElementById('durationRollerPopover');
+        if (pop && pop.classList.contains('open')) {
+            closeDurationRoller();
+        } else {
+            openDurationRoller();
+        }
     }
 
     function closeWizardModal() {
+        closeDurationRoller();
         document.getElementById('wizardModal').classList.remove('active');
         document.body.style.overflow = '';
     }

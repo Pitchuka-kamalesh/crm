@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Models\CrmStudentRegistration;
 use App\Models\Employee;
 use App\Models\Lead;
+use App\Models\ReceiptDetail;
 use App\Models\RoleAssigned;
+use App\Models\StudentAcademicDetail;
+use App\Models\StudentPersonalInfo;
 use App\Models\TelecallerLead;
 use App\Models\TelecallerLeadTask;
 use Illuminate\Support\Collection;
@@ -49,7 +52,7 @@ class TelecallerService
 
     /**
      * Allocate one or multiple leads to a telecaller.
-     * Persists into crm.telecaller_leads and logs into crm.telecaller_leads_tasks via Eloquent.
+     * Persists into crm.telecaller_leads and updates crm.leads without creating telecaller_leads_tasks rows.
      *
      * @param array $params
      * @return array
@@ -257,21 +260,6 @@ class TelecallerService
                     ]);
                 }
 
-                // Insert into crm.telecaller_leads_tasks
-                TelecallerLeadTask::create([
-                    'applino' => $tApplino,
-                    'phoneno' => $tPhoneno,
-                    'crmid' => $tCrmid,
-                    'empcode' => $tEmpcode,
-                    'stage_name' => $tStageName,
-                    'stage_calltime' => $now,
-                    'stage_remark' => $tStageRemark,
-                    'stage_callperson' => $tCallPerson,
-                    'log_userid' => $tLogUser,
-                    'log_ipaddress' => $tIp,
-                    'log_timestamp' => $now,
-                ]);
-
                 // Update crm.leads with empcode and allocated timestamp (log_timestamp is fixed from initial entry, do not overwrite)
                 Lead::where('phoneno', $tPhoneno)->update([
                     'empcode' => $tEmpcode,
@@ -307,41 +295,62 @@ class TelecallerService
     }
 
     /**
-     * Log a lead task into crm.telecaller_leads_tasks via Eloquent.
+     * Log a telecaller action strictly into crm.telecaller_leads_tasks via Eloquent.
      *
      * @param array $params
      * @return array
      */
     public static function logLeadTask(array $params): array
     {
-        $applino = trim($params['applino'] ?? '');
-        $phoneno = trim($params['phoneno'] ?? '');
-        $empCode = trim($params['empcode'] ?? auth()->user()?->usercode ?? '02598');
-        $stageName = trim($params['stage_name'] ?? 'Calling & Verification');
-        $remark = trim($params['stage_remark'] ?? '');
-        $callPerson = trim($params['stage_callperson'] ?? '');
-        $logUser = trim($params['log_userid'] ?? auth()->user()?->usercode ?? '02598');
-        $ip = trim($params['log_ipaddress'] ?? request()->ip() ?? '127.0.0.1');
+        $applino = trim((string) ($params['applino'] ?? ''));
+        $phoneno = trim((string) ($params['phoneno'] ?? ''));
+        $empCode = trim((string) ($params['empcode'] ?? auth()->user()?->usercode ?? '02598'));
+        $stageName = trim((string) ($params['stage_name'] ?? 'Calling & Verification'));
+        $remark = trim((string) ($params['stage_remark'] ?? ''));
+        $callPerson = trim((string) ($params['stage_callperson'] ?? ''));
+        $logUser = trim((string) ($params['log_userid'] ?? auth()->user()?->usercode ?? '02598'));
+        $ip = trim((string) ($params['log_ipaddress'] ?? request()->ip() ?? '127.0.0.1'));
 
-        if (empty($applino) || empty($phoneno)) {
-            $student = CrmStudentRegistration::where('applinano', $applino)
-                ->orWhere('phoneno', $phoneno)
-                ->first();
-            if ($student) {
-                $applino = $student->applinano;
-                $phoneno = $student->phoneno;
-                if (empty($callPerson)) {
-                    $callPerson = $student->name;
-                }
-            } else {
-                return ['success' => false, 'message' => 'Application or Phone number missing.'];
+        $student = null;
+        if ($applino !== '' && $applino !== '0') {
+            $student = CrmStudentRegistration::where('applinano', $applino)->first();
+        }
+        if (!$student && $phoneno !== '' && $phoneno !== '0') {
+            $student = CrmStudentRegistration::where('phoneno', $phoneno)->first();
+        }
+
+        if ($student) {
+            if ($applino === '' || $applino === '0') {
+                $applino = (string) ($student->applinano ?: '0');
+            }
+            if ($phoneno === '' || $phoneno === '0') {
+                $phoneno = (string) ($student->phoneno ?: '0');
+            }
+            if ($callPerson === '' && !empty($student->name)) {
+                $callPerson = (string) $student->name;
             }
         }
 
-        // Ensure parent lead exists in crm.telecaller_leads via Eloquent
-        $lead = TelecallerLead::where('applino', $applino)
-            ->where('phoneno', $phoneno)
-            ->first();
+        // Resolve existing parent record in crm.telecaller_leads (required by fk_tasks_lead) without creating/updating it
+        $lead = null;
+        if ($applino !== '' && $phoneno !== '') {
+            $lead = TelecallerLead::where('applino', $applino)
+                ->where('phoneno', $phoneno)
+                ->first();
+        }
+        if (!$lead && $phoneno !== '' && $phoneno !== '0') {
+            $lead = TelecallerLead::where('phoneno', $phoneno)->first();
+        }
+        if (!$lead && $applino !== '' && $applino !== '0') {
+            $lead = TelecallerLead::where('applino', $applino)->first();
+        }
+
+        if (!$lead) {
+            return [
+                'success' => false,
+                'message' => 'Lead must be assigned in telecaller_leads before logging a telecaller action.',
+            ];
+        }
 
         $now = now();
         $callTime = $now;
@@ -353,32 +362,32 @@ class TelecallerService
             }
         }
 
-        $studentCrmId = CrmIdService::getOrGenerateByAppli($applino);
+        $taskApplino = (string) $lead->applino;
+        $taskPhoneno = (string) $lead->phoneno;
 
-        if (!$lead) {
-            $empMax = (int) TelecallerLead::where('empcode', (string) $empCode)->max('leadcount');
-            TelecallerLead::create([
-                'applino' => $applino,
-                'phoneno' => $phoneno,
-                'crmid' => $studentCrmId,
-                'empcode' => $empCode,
-                'leadcount' => $empMax + 1,
-                'assigndatetime' => $now,
-                'log_userid' => $logUser,
-                'log_ipaddress' => $ip,
-                'log_timestamp' => $now,
-            ]);
+        // Resolve crmid strictly from crm.student_personal_info; use '0' if student has not filled personal info yet
+        $personalCrmId = null;
+        if ($taskApplino !== '' && $taskApplino !== '0') {
+            $personalCrmId = StudentPersonalInfo::where('applino', $taskApplino)->value('crmid');
         }
+        if (empty($personalCrmId) && $taskPhoneno !== '' && $taskPhoneno !== '0') {
+            $personalCrmId = StudentPersonalInfo::where('phoneno', $taskPhoneno)->value('crmid');
+        }
+        $taskCrmId = !empty($personalCrmId) ? (string) $personalCrmId : '0';
+
+        $taskEmpCode = $empCode !== '' ? $empCode : (string) ($lead->empcode ?: '0');
+        $callDuration = trim((string) ($params['stage_call_duration'] ?? $params['call_duration'] ?? ''));
 
         $task = TelecallerLeadTask::create([
-            'applino' => $applino,
-            'phoneno' => $phoneno,
-            'crmid' => $studentCrmId,
-            'empcode' => $empCode,
+            'applino' => $taskApplino,
+            'phoneno' => $taskPhoneno,
+            'crmid' => $taskCrmId,
+            'empcode' => $taskEmpCode,
             'stage_name' => $stageName,
             'stage_calltime' => $callTime,
+            'stage_call_duration' => $callDuration !== '' ? $callDuration : null,
             'stage_remark' => $remark,
-            'stage_callperson' => $callPerson,
+            'stage_callperson' => $callPerson ?: 'Student / Candidate',
             'log_userid' => $logUser,
             'log_ipaddress' => $ip,
             'log_timestamp' => $now,
@@ -428,14 +437,13 @@ class TelecallerService
     }
 
     /**
-     * Determine candidate stage based on user business rules:
-     * 1. If application number not created, not assigned to telecaller -> 'New Lead'
-     * 2. If application number not created, but assigned to telecaller -> 'Telecaller Stage'
-     * 3. If application number created, but not assigned to telecaller -> 'Register Form'
-     * 4. If application number exists but not paid -> 'Payment Stage'
-     * 5. If application number exists and paid, but personal details not filled -> 'Personal Details'
-     * 6. If application number exists, paid, and personal details filled, but academic details not filled -> 'Academic Details'
-     * 7. If academic details filled -> 'Academic Details Completed'
+     * Determine candidate stage based on completed admission milestones:
+     * 1. Application number not created & not assigned -> 'New Lead'
+     * 2. Application number not created & assigned -> 'Telecaller Stage'
+     * 3. Registered (application number exists, not yet paid) -> 'Register Form'
+     * 4. Paid (not yet filled personal details) -> 'Payment Stage'
+     * 5. Personal details filled (not yet filled academic details) -> 'Personal Details'
+     * 6. Academic details filled -> 'Academic Details'
      */
     public static function determineLeadStage(
         ?string $applino,
@@ -447,41 +455,30 @@ class TelecallerService
         $hasAppli = !empty($applino) && $applino !== '0';
         $isAssigned = !empty($empcode) && $empcode !== '0';
 
-        // 1. If application number not created, not assigned to telecaller -> New Lead
         if (!$hasAppli && !$isAssigned) {
             return 'New Lead';
         }
 
-        // 2. If application number not created, but assigned to telecaller -> Telecaller Stage
         if (!$hasAppli && $isAssigned) {
             return 'Telecaller Stage';
         }
 
-        // 3. If application number created, but not assigned to telecaller -> Register Form
-        if ($hasAppli && !$isAssigned) {
-            return 'Register Form';
-        }
-
-        // Has application number and is progressing:
-        $isPaid = in_array(strtolower((string) $stage1), ['paid', 'completed', 'approved']);
-        // 4. If application number not paid -> Payment Stage
+        $isPaid = in_array(strtolower((string) $stage1), ['paid', 'completed', 'approved'], true);
         if (!$isPaid) {
-            return 'Payment Stage';
+            return 'Register Form completed';
         }
 
-        $hasPersonal = in_array(strtolower((string) $stage2), ['completed', 'approved']);
-        // 5. If application number but not filled personal details -> Personal Details
+        $hasPersonal = in_array(strtolower((string) $stage2), ['completed', 'approved'], true);
         if (!$hasPersonal) {
-            return 'Personal Details';
+            return 'Payment Stage completed';
         }
 
-        $hasAcademic = in_array(strtolower((string) $stage3), ['completed', 'approved']);
-        // 6. If application number but not filled academic details -> Academic Details
+        $hasAcademic = in_array(strtolower((string) $stage3), ['completed', 'approved'], true);
         if (!$hasAcademic) {
-            return 'Academic Details';
+            return 'Personal Details completed';
         }
 
-        return 'Academic Details Completed';
+        return 'Academic Details completed';
     }
 
     /**
@@ -490,14 +487,150 @@ class TelecallerService
     public static function getStageBadgeStyle(string $stage): array
     {
         return match (strtolower(trim($stage))) {
-            'new lead' => ['bg' => '#f1f5f9', 'color' => '#475569', 'border' => '#cbd5e1', 'icon' => '🌱'],
-            'telecaller stage' => ['bg' => '#fef3c7', 'color' => '#b45309', 'border' => '#fde68a', 'icon' => '📞'],
-            'register form' => ['bg' => '#e0e7ff', 'color' => '#3730a3', 'border' => '#c7d2fe', 'icon' => '📝'],
-            'payment stage', 'not paid stage' => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'border' => '#fecaca', 'icon' => '💳'],
-            'personal details' => ['bg' => '#eff6ff', 'color' => '#1d4ed8', 'border' => '#bfdbfe', 'icon' => '👤'],
-            'academic details' => ['bg' => '#f3e8ff', 'color' => '#7e22ce', 'border' => '#e9d5ff', 'icon' => '🎓'],
-            'academic details completed' => ['bg' => '#dcfce7', 'color' => '#15803d', 'border' => '#bbf7d0', 'icon' => '✅'],
-            default => ['bg' => '#f8fafc', 'color' => '#334155', 'border' => '#e2e8f0', 'icon' => '📌'],
+            'new lead' => ['bg' => '#f1f5f9', 'color' => '#475569', 'border' => '#cbd5e1', 'icon' => ''],
+            'telecaller stage' => ['bg' => '#fef3c7', 'color' => '#b45309', 'border' => '#fde68a', 'icon' => ''],
+            'register form', 'register form completed' => ['bg' => '#e0e7ff', 'color' => '#3730a3', 'border' => '#c7d2fe', 'icon' => ''],
+            'payment stage', 'payment stage completed', 'not paid stage' => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'border' => '#fecaca', 'icon' => ''],
+            'personal details', 'personal details completed' => ['bg' => '#eff6ff', 'color' => '#1d4ed8', 'border' => '#bfdbfe', 'icon' => ''],
+            'academic details', 'academic details completed' => ['bg' => '#f3e8ff', 'color' => '#7e22ce', 'border' => '#e9d5ff', 'icon' => ''],
+            default => ['bg' => '#f8fafc', 'color' => '#334155', 'border' => '#e2e8f0', 'icon' => ''],
         };
+    }
+
+    /**
+     * Default stage dropdown permissions (Telecaller Stage is always enabled by default).
+     *
+     * @return array<string, bool>
+     */
+    public static function defaultAllowedStages(): array
+    {
+        return [
+            'Telecaller Stage' => true,
+            'Register Form completed' => false,
+            'Payment Stage completed' => false,
+            'Personal Details completed' => false,
+            'Academic Details completed' => false,
+        ];
+    }
+
+    /**
+     * Resolve the displayed Current Step from the student's completed tables and the telecaller's latest selected stage.
+     *
+     * @param  array<string, bool>  $allowedStages
+     */
+    public static function resolveCurrentStep(
+        ?string $empcode,
+        array $allowedStages,
+        ?string $lastTaskStage = null
+    ): string {
+        $ranks = [
+            'New Lead' => 0,
+            'Telecaller Stage' => 1,
+            'Register Form completed' => 2,
+            'Payment Stage completed' => 3,
+            'Personal Details completed' => 4,
+            'Academic Details completed' => 5,
+        ];
+
+        $aliases = [
+            'Register Form' => 'Register Form completed',
+            'Payment Stage' => 'Payment Stage completed',
+            'Personal Details' => 'Personal Details completed',
+            'Academic Details' => 'Academic Details completed',
+        ];
+
+        $studentStep = 'New Lead';
+        if (!empty($allowedStages['Academic Details completed'])) {
+            $studentStep = 'Academic Details completed';
+        } elseif (!empty($allowedStages['Personal Details completed'])) {
+            $studentStep = 'Personal Details completed';
+        } elseif (!empty($allowedStages['Payment Stage completed'])) {
+            $studentStep = 'Payment Stage completed';
+        } elseif (!empty($allowedStages['Register Form completed'])) {
+            $studentStep = 'Register Form completed';
+        } elseif (!empty($empcode) && $empcode !== '0') {
+            $studentStep = 'Telecaller Stage';
+        }
+
+        $taskStage = trim((string) $lastTaskStage);
+        if (isset($aliases[$taskStage])) {
+            $taskStage = $aliases[$taskStage];
+        }
+        if ($taskStage !== '' && isset($ranks[$taskStage])) {
+            $isTaskStageEligible = ($taskStage === 'Telecaller Stage') || !empty($allowedStages[$taskStage]);
+            if ($isTaskStageEligible && $ranks[$taskStage] >= $ranks[$studentStep]) {
+                return $taskStage;
+            }
+        }
+
+        return $studentStep;
+    }
+
+    /**
+     * Batch-compute selectable action modal stages keyed by application number.
+     *
+     * @param  array<int, string|null>  $applinos
+     * @return array<string, array<string, bool>>
+     */
+    public static function getStageEligibilityMap(array $applinos): array
+    {
+        $clean = array_values(array_unique(array_filter(
+            array_map(fn ($v) => trim((string) $v), $applinos),
+            fn (string $v) => $v !== '' && $v !== '0' && !str_starts_with($v, 'APP')
+        )));
+
+        if (empty($clean)) {
+            return [];
+        }
+
+        $regSet = CrmStudentRegistration::whereIn('applinano', $clean)
+            ->pluck('applinano')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        $receiptSet = ReceiptDetail::whereIn('applino', $clean)
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        $personalSet = StudentPersonalInfo::whereIn('applino', $clean)
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        $academicSet = StudentAcademicDetail::whereIn('applino', $clean)
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        $map = [];
+        foreach ($clean as $app) {
+            $map[$app] = [
+                'Telecaller Stage' => true,
+                'Register Form completed' => isset($regSet[$app]),
+                'Payment Stage completed' => isset($receiptSet[$app]),
+                'Personal Details completed' => isset($personalSet[$app]),
+                'Academic Details completed' => isset($academicSet[$app]),
+            ];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Resolve selectable action modal stages for a single application number.
+     *
+     * @return array<string, bool>
+     */
+    public static function getAllowedStagesForLead(?string $applino): array
+    {
+        $app = trim((string) $applino);
+        if ($app === '' || $app === '0' || str_starts_with($app, 'APP')) {
+            return self::defaultAllowedStages();
+        }
+
+        $map = self::getStageEligibilityMap([$app]);
+
+        return $map[$app] ?? self::defaultAllowedStages();
     }
 }

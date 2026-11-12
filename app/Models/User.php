@@ -140,9 +140,24 @@ class User extends Authenticatable
 
     public function getActiveRoleId(): int
     {
+        $allowedRoleIds = $this->getAssignedRoleIds();
+
+        // Option A (Strict Mode): Only honor session role if employee is actually assigned that role
         $sessionRole = session('user.role_id');
         if (!empty($sessionRole)) {
-            return (int) $sessionRole;
+            $sessionRoleId = (int) $sessionRole;
+            if (in_array($sessionRoleId, $allowedRoleIds, true)) {
+                return $sessionRoleId;
+            }
+            // Clear unauthorized or stale session role
+            try {
+                session()->forget('user.role_id');
+            } catch (\Throwable $e) {}
+        }
+
+        // Return first assigned role from master.roles_assigned
+        if (!empty($allowedRoleIds)) {
+            return (int) $allowedRoleIds[0];
         }
 
         // 1. Direct role_id on login
@@ -174,6 +189,15 @@ class User extends Authenticatable
 
         // 4. Default by user type (strictly database-driven, no hardcoded user codes)
         return $this->user_type === 2 ? 1 : 5;
+    }
+
+    /**
+     * Strict Mode: Retrieve only roles actually assigned to this user in master.roles_assigned.
+     */
+    public function getAssignedRoles(): \Illuminate\Support\Collection
+    {
+        $assignedRoleIds = $this->getAssignedRoleIds();
+        return Role::whereIn('role_id', $assignedRoleIds)->orderBy('role_id')->get();
     }
 
     public function role(): BelongsTo

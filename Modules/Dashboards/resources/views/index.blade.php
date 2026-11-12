@@ -2283,7 +2283,7 @@
                     @endif
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
+                <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body">
                     @csrf
                     <input type="hidden" name="step" value="4">
 
@@ -2299,88 +2299,83 @@
                                     <p style="margin: 0.2rem 0 0; font-size: 0.82rem; color: #475569;">Application No: <strong>#{{ $appNo }}</strong> &bull; Generated from Admission Master Database</p>
                                 </div>
                             </div>
-                            <a href="javascript:void(0)" onclick="window.print()" class="btn-step-next" style="text-decoration: none; padding: 0.6rem 1.25rem; font-size: 0.85rem; background: #16a34a;">
-                                <span>📥 Download Application PDF</span>
-                            </a>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <a href="{{ route('application.show', ['id' => $appNo ?: ($user?->usercode ?? '0')]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.6rem 1rem; font-size: 0.85rem;">
+                                    <span>Preview Form</span>
+                                </a>
+                                <a href="{{ route('application.download', ['id' => $appNo ?: ($user?->usercode ?? '0')]) }}" class="btn-step-next" style="text-decoration: none; padding: 0.6rem 1.25rem; font-size: 0.85rem; background: #16a34a;">
+                                    <span>Download Application PDF</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
+
+                    @php
+                        $docDefinitions = [
+                            'marksheet10' => [
+                                'icon' => '📜',
+                                'title' => '10th SSC Marks Memo',
+                                'sub' => 'Class X original certificate or DigiLocker attested copy',
+                            ],
+                            'marksheet12' => [
+                                'icon' => '📑',
+                                'title' => '12th Intermediate Memo',
+                                'sub' => 'Short memo or internet copy with principal attestation',
+                            ],
+                            'aadhaar' => [
+                                'icon' => '🪪',
+                                'title' => 'Candidate Aadhaar Card',
+                                'sub' => 'Government proof of identity & native address',
+                            ],
+                            'photo' => [
+                                'icon' => '🖼️',
+                                'title' => 'Passport Size Photograph',
+                                'sub' => 'Recent studio color photo with white background',
+                            ],
+                            'tc' => [
+                                'icon' => '🏛️',
+                                'title' => 'Transfer Certificate (TC)',
+                                'sub' => 'Original TC from last attended Junior College / School',
+                            ],
+                            'study_conduct' => [
+                                'icon' => '📋',
+                                'title' => 'Study & Conduct Certificate',
+                                'sub' => 'Bonafide certificate covering Class VI to Intermediate',
+                            ],
+                        ];
+                    @endphp
 
                     <div class="section-box">
                         <div class="section-box-title">
                             <span>Uploaded &amp; Required Documents</span>
                         </div>
                         <div class="kyc-docs-grid">
-                            <div class="kyc-doc-card">
-                                <div class="kyc-doc-top">
-                                    <div class="kyc-doc-icon">📜</div>
-                                    <span class="kyc-badge kyc-badge-verified">✓ Verified</span>
+                            @foreach($docDefinitions as $docKey => $docMeta)
+                                @php
+                                    $docFile = $uploadedDocs[$docKey] ?? null;
+                                @endphp
+                                <div class="kyc-doc-card">
+                                    <div class="kyc-doc-top">
+                                        <div class="kyc-doc-icon">{{ $docMeta['icon'] }}</div>
+                                        @if($docFile)
+                                            <span class="kyc-badge kyc-badge-verified">✓ Uploaded</span>
+                                        @else
+                                            <span class="kyc-badge kyc-badge-pending">⏳ Pending</span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <h4 class="kyc-doc-title">{{ $docMeta['title'] }}</h4>
+                                        <p class="kyc-doc-sub">{{ $docMeta['sub'] }}</p>
+                                    </div>
+                                    @if($docFile)
+                                        <div style="font-size:0.78rem; color:#059669; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.4rem;">
+                                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">File: {{ $docFile['filename'] }}</span>
+                                            <a href="{{ $docFile['url'] }}" target="_blank" style="color:#1d4ed8; text-decoration:underline; flex-shrink:0;">View</a>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="docs[{{ $docKey }}]" accept=".pdf,.jpg,.jpeg,.png" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
                                 </div>
-                                <div>
-                                    <h4 class="kyc-doc-title">10th SSC Marks Memo</h4>
-                                    <p class="kyc-doc-sub">Class X original certificate or DigiLocker attested copy</p>
-                                </div>
-                                <div style="font-size:0.78rem; color:#059669; font-weight:700;">File: SSC_Marks_Memo_Verified.pdf</div>
-                            </div>
-
-                            <div class="kyc-doc-card">
-                                <div class="kyc-doc-top">
-                                    <div class="kyc-doc-icon">📑</div>
-                                    <span class="kyc-badge kyc-badge-verified">✓ Verified</span>
-                                </div>
-                                <div>
-                                    <h4 class="kyc-doc-title">12th Intermediate Memo</h4>
-                                    <p class="kyc-doc-sub">Short memo or internet copy with principal attestation</p>
-                                </div>
-                                <div style="font-size:0.78rem; color:#059669; font-weight:700;">File: Inter_Plus2_Memo_Verified.pdf</div>
-                            </div>
-
-                            <div class="kyc-doc-card">
-                                <div class="kyc-doc-top">
-                                    <div class="kyc-doc-icon">🪪</div>
-                                    <span class="kyc-badge kyc-badge-verified">✓ Verified</span>
-                                </div>
-                                <div>
-                                    <h4 class="kyc-doc-title">Candidate Aadhaar Card</h4>
-                                    <p class="kyc-doc-sub">Government proof of identity &amp; native address</p>
-                                </div>
-                                <div style="font-size:0.78rem; color:#059669; font-weight:700;">File: Aadhaar_Front_Back.pdf</div>
-                            </div>
-
-                            <div class="kyc-doc-card">
-                                <div class="kyc-doc-top">
-                                    <div class="kyc-doc-icon">🖼️</div>
-                                    <span class="kyc-badge kyc-badge-verified">✓ Verified</span>
-                                </div>
-                                <div>
-                                    <h4 class="kyc-doc-title">Passport Size Photograph</h4>
-                                    <p class="kyc-doc-sub">Recent studio color photo with white background</p>
-                                </div>
-                                <div style="font-size:0.78rem; color:#059669; font-weight:700;">File: Candidate_Passport_Photo.jpg</div>
-                            </div>
-
-                            <div class="kyc-doc-card">
-                                <div class="kyc-doc-top">
-                                    <div class="kyc-doc-icon">🏛️</div>
-                                    <span class="kyc-badge kyc-badge-pending">⏳ Pending</span>
-                                </div>
-                                <div>
-                                    <h4 class="kyc-doc-title">Transfer Certificate (TC)</h4>
-                                    <p class="kyc-doc-sub">Original TC from last attended Junior College / School</p>
-                                </div>
-                                <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                            </div>
-
-                            <div class="kyc-doc-card">
-                                <div class="kyc-doc-top">
-                                    <div class="kyc-doc-icon">📋</div>
-                                    <span class="kyc-badge kyc-badge-pending">⏳ Pending</span>
-                                </div>
-                                <div>
-                                    <h4 class="kyc-doc-title">Study &amp; Conduct Certificate</h4>
-                                    <p class="kyc-doc-sub">Bonafide certificate covering Class VI to Intermediate</p>
-                                </div>
-                                <input type="file" class="field-input" style="padding:0.4rem; font-size:0.75rem;">
-                            </div>
+                            @endforeach
                         </div>
                     </div>
 

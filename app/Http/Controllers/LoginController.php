@@ -53,7 +53,7 @@ class LoginController extends Controller
                 'name' => 'Y.BHANUPRASAD',
                 'usercode' => '02598',
                 'phone' => '9912996788',
-                'landing' => '/leads',
+                'landing' => '/crm/stddata',
             ],
             [
                 'role' => 'CRM DEAN',
@@ -61,15 +61,15 @@ class LoginController extends Controller
                 'name' => 'Kamalesh',
                 'usercode' => '03141',
                 'phone' => '7075624098',
-                'landing' => '/crms',
+                'landing' => '/crm/stddata',
             ],
             [
-                'role' => 'CRM Incharge',
-                'role_id' => 2,
+                'role' => 'Tele Caller',
+                'role_id' => 4,
                 'name' => 'Ganesh kumar',
                 'usercode' => '03434',
                 'phone' => '9391364210',
-                'landing' => '/crms',
+                'landing' => '/leads',
             ],
             [
                 'role' => 'Student Candidate',
@@ -627,9 +627,9 @@ class LoginController extends Controller
             return route('dashboards.index');
         }
 
-        // 2. CRM DEAN (role_id 3) & CRM Incharge (role_id 2) -> CRM Dashboard
+        // 2. CRM DEAN (role_id 3) & CRM Incharge (role_id 2) -> Student Data Enquiries
         if ($roleId === 2 || $roleId === 3) {
-            return route('crm.index');
+            return route('crm.stddata');
         }
 
         // 3. Tele Caller (role_id 4) -> Leads Dashboard
@@ -639,7 +639,7 @@ class LoginController extends Controller
 
         // 4. Employee / Admin (role_id 1 or user_type 2)
         if ($user->user_type === 2 || $roleId === 1) {
-            return route('crm.index');
+            return route('crm.stddata');
         }
 
         return route('dashboards.index');
@@ -678,9 +678,9 @@ class LoginController extends Controller
         $roleName = $role ? $role->role_name : 'Role ' . $roleId;
 
         $targetUrl = match ($roleId) {
-            2, 3 => route('crm.index'),
+            2, 3 => route('crm.stddata'),
             4 => route('leads.index'),
-            1 => route('crm.index'),
+            1 => route('crm.stddata'),
             default => route('dashboards.index'),
         };
 

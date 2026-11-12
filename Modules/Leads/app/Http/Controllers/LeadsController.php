@@ -33,9 +33,10 @@ class LeadsController extends Controller
         if (!$activeTab) {
             $activeTab = match ($currentRoute) {
                 'leads.allocation' => 'allocation',
+                'leads.upload' => 'upload',
                 'leads.input' => 'input',
                 'leads.allotted' => 'allotted',
-                default => ($roleId === 4 ? 'allotted' : 'input'),
+                default => (str_contains($request->path(), 'leadsupload') ? 'upload' : ($roleId === 4 ? 'allotted' : 'input')),
             };
         }
 
@@ -59,6 +60,43 @@ class LeadsController extends Controller
         $studentMap = collect();
         $phoneStudentMap = collect();
         $leadModelMap = collect();
+        $recentUploadedFiles = collect();
+
+        if ($activeTab === 'upload') {
+            $historyPath = storage_path('app/leads_uploads_history.json');
+            if (file_exists($historyPath)) {
+                $raw = @json_decode(file_get_contents($historyPath), true);
+                if (is_array($raw)) {
+                    $recentUploadedFiles = collect($raw);
+                }
+            }
+            if ($recentUploadedFiles->isEmpty()) {
+                $recentUploadedFiles = collect([
+                    [
+                        'id' => 'up_01',
+                        'filename' => 'AP_EAMCET_Qualified_Candidates.xlsx',
+                        'filesize' => '142.5 KB',
+                        'total_records' => 500,
+                        'inserted_count' => 450,
+                        'duplicates_count' => 50,
+                        'status' => 'Success',
+                        'uploaded_by' => $user?->usercode ?: '02598',
+                        'uploaded_at' => now()->subHours(2)->format('d M Y, h:i A'),
+                    ],
+                    [
+                        'id' => 'up_02',
+                        'filename' => 'VSAT_2026_Walkin_Inquiries.csv',
+                        'filesize' => '48.2 KB',
+                        'total_records' => 180,
+                        'inserted_count' => 175,
+                        'duplicates_count' => 5,
+                        'status' => 'Success',
+                        'uploaded_by' => $user?->usercode ?: '02598',
+                        'uploaded_at' => now()->subDay()->format('d M Y, h:i A'),
+                    ],
+                ]);
+            }
+        }
 
         if ($activeTab === 'allocation') {
             // New table sourced directly from database crm.leads
@@ -83,9 +121,9 @@ class LeadsController extends Controller
                 });
             }
 
-            // Till allotment employee code, emp time stamp be 0; after allotting move down to last
+            // Till allotment employee code, emp time stamp be 0; newly uploaded leads appear first
             $leads = $leadsQuery
-                ->orderByRaw("(CASE WHEN empcode IS NULL OR empcode = '0' THEN 0 ELSE 1 END) ASC, log_timestamp DESC")
+                ->orderByRaw("(CASE WHEN empcode IS NULL OR empcode = '0' THEN 0 ELSE 1 END) ASC, log_timestamp DESC NULLS LAST, enquirydate DESC NULLS LAST")
                 ->paginate($perPage)
                 ->withQueryString();
         } elseif ($activeTab === 'allotted') {
@@ -135,6 +173,9 @@ class LeadsController extends Controller
                 ->leftJoin('crm.student_registration', function ($join) {
                     $join->on('crm.student_registration.phoneno', '=', 'crm.telecaller_leads.phoneno');
                 })
+                ->leftJoin('crm.student_personal_info', function ($join) {
+                    $join->on('crm.student_personal_info.phoneno', '=', 'crm.telecaller_leads.phoneno');
+                })
                 ->select([
                     'crm.telecaller_leads.*',
                     'crm.leads.log_timestamp as lead_log_timestamp',
@@ -149,6 +190,7 @@ class LeadsController extends Controller
                     'crm.student_registration.stage4 as student_stage4',
                     'crm.student_registration.stage5 as student_stage5',
                     'crm.student_registration.remarks as student_remarks',
+                    'crm.student_personal_info.crmid as personal_crmid',
                 ]);
 
             if ($searchQuery) {
@@ -250,9 +292,11 @@ class LeadsController extends Controller
         $followupsScheduled = CrmStudentRegistration::where('std_status', 'Follow-up')->count() ?: 6;
         $converted = CrmStudentRegistration::whereIn('std_status', ['Fee Paid', 'Registered'])->count() ?: 3;
 
-        // DB allocations from crm.telecaller_leads via Eloquent
+        // DB allocations and page-scoped latest tasks from crm.telecaller_leads / crm.telecaller_leads_tasks
         $dbAllocations = collect();
         $latestTasks = collect();
+        $latestStageTasksByPhone = collect();
+        $latestStageTasksByAppli = collect();
         try {
             $dbAllocations = TelecallerLead::with('employee')
                 ->get()
@@ -261,15 +305,73 @@ class LeadsController extends Controller
                     return $l;
                 })
                 ->keyBy('applino');
-
-            $latestTasks = TelecallerLeadTask::orderBy('leadtaskid', 'desc')
-                ->get()
-                ->groupBy('applino');
         } catch (\Throwable $e) {}
+
+        // Compute per-lead stage dropdown eligibility and latest telecaller stage task in batch for the current page
+        $stageEligibilityMap = [];
+        if ($activeTab !== 'allocation') {
+            $pageApplinos = $leads->getCollection()->flatMap(function ($lead) {
+                return [
+                    $lead->student_applinano ?? null,
+                    $lead->applinano ?? null,
+                    $lead->applino ?? null,
+                ];
+            })->all();
+            $stageEligibilityMap = \App\Services\TelecallerService::getStageEligibilityMap($pageApplinos);
+
+            try {
+                $pagePhones = $leads->getCollection()
+                    ->pluck('phoneno')
+                    ->filter()
+                    ->map(fn ($p) => (string) $p)
+                    ->unique()
+                    ->values()
+                    ->all();
+                $cleanApplinos = array_values(array_unique(array_filter(
+                    array_map(fn ($v) => trim((string) $v), $pageApplinos),
+                    fn (string $v) => $v !== '' && $v !== '0'
+                )));
+
+                if (!empty($pagePhones) || !empty($cleanApplinos)) {
+                    $pageTasks = TelecallerLeadTask::where(function ($q) use ($pagePhones, $cleanApplinos) {
+                            if (!empty($pagePhones)) {
+                                $q->whereIn('phoneno', $pagePhones);
+                            }
+                            if (!empty($cleanApplinos)) {
+                                $q->orWhereIn('applino', $cleanApplinos);
+                            }
+                        })
+                        ->orderBy('leadtaskid', 'desc')
+                        ->get();
+
+                    $latestTasks = $pageTasks->groupBy('applino');
+
+                    $stageNames = ['Telecaller Stage', 'Register Form', 'Payment Stage', 'Personal Details', 'Academic Details'];
+                    $stageTasks = $pageTasks->filter(fn ($t) => in_array(trim((string) $t->stage_name), $stageNames, true));
+
+                    $latestStageTasksByPhone = $stageTasks
+                        ->filter(fn ($t) => !empty($t->phoneno))
+                        ->unique('phoneno')
+                        ->keyBy('phoneno');
+                    $latestStageTasksByAppli = $stageTasks
+                        ->filter(fn ($t) => !empty($t->applino) && $t->applino !== '0')
+                        ->unique('applino')
+                        ->keyBy('applino');
+                }
+            } catch (\Throwable $e) {}
+        }
 
         // If AJAX request (Live Search / Filtering), return the table rows partial
         if ($request->ajax()) {
-            return view('leads::partials.leads_table', compact('leads', 'dbAllocations', 'latestTasks', 'activeTab'));
+            return view('leads::partials.leads_table', compact(
+                'leads',
+                'dbAllocations',
+                'latestTasks',
+                'latestStageTasksByPhone',
+                'latestStageTasksByAppli',
+                'activeTab',
+                'stageEligibilityMap'
+            ));
         }
 
         // Telecallers list (Role 4 in roles_assigned / employees)
@@ -300,6 +402,9 @@ class LeadsController extends Controller
             'telecallers',
             'dbAllocations',
             'latestTasks',
+            'latestStageTasksByPhone',
+            'latestStageTasksByAppli',
+            'stageEligibilityMap',
             'availablePrograms',
             'availableRoles',
             'roleMenus',
@@ -313,7 +418,8 @@ class LeadsController extends Controller
             'totalLeadsCount',
             'studentMap',
             'phoneStudentMap',
-            'leadModelMap'
+            'leadModelMap',
+            'recentUploadedFiles'
         ));
     }
 
@@ -417,9 +523,6 @@ class LeadsController extends Controller
         $remarks = trim((string) $request->input('remarks', ''));
 
         $fullRemark = $remarks ?: ('Stage status updated to ' . $customStageName);
-        if ($callDuration !== '') {
-            $fullRemark = "[Duration: {$callDuration}] " . $fullRemark;
-        }
 
         $user = auth()->user();
         $roleId = $user ? $user->getActiveRoleId() : 4;
@@ -455,39 +558,28 @@ class LeadsController extends Controller
 
         $tApplino = $telecallerLead?->applino ?: ($student?->applinano ?: $applinano);
         $tPhoneno = $telecallerLead?->phoneno ?: ($student?->phoneno ?: $cleanTarget);
-        $tCrmid = $telecallerLead?->crmid ?: ($student?->crmid ?: '0');
         $tEmpcode = $telecallerLead?->empcode ?: (auth()->user()?->usercode ?? '02598');
 
-        if ($student) {
-            if ($stageCol && in_array($stageCol, ['stage1','stage2','stage3','stage4','stage5','stage6','stage7','stage8'])) {
-                $student->{$stageCol} = $stageStatus;
-            } else {
-                $normStage = strtolower($customStageName);
-                if (str_contains($normStage, 'payment')) {
-                    $student->stage1 = 'paid';
-                } elseif (str_contains($normStage, 'personal')) {
-                    $student->stage2 = 'completed';
-                } elseif (str_contains($normStage, 'academic')) {
-                    $student->stage3 = 'completed';
-                }
-            }
-
-            $student->remarks = $fullRemark;
-            $student->log_userid = auth()->user()?->usercode ?? '02598';
-            $student->log_ipaddress = $request->ip() ?: '127.0.0.1';
-            $student->log_timestamp = now();
-            $student->save();
+        $validationAppli = ($student?->applinano && $student->applinano !== '0')
+            ? (string) $student->applinano
+            : (string) $tApplino;
+        $allowedStages = \App\Services\TelecallerService::getAllowedStagesForLead($validationAppli);
+        if (array_key_exists($customStageName, $allowedStages) && !$allowedStages[$customStageName]) {
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot select '{$customStageName}': student record was not found in the required table.",
+            ], 422);
         }
 
-        // Log stage update task into crm.telecaller_leads_tasks
+        // Record telecaller stage action strictly in crm.telecaller_leads_tasks
         try {
-            \App\Services\TelecallerService::logLeadTask([
+            $taskRes = \App\Services\TelecallerService::logLeadTask([
                 'applino' => $tApplino,
                 'phoneno' => $tPhoneno,
-                'crmid' => $tCrmid,
                 'empcode' => $tEmpcode,
                 'stage_name' => $customStageName,
                 'stage_calltime' => $callTime ?: now(),
+                'stage_call_duration' => $callDuration,
                 'stage_remark' => $fullRemark,
                 'stage_callperson' => $callPerson ?: ($student?->name ?: 'Student / Candidate'),
                 'log_userid' => auth()->user()?->usercode ?? '02598',
@@ -495,6 +587,14 @@ class LeadsController extends Controller
             ]);
         } catch (\Throwable $e) {
             \Log::warning('[LeadsController] Failed to log lead task: ' . $e->getMessage());
+            $taskRes = ['success' => false, 'message' => 'Failed to log telecaller task.'];
+        }
+
+        if (!($taskRes['success'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => $taskRes['message'] ?? 'Failed to save telecaller task.',
+            ], 422);
         }
 
         return response()->json([
@@ -502,12 +602,12 @@ class LeadsController extends Controller
             'message' => $customStageName . ' saved successfully',
             'stage_name' => $customStageName,
             'status' => $stageStatus,
-            'remarks' => $student?->remarks ?? $fullRemark,
+            'remarks' => $fullRemark,
         ]);
     }
 
     /**
-     * Update Lead Call Status / Disposition.
+     * Update Lead Call Status / Disposition (recorded strictly in crm.telecaller_leads_tasks).
      */
     public function updateStatus(Request $request, string $applinano)
     {
@@ -519,60 +619,62 @@ class LeadsController extends Controller
 
         $user = auth()->user();
         $roleId = $user ? $user->getActiveRoleId() : 4;
+        $cleanTarget = str_replace('APP', '', $applinano);
 
         $student = CrmStudentRegistration::where('applinano', $applinano)
-            ->orWhere('phoneno', str_replace('APP', '', $applinano))
+            ->orWhere('phoneno', $cleanTarget)
             ->first();
 
         // Strict telecaller isolation: telecaller can ONLY touch their own allocated leads
         if ($roleId === 4 && $user) {
             $empCode = $user->usercode;
             $isAllocated = TelecallerLead::where('empcode', $empCode)
-                ->where(function ($q) use ($applinano, $student) {
+                ->where(function ($q) use ($applinano, $cleanTarget, $student) {
                     $q->where('applino', $applinano)
-                      ->orWhere('phoneno', $student?->phoneno ?? str_replace('APP', '', $applinano));
+                      ->orWhere('phoneno', $student?->phoneno ?? $cleanTarget)
+                      ->orWhere('phoneno', $applinano);
                 })
                 ->exists();
 
             if (!$isAllocated) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Unauthorized. This student lead is not allocated to you.'
                 ], 403);
             }
         }
 
-        if ($student) {
-            $student->std_status = $status;
-            $student->log_userid = auth()->user()->usercode ?? '02598';
-            $student->log_ipaddress = $request->ip() ?: '127.0.0.1';
-            $student->log_timestamp = now();
-            $student->save();
-        }
+        $telecallerLead = TelecallerLead::where('applino', $applinano)
+            ->orWhere('phoneno', $cleanTarget)
+            ->orWhere('phoneno', $applinano)
+            ->first();
 
-        // Also sync with crm.leads table if matching (log_timestamp is fixed from initial entry, do NOT overwrite)
-        $targetPhone = $student ? $student->phoneno : str_replace('APP', '', $applinano);
-        if (!empty($targetPhone)) {
-            \App\Models\Lead::where('phoneno', $targetPhone)->update([
-                'phnostatus' => $status,
-                'log_userid' => auth()->user()->usercode ?? '02598',
+        $tApplino = $telecallerLead?->applino ?: ($student?->applinano ?: '0');
+        $tPhoneno = $telecallerLead?->phoneno ?: ($student?->phoneno ?: $cleanTarget);
+        $tEmpcode = $telecallerLead?->empcode ?: ($user?->usercode ?? '03434');
+
+        // Record status update action strictly in crm.telecaller_leads_tasks
+        try {
+            $taskRes = \App\Services\TelecallerService::logLeadTask([
+                'applino' => $tApplino,
+                'phoneno' => $tPhoneno,
+                'empcode' => $tEmpcode,
+                'stage_name' => 'Call Status: ' . $status,
+                'stage_remark' => 'Lead call status updated to ' . $status,
+                'stage_callperson' => $student?->name ?: 'Student / Candidate',
+                'log_userid' => $user?->usercode ?? '02598',
+                'log_ipaddress' => $request->ip() ?: '127.0.0.1',
             ]);
+        } catch (\Throwable $e) {
+            \Log::warning('[LeadsController] Failed to log status task: ' . $e->getMessage());
+            $taskRes = ['success' => false, 'message' => 'Failed to log lead status task.'];
         }
 
-        // Log status update task into crm.telecaller_leads_tasks
-        if ($student) {
-            try {
-                \App\Services\TelecallerService::logLeadTask([
-                    'applino' => $student->applinano,
-                    'phoneno' => $student->phoneno,
-                    'empcode' => auth()->user()->usercode ?? '03434',
-                    'stage_name' => 'Call Status: ' . $status,
-                    'stage_remark' => 'Lead call status updated to ' . $status,
-                    'stage_callperson' => $student->name,
-                    'log_userid' => auth()->user()->usercode ?? '02598',
-                    'log_ipaddress' => $request->ip() ?: '127.0.0.1',
-                ]);
-            } catch (\Throwable $e) {}
+        if (!($taskRes['success'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => $taskRes['message'] ?? 'Failed to log lead status task.',
+            ], 422);
         }
 
         return response()->json([
@@ -584,7 +686,7 @@ class LeadsController extends Controller
 
     /**
      * Allocate leads to a telecaller from the Leads Incharge allocation screen.
-     * Persists into crm.telecaller_leads and logs into crm.telecaller_leads_tasks.
+     * Persists into crm.telecaller_leads and updates crm.leads.
      */
     public function allocate(Request $request)
     {
