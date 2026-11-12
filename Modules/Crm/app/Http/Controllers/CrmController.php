@@ -33,13 +33,13 @@ class CrmController extends Controller
         $currentRoute = $request->route() ? $request->route()->getName() : '';
         $activeTab = $request->query('tab');
         if (!$activeTab) {
-            if ($request->is('*coupoungenration*')) {
+            if ($request->is('*coupoungenration*') || $request->is('*percoupongen*')) {
                 $activeTab = 'couponinfo';
             } else {
                 $activeTab = match ($currentRoute) {
                     'crm.stddata', 'crm.enquirylist' => 'stddata',
                     'crm.stdsearch', 'crm.registerlist' => 'stdsearch',
-                    'crm.couponinfo', 'crm.coupoungenration' => 'couponinfo',
+                    'crm.couponinfo', 'crm.coupoungenration', 'crm.percoupongen' => 'couponinfo',
                     'crm.employeelist' => 'employeelist',
                     'kpi.index', 'kpi.studentkpi' => 'kpi',
                     default => 'stddata', // Default to Student Data (Enquiries) instead of overview dashboard
@@ -101,6 +101,11 @@ class CrmController extends Controller
         $filterPhone = trim($request->input('phone', ''));
         $filterStatus = trim($request->input('status', ''));
         $filterDate = trim($request->input('date', ''));
+
+        // Ensure student CRM IDs are synchronized with branch-wise unique numbers
+        try {
+            \App\Services\CrmIdService::syncAllStudentCrmIds();
+        } catch (\Throwable $e) {}
 
         $allStudents = collect();
         // 1. Fetch from crm.student_registration (Core CRM table)
@@ -178,13 +183,19 @@ class CrmController extends Controller
             $branches = Branch::take(50)->get();
         } catch (\Throwable $e) {}
 
-        // Available roles for UI role switcher (Strict Mode: only assigned roles)
-        $availableRoles = $user ? $user->getAssignedRoles() : collect();
+        // Available roles for UI role switcher (strictly user's assigned roles from DB)
+        $availableRoles = collect();
+        try {
+            $userAssigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+            $availableRoles = !empty($userAssigned)
+                ? collect($userAssigned)->map(fn($r) => (object)['role_id' => (int)$r['role_id'], 'role_name' => $r['role_name']])
+                : Role::where('role_id', $roleId)->get();
+        } catch (\Throwable $e) {}
 
-        // Role-based assigned menus from master.menu_access_roles
+        // Role-based assigned menus from master.menu_access_roles (with crm fallback)
         $roleMenus = collect();
         try {
-            $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
+            $roleMenus = MenuAccessRole::forRole($roleId);
         } catch (\Throwable $e) {}
 
         // Available employees for enquiry allotment & Telecallers with Role 4
@@ -285,6 +296,11 @@ class CrmController extends Controller
 
         $res = \App\Services\CouponService::generatePersonalCoupon($applino, $discount, $usercode, $request->ip() ?? '127.0.0.1');
 
+        if ($request->is('*percoupongen*') || $request->input('redirect_to') === 'percoupongen') {
+            return redirect()->route('crm.percoupongen')
+                ->with('status', $res['message']);
+        }
+
         return redirect()->route('crm.couponinfo', ['tab' => 'couponinfo'])
             ->with('status', $res['message']);
     }
@@ -381,42 +397,11 @@ class CrmController extends Controller
         return redirect()->back()->with('status', $allocResult['message']);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('crm::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('crm::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('crm::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+    // Resource API stubs
+    public function create() { return view('crm::create'); }
+    public function store(Request $request) { return response()->json(['success' => true]); }
+    public function show($id) { return view('crm::show'); }
+    public function edit($id) { return view('crm::edit'); }
+    public function update(Request $request, $id) { return response()->json(['success' => true]); }
+    public function destroy($id) { return response()->json(['success' => true]); }
 }

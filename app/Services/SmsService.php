@@ -55,16 +55,18 @@ class SmsService
         $traceId = null;
         $data = [];
 
+        // Format recipient phone number: JioCX requires country code (91XXXXXXXXXX for India)
+        $destTo = (strlen($cleanTo) === 10) ? ('91' . $cleanTo) : $cleanTo;
+
         try {
-            $response = Http::timeout(5)
-                ->connectTimeout(3)
-                ->connectTimeout(10)
+            $response = Http::timeout(10)
+                ->connectTimeout(5)
                 ->acceptJson()
                 ->post($cfg['url'], [
                     'username'         => $cfg['username'],
                     'password'         => $cfg['password'],
                     'sender_id'        => $cfg['sender_id'],
-                    'to'               => $cleanTo,
+                    'to'               => $destTo,
                     'sms_type'         => 'T',
                     'dlt_entity_id'    => $cfg['dlt_entity_id'],
                     'sms_content_type' => 'Static',
@@ -78,12 +80,13 @@ class SmsService
             $traceId = $this->extractTraceId($data);
 
             if ($success) {
-                Log::info("[SmsService] SMS dispatched successfully to '{$cleanTo}'.", [
+                Log::info("[SmsService] SMS dispatched successfully to '{$destTo}'.", [
                     'template_id' => $templateId,
+                    'body_preview' => substr($body, 0, 100),
                     'response'    => $data,
                 ]);
             } else {
-                Log::warning("[SmsService] SMS delivery returned non-200 status for '{$cleanTo}'.", [
+                Log::warning("[SmsService] SMS delivery returned non-200 status for '{$destTo}'.", [
                     'status'   => $response->status(),
                     'response' => $data,
                 ]);
@@ -92,7 +95,7 @@ class SmsService
             $success = false;
             $status = 'EXCEPTION';
             $data = ['error' => $e->getMessage()];
-            Log::error('[SmsService] SMS send failed', ['to' => $cleanTo, 'error' => $e->getMessage()]);
+            Log::error('[SmsService] SMS send failed', ['to' => $destTo, 'error' => $e->getMessage()]);
         }
 
         // Record in communication logs table (guarantees single record per phone number for sms channel)

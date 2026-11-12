@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Models\StudentRegistration;
 use App\Models\User;
 use App\Models\Wapplog;
+
 use App\Services\ActivityLogger;
 use App\Services\SmsService;
 use App\Services\WhatsAppService;
@@ -39,8 +40,16 @@ class LoginController extends Controller
         // Roles & test logins strictly matching master.login and master.employees
         $sampleUsers = [
             [
-                'role' => 'CRM Incharge',
-                'role_id' => 2,
+                'role' => 'Mani (Tele Caller & CRM Incharge)',
+                'role_id' => 4,
+                'name' => 'Mani',
+                'usercode' => '31420',
+                'phone' => '9876531420',
+                'landing' => '/leads',
+            ],
+            [
+                'role' => 'Tele Caller',
+                'role_id' => 4,
                 'name' => 'Y.BHANUPRASAD',
                 'usercode' => '02598',
                 'phone' => '9912996788',
@@ -76,14 +85,13 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle login via mobile number (Password or OTP).
+     * Normalize mobile number or employee code from request.
      */
-    public function login(Request $request): RedirectResponse
+    protected function extractPhoneAndEmployee(Request $request): array
     {
         $rawInput = trim((string)$request->input('phone', ''));
         $cleanPhone = preg_replace('/\D/', '', $rawInput);
 
-        // Check if rawInput is an employee code
         $employeeByCode = null;
         if (!empty($rawInput)) {
             try {
@@ -105,22 +113,59 @@ class LoginController extends Controller
             $cleanPhone = substr($cleanPhone, -10);
         }
 
-        if (empty($cleanPhone)) {
+        return [$cleanPhone, $rawInput, $employeeByCode];
+    }
+
+    /**
+     * Auto-track new lead in crm.leads.
+     */
+    protected function trackLead(string $cleanPhone, ?string $userId, ?string $ip): void
+    {
+        if (empty($cleanPhone) || !ctype_digit($cleanPhone)) {
+            return;
+        }
+        try {
+            $leadPhone = (int)$cleanPhone;
+            if (!Lead::where('phoneno', $leadPhone)->exists()) {
+                Lead::create([
+                    'phoneno'       => $leadPhone,
+                    'phnostatus'    => 'New Lead',
+                    'enquirydate'   => now()->toDateString(),
+                    'log_userid'    => $userId ?: 'PORTAL',
+                    'log_ipaddress' => $ip,
+                    'log_timestamp' => now(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Error tracking crm.leads: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle login via mobile number (Password or OTP).
+     */
+    public function login(Request $request): RedirectResponse
+    {
+        [$cleanPhone, $rawInput, $employeeByCode] = $this->extractPhoneAndEmployee($request);
+
+        if (empty($cleanPhone) && !$employeeByCode) {
             return back()->withInput()->withErrors([
                 'phone' => 'Please enter your registered mobile number or employee code.',
             ]);
         }
 
-        if (strlen($cleanPhone) !== 10) {
-            return back()->withInput()->withErrors([
-                'phone' => 'Mobile number must contain exactly 10 digits.',
-            ]);
-        }
+        if (!$employeeByCode) {
+            if (strlen($cleanPhone) !== 10) {
+                return back()->withInput()->withErrors([
+                    'phone' => 'Mobile number must contain exactly 10 digits.',
+                ]);
+            }
 
-        if (!in_array($cleanPhone[0], ['6', '7', '8', '9'])) {
-            return back()->withInput()->withErrors([
-                'phone' => 'Mobile number must start with 6, 7, 8, or 9.',
-            ]);
+            if (!in_array($cleanPhone[0], ['6', '7', '8', '9'])) {
+                return back()->withInput()->withErrors([
+                    'phone' => 'Mobile number must start with 6, 7, 8, or 9.',
+                ]);
+            }
         }
 
         // Look up user by phone or usercode (checks master.login, master.employees, admissions, crm schemas)
@@ -174,23 +219,8 @@ class LoginController extends Controller
 
             session()->forget(['dev_otp', 'otp_phone']);
 
-            // Detect & track lead in crm.leads
-            try {
-                $leadPhone = (int)$cleanPhone;
-                $existingLead = Lead::where('phoneno', $leadPhone)->first();
-                if (!$existingLead) {
-                    Lead::create([
-                        'phoneno' => $leadPhone,
-                        'phnostatus' => 'New Lead',
-                        'enquirydate' => now()->toDateString(),
-                        'log_userid' => $user ? $user->usercode : 'PORTAL',
-                        'log_ipaddress' => $request->ip(),
-                        'log_timestamp' => now(),
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                Log::warning('Error checking/saving crm.leads on login: ' . $e->getMessage());
-            }
+            // Auto-track lead in crm.leads
+            $this->trackLead($cleanPhone, $user?->usercode, $request->ip());
 
             // Check if user is a predefined employee / staff or has a predefined role
             $isPredefinedStaff = false;
@@ -314,6 +344,9 @@ class LoginController extends Controller
             $request->session()->regenerate();
         }
 
+        $activeRoleId = $user->getActiveRoleId();
+        session(['user.role_id' => $activeRoleId]);
+
         // Direct to role-based landing page without updating any database tables
         $landingUrl = $this->getLandingUrlForUser($user);
 
@@ -326,70 +359,33 @@ class LoginController extends Controller
      */
     public function sendOtp(Request $request): JsonResponse
     {
-        $rawInput = trim((string)$request->input('phone', ''));
-        $cleanPhone = preg_replace('/\D/', '', $rawInput);
-
-        // Check if rawInput matches an employee code in master.employees
-        $employeeByCode = null;
-        if (!empty($rawInput)) {
-            try {
-                $employeeByCode = Employee::where('emp_code', $rawInput)->first();
-                if (!$employeeByCode && strlen($rawInput) <= 7) {
-                    $employeeByCode = Employee::where('emp_code', str_pad($rawInput, 5, '0', STR_PAD_LEFT))->first();
-                }
-            } catch (\Throwable $e) {}
-        }
-
-        if ($employeeByCode && !empty($employeeByCode->phone_primary)) {
-            $cleanPhone = preg_replace('/\D/', '', $employeeByCode->phone_primary);
-        }
-
-        if (str_starts_with($cleanPhone, '91') && strlen($cleanPhone) > 10) {
-            $cleanPhone = substr($cleanPhone, -10);
-        }
-        if (strlen($cleanPhone) > 10) {
-            $cleanPhone = substr($cleanPhone, -10);
-        }
+        [$cleanPhone, $rawInput, $employeeByCode] = $this->extractPhoneAndEmployee($request);
 
         // Detailed error validation
-        if (empty($cleanPhone)) {
+        if (empty($cleanPhone) && !$employeeByCode) {
             return response()->json([
                 'success' => false,
                 'message' => 'Please enter your registered mobile number or employee code.',
             ], 422);
         }
-        if (strlen($cleanPhone) !== 10) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mobile number must contain exactly 10 digits.',
-            ], 422);
-        }
-
-        if (!in_array($cleanPhone[0], ['6', '7', '8', '9'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mobile number must start with 6, 7, 8, or 9.',
-            ], 422);
-        }
-
-        // Detect or record lead in crm.leads
-        $existingLead = null;
-        try {
-            $leadPhone = (int)$cleanPhone;
-            $existingLead = Lead::where('phoneno', $leadPhone)->first();
-            if (!$existingLead) {
-                $existingLead = Lead::create([
-                    'phoneno' => $leadPhone,
-                    'phnostatus' => 'New Lead',
-                    'enquirydate' => now()->toDateString(),
-                    'log_userid' => $employeeByCode ? $employeeByCode->emp_code : 'PORTAL',
-                    'log_ipaddress' => $request->ip(),
-                    'log_timestamp' => now(),
-                ]);
+        if (!$employeeByCode) {
+            if (strlen($cleanPhone) !== 10) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mobile number must contain exactly 10 digits.',
+                ], 422);
             }
-        } catch (\Throwable $e) {
-            Log::warning('Error detecting/saving crm.leads in sendOtp: ' . $e->getMessage());
+
+            if (!in_array($cleanPhone[0], ['6', '7', '8', '9'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mobile number must start with 6, 7, 8, or 9.',
+                ], 422);
+            }
         }
+
+        // Auto-track lead in crm.leads
+        $this->trackLead($cleanPhone, $employeeByCode?->emp_code, $request->ip());
 
         // Determine if this mobile number / code belongs to an employee or a student
         $isEmployee = false;
@@ -590,6 +586,7 @@ class LoginController extends Controller
         $user = User::where('usercode', $usercode)->firstOrFail();
         Auth::login($user);
         request()->session()->regenerate();
+        session(['user.role_id' => $user->getActiveRoleId()]);
 
         return redirect($this->getLandingUrlForUser($user))
             ->with('status', 'Signed in as ' . $user->name . ' (' . $user->role_label . ')');
@@ -623,9 +620,8 @@ class LoginController extends Controller
                     || ReceiptDetail::where('applino', $applino)->exists()
                 );
 
-                if ($hasReceipt) {
-                    return route('payu.receipt');
-                }
+                // Student lands on admission dashboard with verified status, receipt download & unlocked stages
+                return route('dashboards.index');
             } catch (\Throwable $e) {}
 
             return route('dashboards.index');
@@ -666,10 +662,14 @@ class LoginController extends Controller
 
         $roleId = (int) $request->input('role_id');
 
-        // Option A (Strict Mode): Only allow switching to roles actually assigned to this employee
-        $allowedRoleIds = $user ? $user->getAssignedRoles()->pluck('role_id')->toArray() : [];
-        if (!in_array($roleId, $allowedRoleIds, true)) {
-            return back()->withErrors(['role_id' => 'You are not authorized to switch to this role.']);
+        // Verify the user is actually assigned to this role in master.roles_assigned
+        $assigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+        $allowedRoleIds = !empty($assigned)
+            ? array_column($assigned, 'role_id')
+            : [(int)$user->getActiveRoleId()];
+
+        if (!in_array($roleId, $allowedRoleIds, true) && (int)$user->role_id !== 1) {
+            return back()->withErrors(['role_id' => 'You are not assigned to this role.']);
         }
 
         session(['user.role_id' => $roleId]);

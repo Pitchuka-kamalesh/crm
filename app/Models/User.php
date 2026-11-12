@@ -128,55 +128,14 @@ class User extends Authenticatable
         return $this->phnno ?: 'Applicant';
     }
 
-    /**
-     * Strict Mode: Retrieve raw role IDs assigned to this user in master.roles_assigned.
-     *
-     * @return array<int>
-     */
-    public function getAssignedRoleIds(): array
+    public function roleAssigned(): HasOne
     {
-        if ($this->user_type === 1 || (int)$this->role_id === 5) {
-            return [5];
-        }
+        return $this->hasOne(RoleAssigned::class, 'emp_id', 'usercode');
+    }
 
-        $empCode = $this->usercode;
-        if (empty($empCode) || $empCode === '0') {
-            try {
-                $emp = Employee::where('phone_primary', $this->phnno)
-                    ->orWhere('phone_secondary', $this->phnno)
-                    ->first();
-                $empCode = $emp?->emp_code;
-            } catch (\Throwable $e) {}
-        }
-
-        if (!empty($empCode)) {
-            try {
-                $assigned = RoleAssigned::where('emp_id', $empCode)
-                    ->where(function ($q) {
-                        $q->whereNull('end_date')->orWhere('end_date', '>=', now());
-                    })
-                    ->orderBy('roles_role_id')
-                    ->pluck('roles_role_id')
-                    ->map(fn($id) => (int)$id)
-                    ->toArray();
-
-                if (!empty($assigned)) {
-                    return array_values(array_unique($assigned));
-                }
-            } catch (\Throwable $e) {}
-        }
-
-        if (!empty($this->role_id)) {
-            return [(int)$this->role_id];
-        }
-
-        try {
-            if ($this->employee && !empty($this->employee->role_id)) {
-                return [(int)$this->employee->role_id];
-            }
-        } catch (\Throwable $e) {}
-
-        return [$this->user_type === 2 ? 1 : 5];
+    public function assignedRoles()
+    {
+        return $this->hasMany(RoleAssigned::class, 'emp_id', 'usercode');
     }
 
     public function getActiveRoleId(): int
@@ -201,16 +160,34 @@ class User extends Authenticatable
             return (int) $allowedRoleIds[0];
         }
 
+        // 1. Direct role_id on login
         if (!empty($this->role_id)) {
             return (int) $this->role_id;
         }
 
+        // 2. Look up master.roles_assigned in DB
+        try {
+            $assigned = RoleAssigned::where('emp_id', $this->usercode)
+                ->where(function ($q) {
+                    $q->whereNull('end_date')
+                        ->orWhere('end_date', '>=', now()->toDateString());
+                })
+                ->orderBy('roles_role_id')
+                ->first();
+
+            if ($assigned && !empty($assigned->roles_role_id)) {
+                return (int) $assigned->roles_role_id;
+            }
+        } catch (\Throwable $e) {}
+
+        // 3. Look up master.employees role_id in DB
         try {
             if ($this->employee && !empty($this->employee->role_id)) {
                 return (int) $this->employee->role_id;
             }
         } catch (\Throwable $e) {}
 
+        // 4. Default by user type (strictly database-driven, no hardcoded user codes)
         return $this->user_type === 2 ? 1 : 5;
     }
 

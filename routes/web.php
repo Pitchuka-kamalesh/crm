@@ -28,6 +28,7 @@ Route::post('/switch-role', [LoginController::class, 'switchRole'])->middleware(
 
 // Direct CRM aliases matching master.menus controller_ref
 Route::get('/crm', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.alias');
+Route::get('/crms', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/index', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/stddata', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.stddata');
 Route::get('/crm/enquiry-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.enquirylist');
@@ -37,10 +38,13 @@ Route::get('/crm/coupon-info', [\Modules\Crm\Http\Controllers\CrmController::cla
 Route::get('/crm/couponinfo', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/coupoungenration', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.coupoungenration');
 Route::get('/crm/coupoungenration', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
+Route::get('/crm/percoupongen', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.percoupongen');
+Route::get('/percoupongen', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/employee-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.employeelist');
 Route::get('/crm/employeelist', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::post('/crm/allot-leads', [\Modules\Crm\Http\Controllers\CrmController::class, 'allotLeads'])->middleware('auth')->name('crm.allot');
 Route::post('/crm/coupons/generate-personal', [\Modules\Crm\Http\Controllers\CrmController::class, 'generatePersonalCoupon'])->middleware('auth')->name('crm.coupons.generate-personal');
+Route::post('/crm/percoupongen', [\Modules\Crm\Http\Controllers\CrmController::class, 'generatePersonalCoupon'])->middleware('auth');
 
 // Leads aliases matching master.menus controller_ref
 Route::get('/leads/index', [\Modules\Leads\Http\Controllers\LeadsController::class, 'index'])->middleware('auth');

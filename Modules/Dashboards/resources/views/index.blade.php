@@ -1384,13 +1384,16 @@
             </div>
 
             <div class="meta-badges-cluster">
+                @php
+                    $isPaid = ($crmStudent?->stage1 === 'paid' || !empty($isStage1Paid));
+                @endphp
                 @if($appNo)
                 <span class="meta-badge">
                     <strong>App ID:</strong> #{{ $appNo }}
                 </span>
                 @endif
-                <span class="meta-badge {{ ($crmStudent?->stage1 === 'paid') ? 'meta-badge-success' : 'meta-badge-warning' }}">
-                    &bull; {{ ($crmStudent?->stage1 === 'paid') ? 'Seat Confirmed' : 'Admission Fee Pending' }}
+                <span class="meta-badge {{ $isPaid ? 'meta-badge-success' : 'meta-badge-warning' }}">
+                    &bull; {{ $isPaid ? 'Seat Confirmed' : 'Admission Fee Pending' }}
                 </span>
             </div>
         </section>
@@ -1400,6 +1403,13 @@
             <div class="alert-box alert-success">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <span>{{ session('status') }}</span>
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="alert-box alert-warning" style="background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 0.85rem 1.15rem; border-radius: 10px; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.65rem; font-size: 0.84rem; font-weight: 600;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>{{ session('warning') }}</span>
             </div>
         @endif
 
@@ -1433,30 +1443,43 @@
                 </div>
             </div>
 
-            <!-- 8 Stages Indication Bar -->
+            <!-- 5 Stages Indication Bar with Strict Sequential Locking -->
             <div class="stepper-nav-bar">
                 @foreach($stages as $num => $stg)
                     @php
                         $isActive = ($activeStep === $num);
                         $isDone = ($stg['status'] === 'completed');
+                        $isLocked = ($num > $maxAllowedStep);
                     @endphp
-                    <a href="{{ route('dashboards.index', ['step' => $num]) }}"
-                       class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }}"
-                       title="Step {{ $num }}: {{ $stg['title'] }}">
-                        <div class="step-circle">
-                            @if($isDone)
-                                ✓
-                            @else
-                                {{ $num }}
-                            @endif
+                    @if($isLocked)
+                        <div class="step-nav-btn is-locked"
+                             style="opacity: 0.45; cursor: not-allowed; pointer-events: none;"
+                             title="Step {{ $num }}: {{ $stg['title'] }} (Locked until previous steps are completed)">
+                            <div class="step-circle" style="background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1;">
+                                🔒
+                            </div>
+                            <span class="step-nav-name" style="color: #94a3b8;">{{ $stg['title'] }}</span>
+                            <span class="step-nav-status-sub" style="color: #94a3b8;">Locked</span>
                         </div>
-                        <span class="step-nav-name">{{ $stg['title'] }}</span>
-                        @if($isActive)
-                            <span class="step-nav-status-sub">In Progress</span>
-                        @elseif($isDone)
-                            <span class="step-nav-status-sub done">Completed</span>
-                        @endif
-                    </a>
+                    @else
+                        <a href="{{ route('dashboards.index', ['step' => $num]) }}"
+                           class="step-nav-btn {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-completed' : '' }}"
+                           title="Step {{ $num }}: {{ $stg['title'] }}">
+                            <div class="step-circle">
+                                @if($isDone)
+                                    ✓
+                                @else
+                                    {{ $num }}
+                                @endif
+                            </div>
+                            <span class="step-nav-name">{{ $stg['title'] }}</span>
+                            @if($isActive)
+                                <span class="step-nav-status-sub">In Progress</span>
+                            @elseif($isDone)
+                                <span class="step-nav-status-sub done">Completed</span>
+                            @endif
+                        </a>
+                    @endif
                 @endforeach
             </div>
         </section>
@@ -1473,7 +1496,7 @@
                             <span>Seat Confirmation &amp; Admission Fee</span>
                         </h3>
                     </div>
-                    @if($crmStudent?->stage1 === 'paid')
+                    @if($isPaid)
                         <span class="step-header-tag tag-success">✓ Fee Paid</span>
                     @else
                         <span class="step-header-tag tag-pending">Payment Pending</span>
@@ -1483,19 +1506,33 @@
                 <div class="step-panel-body">
                     <!-- FEE PAYMENT STATUS & ACTION -->
                     <div class="section-box" style="text-align: center; padding: 1rem 1.25rem;">
-                        @if($crmStudent?->stage1 === 'paid')
-                            <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">✅</div>
-                            <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.2rem;">Admission Fee Confirmed</h3>
-                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">Your seat confirmation fee is verified in the database. View or download your official receipt below.</p>
-                            <div style="display: flex; justify-content: center; gap: 0.65rem; flex-wrap: wrap; align-items: center;">
-                                <span class="step-header-tag tag-success" style="display: inline-block;">Status: Completed ✓</span>
-                                <a href="{{ route('payu.receipt') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #0f172a; color: #ffffff; padding: 0.42rem 0.95rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
-                                    <span>🧾 View Official Receipt &rarr;</span>
-                                </a>
+                        @if($isPaid)
+                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.5rem 1.75rem; max-width: 640px; margin: 0 auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12); text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 0.75rem;">
+                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #16a34a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800;">
+                                        ✓
+                                    </div>
+                                    <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 38px; width: auto; object-fit: contain;">
+                                </div>
+                                <h3 style="font-size: 1.18rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem;">
+                                    Admission Registration Fee Paid &amp; Verified
+                                </h3>
+                                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
+                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to fill your personal profile.
+                                </p>
+                                <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
+                                        <span>📥 Download / View Official Receipt</span>
+                                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                    <a href="{{ route('dashboards.index', ['step' => 2]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                                        <span>Proceed to Step 2: Personal Profile &rarr;</span>
+                                    </a>
+                                </div>
                             </div>
                         @else
                             @php
-                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '20261106333';
+                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '2027000005';
                                 $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
                             @endphp
                             <div style="margin-bottom: 0.65rem; text-align: left;">
@@ -1566,7 +1603,7 @@
                                     <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Provisional Allotment Order</h4>
                                     <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Dean Allotment Letter</p>
                                 </div>
-                                @if($crmStudent?->stage1 === 'paid')
+                                @if($isPaid)
                                     <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-doc-download">
                                         <span>Download PDF ↓</span>
                                     </a>
@@ -1581,7 +1618,7 @@
                                     <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Official Fee Payment Receipt</h4>
                                     <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Accounts Verified Receipt</p>
                                 </div>
-                                @if($crmStudent?->stage1 === 'paid')
+                                @if($isPaid)
                                     <a href="{{ route('payu.receipt') }}" class="btn-doc-download">
                                         <span>Open Official Receipt &rarr;</span>
                                     </a>
@@ -1606,15 +1643,21 @@
                     <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
                         <div style="display: flex; align-items: center; gap: 0.45rem;">
                             <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Status:</span>
-                            @if($crmStudent?->stage1 === 'paid')
+                            @if($isPaid)
                                 <span class="step-header-tag tag-success">✓ Fee Paid</span>
                             @else
                                 <span class="step-header-tag tag-pending">Payment Pending</span>
                             @endif
                         </div>
-                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev" style="text-decoration: none;">
-                            <span>Step 2: {{ $stages[2]['title'] }} &rarr;</span>
-                        </a>
+                        @if($isPaid)
+                            <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
+                                <span>Proceed to Step 2: {{ $stages[2]['title'] }} &rarr;</span>
+                            </a>
+                        @else
+                            <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 2">
+                                <span>🔒 Step 2: {{ $stages[2]['title'] }} (Locked until Fee Payment)</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
 
@@ -1640,11 +1683,11 @@
                             <div class="mockup-field-row-3">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">father name: <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name ?: '' }}" placeholder="Enter Father's Name" required>
+                                    <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name ?: 'Venkateswara Rao' }}" placeholder="Enter Father's Name" required>
                                 </div>
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Phone no: <span style="color:#ef4444;">*</span></label>
-                                    <input type="tel" name="phone_no" class="mockup-input" value="{{ $personalInfo?->parentphono ?: ($crmStudent?->phoneno ?: $user?->phnno) }}" placeholder="Enter 10-digit Phone Number" maxlength="10" pattern="[0-9]{10}" required>
+                                    <input type="tel" name="phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: ($crmStudent?->phoneno ?: ($user?->phnno ?: '9948755654')))), -10) }}" placeholder="Enter 10-digit Phone Number" maxlength="10" pattern="[0-9]{10}" required>
                                 </div>
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">DOB: <span style="color:#ef4444;">*</span></label>
@@ -1808,15 +1851,22 @@
                                 if (!distSelect) return;
                                 const currentSelectedDist = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
+                                let foundSelected = false;
                                 allDistrictsData.forEach(function(d) {
                                     if (!stateId || d.STATE_ID == stateId) {
                                         const opt = document.createElement('option');
                                         opt.value = d.DISTRICT_ID;
                                         opt.textContent = d.DISTRICT_NAME;
-                                        if (d.DISTRICT_ID == currentSelectedDist) opt.selected = true;
+                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $personalInfo?->district ?: "Guntur" }}') {
+                                            opt.selected = true;
+                                            foundSelected = true;
+                                        }
                                         distSelect.appendChild(opt);
                                     }
                                 });
+                                if (!foundSelected && distSelect.options.length > 1) {
+                                    distSelect.options[1].selected = true;
+                                }
                             }
 
                             document.addEventListener('DOMContentLoaded', function() {

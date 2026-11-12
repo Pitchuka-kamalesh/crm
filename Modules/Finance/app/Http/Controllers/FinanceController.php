@@ -63,11 +63,14 @@ class FinanceController extends Controller
             } catch (\Throwable $e) {}
         }
 
-        // Available roles for preview switcher (Strict Mode: only assigned roles)
-        $availableRoles = $user ? $user->getAssignedRoles() : collect();
+        // Available roles for preview switcher (strictly user's assigned roles from DB)
+        $userAssigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+        $availableRoles = !empty($userAssigned)
+            ? collect($userAssigned)->map(fn($r) => (object)['role_id' => (int)$r['role_id'], 'role_name' => $r['role_name']])
+            : Role::where('role_id', $roleId)->get();
 
-        // Role-based assigned menus from master.menu_access_roles
-        $roleMenus = MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
+        // Role-based assigned menus from master.menu_access_roles (with crm fallback)
+        $roleMenus = MenuAccessRole::forRole($roleId);
 
         return view('finance::index', compact(
             'user',
@@ -84,42 +87,11 @@ class FinanceController extends Controller
         ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('finance::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('finance::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('finance::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+    // Resource API stubs
+    public function create() { return view('finance::create'); }
+    public function store(Request $request) { return response()->json(['success' => true]); }
+    public function show($id) { return view('finance::show'); }
+    public function edit($id) { return view('finance::edit'); }
+    public function update(Request $request, $id) { return response()->json(['success' => true]); }
+    public function destroy($id) { return response()->json(['success' => true]); }
 }

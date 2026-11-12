@@ -152,17 +152,8 @@ class RegistrationController extends Controller
         if ($crmRecord && !empty($crmRecord->applinano) && $crmRecord->applinano !== '0') {
             $appliNano = (string) $crmRecord->applinano;
         } else {
-            // Generate user code only after filling the registration form
-            try {
-                $seqRow = DB::selectOne("SELECT nextval('crm.student_registration_applinano_seq'::regclass)::text as applinano");
-                if ($seqRow && !empty($seqRow->applinano) && !str_contains($seqRow->applinano, '#')) {
-                    $appliNano = (string) $seqRow->applinano;
-                }
-            } catch (\Throwable $e) {}
-
-            if (!$appliNano) {
-                $appliNano = '20' . date('ymd') . mt_rand(100, 999);
-            }
+            // Generate 10-digit application number starting from 2027000001
+            $appliNano = CrmStudentRegistration::generateNextApplicationNumber();
         }
 
         // 2. Insert or update crm.student_registration via Eloquent (guarantees single record per student)

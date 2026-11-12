@@ -21,6 +21,9 @@ class PayDetail extends Model
         'percouponamount',
         'totalcouponamount',
         'paidamount',
+        'amountpaid',
+        'paymentstatus',
+        'txnid',
         'paytype',
         'txndatetime',
         'txncrmid',
@@ -31,15 +34,18 @@ class PayDetail extends Model
         'log_userid',
         'log_ipaddress',
         'log_timestamp',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
         'feeid' => 'integer',
-        'feepayable' => 'decimal:2',
-        'defcouponamount' => 'decimal:2',
-        'percouponamount' => 'decimal:2',
-        'totalcouponamount' => 'decimal:2',
-        'paidamount' => 'decimal:2',
+        'feepayable' => 'float',
+        'defcouponamount' => 'float',
+        'percouponamount' => 'float',
+        'totalcouponamount' => 'float',
+        'paidamount' => 'float',
+        'amountpaid' => 'float',
         'txndatetime' => 'datetime',
         'log_timestamp' => 'datetime',
     ];
@@ -49,4 +55,3 @@ class PayDetail extends Model
         return $this->belongsTo(CrmStudentRegistration::class, 'applino', 'applinano');
     }
 }
-
