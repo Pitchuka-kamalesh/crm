@@ -72,10 +72,13 @@ class ApplicationController extends Controller
 
         $crmStudent = CrmStudentRegistration::with(['program', 'branch', 'state', 'country'])
             ->where('applinano', $id)
-            ->when($cleanPhone, function ($q) use ($cleanPhone) {
-                $q->orWhere('phoneno', $cleanPhone);
-            })
             ->first();
+
+        if (!$crmStudent && $cleanPhone) {
+            $crmStudent = CrmStudentRegistration::with(['program', 'branch', 'state', 'country'])
+                ->where('phoneno', $cleanPhone)
+                ->first();
+        }
 
         $applino = $crmStudent?->applinano ?? $id;
         $phone = $crmStudent?->phoneno ?? $cleanPhone ?: 'N/A';

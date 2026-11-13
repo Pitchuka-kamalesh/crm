@@ -36,7 +36,7 @@
 
             <div class="top-bar-right">
                 <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="btn-header-action" title="View Paid Details">
-                    <span>🧾 Paid Details (FINA0002)</span>
+                    <span>🧾 Paid Details</span>
                 </a>
                 @include('layouts.role-switcher')
             </div>
@@ -51,90 +51,150 @@
             @endif
 
             <!-- FINANCIAL METRICS -->
-            <div class="metrics-grid">
-                <div class="metric-card">
+            <div style="display: flex; gap: 1.25rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <div class="metric-card" style="padding: 1.15rem 1.35rem; min-width: 260px; flex: 1; max-width: 380px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                     <div class="metric-info">
-                        <span class="metric-label">Total Revenue Collected</span>
-                        <span class="metric-value">₹ {{ number_format($totalRevenue) }}</span>
-                        <span class="metric-sub">Application + Admission Fees</span>
+                        <div class="metric-label" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">TOTAL REVENUE COLLECTED</div>
+                        <div class="metric-value" style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0.25rem 0 0.15rem;">₹ {{ number_format($totalRevenue, 2) }}</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #059669;">Verified Collections (Real-time)</div>
                     </div>
-                    <div class="metric-icon-box metric-emerald">💰</div>
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💰</div>
                 </div>
 
-                <div class="metric-card">
+                <div class="metric-card" style="padding: 1.15rem 1.35rem; min-width: 260px; flex: 1; max-width: 380px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                     <div class="metric-info">
-                        <span class="metric-label">Application Fees</span>
-                        <span class="metric-value">₹ {{ number_format($totalAppFeesCollected) }}</span>
-                        <span class="metric-sub">₹1,200 per candidate</span>
+                        <div class="metric-label" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">VERIFIED PAID STUDENTS</div>
+                        <div class="metric-value" style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0.25rem 0 0.15rem;">{{ $totalPaidStudents }}</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #059669;">Reconciled with Gateway</div>
                     </div>
-                    <div class="metric-icon-box metric-blue">📄</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <span class="metric-label">Admission Confirmation Fees</span>
-                        <span class="metric-value">₹ {{ number_format($totalAdmFeesCollected) }}</span>
-                        <span class="metric-sub">Seat Allotment Deposits</span>
-                    </div>
-                    <div class="metric-icon-box metric-purple">🎓</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <span class="metric-label">Verified Receipts</span>
-                        <span class="metric-value">{{ $totalApplications }}</span>
-                        <span class="metric-sub">Reconciled with Accounts</span>
-                    </div>
-                    <div class="metric-icon-box metric-amber">🧾</div>
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: #fffbeb; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🧾</div>
                 </div>
             </div>
 
-            <!-- PAID DETAILS TABLE (master.menus: FINA0002) -->
+            <!-- PAID DETAILS TABLE -->
             <div class="content-card">
-                <div class="card-header-bar">
-                    <div>
-                        <div class="card-title">🧾 Fee Collection & Paid Details Ledger (master.menus: FINA0002)</div>
-                        <div class="card-subtitle">Real-time payment logs and bank reconciliation for VFSTR Admissions</div>
+                <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                    <div class="card-title" style="font-size: 1.1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                        <span>🧾 Paid Details Ledger</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="filter-count-badge" style="font-size: 0.8rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.4rem 0.85rem; border-radius: 20px;">
+                            Verified Students: <strong id="paidCountDisplay">{{ $totalPaidStudents }}</strong>
+                        </div>
+                        <div style="position: relative;">
+                            <input type="text" id="financeSearchInput" placeholder="Search by name, app no, receipt..." onkeyup="filterFinanceTable()" style="padding: 0.5rem 0.85rem 0.5rem 2.1rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 250px; outline: none; background: #ffffff;">
+                            <svg style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="crm-table">
+                    <table class="crm-table" id="financeTable">
                         <thead>
                             <tr>
-                                <th>Receipt / Ref No</th>
-                                <th>Student Name</th>
-                                <th>Application #</th>
-                                <th>Fee Component</th>
-                                <th>Amount Paid</th>
-                                <th>Payment Mode</th>
-                                <th>Payment Status</th>
+                                <th style="white-space: nowrap;">Receipt / Ref No</th>
+                                <th style="white-space: nowrap;">Student Name</th>
+                                <th style="white-space: nowrap;">Application #</th>
+                                <th style="white-space: nowrap;">Fee Component</th>
+                                <th style="white-space: nowrap;">Program / Branch</th>
+                                <th style="white-space: nowrap;">Amount Paid</th>
+                                <th style="white-space: nowrap;">Payment Mode</th>
+                                <th style="white-space: nowrap;">Payment Date</th>
+                                <th style="white-space: nowrap;">Payment Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($paidStudents as $idx => $student)
-                                <tr>
-                                    <td><code>REC-2026-{{ str_pad($idx + 101, 5, '0', STR_PAD_LEFT) }}</code></td>
-                                    <td><strong>{{ $student->student_name ?? $student->name ?? 'Candidate' }}</strong></td>
-                                    <td>{{ $student->application_no ?? $student->applinano ?? 'VU-2026' }}</td>
-                                    <td>Application & Registration Fee</td>
-                                    <td><strong style="color: #059669;">₹ 1,200.00</strong></td>
-                                    <td><span>Online Gateway (Razorpay/SBI)</span></td>
-                                    <td><span class="badge-status badge-paid">✓ Verified</span></td>
-                                </tr>
-                                <tr>
-                                    <td><code>REC-2026-{{ str_pad($idx + 201, 5, '0', STR_PAD_LEFT) }}</code></td>
-                                    <td><strong>{{ $student->student_name ?? $student->name ?? 'Candidate' }}</strong></td>
-                                    <td>{{ $student->application_no ?? $student->applinano ?? 'VU-2026' }}</td>
-                                    <td>Seat Confirmation Deposit</td>
-                                    <td><strong style="color: #059669;">₹ 25,000.00</strong></td>
-                                    <td><span>NetBanking / UPI</span></td>
-                                    <td><span class="badge-status badge-paid">✓ Verified</span></td>
+                                @php
+                                    $appNo = (string)($student->applinano ?? $student->application_no ?? 'N/A');
+                                    $name = $student->name ?? $student->student_name ?? 'Candidate';
+                                    $payRecord = $payDetails->get($appNo);
+                                    $receiptRecord = $receiptDetails->get($appNo);
+
+                                    $paidAmt = 1200.00;
+                                    if ($payRecord && (float)($payRecord->paidamount ?? 0) > 0) {
+                                        $paidAmt = (float)$payRecord->paidamount;
+                                    } elseif ($receiptRecord && (float)($receiptRecord->feepayable ?? 0) > 0) {
+                                        $paidAmt = (float)$receiptRecord->feepayable;
+                                    }
+
+                                    $receiptNo = $receiptRecord?->receiptno 
+                                        ?? $payRecord?->txncrmid 
+                                        ?? $payRecord?->txnpayuid 
+                                        ?? 'REC-VERIFIED';
+
+                                    $feeComponent = ($paidAmt >= 10000) 
+                                        ? 'Admission & Seat Confirmation Deposit' 
+                                        : 'Application & Registration Fee';
+
+                                    $paymentMode = $payRecord?->paytype ?? $receiptRecord?->paytype ?? 'Online Gateway (PayU)';
+                                    
+                                    $txnDateRaw = $payRecord?->txndatetime 
+                                        ?? $receiptRecord?->receiptdatetime 
+                                        ?? $receiptRecord?->txndatetime 
+                                        ?? $payRecord?->log_timestamp 
+                                        ?? $student->log_timestamp;
+
+                                    $txnDateFormatted = 'Recorded';
+                                    if ($txnDateRaw) {
+                                        try {
+                                            $txnDateFormatted = \Carbon\Carbon::parse($txnDateRaw)->format('d M Y, h:i A');
+                                        } catch (\Throwable $e) {
+                                            $txnDateFormatted = (string)$txnDateRaw;
+                                        }
+                                    }
+
+                                    $programName = $student->branch?->branch_long_name 
+                                        ?? $student->branch?->branch_short_name 
+                                        ?? $student->program?->program_long_name 
+                                        ?? 'B.Tech Program';
+                                @endphp
+                                <tr class="finance-row">
+                                    <td style="white-space: nowrap;">
+                                        <code style="font-size: 0.82rem; background: #f8fafc; padding: 0.3rem 0.65rem; border-radius: 6px; border: 1px solid #e2e8f0; color: #0f172a; white-space: nowrap; word-break: keep-all; display: inline-block; font-family: 'JetBrains Mono', monospace;">{{ $receiptNo }}</code>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        <div style="font-weight: 700; color: #1e293b;">{{ $name }}</div>
+                                        @if(!empty($student->phoneno ?? $student->mobile))
+                                            <div style="font-size: 0.75rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                        @endif
+                                    </td>
+                                    <td style="white-space: nowrap;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: #334155;">{{ $appNo }}</span></td>
+                                    <td style="white-space: nowrap;">
+                                        <span style="font-size: 0.825rem; font-weight: 600; color: #334155; white-space: nowrap;">{{ $feeComponent }}</span>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #334155;">{{ $programName }}</div>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        <strong style="color: #059669; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">₹ {{ number_format($paidAmt, 2) }}</strong>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        <span style="font-size: 0.825rem; color: #475569; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                            <span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span>
+                                            {{ $paymentMode }}
+                                        </span>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        <span style="font-size: 0.8rem; color: #64748b;">{{ $txnDateFormatted }}</span>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.65rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                            ✓ Verified
+                                        </span>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                                        No payment records found.
+                                    <td colspan="9" style="text-align: center; padding: 3.5rem 1.5rem; color: #64748b;">
+                                        <div style="font-size: 2.2rem; margin-bottom: 0.6rem;">🧾</div>
+                                        <div style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">No Verified Paid Students Found</div>
+                                        <div style="font-size: 0.85rem; color: #94a3b8; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+                                            Only students who have completed payment (with verified payment status or transaction logs in <code>finance.paydetails</code>) are displayed here.
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
@@ -145,5 +205,29 @@
         </main>
     </div>
 </div>
+
+<script>
+function filterFinanceTable() {
+    const input = document.getElementById('financeSearchInput');
+    const filter = (input ? input.value : '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#financeTable tbody tr.finance-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (!filter || text.includes(filter)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    const display = document.getElementById('paidCountDisplay');
+    if (display) {
+        display.textContent = visibleCount;
+    }
+}
+</script>
 </body>
 </html>
