@@ -1806,173 +1806,236 @@
             @endif
 
             @if($activeTab === 'upload')
-                <!-- TAB: LEADS UPLOAD (EXCEL / CSV INGESTION) -->
-                <div class="allocation-command-card" style="padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1.15rem; margin-bottom: 1.5rem;">
-                        <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.4rem;">📥</span>
-                            <span>Leads Upload</span>
-                        </div>
-                        <div>
-                            <a href="{{ route('leads.downloadSample') }}" 
-                               style="display: inline-flex; align-items: center; gap: 8px; padding: 0.65rem 1.25rem; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; color: #0f172a; font-size: 0.82rem; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s ease;">
+                <!-- LEADS UPLOAD HEADER & ACTIONS BAR (SPACE SAVER) -->
+                <div class="allocation-command-card" style="padding: 1.15rem 1.5rem; margin-bottom: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                            <div style="font-size: 1.18rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.35rem;">📥</span>
+                                <span>Leads Upload</span>
+                            </div>
+                            <button type="button" 
+                                    onclick="openLeadUploadModal()" 
+                                    class="incharge-btn-submit" 
+                                    id="btnHeaderBrowseComputer"
+                                    style="height: 38px; padding: 0 1.25rem; font-size: 0.84rem; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; border-radius: 8px; cursor: pointer; background: #2563eb; color: #ffffff; border: none; box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: all 0.15s ease;"
+                                    onmouseover="this.style.background='#1d4ed8'"
+                                    onmouseout="this.style.background='#2563eb'">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Browse Computer</span>
+                            </button>
+                        </div>
+
+                        @php
+                            $totalUploadedLeadsCount = (int) $recentUploadedFiles->sum('total_records');
+                            $totalFilesCount = $recentUploadedFiles->count();
+                        @endphp
+                        <!-- Professional Uploaded Leads Metric Counter -->
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
+                                <span style="font-size: 0.76rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Total Leads Uploaded:</span>
+                                <strong id="headerTotalLeadsBadge" style="font-size: 0.96rem; font-weight: 800; color: #0f172a; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($totalUploadedLeadsCount) }}
+                                </strong>
+                            </div>
+
+                            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                                <span style="font-size: 0.76rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.4px;">Files Uploaded:</span>
+                                <strong id="headerTotalFilesBadge" style="font-size: 0.96rem; font-weight: 800; color: #15803d; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($totalFilesCount) }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="{{ route('leads.downloadSample') }}" 
+                               style="display: inline-flex; align-items: center; gap: 8px; padding: 0.55rem 1.15rem; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; color: #0f172a; font-size: 0.82rem; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s ease;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
                                 </svg>
                                 <span>Download Sample Template</span>
                             </a>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Prominent Notifications for Upload (Session Alerts & AJAX Feedback) -->
-                    <div id="uploadNotificationArea">
-                        @if(session('upload_success'))
-                            <div class="upload-alert-box" style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(34,197,94,0.12);">
-                                <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                                    <div style="display: flex; align-items: flex-start; gap: 14px;">
-                                        <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #16a34a; flex-shrink: 0; font-weight: 800;">
-                                            ✓
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 1.15rem; font-weight: 800; color: #15803d;">
-                                                File Uploaded Successfully!
-                                            </div>
-                                            <div style="font-size: 0.9rem; font-weight: 600; color: #166534; margin-top: 4px;">
-                                                {{ session('upload_success') }}
-                                            </div>
-                                            @if(session('upload_summary'))
-                                                @php $sum = session('upload_summary'); @endphp
-                                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #bbf7d0; font-size: 0.82rem;">
-                                                    <span style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #0f172a;">
-                                                        📊 Total in File: <span style="color: #2563eb;">{{ number_format($sum['total_rows'] ?? 0) }}</span>
-                                                    </span>
-                                                    <span style="background: #ffffff; border: 1px solid #86efac; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #15803d;">
-                                                        🟢 New Leads Added: <span style="color: #16a34a;">{{ number_format($sum['inserted_count'] ?? 0) }}</span>
-                                                    </span>
-                                                    @if(($sum['total_duplicates'] ?? 0) > 0)
-                                                        <span style="background: #ffffff; border: 1px solid #fde047; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #854d0e;">
-                                                            ⚠️ Duplicates Skipped: <span style="color: #d97706;">{{ number_format($sum['total_duplicates']) }}</span>
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" style="padding: 0.65rem 1.25rem; background: #16a34a; color: #ffffff; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(22,163,74,0.3);">
-                                        <span>Go to Leads Allocation &rarr;</span>
-                                    </a>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if(session('upload_error'))
-                            <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-                                <div style="display: flex; align-items: center; gap: 14px;">
-                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
-                                        ✕
+                <!-- Prominent Notifications for Upload (Session Alerts & AJAX Feedback) -->
+                <div id="uploadNotificationArea">
+                    @if(session('upload_success'))
+                        <div class="upload-alert-box" style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(34,197,94,0.12);">
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #16a34a; flex-shrink: 0; font-weight: 800;">
+                                        ✓
                                     </div>
                                     <div>
-                                        <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
-                                            Upload Failed / Error
+                                        <div style="font-size: 1.15rem; font-weight: 800; color: #15803d;">
+                                            File Uploaded Successfully!
                                         </div>
-                                        <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
-                                            {{ session('upload_error') }}
+                                        <div style="font-size: 0.9rem; font-weight: 600; color: #166534; margin-top: 4px;">
+                                            {{ session('upload_success') }}
                                         </div>
+                                        @if(session('upload_summary'))
+                                            @php $sum = session('upload_summary'); @endphp
+                                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #bbf7d0; font-size: 0.82rem;">
+                                                <span style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #0f172a;">
+                                                    📊 Total in File: <span style="color: #2563eb;">{{ number_format($sum['total_rows'] ?? 0) }}</span>
+                                                </span>
+                                                <span style="background: #ffffff; border: 1px solid #86efac; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #15803d;">
+                                                    🟢 New Leads Added: <span style="color: #16a34a;">{{ number_format($sum['inserted_count'] ?? 0) }}</span>
+                                                </span>
+                                                @if(($sum['total_duplicates'] ?? 0) > 0)
+                                                    <span style="background: #ffffff; border: 1px solid #fde047; border-radius: 6px; padding: 4px 10px; font-weight: 700; color: #854d0e;">
+                                                        ⚠️ Duplicates Skipped: <span style="color: #d97706;">{{ number_format($sum['total_duplicates']) }}</span>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-
-                        @if($errors->any())
-                            <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
-                                <div style="display: flex; align-items: center; gap: 14px;">
-                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
-                                        ✕
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
-                                            Validation Error
-                                        </div>
-                                        <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
-                                            @foreach($errors->all() as $err)
-                                                <div>&bull; {{ $err }}</div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Upload Form & Drag Drop Box -->
-                    <form action="{{ route('leads.uploadExcel') }}" method="POST" enctype="multipart/form-data" id="leadExcelUploadForm">
-                        @csrf
-                        <div style="max-width: 680px; margin: 0 auto;">
-                            <!-- Dropzone Box -->
-                            <div style="border: 2px dashed #93c5fd; background: #f8fafc; border-radius: 14px; padding: 2.75rem 2rem; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative;"
-                                 id="uploadDropzone"
-                                 onclick="document.getElementById('leadsFileInput').click()">
-                                <input type="file" 
-                                       name="leads_file" 
-                                       id="leadsFileInput" 
-                                       accept=".xlsx, .xls, .csv, .txt, .XLSX, .XLS, .CSV, .TXT" 
-                                       required 
-                                       style="display: none;"
-                                       onchange="handleLeadFileSelected(this)">
-                                
-                                <div style="width: 58px; height: 58px; margin: 0 auto 1rem auto; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2563eb;">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="17 8 12 3 7 8"></polyline>
-                                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                                    </svg>
-                                </div>
-                                <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;" id="dropzoneMainText">
-                                    Click to select Excel/CSV file or drag &amp; drop here
-                                </div>
-                                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem;" id="dropzoneSubText">
-                                    Supports .xlsx, .xls, .csv &bull; Max file size 20MB
-                                </div>
-                                <button type="button" class="btn-action-sm btn-verify" style="padding: 0.6rem 1.75rem; font-size: 0.86rem; pointer-events: none;">
-                                    Browse Computer
-                                </button>
-                            </div>
-
-                            <!-- Selected File Preview Badge -->
-                            <div id="fileSelectedBox" style="display: none; background: #ffffff; border: 1.5px solid #2563eb; border-radius: 10px; padding: 0.85rem 1.15rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(37,99,235,0.08);">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <span style="font-size: 1.6rem;">📄</span>
-                                        <div style="text-align: left;">
-                                            <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem;" id="previewFileName">filename.xlsx</div>
-                                            <div style="font-size: 0.74rem; color: #64748b;" id="previewFileSize">128 KB &bull; Ready to upload</div>
-                                        </div>
-                                    </div>
-                                    <span style="font-size: 0.74rem; font-weight: 700; background: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
-                                        ✓ File Selected
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Upload Progress Status -->
-                            <div id="uploadProgressStatus" style="display: none; margin-top: 1rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e40af; font-size: 0.84rem; font-weight: 600; text-align: center;">
-                                ⏳ Uploading file and ingesting mobile numbers into <code>crm.leads</code>... Please wait.
-                            </div>
-
-                            <div style="margin-top: 1.5rem; text-align: center;">
-                                <button type="submit" id="btnSubmitUpload" class="incharge-btn-submit" style="min-width: 260px; height: 46px; margin: 0 auto; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);" disabled>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                                        <path d="M12 12v9"></path>
-                                        <path d="m16 16-4-4-4 4"></path>
-                                    </svg>
-                                    <span>Upload &amp; Ingest Leads</span>
-                                </button>
+                                <a href="{{ route('leads.allocation', ['tab' => 'allocation']) }}" style="padding: 0.65rem 1.25rem; background: #16a34a; color: #ffffff; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(22,163,74,0.3);">
+                                    <span>Go to Leads Allocation &rarr;</span>
+                                </a>
                             </div>
                         </div>
-                    </form>
+                    @endif
+
+                    @if(session('upload_error'))
+                        <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
+                                    ✕
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
+                                        Upload Failed / Error
+                                    </div>
+                                    <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
+                                        {{ session('upload_error') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #dc2626; flex-shrink: 0; font-weight: 800;">
+                                    ✕
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b;">
+                                        Validation Error
+                                    </div>
+                                    <div style="font-size: 0.86rem; color: #b91c1c; font-weight: 600; margin-top: 4px;">
+                                        @foreach($errors->all() as $err)
+                                            <div>&bull; {{ $err }}</div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- ================= POPUP MODAL: LEADS UPLOAD ================= -->
+                <div class="wizard-overlay" id="leadUploadModal" onclick="if(event.target.id==='leadUploadModal') closeLeadUploadModal()">
+                    <div class="wizard-modal-box" style="max-width: 620px; border-radius: 1rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);">
+                        <!-- Modal Header -->
+                        <div class="wizard-modal-header" style="padding: 1.15rem 1.5rem; background: #0f172a; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.35rem;">📥</span>
+                                <div>
+                                    <div class="candidate-header-name" style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">Leads Upload</div>
+                                    <div class="candidate-header-sub" style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">Select or drop Excel/CSV file to ingest leads into system</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close-modal" onclick="closeLeadUploadModal()" title="Close">✕</button>
+                        </div>
+
+                        <!-- Modal Body Content -->
+                        <div class="modal-body-content" style="padding: 1.5rem 1.75rem; background: #ffffff;">
+                            <div id="modalUploadNotificationArea"></div>
+                            <form action="{{ route('leads.uploadExcel') }}" method="POST" enctype="multipart/form-data" id="leadExcelUploadForm">
+                                @csrf
+                                <div style="max-width: 100%; margin: 0 auto;">
+                                    <!-- Dropzone Box -->
+                                    <div style="border: 2px dashed #93c5fd; background: #f8fafc; border-radius: 14px; padding: 2.25rem 1.75rem; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative;"
+                                         id="uploadDropzone"
+                                         onclick="document.getElementById('leadsFileInput').click()">
+                                        <input type="file" 
+                                               name="leads_file" 
+                                               id="leadsFileInput" 
+                                               accept=".xlsx, .xls, .csv, .txt, .XLSX, .XLS, .CSV, .TXT" 
+                                               required 
+                                               style="display: none;"
+                                               onchange="handleLeadFileSelected(this)">
+                                        
+                                        <div style="width: 52px; height: 52px; margin: 0 auto 0.85rem auto; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;" id="dropzoneMainText">
+                                            Click to select Excel/CSV file or drag &amp; drop here
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 1.25rem;" id="dropzoneSubText">
+                                            Supports .xlsx, .xls, .csv &bull; Max file size 20MB
+                                        </div>
+                                        <button type="button" class="btn-action-sm btn-verify" style="padding: 0.55rem 1.5rem; font-size: 0.84rem; pointer-events: none;">
+                                            Browse Computer
+                                        </button>
+                                    </div>
+
+                                    <!-- Selected File Preview Badge -->
+                                    <div id="fileSelectedBox" style="display: none; background: #ffffff; border: 1.5px solid #2563eb; border-radius: 10px; padding: 0.85rem 1.15rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(37,99,235,0.08);">
+                                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <span style="font-size: 1.6rem;">📄</span>
+                                                <div style="text-align: left;">
+                                                    <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem;" id="previewFileName">filename.xlsx</div>
+                                                    <div style="font-size: 0.74rem; color: #64748b;" id="previewFileSize">128 KB &bull; Ready to upload</div>
+                                                </div>
+                                            </div>
+                                            <span style="font-size: 0.74rem; font-weight: 700; background: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                                                ✓ File Selected
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upload Progress Status -->
+                                    <div id="uploadProgressStatus" style="display: none; margin-top: 1rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e40af; font-size: 0.84rem; font-weight: 600; text-align: center;">
+                                        ⏳ Uploading file and ingesting mobile numbers into <code>crm.leads</code>... Please wait.
+                                    </div>
+
+                                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; align-items: center;">
+                                        <button type="button" onclick="closeLeadUploadModal()" class="tele-btn-action" style="background: #f8fafc; border: 1px solid var(--card-border); color: #475569; padding: 0.6rem 1.25rem; font-size: 0.84rem; border-radius: 8px; font-weight: 600;">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" id="btnSubmitUpload" class="incharge-btn-submit" style="min-width: 220px; height: 42px; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);" disabled>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                                <path d="M12 12v9"></path>
+                                                <path d="m16 16-4-4-4 4"></path>
+                                            </svg>
+                                            <span>Upload &amp; Ingest Leads</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- RECENTLY UPLOADED FILES HISTORY TABLE -->
@@ -2067,6 +2130,31 @@
                         div.textContent = text;
                         return div.innerHTML;
                     }
+
+                    window.openLeadUploadModal = function() {
+                        const modal = document.getElementById('leadUploadModal');
+                        if (modal) {
+                            modal.classList.add('active');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    };
+
+                    window.closeLeadUploadModal = function() {
+                        const modal = document.getElementById('leadUploadModal');
+                        if (modal) {
+                            modal.classList.remove('active');
+                            document.body.style.overflow = '';
+                        }
+                    };
+
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') {
+                            const modal = document.getElementById('leadUploadModal');
+                            if (modal && modal.classList.contains('active')) {
+                                window.closeLeadUploadModal();
+                            }
+                        }
+                    });
 
                     function handleLeadFileSelected(input) {
                         const file = input.files ? input.files[0] : null;
@@ -2271,11 +2359,36 @@
                                             }
                                         }
 
+                                        // Update live metric counters in header
+                                        const leadsBadge = document.getElementById('headerTotalLeadsBadge');
+                                        const filesBadge = document.getElementById('headerTotalFilesBadge');
+                                        if (leadsBadge && d.summary) {
+                                            const currentLeads = parseInt((leadsBadge.textContent || '0').replace(/,/g, ''), 10) || 0;
+                                            const addedLeads = parseInt(d.summary.total_rows || d.summary.inserted_count || 0, 10) || 0;
+                                            leadsBadge.textContent = (currentLeads + addedLeads).toLocaleString();
+                                        }
+                                        if (filesBadge) {
+                                            const currentFiles = parseInt((filesBadge.textContent || '0').replace(/,/g, ''), 10) || 0;
+                                            filesBadge.textContent = (currentFiles + 1).toLocaleString();
+                                        }
+
                                         // Reset form
                                         form.reset();
                                         handleLeadFileSelected(input);
+                                        if (typeof window.closeLeadUploadModal === 'function') {
+                                            window.closeLeadUploadModal();
+                                        }
                                     } else {
                                         const errMsg = (res.data && res.data.message) ? res.data.message : 'An error occurred during file upload.';
+                                        const modalNotify = document.getElementById('modalUploadNotificationArea');
+                                        if (modalNotify) {
+                                            modalNotify.innerHTML = `
+                                                <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                                                    <div style="font-size: 0.95rem; font-weight: 800; color: #991b1b;">Upload Failed</div>
+                                                    <div style="font-size: 0.84rem; color: #b91c1c; font-weight: 600; margin-top: 3px;">${escapeHtmlLead(errMsg)}</div>
+                                                </div>
+                                            `;
+                                        }
                                         if (notifyArea) {
                                             notifyArea.innerHTML = `
                                                 <div class="upload-alert-box" style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">

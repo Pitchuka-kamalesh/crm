@@ -110,6 +110,7 @@
                 return match($controllerRef) {
                     'crm/stddata' => route('crm.stddata', ['tab' => 'stddata']),
                     'crm/stdsearch' => route('crm.stdsearch', ['tab' => 'stdsearch']),
+                    'crm/crmdatatracking', 'crm/datatracking' => route('crm.crmdatatracking', ['tab' => 'stdsearch']),
                     'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => route('crm.couponinfo', ['tab' => 'couponinfo']),
                     'crm/index' => route('crm.stddata', ['tab' => 'stddata']),
                     'leads/allottedleads' => route('leads.allotted'),
@@ -121,6 +122,8 @@
                     'finance/payfee' => route('dashboards.index', ['step' => 1]),
                     'finance/index' => route('finance.index'),
                     'kpi/studentkpi' => route('kpi.studentkpi', ['tab' => 'studentkpi']),
+                    'kpi/telecallerkpi' => route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']),
+                    'kpi/leadskpi' => route('kpi.leadskpi', ['tab' => 'leadskpi']),
                     'kpi/index' => route('kpi.index', ['tab' => 'kpi']),
                     'sms/index' => route('sms.index'),
                     default => url('/' . ltrim($controllerRef, '/')),
@@ -134,7 +137,8 @@
                 }
                 return match($controllerRef) {
                     'crm/stddata' => $currentTab === 'stddata' || request()->routeIs('crm.stddata') || $currentPath === 'crm/stddata',
-                    'crm/stdsearch' => $currentTab === 'stdsearch' || request()->routeIs('crm.stdsearch') || $currentPath === 'crm/stdsearch',
+                    'crm/crmdatatracking', 'crm/datatracking' => request()->routeIs('crm.crmdatatracking') || str_contains($currentPath, 'crmdatatracking'),
+                    'crm/stdsearch' => (request()->routeIs('crm.stdsearch') && !str_contains($currentPath, 'crmdatatracking')) || ($currentPath === 'crm/stdsearch' && !str_contains($currentPath, 'crmdatatracking')),
                     'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => $currentTab === 'couponinfo' || request()->routeIs('crm.couponinfo*') || request()->routeIs('crm.coupoungenration*') || str_contains($currentPath, 'coupoungenration') || str_contains($currentPath, 'coupon-info') || str_contains($currentPath, 'couponinfo'),
                     'leads/allottedleads' => request()->routeIs('leads.allotted') || str_contains($currentPath, 'allotted'),
                     'leads/leadsallocation' => $currentTab === 'allocation' || request()->routeIs('leads.allocation') || str_contains($currentPath, 'allocation'),
@@ -143,6 +147,8 @@
                     'finance/paiddetails' => request()->routeIs('finance.paiddetails') || str_contains($currentPath, 'paiddetails'),
                     'finance/payfee' => str_contains($currentPath, 'payfee'),
                     'kpi/studentkpi' => request()->routeIs('kpi.studentkpi') || $currentTab === 'studentkpi' || str_contains($currentPath, 'studentkpi'),
+                    'kpi/telecallerkpi' => request()->routeIs('kpi.telecallerkpi') || $currentTab === 'telecallerkpi' || str_contains($currentPath, 'telecallerkpi'),
+                    'kpi/leadskpi' => request()->routeIs('kpi.leadskpi') || $currentTab === 'leadskpi' || str_contains($currentPath, 'leadskpi'),
                     default => $currentPath === trim($controllerRef, '/'),
                 };
             };
@@ -225,9 +231,17 @@
                                 $sub = $subItem['menu'];
                                 $subUrl = $resolveMenuUrl($sub->controller_ref);
                                 $isSubActive = $isSubActiveCheck($sub->controller_ref);
+                                $subName = trim($sub->menu_name);
+                                if (in_array(strtolower($subName), ['student kpi', 'studentkpi', 'std kpi'], true)) {
+                                    $subName = 'Student KPI';
+                                } elseif (in_array(strtolower($subName), ['telecaller kpi', 'telecallerkpi'], true)) {
+                                    $subName = 'Telecaller KPI';
+                                } elseif (in_array(strtolower($subName), ['leads kpi', 'leadskpi'], true)) {
+                                    $subName = 'Leads KPI';
+                                }
                             @endphp
                             <a href="{{ $subUrl }}" class="submenu-link {{ $isSubActive ? 'active' : '' }}">
-                                {{ $sub->menu_name }}
+                                {{ $subName }}
                             </a>
                         @endforeach
                     </div>

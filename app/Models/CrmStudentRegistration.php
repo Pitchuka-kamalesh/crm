@@ -76,6 +76,11 @@ class CrmStudentRegistration extends Model
         return $this->hasOne(StudentAcademicDetail::class, 'applino', 'applinano');
     }
 
+    public function payDetail()
+    {
+        return $this->hasOne(PayDetail::class, 'applino', 'applinano');
+    }
+
     public function telecallerLead()
     {
         return $this->hasOne(TelecallerLead::class, 'applino', 'applinano');

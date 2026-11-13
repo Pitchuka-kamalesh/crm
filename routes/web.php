@@ -34,6 +34,8 @@ Route::get('/crm/stddata', [\Modules\Crm\Http\Controllers\CrmController::class, 
 Route::get('/crm/enquiry-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.enquirylist');
 Route::get('/crm/stdsearch', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.stdsearch');
 Route::get('/crm/register-list', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.registerlist');
+Route::get('/crm/crmdatatracking', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.crmdatatracking');
+Route::get('/crm/datatracking', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/crm/coupon-info', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.couponinfo');
 Route::get('/crm/couponinfo', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/coupoungenration', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('crm.coupoungenration');
@@ -69,6 +71,8 @@ Route::get('/finance/paiddetails', [\Modules\Finance\Http\Controllers\FinanceCon
 Route::get('/kpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.index');
 Route::get('/kpi/index', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth');
 Route::get('/kpi/studentkpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.studentkpi');
+Route::get('/kpi/telecallerkpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.telecallerkpi');
+Route::get('/kpi/leadskpi', [\Modules\Crm\Http\Controllers\CrmController::class, 'index'])->middleware('auth')->name('kpi.leadskpi');
 
 // Student Admission Onboarding Step aliases matching master.menus controller_ref
 Route::get('/step1', fn() => redirect()->route('dashboards.index', ['step' => 1]))->middleware('auth')->name('steps.step1');

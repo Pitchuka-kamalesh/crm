@@ -71,28 +71,18 @@ class ApplicationController extends Controller
             $cleanPhone = substr($cleanPhone, -10);
         }
 
-        $crmStudent = null;
-        if (!empty($id) && $id !== '0') {
-            $crmStudent = CrmStudentRegistration::with(['program', 'branch', 'state', 'country'])
-                ->where('applinano', $id)
-                ->first();
-        }
-        if (!$crmStudent && $usercode) {
-            $crmStudent = CrmStudentRegistration::with(['program', 'branch', 'state', 'country'])
-                ->where('applinano', $usercode)
-                ->first();
-        }
+        $crmStudent = CrmStudentRegistration::with(['program', 'branch', 'state', 'country'])
+            ->where('applinano', $id)
+            ->first();
+
         if (!$crmStudent && $cleanPhone) {
             $crmStudent = CrmStudentRegistration::with(['program', 'branch', 'state', 'country'])
-                ->where(function ($q) use ($cleanPhone) {
-                    $q->where('phoneno', $cleanPhone)
-                      ->orWhere('phoneno', 'like', "%{$cleanPhone}%");
-                })
+                ->where('phoneno', $cleanPhone)
                 ->first();
         }
 
-        $applino = $crmStudent?->applinano ?? (!empty($id) && $id !== '0' ? $id : ($usercode ?: '2027000005'));
-        $phone = $crmStudent?->phoneno ?? ($cleanPhone ?: '9440151948');
+        $applino = $crmStudent?->applinano ?? $id;
+        $phone = $crmStudent?->phoneno ?? $cleanPhone ?: 'N/A';
 
         $personalInfo = StudentPersonalInfo::where('applino', $applino)
             ->when($phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))

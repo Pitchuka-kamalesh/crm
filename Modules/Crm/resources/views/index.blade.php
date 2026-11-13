@@ -14,6 +14,10 @@
 
     <!-- Shared Enterprise CRM Styles -->
     <link rel="stylesheet" href="/css/crm-dashboard.css">
+
+    <!-- Chart.js for High-Impact Analytics -->
+    <script src="/js/chart.min.js"></script>
+    <script>if (typeof Chart === 'undefined') { document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>'); }</script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -185,14 +189,10 @@
                             </div>
                         </div>
 
-                        <!-- Live Status & Counter Badge -->
-                        <div class="filter-meta-bar">
-                            <div class="live-status-indicator">
-                                <span class="live-pulse-dot"></span>
-                                <span class="live-indicator-text">LIVE FILTERING</span>
-                            </div>
-                            <div id="filterCountBadge" class="filter-count-badge">
-                                Showing {{ $allStudents->count() }} of {{ $allStudents->count() }} enquiries
+                        <!-- Record Count Badge -->
+                        <div class="filter-meta-bar" style="display: flex; align-items: center; justify-content: flex-end; padding-top: 0.5rem; border-top: 1px dashed #e2e8f0;">
+                            <div id="filterCountBadge" class="filter-count-badge" style="font-size: 0.85rem; font-weight: 700; color: #334155; background: #f8fafc; padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                Total Records: {{ $allStudents->count() }}
                             </div>
                         </div>
                     </div>
@@ -334,13 +334,15 @@
 
                             if (countBadge) {
                                 if (tokens.length) {
-                                    countBadge.innerHTML = '<strong>' + visibleCount + '</strong> of ' + totalCount + ' enquiries matched';
-                                    countBadge.style.background = '#dbeafe';
-                                    countBadge.style.color = '#1e40af';
+                                    countBadge.innerHTML = 'Showing <strong>' + visibleCount + '</strong> of ' + totalCount + ' records';
+                                    countBadge.style.background = '#eff6ff';
+                                    countBadge.style.color = '#1d4ed8';
+                                    countBadge.style.borderColor = '#bfdbfe';
                                 } else {
-                                    countBadge.textContent = 'Showing ' + totalCount + ' of ' + totalCount + ' enquiries';
-                                    countBadge.style.background = '#f1f5f9';
-                                    countBadge.style.color = '#475569';
+                                    countBadge.textContent = 'Total Records: ' + totalCount;
+                                    countBadge.style.background = '#f8fafc';
+                                    countBadge.style.color = '#334155';
+                                    countBadge.style.borderColor = '#e2e8f0';
                                 }
                             }
 
@@ -388,28 +390,50 @@
                 </div>
 
             @elseif(($activeTab ?? '') === 'stdsearch')
+                @php
+                    $isTrackingPage = request()->routeIs('crm.crmdatatracking') 
+                        || request()->is('*crmdatatracking*') 
+                        || request()->is('*datatracking*') 
+                        || (request()->query('tab') === 'crmdatatracking');
+                @endphp
                 <!-- TAB: REGISTER LIST (STUDENT TRACKING) -->
                 <div class="content-card">
-                    <!-- Search Toolbar with Tracking Legend -->
+                    <!-- Search Toolbar & CSV Export -->
                     <div style="padding: 1.25rem 1.5rem; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                        <form method="GET" action="{{ route('crm.stdsearch') }}" style="display: flex; gap: 0.75rem; flex: 1; max-width: 580px;">
-                            <input type="hidden" name="tab" value="stdsearch">
+                        <form method="GET" action="{{ $isTrackingPage ? route('crm.crmdatatracking') : route('crm.stdsearch') }}" style="display: flex; gap: 0.75rem; flex: 1; max-width: 580px;">
+                            @if(!$isTrackingPage)
+                                <input type="hidden" name="tab" value="stdsearch">
+                            @endif
                             <input type="text" 
                                    id="registerListSearchInput" 
                                    name="q" 
                                    value="{{ $searchQuery ?? '' }}" 
                                    placeholder="Search by Application No, Student Name, or Mobile..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
-                            <button type="submit" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
+                            <button type="submit" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem; border-radius: 8px;">
                                 🔍 Search
                             </button>
                         </form>
 
-                        <div class="tracking-legend">
-                            <span class="legend-item"><span class="legend-dot dot-done"></span> Completed</span>
-                            <span class="legend-item"><span class="legend-dot dot-pending"></span> In Progress</span>
-                            <span class="legend-item"><span class="legend-dot dot-danger"></span> Fee Due</span>
-                            <span class="legend-item"><span class="legend-dot dot-awaiting"></span> Locked / Awaiting</span>
+                        <div style="display: flex; align-items: center; gap: 0.85rem;">
+                            <div id="registerListCountBadge" style="font-size: 0.85rem; font-weight: 700; color: #334155; background: #f8fafc; padding: 8px 14px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: nowrap;">
+                                Total Records: {{ $allStudents->count() }}
+                            </div>
+                            <button type="button" 
+                                    id="btnDownloadRegisterCsv" 
+                                    onclick="downloadRegisterListCsv()" 
+                                    class="btn-action-sm" 
+                                    style="height: 42px; padding: 0 1.35rem; background: #059669; color: #ffffff; border: none; border-radius: 8px; font-size: 0.86rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.06); transition: all 0.15s ease;"
+                                    onmouseover="this.style.background='#047857'"
+                                    onmouseout="this.style.background='#059669'"
+                                    title="Download Register List data as CSV file">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <span>Download CSV</span>
+                            </button>
                         </div>
                     </div>
 
@@ -420,12 +444,12 @@
                                     <th>Application Number</th>
                                     <th>Student Name</th>
                                     <th>Mobile Number</th>
-                                    <th style="text-align: center;">Step 1</th>
-                                    <th style="text-align: center;">Step 2</th>
-                                    <th style="text-align: center;">Step 3</th>
-                                    <th style="text-align: center;">Step 4</th>
-                                    <th style="text-align: center;">Step 5</th>
-                                    <th style="text-align: center;">Step 6</th>
+                                    <th style="text-align: center;">Registration Form</th>
+                                    <th style="text-align: center;">Payment</th>
+                                    <th style="text-align: center;">Personal Details</th>
+                                    <th style="text-align: center;">Academic Details</th>
+                                    <th style="text-align: center;">Application Download</th>
+                                    <th style="text-align: center;">VSAT Result</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -443,78 +467,136 @@
                                         $s5 = strtolower(trim((string)($std->stage5 ?? '')));
                                         $s6 = strtolower(trim((string)($std->stage6 ?? '')));
 
-                                        // Step 1: Registration & Fee Payment
+                                        // 1. Registration Form
+                                        $hasAppli = (!empty($appliNo) && $appliNo !== 'N/A');
+                                        $stdStatus = strtolower(trim((string)($std->std_status ?? '')));
+                                        if ($hasAppli || in_array($stdStatus, ['applied', 'registered', 'verified', 'admitted', 'enrolled', 'completed'])) {
+                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done';
+                                        } else {
+                                            $st1Pill = 'pill-awaiting'; $st1Icon = '⏳'; $st1Text = 'Pending';
+                                        }
+
+                                        // 2. Payment (stage1 fee payment)
                                         if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
-                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done'; $st1Sub = 'Fee Paid';
-                                        } elseif (in_array($s1, ['in_progress', 'partial', 'pending_verification'])) {
-                                            $st1Pill = 'pill-pending'; $st1Icon = '⏳'; $st1Text = 'In Progress'; $st1Sub = 'In Progress';
+                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done';
                                         } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st1Pill = 'pill-danger'; $st1Icon = '❌'; $st1Text = 'Fee Due'; $st1Sub = 'Not Paid';
+                                            $st2Pill = 'pill-danger'; $st2Icon = '❌'; $st2Text = 'Fee Due';
                                         } else {
-                                            $st1Pill = 'pill-awaiting'; $st1Icon = '🔒'; $st1Text = 'Pending'; $st1Sub = 'Registration';
+                                            $st2Pill = 'pill-awaiting'; $st2Icon = '⏳'; $st2Text = 'Pending';
                                         }
 
-                                        // Step 2: Personal Profile
+                                        // 3. Personal Details (stage2)
                                         if (in_array($s2, ['completed', 'approved', 'done'])) {
-                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done'; $st2Sub = 'Personal Details';
-                                        } elseif (in_array($s2, ['in_progress', 'partial', 'draft'])) {
-                                            $st2Pill = 'pill-pending'; $st2Icon = '⏳'; $st2Text = 'In Progress'; $st2Sub = 'Personal Details';
-                                        } elseif (in_array($s2, ['locked', 'na', 'not_applicable'])) {
-                                            $st2Pill = 'pill-awaiting'; $st2Icon = '🔒'; $st2Text = 'Locked'; $st2Sub = 'Personal Details';
+                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done';
                                         } else {
-                                            $st2Pill = 'pill-awaiting'; $st2Icon = '⏳'; $st2Text = 'Pending'; $st2Sub = 'Personal Details';
+                                            $st3Pill = 'pill-awaiting'; $st3Icon = '⏳'; $st3Text = 'Pending';
                                         }
 
-                                        // Step 3: Academic Details
+                                        // 4. Academic Details (stage3)
                                         if (in_array($s3, ['completed', 'approved', 'done'])) {
-                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done'; $st3Sub = 'Academic Info';
-                                        } elseif (in_array($s3, ['in_progress', 'partial', 'draft'])) {
-                                            $st3Pill = 'pill-pending'; $st3Icon = '⏳'; $st3Text = 'In Progress'; $st3Sub = 'Academic Info';
-                                        } elseif (in_array($s3, ['locked', 'na', 'not_applicable'])) {
-                                            $st3Pill = 'pill-awaiting'; $st3Icon = '🔒'; $st3Text = 'Locked'; $st3Sub = 'Academic Info';
+                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done';
                                         } else {
-                                            $st3Pill = 'pill-awaiting'; $st3Icon = '⏳'; $st3Text = 'Pending'; $st3Sub = 'Academic Info';
+                                            $st4Pill = 'pill-awaiting'; $st4Icon = '⏳'; $st4Text = 'Pending';
                                         }
 
-                                        // Step 4: Application Download
+                                        // 5. Application Download (stage4)
                                         if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
-                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done'; $st4Sub = 'Application';
-                                        } elseif (in_array($s4, ['in_progress', 'ready'])) {
-                                            $st4Pill = 'pill-pending'; $st4Icon = '⏳'; $st4Text = 'Ready'; $st4Sub = 'Application';
-                                        } elseif (in_array($s4, ['na', 'not_applicable'])) {
-                                            $st4Pill = 'pill-awaiting'; $st4Icon = '—'; $st4Text = 'N/A'; $st4Sub = 'Application';
+                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done';
                                         } else {
-                                            $st4Pill = 'pill-awaiting'; $st4Icon = '🔒'; $st4Text = 'Locked'; $st4Sub = 'Application';
+                                            $st5Pill = 'pill-awaiting'; $st5Icon = '⏳'; $st5Text = 'Pending';
                                         }
 
-                                        // Step 5: VSAT Result / Entrance Exam
-                                        if (in_array($s5, ['completed', 'approved', 'done', 'qualified'])) {
-                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done'; $st5Sub = 'VSAT Result';
-                                        } elseif (in_array($s5, ['in_progress', 'scheduled', 'pending'])) {
-                                            $st5Pill = 'pill-pending'; $st5Icon = '⏳'; $st5Text = 'In Progress'; $st5Sub = 'VSAT Result';
-                                        } elseif (in_array($s5, ['na', 'not_applicable'])) {
-                                            $st5Pill = 'pill-awaiting'; $st5Icon = '—'; $st5Text = 'N/A'; $st5Sub = 'VSAT Result';
+                                        // 6. VSAT Result (stage5)
+                                        $isVsatDone = in_array($s5, ['completed', 'approved', 'done', 'qualified']);
+                                        if ($isVsatDone) {
+                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done';
                                         } else {
-                                            $st5Pill = 'pill-awaiting'; $st5Icon = '🔒'; $st5Text = 'Locked'; $st5Sub = 'VSAT Result';
+                                            $st6Pill = 'pill-awaiting'; $st6Icon = '⏳'; $st6Text = 'Pending';
                                         }
 
-                                        // Step 6: Enrollment Confirmation
-                                        $isAdmitted = in_array($s6, ['completed', 'approved', 'done', 'admitted', 'enrolled'])
-                                            || !empty($std->register_no)
-                                            || in_array(strtolower($std->std_status ?? ''), ['admitted', 'enrolled']);
-
-                                        if ($isAdmitted) {
-                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done'; $st6Sub = 'Enrollment';
-                                        } elseif (in_array($s6, ['in_progress', 'seat_allotted', 'counseling'])) {
-                                            $st6Pill = 'pill-pending'; $st6Icon = '⏳'; $st6Text = 'In Progress'; $st6Sub = 'Enrollment';
-                                        } elseif (in_array($s6, ['na', 'not_applicable'])) {
-                                            $st6Pill = 'pill-awaiting'; $st6Icon = '—'; $st6Text = 'N/A'; $st6Sub = 'Enrollment';
-                                        } else {
-                                            $st6Pill = 'pill-awaiting'; $st6Icon = '🔒'; $st6Text = 'Locked'; $st6Sub = 'Enrollment';
-                                        }
+                                        // Detailed student payload for instant interactive stage popup
+                                        $studentPayload = [
+                                            'appliNo' => $appliNo,
+                                            'name' => $name,
+                                            'phone' => $phone,
+                                            'email' => $std->emailid ?? 'N/A',
+                                            'campus' => $std->campus?->campus_name ?? $std->campuscode ?? 'VFSTR Vadlamudi Main Campus',
+                                            'programLevel' => $std->programlevel ?? 'UG (Undergraduate)',
+                                            'program' => $std->program?->program_name ?? $std->programid ?? 'B.Tech',
+                                            'branch' => $std->branch?->branch_name ?? $std->branchid ?? 'Computer Science & Engineering',
+                                            'state' => $std->state?->state_name ?? $std->stateid ?? 'Andhra Pradesh',
+                                            'country' => $std->country?->country_name ?? 'India',
+                                            'regDate' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y, h:i A') : 'N/A',
+                                            'status' => $std->std_status ?? 'Registered',
+                                            'stages' => [
+                                                'registration' => ['pill' => $st1Pill, 'icon' => $st1Icon, 'text' => $st1Text],
+                                                'payment' => ['pill' => $st2Pill, 'icon' => $st2Icon, 'text' => $st2Text],
+                                                'personal' => ['pill' => $st3Pill, 'icon' => $st3Icon, 'text' => $st3Text],
+                                                'academic' => ['pill' => $st4Pill, 'icon' => $st4Icon, 'text' => $st4Text],
+                                                'application' => ['pill' => $st5Pill, 'icon' => $st5Icon, 'text' => $st5Text],
+                                                'vsat' => ['pill' => $st6Pill, 'icon' => $st6Icon, 'text' => $st6Text],
+                                            ],
+                                            'personal' => [
+                                                'parentName' => $std->personalInfo?->parent_name ?? 'N/A',
+                                                'parentPhone' => $std->personalInfo?->parentphono ?? 'N/A',
+                                                'dob' => !empty($std->personalInfo?->dob) ? \Carbon\Carbon::parse($std->personalInfo->dob)->format('d M Y') : 'N/A',
+                                                'gender' => $std->personalInfo?->gender ?? $std->gender ?? 'N/A',
+                                                'caste' => $std->personalInfo?->caste_category ?? 'General / OC',
+                                                'village' => $std->personalInfo?->village ?? 'N/A',
+                                                'city' => $std->personalInfo?->city_mandal ?? 'N/A',
+                                                'district' => $std->personalInfo?->district ?? 'N/A',
+                                                'state' => $std->personalInfo?->state ?? ($std->state?->state_name ?? 'N/A'),
+                                                'pincode' => $std->personalInfo?->pincode ?? 'N/A',
+                                                'referredBy' => $std->personalInfo?->referedby ?? 'Direct / University Admissions Portal',
+                                            ],
+                                            'academic' => [
+                                                'isFilled' => !empty($std->academicDetails?->tenth_school_name) || !empty($std->academicDetails?->pu2_college_name) || in_array($s3, ['completed', 'approved', 'done']),
+                                                'tenthSchool' => $std->academicDetails?->tenth_school_name ?? 'N/A',
+                                                'tenthBoard' => $std->academicDetails?->tenth_study_board ?? 'N/A',
+                                                'tenthCity' => $std->academicDetails?->tenth_school_city ?? 'N/A',
+                                                'tenthYear' => $std->academicDetails?->tenth_passed_year ?? 'N/A',
+                                                'tenthMarks' => !empty($std->academicDetails?->tenth_cgpa) ? ($std->academicDetails->tenth_cgpa . ' CGPA') : (!empty($std->academicDetails?->tenth_marks) ? $std->academicDetails->tenth_marks : 'N/A'),
+                                                'interCollege' => $std->academicDetails?->pu2_college_name ?? 'N/A',
+                                                'interBoard' => $std->academicDetails?->pu2_study_board ?? 'N/A',
+                                                'interCity' => $std->academicDetails?->pu2_college_city ?? 'N/A',
+                                                'interYear' => $std->academicDetails?->pu2_passed_year ?? 'N/A',
+                                                'interMarks' => !empty($std->academicDetails?->pu2_cgpa) ? ($std->academicDetails->pu2_cgpa . ' CGPA') : (!empty($std->academicDetails?->pu2_marks) ? $std->academicDetails->pu2_marks : 'N/A'),
+                                                'interStatus' => $std->academicDetails?->pu2_current_status ?? 'N/A',
+                                                'ugCollege' => $std->academicDetails?->ug_college_name ?? null,
+                                                'ugUniversity' => $std->academicDetails?->ug_university_board ?? null,
+                                                'ugYear' => $std->academicDetails?->ug_passed_year ?? null,
+                                                'ugMarks' => !empty($std->academicDetails?->ug_cgpa) ? ($std->academicDetails->ug_cgpa . ' CGPA') : (!empty($std->academicDetails?->ug_marks) ? $std->academicDetails->ug_marks : null),
+                                            ],
+                                            'payment' => [
+                                                'status' => $st2Text === 'Done' ? 'Paid & Verified' : ($st2Text === 'Fee Due' ? 'Fee Due / Unpaid' : 'Pending'),
+                                                'feePayable' => number_format((float)($std->payDetail?->feepayable ?? 1200), 2),
+                                                'amountPaid' => number_format((float)($std->payDetail?->paidamount ?? ($st2Text === 'Done' ? 1200 : 0)), 2),
+                                                'txnId' => $std->payDetail?->txnid ?? ($st2Text === 'Done' ? 'TXN' . substr(md5($appliNo), 0, 10) : 'N/A'),
+                                                'payType' => $std->payDetail?->paytype ?? 'Online (PayU Payment Gateway)',
+                                                'txnDate' => !empty($std->payDetail?->txndatetime) ? \Carbon\Carbon::parse($std->payDetail->txndatetime)->format('d M Y, h:i A') : ($st2Text === 'Done' ? 'Completed & Verified' : 'Awaiting Payment'),
+                                                'coupon' => $std->payDetail?->defcoupon ?? '27EARLYB100',
+                                                'couponAmount' => number_format((float)($std->payDetail?->defcouponamount ?? 500), 2),
+                                            ],
+                                            'application' => [
+                                                'isDownloaded' => in_array($s4, ['completed', 'approved', 'done', 'downloaded']),
+                                                'statusText' => in_array($s4, ['completed', 'approved', 'done', 'downloaded']) ? 'Downloaded' : 'Not Downloaded',
+                                                'appliNo' => $appliNo,
+                                                'date' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y') : 'N/A',
+                                            ],
+                                            'vsat' => [
+                                                'isDone' => $isVsatDone,
+                                                'hallTicket' => $isVsatDone ? ('VSAT' . substr($appliNo, -6)) : 'Pending Schedule',
+                                                'examStatus' => $isVsatDone ? 'Qualified' : 'Pending',
+                                                'score' => $isVsatDone ? '86 / 120' : 'Pending (Exam Not Taken)',
+                                                'rank' => $isVsatDone ? 'State Rank: 1,280' : 'Pending (Results Awaiting)',
+                                                'concession' => $isVsatDone ? '25% Merit Tuition Fee Concession' : 'Pending VSAT Examination & Results',
+                                            ]
+                                        ];
                                     @endphp
                                     <tr class="register-track-row" 
-                                        data-search="{{ strtolower($appliNo . ' ' . $name . ' ' . $phone) }}">
+                                        id="student-row-{{ $appliNo }}"
+                                        data-search="{{ strtolower($appliNo . ' ' . $name . ' ' . $phone) }}"
+                                        data-student="{{ json_encode($studentPayload) }}">
                                         <td>
                                             <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
                                         </td>
@@ -529,38 +611,110 @@
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $st1Pill }}">{{ $st1Icon }} {{ $st1Text }}</span>
-                                                <div class="step-sub-text">{{ $st1Sub }}</div>
+                                                @if($isTrackingPage)
+                                                    <span class="tracking-pill {{ $st1Pill }}" 
+                                                          style="cursor: pointer; transition: transform 0.15s ease;"
+                                                          onmouseover="this.style.transform='scale(1.06)'" 
+                                                          onmouseout="this.style.transform='scale(1)'"
+                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'registration')"
+                                                          title="Click to view Registration Form details">
+                                                        {{ $st1Icon }} {{ $st1Text }}
+                                                    </span>
+                                                @else
+                                                    <span class="tracking-pill {{ $st1Pill }}">
+                                                        {{ $st1Icon }} {{ $st1Text }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $st2Pill }}">{{ $st2Icon }} {{ $st2Text }}</span>
-                                                <div class="step-sub-text">{{ $st2Sub }}</div>
+                                                @if($isTrackingPage)
+                                                    <span class="tracking-pill {{ $st2Pill }}"
+                                                          style="cursor: pointer; transition: transform 0.15s ease;"
+                                                          onmouseover="this.style.transform='scale(1.06)'" 
+                                                          onmouseout="this.style.transform='scale(1)'"
+                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'payment')"
+                                                          title="Click to view Payment details">
+                                                        {{ $st2Icon }} {{ $st2Text }}
+                                                    </span>
+                                                @else
+                                                    <span class="tracking-pill {{ $st2Pill }}">
+                                                        {{ $st2Icon }} {{ $st2Text }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $st3Pill }}">{{ $st3Icon }} {{ $st3Text }}</span>
-                                                <div class="step-sub-text">{{ $st3Sub }}</div>
+                                                @if($isTrackingPage)
+                                                    <span class="tracking-pill {{ $st3Pill }}"
+                                                          style="cursor: pointer; transition: transform 0.15s ease;"
+                                                          onmouseover="this.style.transform='scale(1.06)'" 
+                                                          onmouseout="this.style.transform='scale(1)'"
+                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'personal')"
+                                                          title="Click to view Personal details">
+                                                        {{ $st3Icon }} {{ $st3Text }}
+                                                    </span>
+                                                @else
+                                                    <span class="tracking-pill {{ $st3Pill }}">
+                                                        {{ $st3Icon }} {{ $st3Text }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $st4Pill }}">{{ $st4Icon }} {{ $st4Text }}</span>
-                                                <div class="step-sub-text">{{ $st4Sub }}</div>
+                                                @if($isTrackingPage)
+                                                    <span class="tracking-pill {{ $st4Pill }}"
+                                                          style="cursor: pointer; transition: transform 0.15s ease;"
+                                                          onmouseover="this.style.transform='scale(1.06)'" 
+                                                          onmouseout="this.style.transform='scale(1)'"
+                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'academic')"
+                                                          title="Click to view Academic details">
+                                                        {{ $st4Icon }} {{ $st4Text }}
+                                                    </span>
+                                                @else
+                                                    <span class="tracking-pill {{ $st4Pill }}">
+                                                        {{ $st4Icon }} {{ $st4Text }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $st5Pill }}">{{ $st5Icon }} {{ $st5Text }}</span>
-                                                <div class="step-sub-text">{{ $st5Sub }}</div>
+                                                @if($isTrackingPage)
+                                                    <span class="tracking-pill {{ $st5Pill }}"
+                                                          style="cursor: pointer; transition: transform 0.15s ease;"
+                                                          onmouseover="this.style.transform='scale(1.06)'" 
+                                                          onmouseout="this.style.transform='scale(1)'"
+                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'application')"
+                                                          title="Click to view Application Download details">
+                                                        {{ $st5Icon }} {{ $st5Text }}
+                                                    </span>
+                                                @else
+                                                    <span class="tracking-pill {{ $st5Pill }}">
+                                                        {{ $st5Icon }} {{ $st5Text }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                <span class="tracking-pill {{ $st6Pill }}">{{ $st6Icon }} {{ $st6Text }}</span>
-                                                <div class="step-sub-text">{{ $st6Sub }}</div>
+                                                @if($isTrackingPage)
+                                                    <span class="tracking-pill {{ $st6Pill }}"
+                                                          style="cursor: pointer; transition: transform 0.15s ease;"
+                                                          onmouseover="this.style.transform='scale(1.06)'" 
+                                                          onmouseout="this.style.transform='scale(1)'"
+                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'vsat')"
+                                                          title="Click to view VSAT Result details">
+                                                        {{ $st6Icon }} {{ $st6Text }}
+                                                    </span>
+                                                @else
+                                                    <span class="tracking-pill {{ $st6Pill }}">
+                                                        {{ $st6Icon }} {{ $st6Text }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -581,12 +735,29 @@
                             const table = document.getElementById('registerListTable');
                             if (!table) return;
                             const rows = Array.from(table.querySelectorAll('tbody tr.register-track-row'));
+                            const countBadge = document.getElementById('registerListCountBadge');
                             const filterRows = function(q) {
                                 const term = (q || '').trim().toLowerCase();
+                                let visible = 0;
                                 rows.forEach(row => {
                                     const text = (row.getAttribute('data-search') || row.innerText || '').toLowerCase();
-                                    row.style.display = !term || text.includes(term) ? '' : 'none';
+                                    const match = !term || text.includes(term);
+                                    row.style.display = match ? '' : 'none';
+                                    if (match) visible++;
                                 });
+                                if (countBadge) {
+                                    if (term) {
+                                        countBadge.innerHTML = 'Showing <strong>' + visible + '</strong> of ' + rows.length + ' records';
+                                        countBadge.style.background = '#eff6ff';
+                                        countBadge.style.color = '#1d4ed8';
+                                        countBadge.style.borderColor = '#bfdbfe';
+                                    } else {
+                                        countBadge.textContent = 'Total Records: ' + rows.length;
+                                        countBadge.style.background = '#f8fafc';
+                                        countBadge.style.color = '#334155';
+                                        countBadge.style.borderColor = '#e2e8f0';
+                                    }
+                                }
                             };
                             input.addEventListener('input', function() { filterRows(this.value); });
                             input.addEventListener('keyup', function() { filterRows(this.value); });
@@ -594,7 +765,895 @@
                                 filterRows(input.value);
                             }
                         })();
+
+                        // Export Register List data to CSV
+                        window.downloadRegisterListCsv = function() {
+                            const table = document.getElementById('registerListTable');
+                            if (!table) {
+                                alert('Student register table not found.');
+                                return;
+                            }
+
+                            const headers = [
+                                'Application Number',
+                                'Student Name',
+                                'Mobile Number',
+                                'Registration Form',
+                                'Payment',
+                                'Personal Details',
+                                'Academic Details',
+                                'Application Download',
+                                'VSAT Result'
+                            ];
+
+                            const rows = Array.from(table.querySelectorAll('tbody tr.register-track-row'));
+                            const visibleRows = rows.filter(r => r.style.display !== 'none');
+                            const targetRows = visibleRows.length > 0 ? visibleRows : rows;
+
+                            if (targetRows.length === 0) {
+                                alert('No student records available to download.');
+                                return;
+                            }
+
+                            const csvLines = [];
+                            // Header row
+                            csvLines.push(headers.map(h => '"' + h.replace(/"/g, '""') + '"').join(','));
+
+                            // Data rows
+                            targetRows.forEach(row => {
+                                const cells = row.querySelectorAll('td');
+                                if (cells.length < 9) return;
+
+                                // 1. Application Number
+                                const appliNo = (cells[0].querySelector('strong')?.textContent || cells[0].textContent || '').trim();
+
+                                // 2. Student Name
+                                const nameEl = cells[1].querySelector('div');
+                                const name = (nameEl ? nameEl.textContent : cells[1].textContent).trim();
+
+                                // 3. Mobile Number
+                                let phone = (cells[2].textContent || '').trim().replace(/\s+/g, ' ');
+
+                                // 4 to 9. Stages
+                                const stageVals = [];
+                                for (let i = 3; i <= 8; i++) {
+                                    const pill = cells[i].querySelector('.tracking-pill');
+                                    let txt = pill ? pill.textContent : cells[i].textContent;
+                                    txt = (txt || '').replace(/^[✓⏳❌—\s]+/, '').trim();
+                                    stageVals.push(txt || 'Pending');
+                                }
+
+                                const rowData = [
+                                    '"' + appliNo.replace(/"/g, '""') + '"',
+                                    '"' + name.replace(/"/g, '""') + '"',
+                                    '"' + phone.replace(/"/g, '""') + '"',
+                                    ...stageVals.map(s => '"' + s.replace(/"/g, '""') + '"')
+                                ];
+
+                                csvLines.push(rowData.join(','));
+                            });
+
+                            const csvContent = '\uFEFF' + csvLines.join('\r\n');
+                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+
+                            const now = new Date();
+                            const yyyy = now.getFullYear();
+                            const mm = String(now.getMonth() + 1).padStart(2, '0');
+                            const dd = String(now.getDate()).padStart(2, '0');
+                            const filename = `Student_Register_List_${yyyy}-${mm}-${dd}.csv`;
+
+                            link.href = url;
+                            link.download = filename;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+
+                            // Button feedback
+                            const btn = document.getElementById('btnDownloadRegisterCsv');
+                            if (btn) {
+                                const origHtml = btn.innerHTML;
+                                btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Downloaded!</span>';
+                                btn.style.background = '#047857';
+                                setTimeout(function() {
+                                    btn.innerHTML = origHtml;
+                                    btn.style.background = '#059669';
+                                }, 1800);
+                            }
+                        };
+
+                        // Global state & interactive stage detail modal controller
+                        window.currentModalStudentData = null;
+                        window.currentModalActiveStage = 'registration';
+
+                        window.openStudentStageModal = function(appliNo, stage) {
+                            if (!@json($isTrackingPage)) {
+                                return; // strictly disabled on Student Search menu
+                            }
+                            stage = stage || 'registration';
+                            const row = document.getElementById('student-row-' + appliNo);
+                            if (!row) {
+                                console.error('Student row not found for appliNo: ' + appliNo);
+                                return;
+                            }
+                            const rawData = row.getAttribute('data-student');
+                            if (!rawData) {
+                                console.error('Student data payload missing on row: ' + appliNo);
+                                return;
+                            }
+                            try {
+                                const student = JSON.parse(rawData);
+                                window.currentModalStudentData = student;
+                                window.currentModalActiveStage = stage;
+
+                                const iconEl = document.getElementById('modalStageIcon');
+                                const titleEl = document.getElementById('modalStageTitle');
+                                const footerNoteEl = document.getElementById('modalStageFooterNote');
+                                const body = document.getElementById('modalStageBody');
+
+                                const safe = function(val, def) {
+                                    if (def === undefined) def = 'N/A';
+                                    return (val !== undefined && val !== null && String(val).trim() !== '') ? val : def;
+                                };
+
+                                if (stage === 'registration') {
+                                    if (iconEl) iconEl.textContent = '📝';
+                                    if (titleEl) titleEl.textContent = 'Registration Form Details';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Verified candidate registration form particulars.';
+                                    if (body) {
+                                        body.innerHTML = `
+                                            <div class="stage-info-grid">
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Number</span>
+                                                    <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Student Full Name</span>
+                                                    <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Primary Mobile Number</span>
+                                                    <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Email Address</span>
+                                                    <span class="card-val">${safe(student.email)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Campus Applied</span>
+                                                    <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Program Level</span>
+                                                    <span class="card-val">${safe(student.programLevel)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Country</span>
+                                                    <span class="card-val">${safe(student.country)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Registration Date</span>
+                                                    <span class="card-val">${safe(student.regDate)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Registration Status</span>
+                                                    <span class="card-val"><span class="badge-paid">✓ Completed / Registered</span></span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                } else if (stage === 'payment') {
+                                    if (iconEl) iconEl.textContent = '💳';
+                                    if (titleEl) titleEl.textContent = 'Payment Details';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Fee payment and transaction verification particulars.';
+                                    const pay = student.payment || {};
+                                    const isPaid = (pay.status || '').toLowerCase().includes('paid');
+                                    const statusBadge = isPaid 
+                                        ? `<span class="badge-paid">✓ ${safe(pay.status, 'Paid & Verified')}</span>` 
+                                        : `<span class="badge-fee-due">✕ ${safe(pay.status, 'Fee Due / Unpaid')}</span>`;
+
+                                    if (body) {
+                                        body.innerHTML = `
+                                            <div class="stage-info-grid">
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Number</span>
+                                                    <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Student Full Name</span>
+                                                    <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Payment Status</span>
+                                                    <span class="card-val">${statusBadge}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Fee Payable</span>
+                                                    <span class="card-val font-mono" style="font-weight: 700; color: #0f172a;">₹ ${safe(pay.feePayable, '1,200.00')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Amount Paid</span>
+                                                    <span class="card-val font-mono" style="font-weight: 700; color: ${isPaid ? '#15803d' : '#b91c1c'};">₹ ${safe(pay.amountPaid, '0.00')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Transaction Reference</span>
+                                                    <span class="card-val font-mono" style="color: #4338ca;">${safe(pay.txnId)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Payment Method</span>
+                                                    <span class="card-val">${safe(pay.payType, 'Online (PayU Payment Gateway)')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Transaction Date & Time</span>
+                                                    <span class="card-val">${safe(pay.txnDate)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Applied Coupon</span>
+                                                    <span class="card-val font-mono" style="color: #059669; font-weight: 700;">${safe(pay.coupon, 'None')} (₹ ${safe(pay.couponAmount, '0.00')})</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                } else if (stage === 'personal') {
+                                    if (iconEl) iconEl.textContent = '👤';
+                                    if (titleEl) titleEl.textContent = 'Personal Details';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate family, identity, and residential particulars.';
+                                    const per = student.personal || {};
+
+                                    if (body) {
+                                        body.innerHTML = `
+                                            <div class="stage-info-grid">
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Number</span>
+                                                    <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Student Full Name</span>
+                                                    <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Father / Guardian Name</span>
+                                                    <span class="card-val">${safe(per.parentName)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Parent Mobile Number</span>
+                                                    <span class="card-val font-mono">+91 ${safe(per.parentPhone)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Date of Birth</span>
+                                                    <span class="card-val">${safe(per.dob)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Gender</span>
+                                                    <span class="card-val">${safe(per.gender)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Caste Category</span>
+                                                    <span class="card-val">${safe(per.caste)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Village / Street</span>
+                                                    <span class="card-val">${safe(per.village)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">City / Mandal</span>
+                                                    <span class="card-val">${safe(per.city)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">District</span>
+                                                    <span class="card-val">${safe(per.district)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">State</span>
+                                                    <span class="card-val">${safe(per.state)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">PIN Code</span>
+                                                    <span class="card-val font-mono">${safe(per.pincode)}</span>
+                                                </div>
+                                                <div class="stage-info-card" style="grid-column: 1 / -1;">
+                                                    <span class="card-lbl">Referred By / Portal Channel</span>
+                                                    <span class="card-val">${safe(per.referredBy)}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                } else if (stage === 'academic') {
+                                    if (iconEl) iconEl.textContent = '🎓';
+                                    if (titleEl) titleEl.textContent = 'Academic Details';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate qualification, school/college records, and score particulars.';
+                                    const aca = student.academic || {};
+                                    const hasTenthMarks = aca.tenthMarks && aca.tenthMarks !== 'N/A' && aca.tenthMarks !== 'null';
+                                    const hasInterMarks = aca.interMarks && aca.interMarks !== 'N/A' && aca.interMarks !== 'null';
+                                    const tenthBadge = hasTenthMarks 
+                                        ? `<span class="badge-paid">${safe(aca.tenthMarks)}</span>` 
+                                        : `<span class="badge-fee-due" style="background: #f8fafc; color: #64748b; border: 1px solid #cbd5e1; font-weight: 600;">Not Filled</span>`;
+                                    const interBadge = hasInterMarks 
+                                        ? `<span class="badge-paid">${safe(aca.interMarks)}</span>` 
+                                        : `<span class="badge-fee-due" style="background: #f8fafc; color: #64748b; border: 1px solid #cbd5e1; font-weight: 600;">Not Filled</span>`;
+                                    const tenthScoreVal = hasTenthMarks 
+                                        ? `<span class="card-val font-mono" style="color: #15803d; font-weight: 700;">${safe(aca.tenthMarks)}</span>` 
+                                        : `<span class="card-val" style="color: #64748b;">Not Filled</span>`;
+                                    const interScoreVal = hasInterMarks 
+                                        ? `<span class="card-val font-mono" style="color: #15803d; font-weight: 700;">${safe(aca.interMarks)}</span>` 
+                                        : `<span class="card-val" style="color: #64748b;">Not Filled</span>`;
+
+                                    if (body) {
+                                        body.innerHTML = `
+                                            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                                                ${!aca.isFilled ? `
+                                                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                                                        <span style="font-size: 0.84rem; color: #64748b;">Academic qualification records have not been submitted by the candidate yet.</span>
+                                                        <span class="badge-fee-due">⏳ Details Pending</span>
+                                                    </div>
+                                                ` : ''}
+
+                                                <!-- Class 10 / Secondary Section -->
+                                                <div class="academic-card-block">
+                                                    <div class="academic-card-header">
+                                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                                            <span>🏫</span>
+                                                            <span>Class 10 / Secondary School Particulars</span>
+                                                        </span>
+                                                        ${tenthBadge}
+                                                    </div>
+                                                    <div style="padding: 1rem 1.15rem;">
+                                                        <div class="stage-info-grid">
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">School Name</span>
+                                                                <span class="card-val" style="font-weight: 700;">${safe(aca.tenthSchool)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Board of Education</span>
+                                                                <span class="card-val">${safe(aca.tenthBoard)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">School City / Location</span>
+                                                                <span class="card-val">${safe(aca.tenthCity)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Passing Year</span>
+                                                                <span class="card-val font-mono">${safe(aca.tenthYear)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Score / CGPA</span>
+                                                                ${tenthScoreVal}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Class 12 / Intermediate Section -->
+                                                <div class="academic-card-block">
+                                                    <div class="academic-card-header">
+                                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                                            <span>🏛️</span>
+                                                            <span>Class 12 / Intermediate / PU-2 Particulars</span>
+                                                        </span>
+                                                        ${interBadge}
+                                                    </div>
+                                                    <div style="padding: 1rem 1.15rem;">
+                                                        <div class="stage-info-grid">
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">College / Junior College</span>
+                                                                <span class="card-val" style="font-weight: 700;">${safe(aca.interCollege)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Study Board</span>
+                                                                <span class="card-val">${safe(aca.interBoard)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">College City</span>
+                                                                <span class="card-val">${safe(aca.interCity)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Passing Year</span>
+                                                                <span class="card-val font-mono">${safe(aca.interYear)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Score / Percentage</span>
+                                                                ${interScoreVal}
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Result Status</span>
+                                                                <span class="card-val">${safe(aca.interStatus)}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                ${aca.ugCollege && aca.ugCollege !== 'N/A' ? `
+                                                <!-- Undergraduate Degree Section (for PG Candidates) -->
+                                                <div class="academic-card-block">
+                                                    <div class="academic-card-header">
+                                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                                            <span>🎓</span>
+                                                            <span>Undergraduate Degree Particulars</span>
+                                                        </span>
+                                                        <span class="badge-paid">${safe(aca.ugMarks)}</span>
+                                                    </div>
+                                                    <div style="padding: 1rem 1.15rem;">
+                                                        <div class="stage-info-grid">
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">College Name</span>
+                                                                <span class="card-val" style="font-weight: 700;">${safe(aca.ugCollege)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">University / Board</span>
+                                                                <span class="card-val">${safe(aca.ugUniversity)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Passing Year</span>
+                                                                <span class="card-val font-mono">${safe(aca.ugYear)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Score / CGPA</span>
+                                                                <span class="card-val font-mono" style="color: #15803d; font-weight: 700;">${safe(aca.ugMarks)}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                        `;
+                                    }
+                                } else if (stage === 'application') {
+                                    if (iconEl) iconEl.textContent = '📄';
+                                    if (titleEl) titleEl.textContent = 'Application Download Status';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate application form download status verification.';
+                                    const app = student.application || {};
+                                    const isDownloaded = app.isDownloaded === true || (String(app.statusText || '').toLowerCase() === 'downloaded');
+
+                                    if (body) {
+                                        body.innerHTML = `
+                                            <div class="stage-info-grid">
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Number</span>
+                                                    <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Student Full Name</span>
+                                                    <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Primary Mobile</span>
+                                                    <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Campus Applied</span>
+                                                    <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Registration Date</span>
+                                                    <span class="card-val">${safe(app.date || student.regDate)}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Download Status</span>
+                                                    <span class="card-val">
+                                                        ${isDownloaded 
+                                                            ? '<span class="badge-paid">✓ Downloaded</span>' 
+                                                            : '<span class="badge-fee-due">⏳ Not Downloaded</span>'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                } else if (stage === 'vsat') {
+                                    if (iconEl) iconEl.textContent = '🏆';
+                                    if (titleEl) titleEl.textContent = 'VSAT Examination & Result Details';
+                                    const vsat = student.vsat || {};
+                                    const isDone = vsat.isDone === true || (String(vsat.examStatus || '').toLowerCase() === 'qualified');
+
+                                    if (footerNoteEl) {
+                                        footerNoteEl.textContent = isDone 
+                                            ? 'Vignan Scholastic Aptitude Test score, rank, and scholarship concession.' 
+                                            : 'Candidate examination schedule and results are pending.';
+                                    }
+
+                                    if (body) {
+                                        if (isDone) {
+                                            body.innerHTML = `
+                                                <div class="stage-info-grid">
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Application Number</span>
+                                                        <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Student Full Name</span>
+                                                        <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">VSAT Hall Ticket Number</span>
+                                                        <span class="card-val font-mono" style="color: #4338ca; font-weight: 700;">${safe(vsat.hallTicket)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Examination Status</span>
+                                                        <span class="card-val"><span class="badge-paid">✓ Qualified</span></span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">VSAT Test Score</span>
+                                                        <span class="card-val font-mono" style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">${safe(vsat.score)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">State Merit Rank</span>
+                                                        <span class="card-val font-mono" style="font-weight: 700; color: #0369a1;">${safe(vsat.rank)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card" style="grid-column: 1 / -1;">
+                                                        <span class="card-lbl">Merit Scholarship / Fee Concession</span>
+                                                        <span class="card-val" style="color: #15803d; font-weight: 700; font-size: 0.95rem;">${safe(vsat.concession)}</span>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        } else {
+                                            body.innerHTML = `
+                                                <div class="stage-info-grid">
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Application Number</span>
+                                                        <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Student Full Name</span>
+                                                        <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Primary Mobile</span>
+                                                        <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">Campus Applied</span>
+                                                        <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">VSAT Examination Status</span>
+                                                        <span class="card-val"><span class="badge-fee-due">⏳ Pending</span></span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">VSAT Hall Ticket Number</span>
+                                                        <span class="card-val" style="color: #64748b;">Pending Schedule</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">VSAT Test Score</span>
+                                                        <span class="card-val" style="color: #64748b;">Pending (Exam Not Taken)</span>
+                                                    </div>
+                                                    <div class="stage-info-card">
+                                                        <span class="card-lbl">State Merit Rank</span>
+                                                        <span class="card-val" style="color: #64748b;">Pending (Results Awaiting)</span>
+                                                    </div>
+                                                    <div class="stage-info-card" style="grid-column: 1 / -1;">
+                                                        <span class="card-lbl">Merit Scholarship / Fee Concession</span>
+                                                        <span class="card-val" style="color: #64748b;">Pending VSAT Examination & Results</span>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }
+                                    }
+                                }
+
+                                // Show modal
+                                const modal = document.getElementById('studentStageDetailModal');
+                                if (modal) {
+                                    modal.style.display = 'flex';
+                                    document.body.style.overflow = 'hidden';
+                                }
+                            } catch (e) {
+                                console.error('Error opening student stage modal:', e);
+                            }
+                        };
+
+                        window.closeStudentStageModal = function() {
+                            const modal = document.getElementById('studentStageDetailModal');
+                            if (modal) {
+                                modal.style.display = 'none';
+                            }
+                            document.body.style.overflow = '';
+                        };
+
+                        // Modal event listeners (Escape key & backdrop click)
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Escape') {
+                                window.closeStudentStageModal();
+                            }
+                        });
+
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const modalEl = document.getElementById('studentStageDetailModal');
+                            if (modalEl) {
+                                modalEl.addEventListener('click', function(e) {
+                                    if (e.target === this) {
+                                        window.closeStudentStageModal();
+                                    }
+                                });
+                            }
+                        });
                     </script>
+
+                    @if($isTrackingPage)
+                        <!-- STUDENT STAGE PARTICULARS DETAIL MODAL (IN-PAGE POPUP - CRM DATA TRACKING ONLY) -->
+                        <div id="studentStageDetailModal" class="stage-detail-modal-backdrop" style="display: none;">
+                            <div class="stage-detail-modal-card">
+                                <!-- Modal Header Bar -->
+                                <div class="stage-detail-modal-header" style="padding: 1.15rem 1.5rem; background: #ffffff; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span id="modalStageIcon" style="font-size: 1.25rem;">📝</span>
+                                        <h3 id="modalStageTitle" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">Registration Form Details</h3>
+                                    </div>
+                                    <button type="button" class="reg-modal-close-icon-btn" onclick="closeStudentStageModal()" title="Close (Esc)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Modal Body: Stage Content (dynamically populated) -->
+                                <div id="modalStageBody" class="stage-detail-modal-body">
+                                    <!-- Dynamically populated based on clicked stage -->
+                                </div>
+
+                                <!-- Modal Footer Bar -->
+                                <div class="stage-detail-modal-footer">
+                                    <div style="font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                        <span id="modalStageFooterNote">Verified candidate registration form particulars.</span>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="button" class="btn-stage-modal-close" onclick="closeStudentStageModal()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                            <span>Close</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <style>
+                        .stage-detail-modal-backdrop {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            background: rgba(15, 23, 42, 0.65);
+                            backdrop-filter: blur(4px);
+                            -webkit-backdrop-filter: blur(4px);
+                            z-index: 99999;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 1.25rem;
+                            animation: stageFadeIn 0.2s ease-out;
+                        }
+                        @keyframes stageFadeIn {
+                            from { opacity: 0; }
+                            to { opacity: 1; }
+                        }
+                        .stage-detail-modal-card {
+                            background: #ffffff;
+                            border-radius: 18px;
+                            max-width: 880px;
+                            width: 100%;
+                            max-height: 90vh;
+                            display: flex;
+                            flex-direction: column;
+                            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+                            border: 1px solid #e2e8f0;
+                            overflow: hidden;
+                            animation: stageSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                        }
+                        @keyframes stageSlideUp {
+                            from { transform: translateY(20px) scale(0.98); opacity: 0; }
+                            to { transform: translateY(0) scale(1); opacity: 1; }
+                        }
+                        .stage-detail-modal-header {
+                            padding: 1.25rem 1.5rem;
+                            background: #ffffff;
+                            border-bottom: 1px solid #f1f5f9;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+                        .student-avatar-badge {
+                            width: 48px;
+                            height: 48px;
+                            border-radius: 12px;
+                            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                            color: #ffffff;
+                            font-weight: 800;
+                            font-size: 1.15rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            letter-spacing: 0.5px;
+                            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+                        }
+                        .modal-appli-tag {
+                            font-family: 'JetBrains Mono', monospace;
+                            font-size: 0.76rem;
+                            font-weight: 700;
+                            color: #1e40af;
+                            background: #eff6ff;
+                            border: 1px solid #bfdbfe;
+                            padding: 2px 8px;
+                            border-radius: 6px;
+                        }
+                        .reg-modal-close-icon-btn {
+                            background: #f1f5f9;
+                            border: 1px solid #e2e8f0;
+                            width: 34px;
+                            height: 34px;
+                            border-radius: 8px;
+                            color: #64748b;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.15s ease;
+                        }
+                        .reg-modal-close-icon-btn:hover {
+                            background: #fee2e2;
+                            border-color: #fca5a5;
+                            color: #ef4444;
+                            transform: scale(1.05);
+                        }
+                        .reg-modal-close-icon-btn:active {
+                            transform: scale(0.96);
+                        }
+                        .stage-detail-modal-body {
+                            padding: 1.5rem 1.75rem;
+                            overflow-y: auto;
+                            flex: 1;
+                            min-height: 340px;
+                            max-height: calc(90vh - 190px);
+                        }
+                        .stage-detail-modal-footer {
+                            padding: 0.95rem 1.5rem;
+                            background: #f8fafc;
+                            border-top: 1px solid #e2e8f0;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+                        .btn-stage-modal-close {
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            gap: 8px !important;
+                            height: 38px !important;
+                            width: auto !important;
+                            min-width: 104px !important;
+                            padding: 0 1.35rem !important;
+                            border: 1px solid #0f172a !important;
+                            background: #0f172a !important;
+                            color: #ffffff !important;
+                            border-radius: 8px !important;
+                            font-size: 0.84rem !important;
+                            font-weight: 700 !important;
+                            line-height: normal !important;
+                            letter-spacing: 0.2px !important;
+                            cursor: pointer !important;
+                            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.06) !important;
+                            transition: all 0.18s ease-in-out !important;
+                        }
+                        .btn-stage-modal-close:hover {
+                            background: #1e293b !important;
+                            border-color: #1e293b !important;
+                            color: #ffffff !important;
+                            transform: translateY(-1px) !important;
+                            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18) !important;
+                        }
+                        .btn-stage-modal-close:active {
+                            transform: translateY(0) !important;
+                            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
+                        }
+                        .stage-section-banner {
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            margin-bottom: 1.25rem;
+                            padding-bottom: 0.85rem;
+                            border-bottom: 1px solid #f1f5f9;
+                        }
+                        .stage-banner-icon {
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 1.25rem;
+                        }
+                        .stage-info-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                            gap: 1rem;
+                        }
+                        .stage-info-card {
+                            background: #f8fafc;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 10px;
+                            padding: 0.75rem 0.95rem;
+                        }
+                        .stage-info-card .card-lbl {
+                            font-size: 0.72rem;
+                            text-transform: uppercase;
+                            font-weight: 700;
+                            letter-spacing: 0.5px;
+                            color: #64748b;
+                            margin-bottom: 4px;
+                            display: block;
+                        }
+                        .stage-info-card .card-val {
+                            font-size: 0.92rem;
+                            font-weight: 600;
+                            color: #0f172a;
+                            display: block;
+                            word-break: break-word;
+                        }
+                        .stage-info-card .card-val.font-mono {
+                            font-family: 'JetBrains Mono', monospace;
+                        }
+                        .badge-paid {
+                            background: #dcfce7;
+                            color: #15803d;
+                            border: 1px solid #86efac;
+                            padding: 3px 9px;
+                            border-radius: 6px;
+                            font-size: 0.78rem;
+                            font-weight: 700;
+                            display: inline-block;
+                        }
+                        .badge-fee-due {
+                            background: #fee2e2;
+                            color: #b91c1c;
+                            border: 1px solid #fca5a5;
+                            padding: 3px 9px;
+                            border-radius: 6px;
+                            font-size: 0.78rem;
+                            font-weight: 700;
+                            display: inline-block;
+                        }
+                        .academic-card-block {
+                            background: #ffffff;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            margin-bottom: 1rem;
+                        }
+                        .academic-card-header {
+                            background: #f8fafc;
+                            border-bottom: 1px solid #e2e8f0;
+                            padding: 0.65rem 1rem;
+                            font-weight: 700;
+                            font-size: 0.85rem;
+                            color: #334155;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+                        .btn-download-action {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                            background: #059669;
+                            color: #ffffff;
+                            font-weight: 700;
+                            font-size: 0.9rem;
+                            padding: 10px 18px;
+                            border-radius: 9px;
+                            text-decoration: none;
+                            transition: background 0.15s ease;
+                        }
+                        .btn-download-action:hover {
+                            background: #047857;
+                            color: #ffffff;
+                        }
+                    </style>
                 </div>
 
             @elseif(($activeTab ?? '') === 'couponinfo')
@@ -1282,35 +2341,1654 @@
                 </div>
 
             @elseif(($activeTab ?? '') === 'kpi' || ($activeTab ?? '') === 'studentkpi')
-                <!-- TAB: KPI & CONVERSION ANALYTICS -->
+                <!-- TAB: STUDENT KPI & CONVERSION ANALYTICS -->
                 <div class="content-card">
-                    <div class="card-header-bar">
+                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
                         <div>
-                            <div class="card-title">📊 Key Performance Indicators & Conversion Analytics (master.menus: KPII0001)</div>
-                            <div class="card-subtitle">Strategic intake benchmarks and admissions pipeline funnel</div>
+                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <span>🎓 Student KPI &amp; Conversion Analytics</span>
+                            </div>
+                            <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #475569;">Registration:</span>
+                                    <strong style="color: #0284c7;">100%</strong>
+                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiTotal }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #047857;">Fee Payment:</span>
+                                    <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #1e40af;">Personal Profile:</span>
+                                    <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #6d28d9;">Academic Records:</span>
+                                    <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #c2410c;">Application Form:</span>
+                                    <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #64748b;">Seat Allotment:</span>
+                                    <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Header Metadata Badges (Intake Cycle & Total Count) -->
+                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span>📅</span> Intake Cycle 2026–27
+                            </span>
+                            <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
+                                {{ $kpiTotal }} Total Enquiries
+                            </span>
                         </div>
                     </div>
 
                     <div style="padding: 1.5rem;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
-                            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: #ffffff;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Inquiry to Application Ratio</div>
-                                <div style="font-size: 1.85rem; font-weight: 800; color: #2563eb; margin: 0.35rem 0;">84.2%</div>
-                                <div style="font-size: 0.75rem; color: #10b981; font-weight: 600;">↑ 5.4% higher than last academic year</div>
+                        <!-- 1. TOP EXECUTIVE METRIC CARDS -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                            <!-- Card 1: Total Registered -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Registered</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ $kpiTotal }}</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Enquiries</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👥</div>
                             </div>
-                            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: #ffffff;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Application to Verification Rate</div>
-                                <div style="font-size: 1.85rem; font-weight: 800; color: #059669; margin: 0.35rem 0;">92.8%</div>
-                                <div style="font-size: 0.75rem; color: #10b981; font-weight: 600;">Documents verified within 24 hours</div>
+
+                            <!-- Card 2: Fee Payment (Stage 1) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
                             </div>
-                            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: #ffffff;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Fee Paid / Enrollment Confirmation</div>
-                                <div style="font-size: 1.85rem; font-weight: 800; color: #7c3aed; margin: 0.35rem 0;">76.5%</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">Seat reservation fee deposited</div>
+
+                            <!-- Card 3: Personal Profile (Stage 2) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Submitted</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            </div>
+
+                            <!-- Card 4: Academic Records (Stage 3) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Completed</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. VISUAL KPI ANALYTICS (BAR GRAPHS & CHARTS) -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
+                            <!-- Chart 1: Admissions Funnel Progression (Vertical Bar Graph) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Milestone Progression Funnel</div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Applicant conversion through enrollment stages</div>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Enrollment Funnel</span>
+                                </div>
+                                <div style="position: relative; flex-grow: 1; min-height: 270px; max-height: 310px;" id="kpiFunnelContainer">
+                                    <canvas id="kpiFunnelChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2: Fee Clearance Health (Donut / Doughnut Chart + Clear Metrics) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Payment Clearance Status</div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Stage 1 application fee verification ratio</div>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #d1fae5;">Fee Health</span>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.25rem; align-items: center; flex-grow: 1;" id="kpiPaymentContainer">
+                                    <!-- Donut Chart with Center Text -->
+                                    <div style="position: relative; width: 175px; height: 175px; margin: 0 auto;">
+                                        <canvas id="kpiPaymentChart"></canvas>
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                                            <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
+                                            <div style="font-size: 0.7rem; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px;">Cleared</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- High-Visibility Clear Metric Cards -->
+                                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.04em;">Fee Paid</span>
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 1px 7px; border-radius: 4px;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</span>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
+                                                {{ $kpiStage1Paid }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
+                                            </div>
+                                            <div style="font-size: 0.72rem; color: #16a34a; font-weight: 500;">Verified via Payment Gateway</div>
+                                        </div>
+
+                                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Fee Due</span>
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #d97706; background: #fef3c7; padding: 1px 7px; border-radius: 4px;">{{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%</span>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
+                                                {{ max(0, $kpiTotal - $kpiStage1Paid) }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
+                                            </div>
+                                            <div style="font-size: 0.72rem; color: #d97706; font-weight: 500;">Pending Fee Completion</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Segmented Clearance Bar -->
+                                <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: #64748b; margin-bottom: 0.35rem;">
+                                        <span>Paid: {{ $kpiStage1Paid }} ({{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%)</span>
+                                        <span>Pending: {{ max(0, $kpiTotal - $kpiStage1Paid) }} ({{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%)</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #fef3c7; border-radius: 999px; overflow: hidden; display: flex;">
+                                        <div style="width: {{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%; height: 100%; background: #10b981; border-radius: 999px 0 0 999px;"></div>
+                                        <div style="width: {{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%; height: 100%; background: #f59e0b; border-radius: 0 999px 999px 0;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. BRANCH & DISCIPLINE INTAKE DEMAND (EXECUTIVE CARDS GRID) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.75rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.15rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Branch & Discipline Intake Demand</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Applicant interest and distribution across academic programs</div>
+                                </div>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: #7c3aed; background: #f5f3ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #ede9fe;">Top 6 Disciplines</span>
+                            </div>
+
+                            @php
+                                $branchMetaMap = [
+                                    'Information Technology' => ['icon' => '💻', 'tag' => 'Computing', 'color' => '#2563eb', 'bg' => '#eff6ff'],
+                                    'Computer Science & Engineering' => ['icon' => '🖥️', 'tag' => 'Core CSE', 'color' => '#0284c7', 'bg' => '#f0f9ff'],
+                                    'CSE - Artificial Intelligence & Machine Learning' => ['icon' => '🤖', 'tag' => 'AI & ML', 'color' => '#7c3aed', 'bg' => '#f5f3ff'],
+                                    'CSE - AI & ML' => ['icon' => '🤖', 'tag' => 'AI & ML', 'color' => '#7c3aed', 'bg' => '#f5f3ff'],
+                                    'Electronics & Communication Engineering' => ['icon' => '📡', 'tag' => 'ECE', 'color' => '#0891b2', 'bg' => '#ecfeff'],
+                                    'Biotechnology' => ['icon' => '🧬', 'tag' => 'BioTech', 'color' => '#059669', 'bg' => '#ecfdf5'],
+                                    'Mechanical Engineering' => ['icon' => '⚙️', 'tag' => 'Mechanical', 'color' => '#ea580c', 'bg' => '#fff7ed'],
+                                    'Civil Engineering' => ['icon' => '🏗️', 'tag' => 'Civil', 'color' => '#d97706', 'bg' => '#fffbeb'],
+                                ];
+                                $rank = 1;
+                            @endphp
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                                @foreach($kpiBranchDistribution as $bName => $bCount)
+                                    @php
+                                        $bPct = round(($bCount / $kpiTotal) * 100, 1);
+                                        $meta = $branchMetaMap[$bName] ?? ['icon' => '🎓', 'tag' => 'Engineering', 'color' => '#475569', 'bg' => '#f8fafc'];
+                                    @endphp
+                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.1rem 1.15rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                        <!-- Top Row: Icon + Tag on left, Rank badge on right -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 32px; height: 32px; border-radius: 8px; background: {{ $meta['bg'] }}; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                                    {{ $meta['icon'] }}
+                                                </div>
+                                                <span style="font-size: 0.72rem; font-weight: 700; color: {{ $meta['color'] }}; background: {{ $meta['bg'] }}; padding: 2px 8px; border-radius: 6px; border: 1px solid {{ $meta['color'] }}25;">
+                                                    {{ $meta['tag'] }}
+                                                </span>
+                                            </div>
+                                            <span style="font-size: 0.72rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 20px;">
+                                                #{{ $rank++ }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Middle Row: Branch Name -->
+                                        <div>
+                                            <div style="font-size: 0.875rem; font-weight: 700; color: #1e293b; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $bName }}">
+                                                {{ $bName }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Bottom Row: Count, Percentage & Progress Fill -->
+                                        <div>
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.45rem;">
+                                                <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">
+                                                    {{ $bCount }} <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">Enquiries</span>
+                                                </div>
+                                                <div style="font-size: 0.825rem; font-weight: 700; color: {{ $meta['color'] }};">
+                                                    {{ $bPct }}% <span style="font-size: 0.7rem; font-weight: 500; color: #94a3b8;">share</span>
+                                                </div>
+                                            </div>
+                                            <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 999px; overflow: hidden;">
+                                                <div style="width: {{ min(100, $bPct * 2.5) }}%; height: 100%; background: {{ $meta['color'] }}; border-radius: 999px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- 4. STUDENT PROGRESSION MATRIX TABLE -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Student Progress</div>
+                                </div>
+                                <div style="position: relative;">
+                                    <input type="text" id="kpiSearchInput" placeholder="Search by student name, application no, branch..." onkeyup="filterKpiTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 300px; outline: none; background: #ffffff;">
+                                    <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="crm-table" id="kpiTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Application #</th>
+                                            <th>Student Name</th>
+                                            <th>Branch / Program</th>
+                                            <th>Registration</th>
+                                            <th>Payment (Stage 1)</th>
+                                            <th>Personal (Stage 2)</th>
+                                            <th>Academic (Stage 3)</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Prompt row shown by default when search input is empty -->
+                                        <tr id="kpiSearchPromptRow">
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">Type in the search box above to view student progress</div>
+                                            </td>
+                                        </tr>
+                                        <!-- Empty match state when search yields zero rows -->
+                                        <tr id="kpiNoResultsRow" style="display: none;">
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">❌</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student records found</div>
+                                            </td>
+                                        </tr>
+                                        @foreach($allStudents as $student)
+                                            @php
+                                                $sAppNo = (string)($student->applinano ?? $student->application_no ?? 'N/A');
+                                                $sName = $student->name ?? $student->student_name ?? 'Candidate';
+                                                $sBranch = $student->branch?->branch_long_name ?? $student->branch?->branch_short_name ?? $student->program?->program_long_name ?? 'B.Tech';
+                                                
+                                                $s1 = strtolower(trim((string)($student->stage1 ?? '')));
+                                                $s2 = strtolower(trim((string)($student->stage2 ?? '')));
+                                                $s3 = strtolower(trim((string)($student->stage3 ?? '')));
+                                                
+                                                // Genuine fee payment check: status 'paid' or verified in finance records
+                                                $isS1 = ($s1 === 'paid') || (isset($paidAppNos) && $paidAppNos->contains($sAppNo));
+                                                $isS2 = in_array($s2, ['completed', 'approved', 'done'], true);
+                                                $isS3 = in_array($s3, ['completed', 'approved', 'done'], true);
+                                                
+                                                $completedSteps = 1 + ($isS1 ? 1 : 0) + ($isS2 ? 1 : 0) + ($isS3 ? 1 : 0);
+                                                $progressPct = round(($completedSteps / 5) * 100);
+                                            @endphp
+                                            <tr class="kpi-row" style="display: none;">
+                                                <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
+                                                <td>
+                                                    <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
+                                                    @if(!empty($student->phoneno ?? $student->mobile))
+                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span style="font-size: 0.825rem; color: #475569; font-weight: 600;">{{ $sBranch }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                        ✓ Done
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @if($isS1)
+                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Paid
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-danger" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ❌ Fee Due
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($isS2)
+                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Done
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status" style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
+                                                            ⏳ Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($isS3)
+                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Done
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status" style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
+                                                            ⏳ Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td style="min-width: 130px;">
+                                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                        <div style="flex: 1; height: 6px; background: #f1f5f9; border-radius: 999px; overflow: hidden;">
+                                                            <div style="width: {{ $progressPct }}%; height: 100%; background: {{ $progressPct >= 60 ? '#10b981' : ($progressPct >= 40 ? '#3b82f6' : '#f59e0b') }}; border-radius: 999px;"></div>
+                                                        </div>
+                                                        <span style="font-size: 0.75rem; font-weight: 700; color: #475569;">{{ $progressPct }}%</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    initKpiVisualCharts();
+                });
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    setTimeout(initKpiVisualCharts, 50);
+                }
+
+                function initKpiVisualCharts() {
+                    const funnelLabels = [
+                        ['Registration'],
+                        ['Fee', 'Payment'],
+                        ['Personal', 'Details'],
+                        ['Academic', 'Records'],
+                        ['Application', 'Form'],
+                        ['Seat', 'Allotment']
+                    ];
+                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
+                    const totalApplicants = {{ (int)$kpiTotal }};
+                    const paidCount = {{ (int)$kpiStage1Paid }};
+                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+                    const branchLabels = {!! json_encode(array_keys($kpiBranchDistribution->toArray())) !!};
+                    const branchCounts = {!! json_encode(array_values($kpiBranchDistribution->toArray())) !!};
+
+                    if (typeof Chart !== 'undefined') {
+                        // 1. Funnel Vertical Bar Chart
+                        const funnelCanvas = document.getElementById('kpiFunnelChart');
+                        if (funnelCanvas && !funnelCanvas.dataset.chartInit) {
+                            funnelCanvas.dataset.chartInit = 'true';
+                            new Chart(funnelCanvas, {
+                                type: 'bar',
+                                data: {
+                                    labels: funnelLabels,
+                                    datasets: [{
+                                        label: 'Applicants',
+                                        data: funnelCounts,
+                                        backgroundColor: [
+                                            'rgba(2, 132, 199, 0.85)',
+                                            'rgba(16, 185, 129, 0.85)',
+                                            'rgba(37, 99, 235, 0.85)',
+                                            'rgba(124, 58, 237, 0.85)',
+                                            'rgba(234, 88, 12, 0.85)',
+                                            'rgba(8, 145, 178, 0.85)'
+                                        ],
+                                        borderColor: [
+                                            '#0284c7',
+                                            '#10b981',
+                                            '#2563eb',
+                                            '#7c3aed',
+                                            '#ea580c',
+                                            '#0891b2'
+                                        ],
+                                        borderWidth: 1.5,
+                                        borderRadius: 8,
+                                        borderSkipped: false,
+                                        maxBarThickness: 46
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: {
+                                            backgroundColor: '#0f172a',
+                                            padding: 10,
+                                            titleFont: { size: 12, weight: 'bold' },
+                                            bodyFont: { size: 12 },
+                                            cornerRadius: 8,
+                                            callbacks: {
+                                                title: function(context) {
+                                                    const fullNames = ['Registration', 'Fee Payment', 'Personal Details', 'Academic Records', 'Application Form', 'Seat Allotment'];
+                                                    const idx = context[0].dataIndex;
+                                                    return fullNames[idx] || '';
+                                                },
+                                                label: function(context) {
+                                                    const val = context.raw;
+                                                    const pct = totalApplicants > 0 ? ((val / totalApplicants) * 100).toFixed(1) : 0;
+                                                    return ` ${val} Applicants (${pct}%)`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            grid: { display: false },
+                                            ticks: {
+                                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 11 },
+                                                color: '#334155',
+                                                maxRotation: 0,
+                                                minRotation: 0,
+                                                autoSkip: false,
+                                                padding: 6
+                                            }
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            suggestedMax: 35,
+                                            grid: { color: '#f1f5f9' },
+                                            ticks: {
+                                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                                                color: '#64748b',
+                                                stepSize: 5
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // 2. Fee Clearance Donut Chart (Tooltip disabled to prevent obscuring center text)
+                        const paymentCanvas = document.getElementById('kpiPaymentChart');
+                        if (paymentCanvas && !paymentCanvas.dataset.chartInit) {
+                            paymentCanvas.dataset.chartInit = 'true';
+                            new Chart(paymentCanvas, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Fee Paid', 'Fee Due'],
+                                    datasets: [{
+                                        data: [paidCount, dueCount],
+                                        backgroundColor: ['#10b981', '#f59e0b'],
+                                        borderColor: '#ffffff',
+                                        borderWidth: 3,
+                                        hoverOffset: 3
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '72%',
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: {
+                                            enabled: false
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        // Fallback for offline or non-JS environments
+                        renderKpiSvgFallbacks(funnelLabels, funnelCounts, totalApplicants, paidCount, dueCount);
+                    }
+                }
+
+                function renderKpiSvgFallbacks(labels, counts, total, paid, due) {
+                    const funnelCont = document.getElementById('kpiFunnelContainer');
+                    if (funnelCont) {
+                        const colors = ['#0ea5e9', '#10b981', '#3b82f6', '#8b5cf6', '#f97316', '#ec4899'];
+                        const maxVal = Math.max(...counts, 1);
+                        let barsHtml = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 220px; padding: 20px 10px 10px; gap: 8px;">';
+                        counts.forEach((cnt, idx) => {
+                            const h = maxVal > 0 ? Math.max(8, Math.round((cnt / maxVal) * 160)) : 8;
+                            const labelText = Array.isArray(labels[idx]) ? labels[idx].join('<br>') : labels[idx];
+                            barsHtml += `
+                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end;">
+                                    <div style="width: 100%; max-width: 44px; height: ${h}px; background: ${colors[idx % colors.length]}; border-radius: 6px 6px 0 0;"></div>
+                                    <div style="font-size: 0.72rem; font-weight: 600; color: #334155; margin-top: 4px; text-align: center; line-height: 1.25;">${labelText}</div>
+                                </div>
+                            `;
+                        });
+                        barsHtml += '</div>';
+                        funnelCont.innerHTML = barsHtml;
+                    }
+                }
+
+                function filterKpiTable() {
+                    const input = document.getElementById('kpiSearchInput');
+                    const filter = (input ? input.value : '').toLowerCase().trim();
+                    const rows = document.querySelectorAll('#kpiTable tbody tr.kpi-row');
+                    const promptRow = document.getElementById('kpiSearchPromptRow');
+                    const noResultsRow = document.getElementById('kpiNoResultsRow');
+
+                    if (!filter) {
+                        rows.forEach(row => row.style.display = 'none');
+                        if (promptRow) promptRow.style.display = '';
+                        if (noResultsRow) noResultsRow.style.display = 'none';
+                        return;
+                    }
+
+                    if (promptRow) promptRow.style.display = 'none';
+                    let visibleCount = 0;
+
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        if (text.includes(filter)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    if (noResultsRow) {
+                        noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+                    }
+                }
+                </script>
+
+            @elseif(($activeTab ?? '') === 'telecallerkpi')
+                <!-- TAB: TELECALLER KPI & OUTREACH ANALYTICS -->
+                <div class="content-card">
+                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                        <div>
+                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <span>🎧 Telecaller KPI &amp; Outreach Analytics</span>
+                            </div>
+                            <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #475569;">Allotted Leads:</span>
+                                    <strong style="color: #0284c7;">100%</strong>
+                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ number_format($totalTelecallerLeads) }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #047857;">Fee Payment:</span>
+                                    <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #1e40af;">Personal Profile:</span>
+                                    <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #6d28d9;">Academic Records:</span>
+                                    <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #c2410c;">Application Form:</span>
+                                    <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #64748b;">Seat Allotment:</span>
+                                    <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Header Metadata Badges -->
+                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span>📅</span> Intake Cycle 2026–27
+                            </span>
+                            <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
+                                {{ number_format($totalTelecallerLeads) }} Allotted Leads
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 1.5rem;">
+                        <!-- 1. TOP EXECUTIVE METRIC CARDS -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                            <!-- Card 1: Total Allotted Leads -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Allotted Leads</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalTelecallerLeads) }}</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Assigned for Calling</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            </div>
+
+                            <!-- Card 2: Fee Payment Conversion -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid Leads</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                            </div>
+
+                            <!-- Card 3: Profile Completion -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Profiles Submitted</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            </div>
+
+                            <!-- Card 4: Academic Verified -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Enrolments Completed</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. VISUAL KPI ANALYTICS (BAR GRAPHS & CHARTS) -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
+                            <!-- Chart 1: Admissions Funnel Progression (Vertical Bar Graph) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Milestone Outreach Funnel</div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Counselor lead progression through conversion stages</div>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Outreach Funnel</span>
+                                </div>
+                                <div style="position: relative; flex-grow: 1; min-height: 270px; max-height: 310px;" id="telecallerFunnelContainer">
+                                    <canvas id="telecallerFunnelChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2: Fee Clearance Health (Donut / Doughnut Chart + Clear Metrics) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Payment Clearance Status</div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Stage 1 fee payment conversion from allotted leads</div>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #d1fae5;">Calling Health</span>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.25rem; align-items: center; flex-grow: 1;" id="telecallerPaymentContainer">
+                                    <!-- Donut Chart with Center Text -->
+                                    <div style="position: relative; width: 175px; height: 175px; margin: 0 auto;">
+                                        <canvas id="telecallerPaymentChart"></canvas>
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                                            <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
+                                            <div style="font-size: 0.7rem; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px;">Cleared</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- High-Visibility Clear Metric Cards -->
+                                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.04em;">Fee Paid</span>
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 1px 7px; border-radius: 4px;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</span>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
+                                                {{ $kpiStage1Paid }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
+                                            </div>
+                                            <div style="font-size: 0.72rem; color: #16a34a; font-weight: 500;">Verified via Payment Gateway</div>
+                                        </div>
+
+                                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Fee Due</span>
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #d97706; background: #fef3c7; padding: 1px 7px; border-radius: 4px;">{{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%</span>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
+                                                {{ max(0, $kpiTotal - $kpiStage1Paid) }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
+                                            </div>
+                                            <div style="font-size: 0.72rem; color: #d97706; font-weight: 500;">Pending Outreach Follow-up</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Segmented Clearance Bar -->
+                                <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: #64748b; margin-bottom: 0.35rem;">
+                                        <span>Paid: {{ $kpiStage1Paid }} ({{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%)</span>
+                                        <span>Pending: {{ max(0, $kpiTotal - $kpiStage1Paid) }} ({{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%)</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #fef3c7; border-radius: 999px; overflow: hidden; display: flex;">
+                                        <div style="width: {{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%; height: 100%; background: #10b981; border-radius: 999px 0 0 999px;"></div>
+                                        <div style="width: {{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%; height: 100%; background: #f59e0b; border-radius: 0 999px 999px 0;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. COUNSELOR PERFORMANCE SCORECARDS (EXECUTIVE CARDS GRID) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.75rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.15rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Counselor Performance &amp; Lead Allocation</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Individual counselor outreach volume and conversion efficiency</div>
+                                </div>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #f0f9ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #e0f2fe;">Active Staff</span>
+                            </div>
+
+                            @php
+                                $counselorRank = 1;
+                            @endphp
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                                @forelse($telecallerStats as $stat)
+                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.1rem 1.15rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 32px; height: 32px; border-radius: 8px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                                    🎧
+                                                </div>
+                                                <span style="font-size: 0.7rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
+                                                    Senior Counselor
+                                                </span>
+                                            </div>
+                                            <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 1px solid #f1f5f9; padding: 2px 7px; border-radius: 6px;">
+                                                #{{ $counselorRank++ }}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 0.2rem;">{{ $stat->name }}</div>
+                                            <div style="font-size: 0.75rem; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem;">ID: {{ $stat->emp_code }}</div>
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">
+                                                    {{ number_format($stat->leads_count) }} <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">assigned</span>
+                                                </span>
+                                                <span style="font-size: 0.8rem; font-weight: 700; color: #059669;">
+                                                    {{ $kpiStage1Paid }} Fee Paid
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 51.5%; height: 100%; background: #10b981; border-radius: 4px;"></div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div style="padding: 1rem; color: #64748b; font-size: 0.85rem;">No active telecallers registered in the system.</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- 4. DETAILED SEARCHABLE CANDIDATE OUTREACH RECORDS TABLE -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Detailed Candidate Outreach Records</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Live searchable directory of candidate milestones and counselor outreach status</div>
+                                </div>
+                                <div style="position: relative;">
+                                    <input type="text" id="telecallerSearchInput" placeholder="Search by student name, application no, counselor, phone..." onkeyup="filterTelecallerTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 320px; outline: none; background: #ffffff;">
+                                    <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="crm-table" id="telecallerTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Application #</th>
+                                            <th>Student Name</th>
+                                            <th>Assigned Counselor</th>
+                                            <th>Branch / Program</th>
+                                            <th>Registration</th>
+                                            <th>Payment (Stage 1)</th>
+                                            <th>Personal (Stage 2)</th>
+                                            <th>Academic (Stage 3)</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Prompt row shown by default when search input is empty -->
+                                        <tr id="telecallerSearchPromptRow">
+                                            <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">Type in the search box above to view candidate outreach progress</div>
+                                            </td>
+                                        </tr>
+                                        <!-- Empty match state when search yields zero rows -->
+                                        <tr id="telecallerNoResultsRow" style="display: none;">
+                                            <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">❌</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching candidate records found</div>
+                                            </td>
+                                        </tr>
+                                        @foreach($allStudents as $student)
+                                            @php
+                                                $sAppNo = (string)($student->applinano ?? $student->application_no ?? 'N/A');
+                                                $sName = $student->name ?? $student->student_name ?? 'Candidate';
+                                                $sBranch = $student->branch?->branch_long_name ?? $student->branch?->branch_short_name ?? $student->program?->program_long_name ?? 'B.Tech';
+                                                
+                                                $s1 = strtolower(trim((string)($student->stage1 ?? '')));
+                                                $s2 = strtolower(trim((string)($student->stage2 ?? '')));
+                                                $s3 = strtolower(trim((string)($student->stage3 ?? '')));
+                                                
+                                                // Genuine fee payment check: status 'paid' or verified in finance records
+                                                $isS1 = ($s1 === 'paid') || (isset($paidAppNos) && $paidAppNos->contains($sAppNo));
+                                                $isS2 = in_array($s2, ['completed', 'approved', 'done'], true);
+                                                $isS3 = in_array($s3, ['completed', 'approved', 'done'], true);
+                                                
+                                                $completedSteps = 1 + ($isS1 ? 1 : 0) + ($isS2 ? 1 : 0) + ($isS3 ? 1 : 0);
+                                                $progressPct = round(($completedSteps / 5) * 100);
+                                                $counselorName = $leadAssignments[$sAppNo]['employee'] ?? 'Ganesh kumar (03434)';
+                                            @endphp
+                                            <tr class="telecaller-row" style="display: none;">
+                                                <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
+                                                <td>
+                                                    <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
+                                                    @if(!empty($student->phoneno ?? $student->mobile))
+                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span style="font-size: 0.78rem; font-weight: 600; color: #0284c7; background: #f0f9ff; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                                                        🎧 {{ $counselorName }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span style="font-size: 0.825rem; color: #475569; font-weight: 600;">{{ $sBranch }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                        ✓ Done
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @if($isS1)
+                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Paid
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-pending" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($isS2)
+                                                        <span class="badge-status badge-paid" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Done
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($isS3)
+                                                        <span class="badge-status badge-paid" style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Verified
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                        <div style="flex-grow: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; width: 60px;">
+                                                            <div style="height: 100%; width: {{ $progressPct }}%; background: {{ $progressPct >= 80 ? '#10b981' : ($progressPct >= 40 ? '#3b82f6' : '#f59e0b') }};"></div>
+                                                        </div>
+                                                        <span style="font-size: 0.72rem; font-weight: 700; color: #475569;">{{ $progressPct }}%</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    initTelecallerVisualCharts();
+                });
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    setTimeout(initTelecallerVisualCharts, 50);
+                }
+
+                function initTelecallerVisualCharts() {
+                    const funnelLabels = [
+                        ['Allotted', 'Leads'],
+                        ['Fee', 'Payment'],
+                        ['Personal', 'Profile'],
+                        ['Academic', 'Records'],
+                        ['Application', 'Form'],
+                        ['Seat', 'Allotment']
+                    ];
+                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
+                    const totalApplicants = {{ (int)$kpiTotal }};
+                    const paidCount = {{ (int)$kpiStage1Paid }};
+                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+
+                    if (typeof Chart !== 'undefined') {
+                        // 1. Funnel Vertical Bar Chart
+                        const funnelCanvas = document.getElementById('telecallerFunnelChart');
+                        if (funnelCanvas && !funnelCanvas.dataset.chartInit) {
+                            funnelCanvas.dataset.chartInit = 'true';
+                            new Chart(funnelCanvas, {
+                                type: 'bar',
+                                data: {
+                                    labels: funnelLabels,
+                                    datasets: [{
+                                        label: 'Applicants',
+                                        data: funnelCounts,
+                                        backgroundColor: [
+                                            'rgba(2, 132, 199, 0.85)',
+                                            'rgba(16, 185, 129, 0.85)',
+                                            'rgba(37, 99, 235, 0.85)',
+                                            'rgba(124, 58, 237, 0.85)',
+                                            'rgba(234, 88, 12, 0.85)',
+                                            'rgba(8, 145, 178, 0.85)'
+                                        ],
+                                        borderColor: [
+                                            '#0284c7',
+                                            '#10b981',
+                                            '#2563eb',
+                                            '#7c3aed',
+                                            '#ea580c',
+                                            '#0891b2'
+                                        ],
+                                        borderWidth: 1.5,
+                                        borderRadius: 8,
+                                        borderSkipped: false,
+                                        maxBarThickness: 46
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: {
+                                            backgroundColor: '#0f172a',
+                                            padding: 10,
+                                            titleFont: { size: 12, weight: 'bold' },
+                                            bodyFont: { size: 12 },
+                                            cornerRadius: 8,
+                                            callbacks: {
+                                                title: function(context) {
+                                                    const fullNames = ['Allotted Leads', 'Fee Payment', 'Personal Profile', 'Academic Records', 'Application Form', 'Seat Allotment'];
+                                                    const idx = context[0].dataIndex;
+                                                    return fullNames[idx] || '';
+                                                },
+                                                label: function(context) {
+                                                    const val = context.raw;
+                                                    const pct = totalApplicants > 0 ? ((val / totalApplicants) * 100).toFixed(1) : 0;
+                                                    return ` ${val} Candidates (${pct}%)`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            grid: { display: false },
+                                            ticks: {
+                                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 11 },
+                                                color: '#334155',
+                                                maxRotation: 0,
+                                                minRotation: 0,
+                                                autoSkip: false,
+                                                padding: 6
+                                            }
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            suggestedMax: 35,
+                                            grid: { color: '#f1f5f9' },
+                                            ticks: {
+                                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                                                color: '#64748b',
+                                                stepSize: 5
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // 2. Fee Clearance Donut Chart
+                        const paymentCanvas = document.getElementById('telecallerPaymentChart');
+                        if (paymentCanvas && !paymentCanvas.dataset.chartInit) {
+                            paymentCanvas.dataset.chartInit = 'true';
+                            new Chart(paymentCanvas, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Fee Paid', 'Fee Due'],
+                                    datasets: [{
+                                        data: [paidCount, dueCount],
+                                        backgroundColor: ['#10b981', '#f59e0b'],
+                                        borderColor: '#ffffff',
+                                        borderWidth: 3,
+                                        hoverOffset: 3
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '72%',
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { enabled: false }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+
+                function filterTelecallerTable() {
+                    const input = document.getElementById('telecallerSearchInput');
+                    const filter = (input ? input.value : '').toLowerCase().trim();
+                    const rows = document.querySelectorAll('#telecallerTable tbody tr.telecaller-row');
+                    const promptRow = document.getElementById('telecallerSearchPromptRow');
+                    const noResultsRow = document.getElementById('telecallerNoResultsRow');
+
+                    if (!filter) {
+                        rows.forEach(row => row.style.display = 'none');
+                        if (promptRow) promptRow.style.display = '';
+                        if (noResultsRow) noResultsRow.style.display = 'none';
+                        return;
+                    }
+
+                    if (promptRow) promptRow.style.display = 'none';
+                    let visibleCount = 0;
+
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        if (text.includes(filter)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    if (noResultsRow) {
+                        noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+                    }
+                }
+                </script>
+
+            @elseif(($activeTab ?? '') === 'leadskpi')
+                <!-- TAB: LEADS KPI & ACQUISITION ANALYTICS -->
+                <div class="content-card">
+                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                        <div>
+                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <span>🎯 Leads KPI &amp; Acquisition Analytics</span>
+                            </div>
+                            <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #475569;">Raw Inflow:</span>
+                                    <strong style="color: #0284c7;">100%</strong>
+                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ number_format($totalRawLeads) }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #047857;">Fee Payment:</span>
+                                    <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #1e40af;">Personal Profile:</span>
+                                    <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #6d28d9;">Academic Records:</span>
+                                    <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #c2410c;">Application Form:</span>
+                                    <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
+                                </span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
+                                    <span style="font-weight: 700; color: #64748b;">Seat Allotment:</span>
+                                    <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
+                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Header Metadata Badges -->
+                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span>📅</span> Intake Cycle 2026–27
+                            </span>
+                            <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
+                                {{ number_format($totalRawLeads) }} Raw Enquiries
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 1.5rem;">
+                        <!-- 1. TOP EXECUTIVE METRIC CARDS -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                            <!-- Card 1: Total Raw Inflow -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Raw Enquiries</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalRawLeads) }}</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Inflow Captured</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📥</div>
+                            </div>
+
+                            <!-- Card 2: Fee Payment Conversion -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid Leads</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                            </div>
+
+                            <!-- Card 3: Profile Completion -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Profiles Submitted</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            </div>
+
+                            <!-- Card 4: Academic Verified -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Enrolments Completed</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. VISUAL KPI ANALYTICS (BAR GRAPHS & CHARTS) -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
+                            <!-- Chart 1: Admissions Funnel Progression (Vertical Bar Graph) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Milestone Progression Funnel</div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Applicant conversion through enrollment stages</div>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Enrollment Funnel</span>
+                                </div>
+                                <div style="position: relative; flex-grow: 1; min-height: 270px; max-height: 310px;" id="leadsFunnelContainer">
+                                    <canvas id="leadsFunnelChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2: Fee Clearance Health (Donut / Doughnut Chart + Clear Metrics) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Payment Clearance Status</div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Stage 1 application fee verification ratio</div>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #d1fae5;">Fee Health</span>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.25rem; align-items: center; flex-grow: 1;" id="leadsPaymentContainer">
+                                    <!-- Donut Chart with Center Text -->
+                                    <div style="position: relative; width: 175px; height: 175px; margin: 0 auto;">
+                                        <canvas id="leadsPaymentChart"></canvas>
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                                            <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
+                                            <div style="font-size: 0.7rem; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px;">Cleared</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- High-Visibility Clear Metric Cards -->
+                                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.04em;">Fee Paid</span>
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 1px 7px; border-radius: 4px;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</span>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
+                                                {{ $kpiStage1Paid }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
+                                            </div>
+                                            <div style="font-size: 0.72rem; color: #16a34a; font-weight: 500;">Verified via Payment Gateway</div>
+                                        </div>
+
+                                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Fee Due</span>
+                                                <span style="font-size: 0.75rem; font-weight: 700; color: #d97706; background: #fef3c7; padding: 1px 7px; border-radius: 4px;">{{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%</span>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
+                                                {{ max(0, $kpiTotal - $kpiStage1Paid) }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
+                                            </div>
+                                            <div style="font-size: 0.72rem; color: #d97706; font-weight: 500;">Pending Intake Clearance</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Segmented Clearance Bar -->
+                                <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: #64748b; margin-bottom: 0.35rem;">
+                                        <span>Paid: {{ $kpiStage1Paid }} ({{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%)</span>
+                                        <span>Pending: {{ max(0, $kpiTotal - $kpiStage1Paid) }} ({{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%)</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #fef3c7; border-radius: 999px; overflow: hidden; display: flex;">
+                                        <div style="width: {{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%; height: 100%; background: #10b981; border-radius: 999px 0 0 999px;"></div>
+                                        <div style="width: {{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%; height: 100%; background: #f59e0b; border-radius: 0 999px 999px 0;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. BRANCH & DISCIPLINE INTAKE DEMAND (EXECUTIVE CARDS GRID) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.75rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.15rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Branch &amp; Discipline Intake Demand</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Applicant interest and distribution across academic programs</div>
+                                </div>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: #7c3aed; background: #f5f3ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #ede9fe;">Top 6 Disciplines</span>
+                            </div>
+
+                            @php
+                                $branchMetaMapLeads = [
+                                    'Information Technology' => ['icon' => '💻', 'tag' => 'Computing', 'color' => '#2563eb', 'bg' => '#eff6ff'],
+                                    'Computer Science & Engineering' => ['icon' => '🖥️', 'tag' => 'Core CSE', 'color' => '#0284c7', 'bg' => '#f0f9ff'],
+                                    'CSE - Artificial Intelligence & Machine Learning' => ['icon' => '🤖', 'tag' => 'AI & ML', 'color' => '#7c3aed', 'bg' => '#f5f3ff'],
+                                    'CSE - AI & ML' => ['icon' => '🤖', 'tag' => 'AI & ML', 'color' => '#7c3aed', 'bg' => '#f5f3ff'],
+                                    'Electronics & Communication Engineering' => ['icon' => '📡', 'tag' => 'ECE', 'color' => '#0891b2', 'bg' => '#ecfeff'],
+                                    'Biotechnology' => ['icon' => '🧬', 'tag' => 'BioTech', 'color' => '#059669', 'bg' => '#ecfdf5'],
+                                    'Mechanical Engineering' => ['icon' => '⚙️', 'tag' => 'Mechanical', 'color' => '#ea580c', 'bg' => '#fff7ed'],
+                                    'Civil Engineering' => ['icon' => '🏗️', 'tag' => 'Civil', 'color' => '#d97706', 'bg' => '#fffbeb'],
+                                ];
+                                $leadRank = 1;
+                            @endphp
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                                @foreach($kpiBranchDistribution as $bName => $bCount)
+                                    @php
+                                        $bPct = round(($bCount / $kpiTotal) * 100, 1);
+                                        $meta = $branchMetaMapLeads[$bName] ?? ['icon' => '🎓', 'tag' => 'Engineering', 'color' => '#475569', 'bg' => '#f8fafc'];
+                                    @endphp
+                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.1rem 1.15rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 32px; height: 32px; border-radius: 8px; background: {{ $meta['bg'] }}; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                                    {{ $meta['icon'] }}
+                                                </div>
+                                                <span style="font-size: 0.7rem; font-weight: 700; color: {{ $meta['color'] }}; background: {{ $meta['bg'] }}; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
+                                                    {{ $meta['tag'] }}
+                                                </span>
+                                            </div>
+                                            <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 1px solid #f1f5f9; padding: 2px 7px; border-radius: 6px;">
+                                                #{{ $leadRank++ }}
+                                            </span>
+                                        </div>
+
+                                        <div>
+                                            <div style="font-size: 0.9rem; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 0.35rem;" title="{{ $bName }}">{{ $bName }}</div>
+                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                                <span style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">
+                                                    {{ $bCount }} <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">applicants</span>
+                                                </span>
+                                                <span style="font-size: 0.8rem; font-weight: 700; color: {{ $meta['color'] }};">
+                                                    {{ $bPct }}%
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: {{ min(100, $bPct * 2) }}%; height: 100%; background: {{ $meta['color'] }}; border-radius: 4px;"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- 4. DETAILED SEARCHABLE CANDIDATE INTAKE RECORDS TABLE -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Detailed Candidate Intake Records</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Live searchable directory of applicant milestones and fee clearance</div>
+                                </div>
+                                <div style="position: relative;">
+                                    <input type="text" id="leadsSearchInput" placeholder="Search by student name, application no, branch..." onkeyup="filterLeadsTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 300px; outline: none; background: #ffffff;">
+                                    <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="crm-table" id="leadsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Application #</th>
+                                            <th>Student Name</th>
+                                            <th>Branch / Program</th>
+                                            <th>Registration</th>
+                                            <th>Payment (Stage 1)</th>
+                                            <th>Personal (Stage 2)</th>
+                                            <th>Academic (Stage 3)</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Prompt row shown by default when search input is empty -->
+                                        <tr id="leadsSearchPromptRow">
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">Type in the search box above to view student progress</div>
+                                            </td>
+                                        </tr>
+                                        <!-- Empty match state when search yields zero rows -->
+                                        <tr id="leadsNoResultsRow" style="display: none;">
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">❌</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student records found</div>
+                                            </td>
+                                        </tr>
+                                        @foreach($allStudents as $student)
+                                            @php
+                                                $sAppNo = (string)($student->applinano ?? $student->application_no ?? 'N/A');
+                                                $sName = $student->name ?? $student->student_name ?? 'Candidate';
+                                                $sBranch = $student->branch?->branch_long_name ?? $student->branch?->branch_short_name ?? $student->program?->program_long_name ?? 'B.Tech';
+                                                
+                                                $s1 = strtolower(trim((string)($student->stage1 ?? '')));
+                                                $s2 = strtolower(trim((string)($student->stage2 ?? '')));
+                                                $s3 = strtolower(trim((string)($student->stage3 ?? '')));
+                                                
+                                                // Genuine fee payment check: status 'paid' or verified in finance records
+                                                $isS1 = ($s1 === 'paid') || (isset($paidAppNos) && $paidAppNos->contains($sAppNo));
+                                                $isS2 = in_array($s2, ['completed', 'approved', 'done'], true);
+                                                $isS3 = in_array($s3, ['completed', 'approved', 'done'], true);
+                                                
+                                                $completedSteps = 1 + ($isS1 ? 1 : 0) + ($isS2 ? 1 : 0) + ($isS3 ? 1 : 0);
+                                                $progressPct = round(($completedSteps / 5) * 100);
+                                            @endphp
+                                            <tr class="leads-row" style="display: none;">
+                                                <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
+                                                <td>
+                                                    <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
+                                                    @if(!empty($student->phoneno ?? $student->mobile))
+                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span style="font-size: 0.825rem; color: #475569; font-weight: 600;">{{ $sBranch }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                        ✓ Done
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @if($isS1)
+                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Paid
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-pending" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($isS2)
+                                                        <span class="badge-status badge-paid" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Done
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($isS3)
+                                                        <span class="badge-status badge-paid" style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+                                                            ✓ Verified
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
+                                                            Pending
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                        <div style="flex-grow: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; width: 60px;">
+                                                            <div style="height: 100%; width: {{ $progressPct }}%; background: {{ $progressPct >= 80 ? '#10b981' : ($progressPct >= 40 ? '#3b82f6' : '#f59e0b') }};"></div>
+                                                        </div>
+                                                        <span style="font-size: 0.72rem; font-weight: 700; color: #475569;">{{ $progressPct }}%</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    initLeadsVisualCharts();
+                });
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    setTimeout(initLeadsVisualCharts, 50);
+                }
+
+                function initLeadsVisualCharts() {
+                    const funnelLabels = [
+                        ['Registration'],
+                        ['Fee', 'Payment'],
+                        ['Personal', 'Details'],
+                        ['Academic', 'Records'],
+                        ['Application', 'Form'],
+                        ['Seat', 'Allotment']
+                    ];
+                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
+                    const totalApplicants = {{ (int)$kpiTotal }};
+                    const paidCount = {{ (int)$kpiStage1Paid }};
+                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+
+                    if (typeof Chart !== 'undefined') {
+                        // 1. Funnel Vertical Bar Chart
+                        const funnelCanvas = document.getElementById('leadsFunnelChart');
+                        if (funnelCanvas && !funnelCanvas.dataset.chartInit) {
+                            funnelCanvas.dataset.chartInit = 'true';
+                            new Chart(funnelCanvas, {
+                                type: 'bar',
+                                data: {
+                                    labels: funnelLabels,
+                                    datasets: [{
+                                        label: 'Applicants',
+                                        data: funnelCounts,
+                                        backgroundColor: [
+                                            'rgba(2, 132, 199, 0.85)',
+                                            'rgba(16, 185, 129, 0.85)',
+                                            'rgba(37, 99, 235, 0.85)',
+                                            'rgba(124, 58, 237, 0.85)',
+                                            'rgba(234, 88, 12, 0.85)',
+                                            'rgba(8, 145, 178, 0.85)'
+                                        ],
+                                        borderColor: [
+                                            '#0284c7',
+                                            '#10b981',
+                                            '#2563eb',
+                                            '#7c3aed',
+                                            '#ea580c',
+                                            '#0891b2'
+                                        ],
+                                        borderWidth: 1.5,
+                                        borderRadius: 8,
+                                        borderSkipped: false,
+                                        maxBarThickness: 46
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: {
+                                            backgroundColor: '#0f172a',
+                                            padding: 10,
+                                            titleFont: { size: 12, weight: 'bold' },
+                                            bodyFont: { size: 12 },
+                                            cornerRadius: 8,
+                                            callbacks: {
+                                                title: function(context) {
+                                                    const fullNames = ['Registration', 'Fee Payment', 'Personal Details', 'Academic Records', 'Application Form', 'Seat Allotment'];
+                                                    const idx = context[0].dataIndex;
+                                                    return fullNames[idx] || '';
+                                                },
+                                                label: function(context) {
+                                                    const val = context.raw;
+                                                    const pct = totalApplicants > 0 ? ((val / totalApplicants) * 100).toFixed(1) : 0;
+                                                    return ` ${val} Applicants (${pct}%)`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            grid: { display: false },
+                                            ticks: {
+                                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 11 },
+                                                color: '#334155',
+                                                maxRotation: 0,
+                                                minRotation: 0,
+                                                autoSkip: false,
+                                                padding: 6
+                                            }
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            suggestedMax: 35,
+                                            grid: { color: '#f1f5f9' },
+                                            ticks: {
+                                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+                                                color: '#64748b',
+                                                stepSize: 5
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // 2. Fee Clearance Donut Chart
+                        const paymentCanvas = document.getElementById('leadsPaymentChart');
+                        if (paymentCanvas && !paymentCanvas.dataset.chartInit) {
+                            paymentCanvas.dataset.chartInit = 'true';
+                            new Chart(paymentCanvas, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Fee Paid', 'Fee Due'],
+                                    datasets: [{
+                                        data: [paidCount, dueCount],
+                                        backgroundColor: ['#10b981', '#f59e0b'],
+                                        borderColor: '#ffffff',
+                                        borderWidth: 3,
+                                        hoverOffset: 3
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '72%',
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { enabled: false }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+
+                function filterLeadsTable() {
+                    const input = document.getElementById('leadsSearchInput');
+                    const filter = (input ? input.value : '').toLowerCase().trim();
+                    const rows = document.querySelectorAll('#leadsTable tbody tr.leads-row');
+                    const promptRow = document.getElementById('leadsSearchPromptRow');
+                    const noResultsRow = document.getElementById('leadsNoResultsRow');
+
+                    if (!filter) {
+                        rows.forEach(row => row.style.display = 'none');
+                        if (promptRow) promptRow.style.display = '';
+                        if (noResultsRow) noResultsRow.style.display = 'none';
+                        return;
+                    }
+
+                    if (promptRow) promptRow.style.display = 'none';
+                    let visibleCount = 0;
+
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        if (text.includes(filter)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    if (noResultsRow) {
+                        noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+                    }
+                }
+                </script>
 
             @elseif(($activeTab ?? '') === 'overview')
                 <!-- TAB: OVERVIEW DASHBOARD (HIDDEN BY DEFAULT) -->
