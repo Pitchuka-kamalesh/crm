@@ -86,6 +86,11 @@ class CrmStudentRegistration extends Model
         return $this->hasMany(TelecallerLeadTask::class, 'applino', 'applinano');
     }
 
+    public function uploads()
+    {
+        return $this->hasOne(StudentUpload::class, 'applino', 'applinano');
+    }
+
     /**
      * Generate the next 10-digit application number starting from 2027000001.
      */

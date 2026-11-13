@@ -24,10 +24,10 @@
 <meta charset="utf-8">
 <title>Application Form - {{ $student->name }}</title>
 <style>
-    @page { size: A4; margin: 0; }
+    @page { size: A4 portrait; margin: 0; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Helvetica, Arial, sans-serif; color: #1B2430; font-size: 11px; background: #F4F7FB; }
-    .page { width: 210mm; height: 297mm; margin: 0 auto; background: #F4F7FB; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.12); }
+    body { margin: 0; font-family: Helvetica, Arial, sans-serif; color: #1B2430; font-size: 11px; background: #F4F7FB; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: #F4F7FB; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.12); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     table { border-collapse: collapse; border-spacing: 0; }
     td { vertical-align: top; }
 
@@ -102,16 +102,16 @@
     .btn-back:hover { background: #e2e8f0; color: #0F2A4A; }
     .btn svg { vertical-align: -3px; margin-right: 6px; }
     @media print {
-        body { background: #fff; }
-        .page { box-shadow: none; }
-        .toolbar { display: none; }
+        body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { box-shadow: none; width: 100%; margin: 0; padding: 0; }
+        .toolbar { display: none !important; }
     }
 </style>
 </head>
 <body>
 @if (empty($isPdf))
     <div class="toolbar">
-        <a class="btn btn-back" href="{{ route('dashboards.index', ['step' => 4]) }}">
+        <a class="btn btn-back" href="{{ route('dashboards.index', ['step' => 5]) }}">
             &larr; Back to Portal
         </a>
         <div style="display:flex; gap:8px;">
