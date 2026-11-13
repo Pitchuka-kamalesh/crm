@@ -1547,7 +1547,7 @@
                             </div>
                         @else
                             @php
-                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '2027000005';
+                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? (string) session('student_applino', '');
                                 $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
                             @endphp
                             <div style="margin-bottom: 0.65rem; text-align: left;">
@@ -2772,16 +2772,22 @@
 
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] }}
+                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Application upload' }}
                         </a>
-                        <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Proceed to Stage 6: {{ $stages[6]['title'] ?? 'VSAT Result' }} &rarr;</span>
-                        </button>
+                        @if(isset($stages[6]))
+                            <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                <span>Proceed to Stage 6: {{ $stages[6]['title'] }} &rarr;</span>
+                            </button>
+                        @else
+                            <button type="submit" class="btn-step-next" style="background: #16a34a;">
+                                <span>✓ Complete Onboarding &amp; Confirm Submission</span>
+                            </button>
+                        @endif
                     </div>
                 </form>
 
-            <!-- ================= STAGE 6: VSAT RESULTS (master.menus: CRMM0007) ================= -->
-            @elseif($activeStep === 6)
+            <!-- ================= STAGE 6: OPTIONAL SUBSEQUENT STAGE ================= -->
+            @elseif($activeStep === 6 && isset($stages[6]))
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 6 of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
@@ -2808,7 +2814,7 @@
                                 </div>
                                 <div>
                                     <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e3a8a;">V-SAT 2026 National Entrance Examination</h4>
-                                    <span style="font-size:0.8rem; color:#475569;">Hall Ticket: <strong>VSAT26-{{ $appNo ?: '2027000005' }}</strong> &bull; Exam Mode: Online Computer Based</span>
+                                    <span style="font-size:0.8rem; color:#475569;">Hall Ticket: <strong>VSAT26-{{ $appNo ?: '' }}</strong> &bull; Exam Mode: Online Computer Based</span>
                                 </div>
                             </div>
                             <span class="meta-badge meta-badge-success" style="font-size:0.85rem; padding:0.4rem 0.85rem;">✓ Qualified for Counseling</span>

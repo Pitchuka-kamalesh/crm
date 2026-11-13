@@ -29,4 +29,6 @@ Thumbs.db
 /scratch/
 *.sql
 *.backup
+/public/uploads/
+/public/uploads/**
 

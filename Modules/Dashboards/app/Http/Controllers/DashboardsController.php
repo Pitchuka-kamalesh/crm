@@ -171,104 +171,67 @@ class DashboardsController extends Controller
             $roleMenus = MenuAccessRole::forRole($roleId);
         } catch (\Throwable $e) {}
 
-        // Default 6-Stage Metadata definitions (aligned with master.menus)
-        $stageMeta = [
-            1 => [
-                'menu_id' => 109,
-                'menu_code' => 'FINA0003',
-                'title' => 'Fee Payment',
-                'subtitle' => 'Seat Confirmation & Fee Payment',
-                'icon' => '💳',
-            ],
-            2 => [
-                'menu_id' => 110,
-                'menu_code' => 'CRMM0004',
-                'title' => 'Personal Profile',
-                'subtitle' => 'Candidate Bio & Contact Information',
-                'icon' => '👤',
-            ],
-            3 => [
-                'menu_id' => 111,
-                'menu_code' => 'CRMM0005',
-                'title' => 'Academic Info',
-                'subtitle' => '10th SSC & Intermediate Details',
-                'icon' => '🎓',
-            ],
-            4 => [
-                'menu_id' => 112,
-                'menu_code' => 'CRMM0006',
-                'title' => 'Application upload',
-                'subtitle' => 'Upload Candidate Documents & Certificates',
-                'icon' => '📤',
-            ],
-            5 => [
-                'menu_id' => 122,
-                'menu_code' => 'CRMM0010',
-                'title' => 'Application Download',
-                'subtitle' => 'Official Application PDF & Final Submission',
-                'icon' => '📥',
-            ],
-            6 => [
-                'menu_id' => 113,
-                'menu_code' => 'CRMM0007',
-                'title' => 'VSAT Result',
-                'subtitle' => 'VSAT Scorecard & Merit Rank Details',
-                'icon' => '📊',
-            ],
+        // Standard subtitles & icons mapped by menu_code / controller_ref
+        $metaDetails = [
+            'FINA0003' => ['subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳'],
+            'CRMM0004' => ['subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤'],
+            'CRMM0005' => ['subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓'],
+            'CRMM0006' => ['subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤'],
+            'CRMM0010' => ['subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥'],
         ];
 
-        // Dynamically populate stage titles, icons and active status from master.menus table
-        try {
-            $dbStageMenus = Menu::whereIn('menu_id', [109, 110, 111, 112, 113, 122])
-                ->orWhere('controller_ref', 'like', 'step%')
-                ->orWhere('controller_ref', 'like', 'dashboards?step=%')
-                ->get();
-
-            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 122 => 5, 113 => 6];
-            foreach ($dbStageMenus as $m) {
-                $stepNum = null;
-                if (!empty($m->controller_ref) && preg_match('/step\D*(\d+)/i', $m->controller_ref, $matches)) {
-                    $stepNum = (int) $matches[1];
-                } elseif (isset($stepMap[$m->menu_id])) {
-                    $stepNum = $stepMap[$m->menu_id];
-                }
-                if ($stepNum && isset($stageMeta[$stepNum])) {
-                    if (!empty($m->menu_name)) {
-                        $stageMeta[$stepNum]['title'] = trim((string) $m->menu_name);
-                    }
-                    if (!empty($m->icon_name)) {
-                        $stageMeta[$stepNum]['icon_name'] = $m->icon_name;
-                    }
-                    $stageMeta[$stepNum]['menu_id'] = (int) $m->menu_id;
-                    $stageMeta[$stepNum]['menu_code'] = $m->menu_code;
-                    $stageMeta[$stepNum]['lock_status'] = (int) $m->lock_status;
+        // Build $stageMeta dynamically from the database
+        $stageMeta = [];
+        if ($roleMenus->isNotEmpty()) {
+            foreach ($roleMenus as $item) {
+                $stepNum = (int) $item->morder;
+                $menu = $item->menu;
+                if ($menu) {
+                    $mCode = (string) $menu->menu_code;
+                    $stageMeta[$stepNum] = [
+                        'menu_id'     => (int) $menu->menu_id,
+                        'menu_code'   => $mCode,
+                        'title'       => trim((string) $menu->menu_name),
+                        'subtitle'    => $metaDetails[$mCode]['subtitle'] ?? ($menu->menu_name . ' Information'),
+                        'icon'        => $metaDetails[$mCode]['icon'] ?? '📋',
+                        'lock_status' => (int) $menu->lock_status,
+                    ];
                 }
             }
-        } catch (\Throwable $e) {
-            Log::warning('Could not load dynamic stage menus from master.menus: ' . $e->getMessage());
         }
 
-        // Determine total active steps (defaults to 6 steps if menu 122 exists)
-        $totalSteps = isset($stageMeta[6]) ? 6 : 5;
+        // Safe 5-stage fallback if database roles/menus are not yet seeded
+        if (empty($stageMeta)) {
+            $stageMeta = [
+                1 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
+                2 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
+                3 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
+                4 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Application upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
+                5 => ['menu_id' => 122, 'menu_code' => 'CRMM0010', 'title' => 'Application Download', 'subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥', 'lock_status' => 0],
+            ];
+        }
+
+        ksort($stageMeta);
+        $totalSteps = count($stageMeta);
 
         // Calculate stage statuses strictly from crmStudent DB columns
         $stages = [];
-        for ($i = 1; $i <= $totalSteps; $i++) {
+        foreach ($stageMeta as $i => $meta) {
             $col = 'stage' . $i;
             $val = $crmStudent ? (string)$crmStudent->{$col} : '';
-            // For stage 1, 'paid' or $isStage1Paid is completed; for stages 2-6, 'completed' or 'paid' is completed
+            // For stage 1, 'paid' or $isStage1Paid is completed; for other stages, 'completed' or 'paid' is completed
             $isCompleted = ($i === 1) ? ($val === 'paid' || $isStage1Paid) : ($val === 'completed' || $val === 'paid');
 
             $stages[$i] = [
-                'title' => $stageMeta[$i]['title'],
-                'subtitle' => $stageMeta[$i]['subtitle'],
-                'icon' => $stageMeta[$i]['icon'],
-                'status' => $isCompleted ? 'completed' : 'pending',
-                'db_field' => $col,
-                'db_value' => $val ?: ($i === 1 ? 'not_paid' : 'NA'),
-                'menu_id' => $stageMeta[$i]['menu_id'] ?? null,
-                'menu_code' => $stageMeta[$i]['menu_code'] ?? null,
-                'is_locked_by_menu' => !empty($stageMeta[$i]['lock_status']),
+                'title'             => $meta['title'],
+                'subtitle'          => $meta['subtitle'],
+                'icon'              => $meta['icon'],
+                'status'            => $isCompleted ? 'completed' : 'pending',
+                'db_field'          => $col,
+                'db_value'          => $val ?: ($i === 1 ? 'not_paid' : 'NA'),
+                'menu_id'           => $meta['menu_id'] ?? null,
+                'menu_code'         => $meta['menu_code'] ?? null,
+                'is_locked_by_menu' => !empty($meta['lock_status']),
             ];
         }
 
@@ -768,8 +731,10 @@ class DashboardsController extends Controller
                         'log_timestamp' => now(),
                     ]);
                 }
-                $nextStep = 6;
-                $msg = 'Stage 5: Application Download completed!';
+                // Check if step 6 exists in menu_access_roles for role 5
+                $hasStep6 = MenuAccessRole::where('role_id', 5)->where('morder', 6)->exists();
+                $nextStep = $hasStep6 ? 6 : 5;
+                $msg = 'Stage 5: Application Download completed & Onboarding verified!';
             } elseif ($step === 6) {
                 if ($crmStudent) {
                     $crmStudent->update([
@@ -779,7 +744,7 @@ class DashboardsController extends Controller
                     ]);
                 }
                 $nextStep = 6;
-                $msg = 'Stage 6: VSAT Result verified!';
+                $msg = 'Stage 6 verified!';
             } else {
                 $msg = 'Stage updated successfully!';
             }
@@ -1002,7 +967,7 @@ class DashboardsController extends Controller
 
         if (empty($applino)) {
             $user = Auth::user();
-            $applino = $user?->usercode ?? '2027000005';
+            $applino = $user?->usercode ?? (string) session('student_applino', '');
         }
 
         $res = \App\Services\CouponService::validateAndApplyPersonalCoupon($code, $applino);

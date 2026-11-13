@@ -29,54 +29,6 @@ class AppServiceProvider extends ServiceProvider
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS usercode VARCHAR(50);");
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS user_ip VARCHAR(45);");
             } catch (\Throwable $e) {}
-
-            // Settle confirmed payment for candidate 2027000005 & sync stage1 in student_registration
-            try {
-                \Illuminate\Support\Facades\DB::table('crm.student_registration')
-                    ->where('applinano', '2027000005')
-                    ->update(['stage1' => 'paid']);
-
-                if (!\Illuminate\Support\Facades\DB::table('finance.paydetails')->where('applino', '2027000005')->where('txnstatus', 'success')->exists()) {
-                    $nextFeeId = (\Illuminate\Support\Facades\DB::table('finance.paydetails')->max('feeid') ?? 0) + 1;
-                    \Illuminate\Support\Facades\DB::table('finance.paydetails')->insert([
-                        'feeid' => $nextFeeId,
-                        'applino' => '2027000005',
-                        'feepayable' => 1200.00,
-                        'defcoupon' => '27EARLYB100',
-                        'defcouponamount' => 500.00,
-                        'percoupon' => '27000005P1',
-                        'percouponamount' => 500.00,
-                        'totalcouponamount' => 1000.00,
-                        'paidamount' => 200.00,
-                        'paytype' => 'PayU (Online)',
-                        'txncrmid' => 'TXN2611122027000005',
-                        'txnpayuid' => 'PAYU2611122027000005',
-                        'txnstatus' => 'success',
-                        'txnremark' => 'Net Paid: ₹200.00 | Concessions: ₹1,000.00 (27EARLYB100 & 27000005P1)',
-                        'txndatetime' => now(),
-                        'log_timestamp' => now(),
-                    ]);
-                }
-
-                if (!\Illuminate\Support\Facades\DB::table('finance.receiptdetails')->where('applino', '2027000005')->exists()) {
-                    $nextRecId = (\Illuminate\Support\Facades\DB::table('finance.receiptdetails')->max('id') ?? 0) + 1;
-                    \Illuminate\Support\Facades\DB::table('finance.receiptdetails')->insert([
-                        'id' => $nextRecId,
-                        'applino' => '2027000005',
-                        'receiptno' => 'REC-2026-1112-0005',
-                        'paytype' => 'PayU',
-                        'feepayable' => 200.00,
-                        'defcouponamount' => 500.00,
-                        'percouponamount' => 500.00,
-                        'totalcouponamount' => 1000.00,
-                        'txndatetime' => now(),
-                        'receiptdatetime' => now(),
-                        'log_userid' => '2027000005',
-                        'log_ipaddress' => '127.0.0.1',
-                        'log_timestamp' => now(),
-                    ]);
-                }
-            } catch (\Throwable $e) {}
         }
     }
 }
