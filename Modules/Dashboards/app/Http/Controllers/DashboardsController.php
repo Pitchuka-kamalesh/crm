@@ -14,6 +14,7 @@ use App\Models\State;
 use App\Models\StudentAcademicDetail;
 use App\Models\StudentEducationInfo;
 use App\Models\StudentPersonalInfo;
+use App\Models\StudentUpload;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -26,9 +27,9 @@ use Illuminate\View\View;
 class DashboardsController extends Controller
 {
     /**
-     * Display the 8-Stage Student Admission & Onboarding Landing Page.
+     * Display the 6-Stage Student Admission & Onboarding Landing Page.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $user = Auth::user();
         $usercode = $user?->usercode ?? '';
@@ -37,9 +38,9 @@ class DashboardsController extends Controller
             $cleanPhone = substr($cleanPhone, -10);
         }
 
-        // Active step (1 through 5, default 1)
+        // Active step (1 through 6, default 1)
         $activeStep = (int) $request->query('step', 1);
-        if ($activeStep < 1 || $activeStep > 5) {
+        if ($activeStep < 1 || $activeStep > 6) {
             $activeStep = 1;
         }
 
@@ -111,11 +112,26 @@ class DashboardsController extends Controller
         $campus = $campusCode ? Campus::where('campus_code', $campusCode)->first() : null;
         $campusName = $campus ? $campus->campus_short_name : '';
 
-        // Determine Degree Level for Step 3 (B.Tech, M.Tech, PhD)
-        $progShort = strtoupper($program?->program_short_name ?? ($crmStudent?->programlevel ?? 'B.Tech'));
-        if (str_contains($progShort, 'M.TECH') || in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])) {
+        // Determine Degree Level for Step 3 based on registration (UG -> B.Tech, PG -> M.Tech, Doctoral -> PhD)
+        $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
+        $progShort = strtoupper($program?->program_short_name ?? '');
+        $progName = strtoupper($program?->program_name ?? '');
+
+        if (
+            $progLevel === 'PG' ||
+            str_contains($progShort, 'M.TECH') ||
+            str_contains($progShort, 'MTECH') ||
+            str_contains($progName, 'MASTER') ||
+            in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])
+        ) {
             $degreeLevel = 'mtech';
-        } elseif (str_contains($progShort, 'PHD') || str_contains($progShort, 'PH.D')) {
+        } elseif (
+            $progLevel === 'PHD' ||
+            $progLevel === 'DOCTORAL' ||
+            str_contains($progShort, 'PHD') ||
+            str_contains($progShort, 'PH.D') ||
+            str_contains($progName, 'DOCTOR')
+        ) {
             $degreeLevel = 'phd';
         } else {
             $degreeLevel = 'btech';
@@ -148,42 +164,67 @@ class DashboardsController extends Controller
         $documents = collect();
         $uploadedDocs = self::getUploadedDocuments((string) $appNo);
 
-        // 5-Stage Metadata definitions (strictly aligned with master.menus)
+        // Role-based assigned menus from master.menu_access_roles (with crm fallback)
+        $roleId = $user ? (int) $user->getActiveRoleId() : 5;
+        $roleMenus = collect();
+        try {
+            $roleMenus = MenuAccessRole::forRole($roleId);
+        } catch (\Throwable $e) {}
+
+        // Default 6-Stage Metadata definitions (aligned with master.menus)
         $stageMeta = [
             1 => [
+                'menu_id' => 109,
+                'menu_code' => 'FINA0003',
                 'title' => 'Fee Payment',
                 'subtitle' => 'Seat Confirmation & Fee Payment',
                 'icon' => '💳',
             ],
             2 => [
+                'menu_id' => 110,
+                'menu_code' => 'CRMM0004',
                 'title' => 'Personal Profile',
                 'subtitle' => 'Candidate Bio & Contact Information',
                 'icon' => '👤',
             ],
             3 => [
+                'menu_id' => 111,
+                'menu_code' => 'CRMM0005',
                 'title' => 'Academic Info',
                 'subtitle' => '10th SSC & Intermediate Details',
                 'icon' => '🎓',
             ],
             4 => [
-                'title' => 'Application Download',
-                'subtitle' => 'Application PDF & Documents Download',
-                'icon' => '📄',
+                'menu_id' => 112,
+                'menu_code' => 'CRMM0006',
+                'title' => 'Application upload',
+                'subtitle' => 'Upload Candidate Documents & Certificates',
+                'icon' => '📤',
             ],
             5 => [
-                'title' => 'VSAT Results',
+                'menu_id' => 122,
+                'menu_code' => 'CRMM0010',
+                'title' => 'Application Download',
+                'subtitle' => 'Official Application PDF & Final Submission',
+                'icon' => '📥',
+            ],
+            6 => [
+                'menu_id' => 113,
+                'menu_code' => 'CRMM0007',
+                'title' => 'VSAT Result',
                 'subtitle' => 'VSAT Scorecard & Merit Rank Details',
                 'icon' => '📊',
             ],
         ];
 
-        // Dynamically populate stage titles from master.menus table so DB updates reflect immediately via Eloquent
+        // Dynamically populate stage titles, icons and active status from master.menus table
         try {
-            $dbStageMenus = Menu::whereIn('menu_id', [109, 110, 111, 112, 113])
+            $dbStageMenus = Menu::whereIn('menu_id', [109, 110, 111, 112, 113, 122])
+                ->orWhere('controller_ref', 'like', 'step%')
                 ->orWhere('controller_ref', 'like', 'dashboards?step=%')
                 ->get();
 
-            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 113 => 5];
+            $stepMap = [109 => 1, 110 => 2, 111 => 3, 112 => 4, 122 => 5, 113 => 6];
             foreach ($dbStageMenus as $m) {
                 $stepNum = null;
                 if (!empty($m->controller_ref) && preg_match('/step\D*(\d+)/i', $m->controller_ref, $matches)) {
@@ -191,20 +232,31 @@ class DashboardsController extends Controller
                 } elseif (isset($stepMap[$m->menu_id])) {
                     $stepNum = $stepMap[$m->menu_id];
                 }
-                if ($stepNum && isset($stageMeta[$stepNum]) && !empty($m->menu_name)) {
-                    $stageMeta[$stepNum]['title'] = trim((string) $m->menu_name);
+                if ($stepNum && isset($stageMeta[$stepNum])) {
+                    if (!empty($m->menu_name)) {
+                        $stageMeta[$stepNum]['title'] = trim((string) $m->menu_name);
+                    }
+                    if (!empty($m->icon_name)) {
+                        $stageMeta[$stepNum]['icon_name'] = $m->icon_name;
+                    }
+                    $stageMeta[$stepNum]['menu_id'] = (int) $m->menu_id;
+                    $stageMeta[$stepNum]['menu_code'] = $m->menu_code;
+                    $stageMeta[$stepNum]['lock_status'] = (int) $m->lock_status;
                 }
             }
         } catch (\Throwable $e) {
             Log::warning('Could not load dynamic stage menus from master.menus: ' . $e->getMessage());
         }
 
+        // Determine total active steps (defaults to 6 steps if menu 122 exists)
+        $totalSteps = isset($stageMeta[6]) ? 6 : 5;
+
         // Calculate stage statuses strictly from crmStudent DB columns
         $stages = [];
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= $totalSteps; $i++) {
             $col = 'stage' . $i;
             $val = $crmStudent ? (string)$crmStudent->{$col} : '';
-            // For stage 1, 'paid' or $isStage1Paid is completed; for stages 2-5, 'completed' or 'paid' is completed
+            // For stage 1, 'paid' or $isStage1Paid is completed; for stages 2-6, 'completed' or 'paid' is completed
             $isCompleted = ($i === 1) ? ($val === 'paid' || $isStage1Paid) : ($val === 'completed' || $val === 'paid');
 
             $stages[$i] = [
@@ -214,6 +266,9 @@ class DashboardsController extends Controller
                 'status' => $isCompleted ? 'completed' : 'pending',
                 'db_field' => $col,
                 'db_value' => $val ?: ($i === 1 ? 'not_paid' : 'NA'),
+                'menu_id' => $stageMeta[$i]['menu_id'] ?? null,
+                'menu_code' => $stageMeta[$i]['menu_code'] ?? null,
+                'is_locked_by_menu' => !empty($stageMeta[$i]['lock_status']),
             ];
         }
 
@@ -225,7 +280,7 @@ class DashboardsController extends Controller
         } elseif (!$isStage3Done) {
             $maxAllowedStep = 3;
         } else {
-            $maxAllowedStep = 5;
+            $maxAllowedStep = $totalSteps;
         }
 
         // Overall progress percentage
@@ -235,7 +290,7 @@ class DashboardsController extends Controller
                 $completedCount++;
             }
         }
-        $progressPercent = round(($completedCount / 5) * 100);
+        $progressPercent = round(($completedCount / $totalSteps) * 100);
 
         // Load Country, State, District options from crm tables via Eloquent
         $countries = collect();
@@ -249,12 +304,20 @@ class DashboardsController extends Controller
             Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
         }
 
+        $applicationData = null;
+        try {
+            $applicationData = \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) $appNo);
+        } catch (\Throwable $e) {
+            Log::warning('Could not build application data: ' . $e->getMessage());
+        }
+
         return view('dashboards::index', compact(
             'user',
             'student',
             'crmStudent',
             'personalInfo',
             'academicDetails',
+            'applicationData',
             'countries',
             'states',
             'districts',
@@ -275,6 +338,8 @@ class DashboardsController extends Controller
             'activeStep',
             'maxAllowedStep',
             'stages',
+            'totalSteps',
+            'roleMenus',
             'isStage1Paid',
             'completedCount',
             'progressPercent'
@@ -331,7 +396,7 @@ class DashboardsController extends Controller
                 $nextStep = 2;
                 $msg = 'Stage 1: Admission Fee Payment confirmed!';
             } elseif ($step === 2) {
-                // Normalize phone and pincode before validation to guarantee smooth transition
+                // Normalize phone and pincode before validation
                 $rawPhone = (string) ($request->input('phone_no') ?? '');
                 $cleanPhoneInput = substr(preg_replace('/\D/', '', $rawPhone), -10);
                 if (!$cleanPhoneInput && $crmStudent?->phoneno) {
@@ -339,18 +404,14 @@ class DashboardsController extends Controller
                 }
 
                 $rawPin = (string) ($request->input('pin_code') ?? '');
-                $cleanPinInput = substr(preg_replace('/\D/', '', $rawPin), 0, 6);
-                if (strlen($cleanPinInput) < 6) {
-                    $cleanPinInput = '522002';
-                }
+                $cleanPinInput = preg_replace('/\D/', '', $rawPin);
 
-                $request->merge([
-                    'phone_no' => $cleanPhoneInput ?: '9948755654',
-                    'pin_code' => $cleanPinInput,
-                    'distric_t' => $request->input('distric_t') ?: 'Guntur',
-                    'state' => $request->input('state') ?: 'Andhra Pradesh',
-                    'street_country' => $request->input('street_country') ?: 'India',
-                ]);
+                if ($cleanPhoneInput) {
+                    $request->merge(['phone_no' => $cleanPhoneInput]);
+                }
+                if ($cleanPinInput) {
+                    $request->merge(['pin_code' => $cleanPinInput]);
+                }
 
                 // Validation for Step 2
                 $request->validate([
@@ -484,13 +545,11 @@ class DashboardsController extends Controller
                     'roll_no' => ['required', 'string', 'max:50'],
                     'passing_year' => ['required', 'integer', 'min:2000', 'max:2030'],
                     'eval_type' => ['required', 'string'],
-                    'upload_docs' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
                 ], [
                     'school_co_name.required' => 'School / College name is required.',
                     'boad_of_study.required' => 'Board of study is required.',
                     'roll_no.required' => 'Roll / Hall ticket number is required.',
                     'passing_year.required' => 'Passing year is required.',
-                    'upload_docs.max' => 'Document file must be 5MB or smaller.',
                 ]);
 
                 if ($crmStudent) {
@@ -511,15 +570,17 @@ class DashboardsController extends Controller
 
                     if ($evalType === 'CGPA' || $request->filled('cgpa_value')) {
                         $cgpaInput = $request->input('cgpa_value') ?? $sscMarks;
-                        $tenthCgpaNum = is_numeric($cgpaInput) ? (float)$cgpaInput : 9.80;
-                        $tenthMarksNum = round($tenthCgpaNum * 9.5, 2);
+                        $tenthCgpaNum = is_numeric($cgpaInput) ? (float)$cgpaInput : null;
+                        $tenthMarksNum = $tenthCgpaNum ? round($tenthCgpaNum * 9.5, 2) : null;
                         $evalType = 'CGPA';
                     } else {
-                        $tenthMarksNum = is_numeric($sscMarks) ? (float)$sscMarks : 590.0;
-                        if ($tenthMarksNum > 100) {
-                            $tenthCgpaNum = round(($tenthMarksNum / 600) * 10, 2);
-                        } else {
-                            $tenthCgpaNum = round($tenthMarksNum / 9.5, 2);
+                        $tenthMarksNum = is_numeric($sscMarks) ? (float)$sscMarks : null;
+                        if ($tenthMarksNum !== null) {
+                            if ($tenthMarksNum > 100) {
+                                $tenthCgpaNum = round(($tenthMarksNum / 600) * 10, 2);
+                            } else {
+                                $tenthCgpaNum = round($tenthMarksNum / 9.5, 2);
+                            }
                         }
                         $evalType = 'marks';
                     }
@@ -527,37 +588,26 @@ class DashboardsController extends Controller
                     $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board') ?? 'Inter';
                     $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? 'First Year';
 
-                    // Handle document upload if present
-                    if ($request->hasFile('upload_docs')) {
-                        try {
-                            $file = $request->file('upload_docs');
-                            $fileName = 'DOC_' . ($crmStudent->applinano ?: 'APP') . '_' . time() . '.' . $file->getClientOriginalExtension();
-                            $file->move(public_path('uploads/documents'), $fileName);
-                        } catch (\Throwable $e) {
-                            Log::warning('Document upload note: ' . $e->getMessage());
-                        }
-                    }
-
                     $academicPayload = [
                         'crmid' => $academicCrmId,
                         'progmid' => $crmStudent->programid,
                         'branchid' => $crmStudent->branchid,
                         'tenth_school_name' => $tenthSchool,
                         'tenth_study_board' => $tenthBoard,
-                        'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location') ?? 'Guntur',
-                        'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location') ?? 'Guntur',
+                        'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location'),
+                        'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location'),
                         'tenth_roll_no' => $tenthRoll,
-                        'tenth_passed_year' => $tenthYear,
+                        'tenth_passed_year' => $tenthYear ?: null,
                         'tenth_marks_type' => $evalType,
                         'tenth_marks' => $tenthMarksNum,
                         'tenth_cgpa' => $tenthCgpaNum,
-                        'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name') ?? 'Narayana Junior College',
+                        'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
                         'pu2_study_board' => $courseChoice,
                         'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
                         'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
-                        'pu2_passed_year' => (int) ($request->input('inter_year') ?? $request->input('pu2_passed_year') ?? 2026),
-                        'pu2_marks_type' => 'Marks',
-                        'pu2_marks' => is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : 962.00,
+                        'pu2_passed_year' => $request->filled('inter_year') ? (int) $request->input('inter_year') : ($request->filled('pu2_passed_year') ? (int) $request->input('pu2_passed_year') : null),
+                        'pu2_marks_type' => $request->input('inter_marks_type') ?: 'Marks',
+                        'pu2_marks' => is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : null,
                         'pu2_cgpa' => is_numeric($request->input('inter_cgpa')) ? (float)$request->input('inter_cgpa') : null,
                         'pu2_current_status' => $subsetChoice,
                         'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
@@ -610,6 +660,8 @@ class DashboardsController extends Controller
                 $nextStep = 4;
                 $msg = 'Stage 3: Academic Records saved successfully!';
             } elseif ($step === 4) {
+                self::ensureStudentUploadsTable();
+
                 $request->validate([
                     'docs' => ['nullable', 'array'],
                     'docs.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
@@ -619,9 +671,35 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $allowedDocKeys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct'];
+                    $allowedDocKeys = [
+                        'marksheet10', 'marksheet12', 'btech', 'mtech', 'pg',
+                        'aadhaar', 'photo', 'tc', 'study_conduct'
+                    ];
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
                     $destDir = public_path('uploads/documents/' . $appliFolder);
+
+                    $crmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+
+                    $uploadPayload = [
+                        'crmid' => $crmId,
+                        'applino' => $crmStudent->applinano,
+                        'phoneno' => $crmStudent->phoneno,
+                        'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ];
+
+                    $fieldMapping = [
+                        'marksheet10' => ['tenth_file_name', 'tenth_file_path'],
+                        'marksheet12' => ['inter_file_name', 'inter_file_path'],
+                        'btech' => ['btech_file_name', 'btech_file_path'],
+                        'mtech' => ['mtech_file_name', 'mtech_file_path'],
+                        'pg' => ['pg_file_name', 'pg_file_path'],
+                        'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
+                        'photo' => ['passport_file_name', 'passport_file_path'],
+                        'tc' => ['transfer_file_name', 'transfer_file_path'],
+                        'study_conduct' => ['study_conduct_file_name', 'study_conduct_file_path'],
+                    ];
 
                     if ($request->hasFile('docs')) {
                         if (!is_dir($destDir)) {
@@ -635,18 +713,50 @@ class DashboardsController extends Controller
                                 @unlink($oldFile);
                             }
                             $ext = strtolower($file->getClientOriginalExtension() ?: 'pdf');
-                            $base = preg_replace('/[^A-Za-z0-9_-]/', '_', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                            $origName = $file->getClientOriginalName();
+                            $base = preg_replace('/[^A-Za-z0-9_-]/', '_', pathinfo($origName, PATHINFO_FILENAME));
                             $base = trim((string) $base, '_') ?: $docKey;
                             $fileName = $docKey . '_' . substr($base, 0, 40) . '.' . $ext;
                             $file->move($destDir, $fileName);
+
+                            $relativeFilePath = 'uploads/documents/' . $appliFolder . '/' . $fileName;
+
+                            if (isset($fieldMapping[$docKey])) {
+                                [$nameCol, $pathCol] = $fieldMapping[$docKey];
+                                $uploadPayload[$nameCol] = $origName;
+                                $uploadPayload[$pathCol] = $relativeFilePath;
+                            }
                         }
                     }
 
-                    $crmStudent->update([
+                    try {
+                        StudentUpload::updateOrCreate(
+                            [
+                                'applino' => $crmStudent->applinano,
+                                'phoneno' => $crmStudent->phoneno,
+                            ],
+                            $uploadPayload
+                        );
+                    } catch (\Throwable $e) {
+                        Log::error('[DashboardsController] StudentUpload save error: ' . $e->getMessage());
+                    }
+
+                    $crmUpdates = [
                         'stage4' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
-                    ]);
+                    ];
+                    if ($request->filled('degree_level')) {
+                        $lvl = strtolower(trim((string)$request->input('degree_level')));
+                        if ($lvl === 'mtech') {
+                            $crmUpdates['programlevel'] = 'PG';
+                        } elseif ($lvl === 'phd') {
+                            $crmUpdates['programlevel'] = 'Doctoral';
+                        } elseif ($lvl === 'btech') {
+                            $crmUpdates['programlevel'] = 'UG';
+                        }
+                    }
+                    $crmStudent->update($crmUpdates);
                 }
                 $nextStep = 5;
                 $msg = 'Stage 4 documents saved successfully!';
@@ -658,8 +768,18 @@ class DashboardsController extends Controller
                         'log_timestamp' => now(),
                     ]);
                 }
-                $nextStep = 5;
-                $msg = 'Stage 5 saved successfully!';
+                $nextStep = 6;
+                $msg = 'Stage 5: Application Download completed!';
+            } elseif ($step === 6) {
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage6' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 6;
+                $msg = 'Stage 6: VSAT Result verified!';
             } else {
                 $msg = 'Stage updated successfully!';
             }
@@ -675,23 +795,76 @@ class DashboardsController extends Controller
     }
 
     /**
-     * Scan uploaded documents for an application number from public/uploads/documents/{applino}.
+     * Ensure the crm.student_uploads table exists in the database.
+     */
+    public static function ensureStudentUploadsTable(): void
+    {
+        try {
+            DB::unprepared("
+                CREATE TABLE IF NOT EXISTS crm.student_uploads (
+                    id BIGSERIAL PRIMARY KEY,
+                    crmid VARCHAR(50),
+                    applino VARCHAR(50) NOT NULL,
+                    phoneno VARCHAR(20) NOT NULL,
+
+                    tenth_file_name VARCHAR(255),
+                    tenth_file_path VARCHAR(500),
+
+                    inter_file_name VARCHAR(255),
+                    inter_file_path VARCHAR(500),
+
+                    btech_file_name VARCHAR(255),
+                    btech_file_path VARCHAR(500),
+
+                    mtech_file_name VARCHAR(255),
+                    mtech_file_path VARCHAR(500),
+
+                    pg_file_name VARCHAR(255),
+                    pg_file_path VARCHAR(500),
+
+                    aadhar_file_name VARCHAR(255),
+                    aadhar_file_path VARCHAR(500),
+
+                    passport_file_name VARCHAR(255),
+                    passport_file_path VARCHAR(500),
+
+                    transfer_file_name VARCHAR(255),
+                    transfer_file_path VARCHAR(500),
+
+                    study_conduct_file_name VARCHAR(255),
+                    study_conduct_file_path VARCHAR(500),
+
+                    log_userid VARCHAR(50),
+                    log_ipaddress VARCHAR(255),
+                    log_timestamp TIMESTAMP DEFAULT now(),
+
+                    CONSTRAINT uq_student_uploads_applino_phone UNIQUE (applino, phoneno)
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_student_uploads_crmid ON crm.student_uploads (crmid);
+                CREATE INDEX IF NOT EXISTS idx_student_uploads_applino ON crm.student_uploads (applino);
+            ");
+        } catch (\Throwable $e) {
+            // Silently continue if table already exists
+        }
+    }
+
+    /**
+     * Scan uploaded documents for an application number from DB (crm.student_uploads) and public/uploads/documents/{applino}.
      *
      * @return array<string, array{filename: string, path: string, url: string, mime: string, ext: string}>
      */
     public static function getUploadedDocuments(string $applino): array
     {
+        self::ensureStudentUploadsTable();
+
         $cleanAppli = preg_replace('/[^A-Za-z0-9_-]/', '', $applino);
         if ($cleanAppli === '' || $cleanAppli === '0') {
             return [];
         }
 
         $dir = public_path('uploads/documents/' . $cleanAppli);
-        if (!is_dir($dir)) {
-            return [];
-        }
-
-        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct'];
+        $keys = ['marksheet10', 'marksheet12', 'btech', 'mtech', 'pg', 'aadhaar', 'photo', 'tc', 'study_conduct'];
         $mimeMap = [
             'pdf' => 'application/pdf',
             'jpg' => 'image/jpeg',
@@ -700,19 +873,57 @@ class DashboardsController extends Controller
         ];
         $found = [];
 
-        foreach ($keys as $key) {
-            $matches = glob($dir . DIRECTORY_SEPARATOR . $key . '_*');
-            if (!empty($matches) && is_file($matches[0])) {
-                $fullPath = $matches[0];
-                $filename = basename($fullPath);
-                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                $found[$key] = [
-                    'filename' => $filename,
-                    'path' => $fullPath,
-                    'url' => asset('uploads/documents/' . $cleanAppli . '/' . $filename),
-                    'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
-                    'ext' => $ext,
+        // 1. Check from database (crm.student_uploads)
+        try {
+            $dbUpload = StudentUpload::where('applino', $cleanAppli)->first();
+            if ($dbUpload) {
+                $fieldMap = [
+                    'marksheet10' => ['tenth_file_name', 'tenth_file_path'],
+                    'marksheet12' => ['inter_file_name', 'inter_file_path'],
+                    'btech' => ['btech_file_name', 'btech_file_path'],
+                    'mtech' => ['mtech_file_name', 'mtech_file_path'],
+                    'pg' => ['pg_file_name', 'pg_file_path'],
+                    'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
+                    'photo' => ['passport_file_name', 'passport_file_path'],
+                    'tc' => ['transfer_file_name', 'transfer_file_path'],
+                    'study_conduct' => ['study_conduct_file_name', 'study_conduct_file_path'],
                 ];
+                foreach ($fieldMap as $k => [$nameCol, $pathCol]) {
+                    if (!empty($dbUpload->{$nameCol}) || !empty($dbUpload->{$pathCol})) {
+                        $fName = $dbUpload->{$nameCol} ?: basename((string)$dbUpload->{$pathCol});
+                        $fPath = $dbUpload->{$pathCol} ?: ($dir . DIRECTORY_SEPARATOR . $fName);
+                        $ext = strtolower(pathinfo($fName, PATHINFO_EXTENSION) ?: 'pdf');
+                        $found[$k] = [
+                            'filename' => $fName,
+                            'path' => $fPath,
+                            'url' => asset(str_starts_with($fPath, 'uploads/') ? $fPath : ('uploads/documents/' . $cleanAppli . '/' . $fName)),
+                            'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
+                            'ext' => $ext,
+                        ];
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // 2. Also check physical disk directory
+        if (is_dir($dir)) {
+            foreach ($keys as $key) {
+                if (isset($found[$key])) {
+                    continue;
+                }
+                $matches = glob($dir . DIRECTORY_SEPARATOR . $key . '_*');
+                if (!empty($matches) && is_file($matches[0])) {
+                    $fullPath = $matches[0];
+                    $filename = basename($fullPath);
+                    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                    $found[$key] = [
+                        'filename' => $filename,
+                        'path' => $fullPath,
+                        'url' => asset('uploads/documents/' . $cleanAppli . '/' . $filename),
+                        'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
+                        'ext' => $ext,
+                    ];
+                }
             }
         }
 
