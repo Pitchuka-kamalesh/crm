@@ -20,6 +20,7 @@ use App\Models\TelecallerLead;
 use App\Models\TelecallerLeadTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CrmController extends Controller
@@ -308,40 +309,175 @@ class CrmController extends Controller
         })->map(fn($group) => $group->count())->sortDesc()->take(6);
 
         // Genuine Telecaller KPI Metrics
+        $selectedTelecaller = (string)$request->query('telecaller', 'all');
         $totalTelecallerLeads = 0;
+        $teleGaneshCount = 0;
+        $teleUnassignedCount = 0;
+        $teleTasksCount = 0;
+        $teleDistinctContacted = 0;
+        $telePendingCount = 0;
+        $teleTaskStages = collect();
         try {
             $totalTelecallerLeads = TelecallerLead::count();
+            $teleGaneshCount = TelecallerLead::where('empcode', '03434')->count();
+            $teleUnassignedCount = TelecallerLead::where('empcode', '0')->count();
+            $teleTasksCount = TelecallerLeadTask::count();
+            $teleDistinctContacted = TelecallerLeadTask::distinct('phoneno')->count('phoneno');
+            $telePendingCount = max(0, $totalTelecallerLeads - $teleDistinctContacted);
+            $teleTaskStages = DB::table('crm.telecaller_leads_tasks')
+                ->select('stage_name', DB::raw('count(*) as count'))
+                ->whereNotNull('stage_name')
+                ->groupBy('stage_name')
+                ->orderBy('count', 'desc')
+                ->get();
+        } catch (\Throwable $e) {}
+
+        $telecallerLeadsList = collect();
+        try {
+            $telecallerLeadsList = DB::table('crm.telecaller_leads as tl')
+                ->leftJoin('master.employees as e', 'e.emp_code', '=', 'tl.empcode')
+                ->select(
+                    'tl.applino',
+                    'tl.phoneno',
+                    'tl.empcode',
+                    'tl.assigndatetime',
+                    'tl.leadcount',
+                    'e.full_name as emp_name',
+                    'e.phone_primary as emp_phone',
+                    'e.ofc_mailid as emp_email'
+                )
+                ->orderBy('tl.leadcount', 'asc')
+                ->take(100)
+                ->get()
+                ->map(function($lead) {
+                    $latestTask = DB::table('crm.telecaller_leads_tasks')
+                        ->where('phoneno', (string)$lead->phoneno)
+                        ->orWhere(function($q) use ($lead) {
+                            if ($lead->applino && $lead->applino !== '0') {
+                                $q->where('applino', (string)$lead->applino);
+                            }
+                        })
+                        ->orderBy('leadtaskid', 'desc')
+                        ->first();
+                    $lead->latest_stage = $latestTask ? $latestTask->stage_name : 'Pending Call';
+                    $lead->latest_calltime = $latestTask ? $latestTask->stage_calltime : null;
+                    $lead->latest_duration = $latestTask ? $latestTask->stage_call_duration : null;
+                    $lead->latest_remark = $latestTask ? $latestTask->stage_remark : 'No calls recorded yet';
+                    $lead->call_person = $latestTask ? $latestTask->stage_callperson : null;
+                    $lead->call_count = DB::table('crm.telecaller_leads_tasks')
+                        ->where('phoneno', (string)$lead->phoneno)
+                        ->count();
+                    return $lead;
+                });
         } catch (\Throwable $e) {}
 
         $telecallerStats = collect();
+        $totalTelecallersCount = 0;
         try {
             $telecallerStats = Employee::whereIn('emp_code', function($q) {
                 $q->select('emp_id')->from('master.roles_assigned')->where('roles_role_id', 4);
-            })->orWhereIn('emp_code', function($q) {
+            })->orWhere('role_id', 4)
+            ->orWhereIn('emp_code', function($q) {
                 $q->select('empcode')->from('crm.telecaller_leads');
-            })->get()->map(function($emp) use ($paidAppNos) {
+            })->orWhereIn('emp_code', function($q) {
+                $q->select('empcode')->from('crm.leads')->whereNotNull('empcode')->where('empcode', '!=', '0');
+            })->orderBy('full_name', 'asc')->get()->map(function($emp) use ($paidAppNos) {
                 $leads = TelecallerLead::where('empcode', $emp->emp_code)->get();
                 $leadsCount = $leads->count();
                 $paidCount = $leads->filter(fn($l) => $paidAppNos->contains((string)$l->applino))->count();
                 $tasksCount = TelecallerLeadTask::where('empcode', $emp->emp_code)->count();
+                $contactedCount = TelecallerLeadTask::where('empcode', $emp->emp_code)->distinct('phoneno')->count('phoneno');
+                $pendingCount = max(0, $leadsCount - $contactedCount);
+                $stages = DB::table('crm.telecaller_leads_tasks')
+                    ->where('empcode', $emp->emp_code)
+                    ->select('stage_name', DB::raw('count(*) as count'))
+                    ->whereNotNull('stage_name')
+                    ->groupBy('stage_name')
+                    ->orderBy('count', 'desc')
+                    ->get();
                 $convRate = $leadsCount > 0 ? round(($paidCount / $leadsCount) * 100, 1) : 0;
                 return (object)[
                     'emp_code' => $emp->emp_code,
                     'name' => $emp->full_name,
-                    'email' => $emp->email ?? 'N/A',
+                    'email' => $emp->ofc_mailid ?? $emp->personal_mailid ?? 'N/A',
+                    'phone' => $emp->phone_primary ?? 'N/A',
                     'leads_count' => $leadsCount,
                     'tasks_count' => $tasksCount,
+                    'contacted_count' => $contactedCount,
+                    'pending_count' => $pendingCount,
+                    'stages' => $stages,
                     'paid_count' => $paidCount,
                     'conversion_rate' => $convRate,
                     'status' => $leadsCount > 0 ? 'Active' : 'Standby',
                 ];
             });
+            $totalTelecallersCount = $telecallerStats->count();
         } catch (\Throwable $e) {}
 
         // Genuine Leads KPI Metrics
         $totalRawLeads = 0;
+        $leadsNewCount = 0;
+        $leadsRegCount = 0;
+        $allocatedLeadsCount = 0;
+        $unallocatedPoolCount = 0;
         try {
             $totalRawLeads = Lead::count();
+            $leadsNewCount = Lead::where('phnostatus', 'New Lead')->count();
+            $leadsRegCount = Lead::where('phnostatus', 'Registered')->count();
+            $allocatedLeadsCount = Lead::where('empcode', '!=', '0')->whereNotNull('empcode')->count();
+            $unallocatedPoolCount = Lead::where(function($q) {
+                $q->where('empcode', '0')->orWhereNull('empcode');
+            })->count();
+        } catch (\Throwable $e) {}
+
+        $leadsByDate = collect();
+        $availableYears = collect();
+        $availableMonths = collect();
+        try {
+            $leadsByDate = DB::table('crm.leads')
+                ->select(DB::raw("CAST(enquirydate AS text) as enquirydate"), DB::raw('count(*) as count'))
+                ->whereNotNull('enquirydate')
+                ->groupBy('enquirydate')
+                ->orderBy('enquirydate', 'asc')
+                ->get()
+                ->map(function($item) {
+                    $dt = strtotime($item->enquirydate);
+                    $item->year = date('Y', $dt);
+                    $item->month = date('m', $dt);
+                    $item->month_name = date('M', $dt);
+                    $item->formatted_date = date('d M Y', $dt);
+                    $item->short_date = date('d M', $dt);
+                    return $item;
+                });
+
+            $availableYears = $leadsByDate->pluck('year')->unique()->values();
+            $availableMonths = $leadsByDate->map(function($d) {
+                return (object)[
+                    'year' => $d->year,
+                    'month' => $d->month,
+                    'label' => date('F Y', strtotime($d->enquirydate)),
+                    'short' => date('M Y', strtotime($d->enquirydate))
+                ];
+            })->unique('label')->values();
+        } catch (\Throwable $e) {}
+
+        $rawLeadsList = collect();
+        try {
+            $rawLeadsList = DB::table('crm.leads')
+                ->select('phoneno', 'phnostatus', 'enquirydate', 'empcode', 'applino')
+                ->orderBy('enquirydate', 'desc')
+                ->orderByRaw('log_timestamp DESC NULLS LAST')
+                ->take(100)
+                ->get();
+        } catch (\Throwable $e) {}
+
+        $leadsBySource = collect();
+        try {
+            $leadsBySource = DB::table('crm.leads')
+                ->select(DB::raw("CASE WHEN log_userid = '02598' THEN 'Bulk Upload' ELSE 'Portal / Direct' END as source_name"), DB::raw('count(*) as count'))
+                ->groupBy(DB::raw("CASE WHEN log_userid = '02598' THEN 'Bulk Upload' ELSE 'Portal / Direct' END"))
+                ->orderBy('count', 'desc')
+                ->get();
         } catch (\Throwable $e) {}
 
         return view('crm::index', compact(
@@ -382,9 +518,27 @@ class CrmController extends Controller
             'kpiStage4Done',
             'kpiStage5Done',
             'kpiBranchDistribution',
+            'selectedTelecaller',
             'totalTelecallerLeads',
+            'teleGaneshCount',
+            'teleUnassignedCount',
+            'teleTasksCount',
+            'teleDistinctContacted',
+            'telePendingCount',
+            'teleTaskStages',
+            'telecallerLeadsList',
             'telecallerStats',
-            'totalRawLeads'
+            'totalTelecallersCount',
+            'totalRawLeads',
+            'leadsNewCount',
+            'leadsRegCount',
+            'allocatedLeadsCount',
+            'unallocatedPoolCount',
+            'leadsByDate',
+            'availableYears',
+            'availableMonths',
+            'leadsBySource',
+            'rawLeadsList'
         ));
     }
 
