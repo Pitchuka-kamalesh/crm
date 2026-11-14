@@ -32,4 +32,3 @@ class CommunicationLog extends Model
         'updated_at' => 'datetime',
     ];
 }
-

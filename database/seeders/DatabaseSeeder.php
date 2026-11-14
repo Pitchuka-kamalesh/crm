@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         if (File::exists($seedSqlPath)) {
             $hasData = false;
             try {
-                $hasData = DB::table('master.campuses')->exists();
+                $hasData = \App\Models\Campus::exists();
             } catch (\Throwable $e) {}
 
             if (!$hasData) {

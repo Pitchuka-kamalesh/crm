@@ -2,36 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Modules\Sms\Models\Wapplog as BaseWapplog;
 
-class Wapplog extends Model
+/**
+ * Compatibility alias for Modules\Sms\Models\Wapplog
+ */
+class Wapplog extends BaseWapplog
 {
-    protected $table = 'master.wapp_logs';
-    protected $primaryKey = 'id';
-    public $timestamps = true;
-
-    protected $fillable = [
-        'channel',
-        'wauser',
-        'waregisterno',
-        'wapptophone',
-        'jiotraceid',
-        'template_name',
-        'wapptext',
-        'var1',
-        'var2',
-        'status',
-        'ipaddr',
-        'response_payload',
-    ];
-
-    protected function casts(): array
-    {
-        return [
-            'response_payload' => 'array',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
 }
-

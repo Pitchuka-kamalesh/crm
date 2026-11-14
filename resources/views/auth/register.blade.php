@@ -129,6 +129,8 @@
             flex-direction: column;
             gap: 1.5rem;
             padding-top: 2rem;
+            position: sticky;
+            top: 2rem;
         }
 
         .hero-headline {

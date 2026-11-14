@@ -2,34 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Modules\Auth\Models\LoginOtp as BaseLoginOtp;
 
-class LoginOtp extends Model
+/**
+ * Compatibility alias for Modules\Auth\Models\LoginOtp
+ */
+class LoginOtp extends BaseLoginOtp
 {
-    protected $table = 'master.login_otp';
-    protected $primaryKey = 'otp_id';
-    public $timestamps = false;
-
-    protected $fillable = [
-        'usercode',
-        'identifier',
-        'otp_code',
-        'purpose',
-        'is_used',
-        'expires_at',
-        'attempt_count',
-        'log_userid',
-        'log_ipaddress',
-        'log_timestamp',
-    ];
-
-    protected function casts(): array
-    {
-        return [
-            'is_used' => 'boolean',
-            'expires_at' => 'datetime',
-            'log_timestamp' => 'datetime',
-        ];
-    }
 }
-

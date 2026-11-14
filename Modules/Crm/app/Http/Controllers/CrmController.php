@@ -3,21 +3,23 @@
 namespace Modules\Crm\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Branch;
-use App\Models\Campus;
-use App\Models\CommunicationLog;
-use App\Models\CouponInfo;
-use App\Models\CrmStudentRegistration;
-use App\Models\Employee;
-use App\Models\Lead;
-use App\Models\MenuAccessRole;
-use App\Models\PayDetail;
-use App\Models\ReceiptDetail;
-use App\Models\Program;
-use App\Models\Role;
-use App\Models\StudentRegistration;
-use App\Models\TelecallerLead;
-use App\Models\TelecallerLeadTask;
+use Modules\Crm\Models\Branch;
+use Modules\Crm\Models\Campus;
+use Modules\Crm\Models\Program;
+use Modules\Crm\Models\CrmStudentRegistration;
+use Modules\Crm\Models\StudentRegistration;
+use Modules\Finance\Models\Coupous as CouponInfo;
+use Modules\Finance\Models\PayDetail;
+use Modules\Finance\Models\ReceiptDetail;
+use Modules\Leads\Models\Lead;
+use Modules\Leads\Models\TelecallerLead;
+use Modules\Leads\Models\TelecallerLeadTask;
+use Modules\Auth\Models\Employee;
+use Modules\Auth\Models\Role;
+use Modules\Auth\Models\MenuAccessRole;
+use Modules\Sms\Models\CommunicationLog;
+use App\Common\Services\RoleService;
+use App\Common\Services\TelecallerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +33,7 @@ class CrmController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $roleId = $user ? $user->getActiveRoleId() : 1;
+        $roleId = $user ? $user->getActiveRoleId() : RoleService::defaultStaffRoleId();
         $roleName = $user ? $user->role_label : 'CRM Official';
 
         $currentRoute = $request->route() ? $request->route()->getName() : '';
@@ -218,11 +220,11 @@ class CrmController extends Controller
             $roleMenus = MenuAccessRole::forRole($roleId);
         } catch (\Throwable $e) {}
 
-        // Available employees for enquiry allotment & Telecallers with Role 4
+        // Available employees for enquiry allotment & Telecallers
         $employees = collect();
         $telecallers = collect();
         try {
-            $telecallers = \App\Services\TelecallerService::getTelecallers();
+            $telecallers = TelecallerService::getTelecallers();
             $employees = Employee::where('is_active', 1)->orderBy('full_name')->get();
             if ($employees->isEmpty()) {
                 $employees = $telecallers->isNotEmpty() ? $telecallers : Employee::all();
@@ -256,229 +258,29 @@ class CrmController extends Controller
         }
 
         // Fetch coupon batches, personal coupons, and pay details via Eloquent
-        $couponBatches = collect();
-        $personalCoupons = collect();
-        $payDetails = collect();
-        $paidAppNos = collect();
-        try {
-            $couponBatches = CouponInfo::where('coupontype', 'DEFAULT')->orderBy('id', 'asc')->get();
-            $personalCoupons = CouponInfo::where('coupontype', 'PERSONAL')->get()->keyBy('applino');
-            $payDetails = PayDetail::all()->keyBy('applino');
+        $couponBatches = CouponInfo::where('coupontype', 'DEFAULT')->orderBy('id', 'asc')->get();
+        $personalCoupons = CouponInfo::where('coupontype', 'PERSONAL')->get()->keyBy('applino');
+        $payDetails = PayDetail::all()->keyBy('applino');
 
-            // Genuine verified payment records from paydetails (status success or paidamount > 0) and receiptdetails
-            $pdPaid = PayDetail::where(function($q) {
-                $q->where('txnstatus', 'success')
-                  ->orWhere('paidamount', '>', 0);
-            })->pluck('applino')->map(fn($v) => (string)$v);
+        $kpiService = app(\App\Services\KpiAnalyticsService::class);
+        $paidAppNos = $kpiService->getVerifiedPaidAppNumbers();
 
-            $rdPaid = ReceiptDetail::pluck('applino')->map(fn($v) => (string)$v);
-            $paidAppNos = $pdPaid->merge($rdPaid)->unique()->filter()->values();
-        } catch (\Throwable $e) {}
+        // Eloquent KPI Metrics (Computed via KpiAnalyticsService)
+        $studentKpi = $kpiService->getStudentKpiMetrics();
+        $kpiTotal = $studentKpi['kpiTotal'];
+        $kpiStage1Paid = $studentKpi['kpiStage1Paid'];
+        $kpiStage2Done = $studentKpi['kpiStage2Done'];
+        $kpiStage3Done = $studentKpi['kpiStage3Done'];
+        $kpiStage4Done = $studentKpi['kpiStage4Done'];
+        $kpiStage5Done = $studentKpi['kpiStage5Done'];
+        $kpiBranchDistribution = $studentKpi['kpiBranchDistribution'];
 
-        // Genuine Student KPI & Funnel Metrics for 'kpi' tab
-        $kpiTotal = max(1, $allStudents->count() ?: $totalApplications);
-        $kpiStage1Paid = $allStudents->filter(function($s) use ($paidAppNos) {
-            $st1 = strtolower(trim((string)($s->stage1 ?? '')));
-            $appNo = (string)($s->applinano ?? $s->application_no ?? '');
-            // Strictly genuine: status 'paid' or verified payment record
-            return $st1 === 'paid' || ($appNo !== '' && $paidAppNos->contains($appNo));
-        })->count();
+        $telecallerKpi = $kpiService->getTelecallerKpiMetrics();
+        $totalTelecallerLeads = $telecallerKpi['totalTelecallerLeads'];
+        $telecallerStats = $telecallerKpi['telecallerStats'];
 
-        $kpiStage2Done = $allStudents->filter(function($s) {
-            $st2 = strtolower(trim((string)($s->stage2 ?? '')));
-            return in_array($st2, ['completed', 'approved', 'done'], true);
-        })->count();
-
-        $kpiStage3Done = $allStudents->filter(function($s) {
-            $st3 = strtolower(trim((string)($s->stage3 ?? '')));
-            return in_array($st3, ['completed', 'approved', 'done'], true);
-        })->count();
-
-        $kpiStage4Done = $allStudents->filter(function($s) {
-            $st4 = strtolower(trim((string)($s->stage4 ?? '')));
-            return in_array($st4, ['completed', 'approved', 'done'], true);
-        })->count();
-
-        $kpiStage5Done = $allStudents->filter(function($s) {
-            $st5 = strtolower(trim((string)($s->stage5 ?? '')));
-            return in_array($st5, ['completed', 'approved', 'done'], true);
-        })->count();
-
-        $kpiBranchDistribution = $allStudents->groupBy(function($s) {
-            return $s->branch?->branch_long_name ?? $s->branch?->branch_short_name ?? 'General Engineering';
-        })->map(fn($group) => $group->count())->sortDesc()->take(6);
-
-        // Genuine Telecaller KPI Metrics
-        $selectedTelecaller = (string)$request->query('telecaller', 'all');
-        $totalTelecallerLeads = 0;
-        $teleGaneshCount = 0;
-        $teleUnassignedCount = 0;
-        $teleTasksCount = 0;
-        $teleDistinctContacted = 0;
-        $telePendingCount = 0;
-        $teleTaskStages = collect();
-        try {
-            $totalTelecallerLeads = TelecallerLead::count();
-            $teleGaneshCount = TelecallerLead::where('empcode', '03434')->count();
-            $teleUnassignedCount = TelecallerLead::where('empcode', '0')->count();
-            $teleTasksCount = TelecallerLeadTask::count();
-            $teleDistinctContacted = TelecallerLeadTask::distinct('phoneno')->count('phoneno');
-            $telePendingCount = max(0, $totalTelecallerLeads - $teleDistinctContacted);
-            $teleTaskStages = DB::table('crm.telecaller_leads_tasks')
-                ->select('stage_name', DB::raw('count(*) as count'))
-                ->whereNotNull('stage_name')
-                ->groupBy('stage_name')
-                ->orderBy('count', 'desc')
-                ->get();
-        } catch (\Throwable $e) {}
-
-        $telecallerLeadsList = collect();
-        try {
-            $telecallerLeadsList = DB::table('crm.telecaller_leads as tl')
-                ->leftJoin('master.employees as e', 'e.emp_code', '=', 'tl.empcode')
-                ->select(
-                    'tl.applino',
-                    'tl.phoneno',
-                    'tl.empcode',
-                    'tl.assigndatetime',
-                    'tl.leadcount',
-                    'e.full_name as emp_name',
-                    'e.phone_primary as emp_phone',
-                    'e.ofc_mailid as emp_email'
-                )
-                ->orderBy('tl.leadcount', 'asc')
-                ->take(100)
-                ->get()
-                ->map(function($lead) {
-                    $latestTask = DB::table('crm.telecaller_leads_tasks')
-                        ->where('phoneno', (string)$lead->phoneno)
-                        ->orWhere(function($q) use ($lead) {
-                            if ($lead->applino && $lead->applino !== '0') {
-                                $q->where('applino', (string)$lead->applino);
-                            }
-                        })
-                        ->orderBy('leadtaskid', 'desc')
-                        ->first();
-                    $lead->latest_stage = $latestTask ? $latestTask->stage_name : 'Pending Call';
-                    $lead->latest_calltime = $latestTask ? $latestTask->stage_calltime : null;
-                    $lead->latest_duration = $latestTask ? $latestTask->stage_call_duration : null;
-                    $lead->latest_remark = $latestTask ? $latestTask->stage_remark : 'No calls recorded yet';
-                    $lead->call_person = $latestTask ? $latestTask->stage_callperson : null;
-                    $lead->call_count = DB::table('crm.telecaller_leads_tasks')
-                        ->where('phoneno', (string)$lead->phoneno)
-                        ->count();
-                    return $lead;
-                });
-        } catch (\Throwable $e) {}
-
-        $telecallerStats = collect();
-        $totalTelecallersCount = 0;
-        try {
-            $telecallerStats = Employee::whereIn('emp_code', function($q) {
-                $q->select('emp_id')->from('master.roles_assigned')->where('roles_role_id', 4);
-            })->orWhere('role_id', 4)
-            ->orWhereIn('emp_code', function($q) {
-                $q->select('empcode')->from('crm.telecaller_leads');
-            })->orWhereIn('emp_code', function($q) {
-                $q->select('empcode')->from('crm.leads')->whereNotNull('empcode')->where('empcode', '!=', '0');
-            })->orderBy('full_name', 'asc')->get()->map(function($emp) use ($paidAppNos) {
-                $leads = TelecallerLead::where('empcode', $emp->emp_code)->get();
-                $leadsCount = $leads->count();
-                $paidCount = $leads->filter(fn($l) => $paidAppNos->contains((string)$l->applino))->count();
-                $tasksCount = TelecallerLeadTask::where('empcode', $emp->emp_code)->count();
-                $contactedCount = TelecallerLeadTask::where('empcode', $emp->emp_code)->distinct('phoneno')->count('phoneno');
-                $pendingCount = max(0, $leadsCount - $contactedCount);
-                $stages = DB::table('crm.telecaller_leads_tasks')
-                    ->where('empcode', $emp->emp_code)
-                    ->select('stage_name', DB::raw('count(*) as count'))
-                    ->whereNotNull('stage_name')
-                    ->groupBy('stage_name')
-                    ->orderBy('count', 'desc')
-                    ->get();
-                $convRate = $leadsCount > 0 ? round(($paidCount / $leadsCount) * 100, 1) : 0;
-                return (object)[
-                    'emp_code' => $emp->emp_code,
-                    'name' => $emp->full_name,
-                    'email' => $emp->ofc_mailid ?? $emp->personal_mailid ?? 'N/A',
-                    'phone' => $emp->phone_primary ?? 'N/A',
-                    'leads_count' => $leadsCount,
-                    'tasks_count' => $tasksCount,
-                    'contacted_count' => $contactedCount,
-                    'pending_count' => $pendingCount,
-                    'stages' => $stages,
-                    'paid_count' => $paidCount,
-                    'conversion_rate' => $convRate,
-                    'status' => $leadsCount > 0 ? 'Active' : 'Standby',
-                ];
-            });
-            $totalTelecallersCount = $telecallerStats->count();
-        } catch (\Throwable $e) {}
-
-        // Genuine Leads KPI Metrics
-        $totalRawLeads = 0;
-        $leadsNewCount = 0;
-        $leadsRegCount = 0;
-        $allocatedLeadsCount = 0;
-        $unallocatedPoolCount = 0;
-        try {
-            $totalRawLeads = Lead::count();
-            $leadsNewCount = Lead::where('phnostatus', 'New Lead')->count();
-            $leadsRegCount = Lead::where('phnostatus', 'Registered')->count();
-            $allocatedLeadsCount = Lead::where('empcode', '!=', '0')->whereNotNull('empcode')->count();
-            $unallocatedPoolCount = Lead::where(function($q) {
-                $q->where('empcode', '0')->orWhereNull('empcode');
-            })->count();
-        } catch (\Throwable $e) {}
-
-        $leadsByDate = collect();
-        $availableYears = collect();
-        $availableMonths = collect();
-        try {
-            $leadsByDate = DB::table('crm.leads')
-                ->select(DB::raw("CAST(enquirydate AS text) as enquirydate"), DB::raw('count(*) as count'))
-                ->whereNotNull('enquirydate')
-                ->groupBy('enquirydate')
-                ->orderBy('enquirydate', 'asc')
-                ->get()
-                ->map(function($item) {
-                    $dt = strtotime($item->enquirydate);
-                    $item->year = date('Y', $dt);
-                    $item->month = date('m', $dt);
-                    $item->month_name = date('M', $dt);
-                    $item->formatted_date = date('d M Y', $dt);
-                    $item->short_date = date('d M', $dt);
-                    return $item;
-                });
-
-            $availableYears = $leadsByDate->pluck('year')->unique()->values();
-            $availableMonths = $leadsByDate->map(function($d) {
-                return (object)[
-                    'year' => $d->year,
-                    'month' => $d->month,
-                    'label' => date('F Y', strtotime($d->enquirydate)),
-                    'short' => date('M Y', strtotime($d->enquirydate))
-                ];
-            })->unique('label')->values();
-        } catch (\Throwable $e) {}
-
-        $rawLeadsList = collect();
-        try {
-            $rawLeadsList = DB::table('crm.leads')
-                ->select('phoneno', 'phnostatus', 'enquirydate', 'empcode', 'applino')
-                ->orderBy('enquirydate', 'desc')
-                ->orderByRaw('log_timestamp DESC NULLS LAST')
-                ->take(100)
-                ->get();
-        } catch (\Throwable $e) {}
-
-        $leadsBySource = collect();
-        try {
-            $leadsBySource = DB::table('crm.leads')
-                ->select(DB::raw("CASE WHEN log_userid = '02598' THEN 'Bulk Upload' ELSE 'Portal / Direct' END as source_name"), DB::raw('count(*) as count'))
-                ->groupBy(DB::raw("CASE WHEN log_userid = '02598' THEN 'Bulk Upload' ELSE 'Portal / Direct' END"))
-                ->orderBy('count', 'desc')
-                ->get();
-        } catch (\Throwable $e) {}
+        $leadsKpi = $kpiService->getLeadsKpiMetrics();
+        $totalRawLeads = $leadsKpi['totalRawLeads'];
 
         return view('crm::index', compact(
             'user',
@@ -548,25 +350,7 @@ class CrmController extends Controller
      */
     public function generatePersonalCoupon(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
-            'applino' => 'required|string',
-            'discount_amount' => 'required|numeric|min:1|max:1200',
-        ]);
-
-        $applino = trim($request->input('applino'));
-        $discount = (float) $request->input('discount_amount', 500.00);
-        $user = Auth::user();
-        $usercode = $user?->usercode ?? '03141';
-
-        $res = \App\Services\CouponService::generatePersonalCoupon($applino, $discount, $usercode, $request->ip() ?? '127.0.0.1');
-
-        if ($request->is('*percoupongen*') || $request->input('redirect_to') === 'percoupongen') {
-            return redirect()->route('crm.percoupongen')
-                ->with('status', $res['message']);
-        }
-
-        return redirect()->route('crm.couponinfo', ['tab' => 'couponinfo'])
-            ->with('status', $res['message']);
+        return (new \Modules\Finance\Http\Controllers\CoupounController())->generatePersonalCoupon($request);
     }
 
     /**
@@ -609,7 +393,7 @@ class CrmController extends Controller
         $crmId = $user ? $user->usercode : 'SYSTEM';
 
         // Call TelecallerService
-        $allocResult = \App\Services\TelecallerService::allocateLeads([
+        $allocResult = TelecallerService::allocateLeads([
             'empcode' => $employeeCode,
             'crmid' => $crmId,
             'allot_mode' => $allotMode,
