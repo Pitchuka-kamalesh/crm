@@ -1191,14 +1191,26 @@
             gap: 0.85rem 1.15rem;
         }
 
+        .mockup-field-row-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem 1rem;
+        }
+
         @media (max-width: 900px) {
             .mockup-field-row-3 {
                 grid-template-columns: 1fr;
+            }
+            .mockup-field-row-4 {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 640px) {
             .mockup-field-row-2 {
+                grid-template-columns: 1fr;
+            }
+            .mockup-field-row-4 {
                 grid-template-columns: 1fr;
             }
         }
@@ -1488,10 +1500,10 @@
                                 @endif
                             </div>
                             <span class="step-nav-name">{{ $stg['title'] }}</span>
-                            @if($isActive)
-                                <span class="step-nav-status-sub">In Progress</span>
-                            @elseif($isDone)
+                            @if($isDone)
                                 <span class="step-nav-status-sub done">Completed</span>
+                            @elseif($isActive)
+                                <span class="step-nav-status-sub">In Progress</span>
                             @endif
                         </a>
                     @endif
@@ -1679,10 +1691,10 @@
             <!-- ================= STAGE 2: PERSONAL INFO (SEPARATE STEP 2) ================= -->
             @elseif($activeStep === 2)
                 <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
-                    <!-- CARD 1: 2. PERSONAL INFO (FULL WIDTH) -->
+                    <!-- CARD 1: 2. PERSONAL DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                            <h3 class="mockup-card-title">2. personal info : Fathers Name</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <h3 class="mockup-card-title">2. Personal Details</h3>
                             @if($stages[2]['status'] === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
@@ -1694,24 +1706,36 @@
                             @csrf
                             <input type="hidden" name="step" value="2">
 
-                            <!-- Row 1: Father Name, Phone No, DOB (3 Columns) -->
-                            <div class="mockup-field-row-3">
+                            <!-- Row 1: Candidate Name & Parent Name (2 Columns) -->
+                            <div class="mockup-field-row-2">
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">father name: <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" name="father_name" class="mockup-input" value="{{ $personalInfo?->parent_name }}" placeholder="Enter Father's Name" required>
+                                    <label class="mockup-label">Candidate Name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="candidate_name" class="mockup-input" value="{{ $crmStudent?->name ?? $user?->name }}" placeholder="Enter Candidate Name" required>
                                 </div>
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">Phone no: <span style="color:#ef4444;">*</span></label>
-                                    <input type="tel" name="phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: ($crmStudent?->phoneno ?: ($user?->phnno ?: '')))), -10) }}" placeholder="Enter 10-digit Phone Number" maxlength="10" pattern="[0-9]{10}" required>
-                                </div>
-                                <div class="mockup-field-group">
-                                    <label class="mockup-label">DOB: <span style="color:#ef4444;">*</span></label>
-                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" required>
+                                    <label class="mockup-label">Parent Name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="parent_name" class="mockup-input" value="{{ $personalInfo?->parent_name }}" placeholder="Enter Parent Name" required>
                                 </div>
                             </div>
 
-                            <!-- Row 2: Gender, Category, Referee By (3 Columns) -->
+                            <!-- Row 2: Student Number & Parent Phone Number (2 Columns) -->
+                            <div class="mockup-field-row-2" style="margin-top: 1rem;">
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">Student Number: <span style="color:#ef4444;">*</span></label>
+                                    <input type="tel" name="student_number" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($crmStudent?->phoneno ?: ($personalInfo?->phoneno ?: ($user?->phnno ?: '')))), -10) }}" placeholder="Enter 10-digit Student Number" maxlength="10" pattern="[0-9]{10}" required>
+                                </div>
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">Parent Phone Number:</label>
+                                    <input type="tel" name="parent_phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: '')), -10) }}" placeholder="Enter 10-digit Parent Phone Number" maxlength="10" pattern="[0-9]{10}">
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Date of Birth, Gender, Category (3 Columns) -->
                             <div class="mockup-field-row-3" style="margin-top: 1rem; align-items: start;">
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">Date of Birth: <span style="color:#ef4444;">*</span></label>
+                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" required>
+                                </div>
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Gender: <span style="color:#ef4444;">*</span></label>
                                     <select name="gender" class="mockup-select" required>
@@ -1721,7 +1745,7 @@
                                     </select>
                                 </div>
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">category: <span style="color:#ef4444;">*</span></label>
+                                    <label class="mockup-label">Category: <span style="color:#ef4444;">*</span></label>
                                     <div class="mockup-radio-row" style="margin-top: 0.5rem;">
                                         <label class="mockup-radio-label">
                                             <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
@@ -1741,11 +1765,15 @@
                                         </label>
                                     </div>
                                 </div>
-                                @php
-                                    $savedRefs = array_map('trim', explode(',', $personalInfo?->referedby ?? 'via advertisement'));
-                                @endphp
+                            </div>
+
+                            <!-- Row 3: Referee By -->
+                            @php
+                                $savedRefs = array_map('trim', explode(',', $personalInfo?->referedby ?? 'via advertisement'));
+                            @endphp
+                            <div style="margin-top: 1rem;">
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">referee by:</label>
+                                    <label class="mockup-label">Referee By:</label>
                                     <div class="mockup-radio-grid" style="margin-top: 0.35rem;">
                                         <label class="mockup-radio-label">
                                             <input type="checkbox" name="referee_by[]" value="via advertisement" {{ in_array('via advertisement', $savedRefs) ? 'checked' : '' }}>
@@ -1770,13 +1798,13 @@
                                 </div>
                             </div>
 
-                            <!-- Address Box populated from crm DB tables (3 Columns) -->
+                            <!-- Address Box (Order by: Country, State, District, City / Mandal / Town, D.No / Colony / Street / Village, Pincode) -->
                             <div class="mockup-subbox" style="margin-top: 1.25rem;">
                                 <h4 class="mockup-subbox-title">Address</h4>
                                 <div class="mockup-field-row-3">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">street/country: <span style="color:#ef4444;">*</span></label>
-                                        <select name="street_country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
+                                        <label class="mockup-label">Country: <span style="color:#ef4444;">*</span></label>
+                                        <select name="country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
                                             @foreach($countries as $c)
                                                 <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ ($personalInfo?->country == $c->country_name || (!$personalInfo && $c->country_code === 'IN')) ? 'selected' : '' }}>
                                                     {{ $c->country_name }}
@@ -1785,7 +1813,7 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">state: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">State: <span style="color:#ef4444;">*</span></label>
                                         <select name="state" id="geo-state-select" class="mockup-select" onchange="onStateChange(this.value)" required>
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
@@ -1796,8 +1824,8 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">distric t: <span style="color:#ef4444;">*</span></label>
-                                        <select name="distric_t" id="geo-district-select" class="mockup-select" required>
+                                        <label class="mockup-label">District: <span style="color:#ef4444;">*</span></label>
+                                        <select name="district" id="geo-district-select" class="mockup-select" required>
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ ($personalInfo?->district == $d->DISTRICT_NAME || (!$personalInfo && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
@@ -1809,16 +1837,16 @@
                                 </div>
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">city / mandal: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="city_mandal" class="mockup-input" value="{{ $personalInfo?->city_mandal }}" placeholder="Enter City / Mandal" required>
+                                        <label class="mockup-label">City / Mandal / Town: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city_mandal" class="mockup-input" value="{{ $personalInfo?->city_mandal }}" placeholder="Enter City / Mandal / Town" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">village : <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="village" class="mockup-input" value="{{ $personalInfo?->village }}" placeholder="Enter Village / Street Address" required>
+                                        <label class="mockup-label">D.No / Colony / Street / Village: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="village" class="mockup-input" value="{{ $personalInfo?->village }}" placeholder="Enter D.No / Colony / Street / Village" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">pin code: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pin_code" class="mockup-input" value="{{ $personalInfo?->pincode }}" placeholder="Enter 6-digit Pin Code" maxlength="6" pattern="[0-9]{6}" required>
+                                        <label class="mockup-label">Pincode: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pincode" class="mockup-input" value="{{ $personalInfo?->pincode }}" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}" required>
                                     </div>
                                 </div>
                             </div>
@@ -1912,87 +1940,55 @@
                             @csrf
                             <input type="hidden" name="step" value="3">
                             <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
+                            <input type="hidden" name="eval_type" id="eval_type" value="{{ $academicDetails?->tenth_marks_type ?? 'Marks' }}">
 
                             <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
                             <div class="mockup-subbox" id="sec-10th-details">
-                                <h4 class="mockup-subbox-title">school/ college 10 th info</h4>
+                                <h4 class="mockup-subbox-title">10th School / SSC Details</h4>
 
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">school/ co name : <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">School / College Name: <span style="color:#ef4444;">*</span></label>
                                         <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / College Name" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Boad of study : <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Board of Study: <span style="color:#ef4444;">*</span></label>
                                         <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board of Study (e.g. BSEAP, CBSE, ICSE)" required>
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Roll NO : <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Roll No / Hall Ticket No: <span style="color:#ef4444;">*</span></label>
                                         <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Roll / Hall Ticket No" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">passing year : <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
                                         <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030" required>
-                                    </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Evaluation Type / Marks: <span style="color:#ef4444;">*</span></label>
-                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="eval_type" value="marks" {{ ($academicDetails?->tenth_marks_type !== 'CGPA') ? 'checked' : '' }} onchange="onEvalTypeChange('marks')">
-                                                <span>marks</span>
-                                            </label>
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="eval_type" value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'checked' : '' }} onchange="onEvalTypeChange('CGPA')">
-                                                <span>CGPA</span>
-                                            </label>
-                                        </div>
-                                        <div id="cgpa-input-box" style="display: {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'block' : 'none' }}; margin-top: 0.35rem;">
-                                            <input type="number" id="eval_cgpa_field" name="cgpa_value" class="mockup-input" style="padding: 0.4rem 0.65rem;" step="0.01" min="1.0" max="10.0" value="{{ $academicDetails?->tenth_cgpa }}" placeholder="Enter CGPA (e.g. 9.80)" oninput="evaluateScholarshipFromInput()">
-                                        </div>
-                                        <div id="marks-input-box" style="display: {{ ($academicDetails?->tenth_marks_type !== 'CGPA') ? 'block' : 'none' }}; margin-top: 0.35rem;">
-                                            <input type="number" id="eval_marks_field" name="marks_value" class="mockup-input" style="padding: 0.4rem 0.65rem;" step="0.1" min="0" max="1000" value="{{ $academicDetails?->tenth_marks }}" placeholder="Enter Marks (e.g. 590 or 85%)" oninput="evaluateScholarshipFromInput()">
-                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- DYNAMIC SCHOLARSHIP ELIGIBILITY & CONCESSION CONTAINER (POPS UP WHEN >= 60%) -->
-                                <div id="scholarship-details-box" style="display: none; margin-top: 1rem; background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.25rem 1.35rem; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.08);">
-                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.85rem; border-bottom: 1px dashed #86efac; padding-bottom: 0.75rem;">
-                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                                            <span style="font-size: 1.5rem;">🎉</span>
-                                            <div>
-                                                <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #14532d;">Eligible for VFSTR Merit Scholarship!</h4>
-                                                <p style="margin: 0.15rem 0 0 0; font-size: 0.76rem; color: #166534; font-weight: 600;">Candidate aggregate score is &ge; 60% — Tuition Fee Concession Tier unlocked!</p>
-                                            </div>
-                                        </div>
-                                        <span id="scholarship-status-badge" style="background: #16a34a; color: #ffffff; font-size: 0.74rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 20px; letter-spacing: 0.02em;">
-                                            ✓ Scholarship Eligible
-                                        </span>
+                                <!-- EXACT DATABASE FIELDS: tenth_marks_type, tenth_marks_conducted, tenth_marks_earned, tenth_percentage -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
+                                        <select name="tenth_marks_type" id="tenth_marks_type" class="mockup-select" onchange="onTenthMarksTypeChange(this.value)">
+                                            <option value="Marks" {{ ($academicDetails?->tenth_marks_type === 'Marks' || $academicDetails?->tenth_marks_type === 'marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
+                                            <option value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
+                                            <option value=">= 60%" {{ ($academicDetails?->tenth_marks_type === '>= 60%') ? 'selected' : '' }}>Grade (>= 60%)</option>
+                                        </select>
                                     </div>
-
-                                    <div class="mockup-field-row-2" style="align-items: center;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label" style="color: #14532d;">Applicable Concession Tier:</label>
-                                            <div id="scholarship-tier-display" style="background: #ffffff; border: 1.5px solid #86efac; border-radius: 10px; padding: 0.65rem 0.95rem; font-size: 0.86rem; font-weight: 800; color: #15803d; display: flex; align-items: center; gap: 0.5rem; min-height: 42px;">
-                                                <span>🏆 Tier 1: 50% Tuition Fee Concession</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label" style="color: #14532d;">Scholarship Concession Status:</label>
-                                            <div style="background: #e0f2fe; border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 0.65rem 0.95rem; font-size: 0.84rem; font-weight: 700; color: #0369a1; display: flex; align-items: center; gap: 0.5rem; min-height: 42px;">
-                                                <span>Auto-adjusted in Semester Fee</span>
-                                            </div>
-                                        </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Conducted: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()" required>
                                     </div>
-
-                                    <div style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px solid rgba(134, 239, 172, 0.4); font-size: 0.76rem; color: #166534; display: flex; flex-wrap: wrap; gap: 1.5rem;">
-                                        <span><strong>Tier 1 (&ge; 80%):</strong> 50% Fee Concession</span>
-                                        <span><strong>Tier 2 (70% - 79.9%):</strong> 35% Fee Concession</span>
-                                        <span><strong>Tier 3 (60% - 69.9%):</strong> 25% Fee Concession</span>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" required>
                                     </div>
                                 </div>
                             </div>
@@ -2003,7 +1999,7 @@
 
                                 <div class="mockup-field-row-3">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Course choice: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Course Choice: <span style="color:#ef4444;">*</span></label>
                                         <div class="mockup-radio-row" style="margin-top: 0.35rem;">
                                             <label class="mockup-radio-label">
                                                 <input type="radio" name="course_choice" value="Inter" {{ ($academicDetails?->pu2_study_board !== 'Diploma') ? 'checked' : '' }}>
@@ -2017,7 +2013,7 @@
                                     </div>
 
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Subset choice: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
                                         <div class="mockup-radio-row" style="margin-top: 0.35rem;">
                                             <label class="mockup-radio-label">
                                                 <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year') ? 'checked' : '' }}>
@@ -2025,29 +2021,48 @@
                                             </label>
                                             <label class="mockup-radio-label">
                                                 <input type="radio" name="subset_choice" value="Second year" {{ ($academicDetails?->pu2_current_status === 'Second year') ? 'checked' : '' }}>
-                                                <span>Second year</span>
+                                                <span>Second Year</span>
                                             </label>
                                         </div>
                                     </div>
 
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? '' }}" placeholder="2026" min="2000" max="2030">
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="2026" min="2000" max="2030" required>
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+                                <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Junior College / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Junior College / Institute Name">
+                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Junior College / Institute Name" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Hall Ticket / Roll No: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Inter / Diploma Roll No">
+                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Inter / Diploma Roll No" required>
+                                    </div>
+                                </div>
+
+                                <!-- EXACT DATABASE FIELDS: pu2_marks_type, pu2_marks_conducted, pu2_marks_earned, pu2_percentage -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
+                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)">
+                                            <option value="Marks" {{ ($academicDetails?->pu2_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
+                                            <option value="CGPA" {{ ($academicDetails?->pu2_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
+                                        </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Inter Total Marks / CGPA: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_marks" class="mockup-input" value="{{ $academicDetails?->pu2_marks }}" placeholder="Total Marks / CGPA (e.g. 962 or 9.5)">
+                                        <label class="mockup-label">Marks Conducted: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted ?? 1000 }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" required>
                                     </div>
                                 </div>
                             </div>
@@ -2165,64 +2180,62 @@
                                 }
                             }
 
-                            function onEvalTypeChange(type) {
-                                const cgpaIn = document.getElementById('cgpa-input-box');
-                                const marksIn = document.getElementById('marks-input-box');
+                            function calculateTenthPct() {
+                                const conducted = parseFloat(document.getElementById('tenth_marks_conducted')?.value || 0);
+                                const earned = parseFloat(document.getElementById('tenth_marks_earned')?.value || 0);
+                                const type = document.getElementById('tenth_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('tenth_percentage');
+                                if (!pctInput) return;
 
                                 if (type === 'CGPA') {
-                                    if (cgpaIn) cgpaIn.style.display = 'block';
-                                    if (marksIn) marksIn.style.display = 'none';
+                                    if (earned > 0) {
+                                        pctInput.value = (earned * 9.5).toFixed(2);
+                                    }
                                 } else {
-                                    if (cgpaIn) cgpaIn.style.display = 'none';
-                                    if (marksIn) marksIn.style.display = 'block';
+                                    if (conducted > 0 && earned > 0) {
+                                        pctInput.value = ((earned / conducted) * 100).toFixed(2);
+                                    }
                                 }
-                                evaluateScholarshipFromInput();
                             }
 
-                            function evaluateScholarshipFromInput() {
-                                const isCgpa = document.querySelector('input[name="eval_type"][value="CGPA"]')?.checked;
-                                let percentage = 0;
-
-                                if (isCgpa) {
-                                    const cgpa = parseFloat(document.getElementById('eval_cgpa_field')?.value || 0);
-                                    percentage = cgpa * 9.5;
+                            function onTenthMarksTypeChange(val) {
+                                const evalIn = document.getElementById('eval_type');
+                                if (evalIn) evalIn.value = val;
+                                const conductedIn = document.getElementById('tenth_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (conductedIn) conductedIn.value = '10';
                                 } else {
-                                    const marks = parseFloat(document.getElementById('eval_marks_field')?.value || 0);
-                                    if (marks > 100) {
-                                        percentage = (marks / 600) * 100;
-                                    } else {
-                                        percentage = marks;
-                                    }
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '600';
                                 }
+                                calculateTenthPct();
+                            }
 
-                                const sBox = document.getElementById('scholarship-details-box');
-                                const display = document.getElementById('scholarship-tier-display');
-                                const badge = document.getElementById('scholarship-status-badge');
+                            function calculatePu2Pct() {
+                                const conducted = parseFloat(document.getElementById('pu2_marks_conducted')?.value || 0);
+                                const earned = parseFloat(document.getElementById('pu2_marks_earned')?.value || 0);
+                                const type = document.getElementById('pu2_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('pu2_percentage');
+                                if (!pctInput) return;
 
-                                if (percentage >= 60) {
-                                    if (sBox) sBox.style.display = 'block';
-                                    if (percentage >= 80) {
-                                        if (display) display.innerHTML = '<span>🏆 Tier 1: 50% Tuition Fee Concession (' + Math.round(percentage) + '%)</span>';
-                                        if (badge) {
-                                            badge.style.background = '#16a34a';
-                                            badge.textContent = '✓ Eligible: 50% Concession';
-                                        }
-                                    } else if (percentage >= 70) {
-                                        if (display) display.innerHTML = '<span>⭐ Tier 2: 35% Tuition Fee Concession (' + Math.round(percentage) + '%)</span>';
-                                        if (badge) {
-                                            badge.style.background = '#2563eb';
-                                            badge.textContent = '✓ Eligible: 35% Concession';
-                                        }
-                                    } else {
-                                        if (display) display.innerHTML = '<span>⭐ Tier 3: 25% Tuition Fee Concession (' + Math.round(percentage) + '%)</span>';
-                                        if (badge) {
-                                            badge.style.background = '#d97706';
-                                            badge.textContent = '✓ Eligible: 25% Concession';
-                                        }
+                                if (type === 'CGPA') {
+                                    if (earned > 0) {
+                                        pctInput.value = (earned * 9.5).toFixed(2);
                                     }
                                 } else {
-                                    if (sBox) sBox.style.display = 'none';
+                                    if (conducted > 0 && earned > 0) {
+                                        pctInput.value = ((earned / conducted) * 100).toFixed(2);
+                                    }
                                 }
+                            }
+
+                            function onPu2MarksTypeChange(val) {
+                                const conductedIn = document.getElementById('pu2_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (conductedIn) conductedIn.value = '10';
+                                } else {
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '1000';
+                                }
+                                calculatePu2Pct();
                             }
 
                             function validateStep3Form(form) {
@@ -2231,8 +2244,12 @@
 
                             document.addEventListener('DOMContentLoaded', function() {
                                 setDegreeLevel('{{ $degreeLevel }}');
-                                const activeEval = document.querySelector('input[name="eval_type"]:checked')?.value || 'marks';
-                                onEvalTypeChange(activeEval);
+                                if (!document.getElementById('tenth_percentage')?.value) {
+                                    calculateTenthPct();
+                                }
+                                if (!document.getElementById('pu2_percentage')?.value) {
+                                    calculatePu2Pct();
+                                }
                             });
                         </script>
                     </div>
@@ -2466,8 +2483,162 @@
                     </script>
                 </form>
 
-            <!-- ================= STAGE 5: APPLICATION DOWNLOAD (master.menus: CRMM0010) ================= -->
+            <!-- ================= STAGE 5: EXAM SLOT BOOKING (master.menus: EXAM00002) ================= -->
             @elseif($activeStep === 5)
+                @php
+                    $now = \Carbon\Carbon::now();
+                    $cutoffHour = 17; // 5:00 PM daily cutoff
+                    $isBefore5PM = $now->hour < $cutoffHour;
+
+                    // If before 5 PM: earliest available is tomorrow (14th -> 15th).
+                    // If after 5 PM cutoff: earliest available is day after tomorrow (16th).
+                    $minExamDate = $isBefore5PM 
+                        ? $now->copy()->addDay()->format('Y-m-d') 
+                        : $now->copy()->addDays(2)->format('Y-m-d');
+
+                    $minExamDateFormatted = \Carbon\Carbon::parse($minExamDate)->format('d M Y');
+                    $cutoffMessage = $isBefore5PM
+                        ? 'Bookings today before 5:00 PM are scheduled for tomorrow (' . $minExamDateFormatted . ').'
+                        : 'Bookings after 5:00 PM cutoff are scheduled for day after tomorrow (' . $minExamDateFormatted . ').';
+
+                    $existingDate = $examSchedule?->examdate ? \Carbon\Carbon::parse($examSchedule->examdate)->format('Y-m-d') : null;
+                    $defaultDate = ($existingDate && $existingDate >= $minExamDate) 
+                        ? $existingDate 
+                        : $minExamDate;
+
+                    $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';
+                    $hasBookedSlot = !empty($examSchedule?->examdate) && !empty($examSchedule?->exam_slot);
+                @endphp
+
+                <div class="step-panel-header">
+                    <div>
+                        <div class="step-panel-kicker">Stage 5 of {{ count($stages) }} &bull; Entrance Examination Scheduling</div>
+                        <h3>{{ $stages[5]['title'] ?? 'Exam Slot Booking' }}</h3>
+                        <p>{{ $stages[5]['subtitle'] ?? 'Select your preferred date and time slot for the V-SAT entrance examination.' }}</p>
+                    </div>
+                    @if($hasBookedSlot)
+                        <span class="step-header-tag tag-success">✓ Slot Booked</span>
+                    @else
+                        <span class="step-header-tag tag-pending">Booking Pending</span>
+                    @endif
+                </div>
+
+                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
+                    @csrf
+                    <input type="hidden" name="step" value="5">
+
+                    <!-- Confirmation Banner: Display when a time slot is booked -->
+                    @if($hasBookedSlot)
+                        <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #22c55e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+                                    ✓
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.96rem; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                        <span>This time slot has been booked</span>
+                                        <span style="font-size: 0.72rem; font-weight: 700; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 9999px;">
+                                            Confirmed in Database
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 0.84rem; color: #334155; margin-top: 3px;">
+                                        📅 Booked Date: <strong>{{ \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') }}</strong> &bull; Selected Slot: <strong>{{ $examSchedule->exam_slot }}</strong>
+                                    </div>
+                                    <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                        Examination Center: <strong>{{ $campusName ?: 'Vignan Main Campus (Vadlamudi)' }}</strong> &bull; Status: Confirmed
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #ffffff; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 8px;">
+                                To change slot, select date/slot below &amp; click Confirm
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Slot Booking Selection -->
+                    <div class="section-box">
+                        <div class="section-box-title">
+                            <span>Select Exam Date &amp; Time Slot</span>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <!-- Date Selection with 5 PM Cutoff Enforcement -->
+                            <div class="field-group">
+                                <label class="field-label">Exam Date <span class="required-star">*</span></label>
+                                <input type="date"
+                                       id="stage5ExamDateInput"
+                                       name="examdate"
+                                       class="field-input"
+                                       min="{{ $minExamDate }}"
+                                       value="{{ $defaultDate }}"
+                                       required>
+                                <div style="margin-top: 6px; font-size: 0.76rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                    <span>⏰</span>
+                                    <span><strong>5:00 PM Daily Cutoff:</strong> {{ $cutoffMessage }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Slot Selection (S1 11 AM - 1 PM or S2 2 PM - 4 PM) -->
+                            <div class="field-group">
+                                <label class="field-label">Select Slot <span class="required-star">*</span></label>
+                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" required>
+                                    <option value="S1 11:00 AM to 1:00 PM" {{ str_contains($currentSlot, 'S1') || str_contains($currentSlot, '11') ? 'selected' : '' }}>
+                                        S1 11:00 AM to 1:00 PM (Morning Session)
+                                    </option>
+                                    <option value="S2 2:00 PM to 4:00 PM" {{ str_contains($currentSlot, 'S2') || str_contains($currentSlot, '2') ? 'selected' : '' }}>
+                                        S2 2:00 PM to 4:00 PM (Afternoon Session)
+                                    </option>
+                                </select>
+                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                    <span>✓</span>
+                                    <span id="slotLiveStatus">Standard 2-hour CBT entrance test session.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-footer-actions">
+                        <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
+                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Document upload' }}
+                        </a>
+                        <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                            <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Client-Side Real-Time 5 PM Cutoff Validator -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const dateInput = document.getElementById('stage5ExamDateInput');
+                            const slotSelect = document.getElementById('stage5ExamSlotSelect');
+                            const liveStatus = document.getElementById('slotLiveStatus');
+
+                            const minAllowed = '{{ $minExamDate }}';
+
+                            if (dateInput) {
+                                dateInput.addEventListener('change', function() {
+                                    if (this.value < minAllowed) {
+                                        alert('Per university policy, exam dates must be scheduled with advance notice (before 5:00 PM for tomorrow, or after 5:00 PM for day after tomorrow). Earliest available date is ' + minAllowed);
+                                        this.value = minAllowed;
+                                    }
+                                });
+                            }
+
+                            if (slotSelect && liveStatus) {
+                                slotSelect.addEventListener('change', function() {
+                                    if (this.value.includes('S1')) {
+                                        liveStatus.textContent = 'Morning session selected: 11:00 AM to 1:00 PM. Please report 30 minutes prior.';
+                                    } else {
+                                        liveStatus.textContent = 'Afternoon session selected: 2:00 PM to 4:00 PM. Please report 30 minutes prior.';
+                                    }
+                                });
+                            }
+                        });
+                    </script>
+                </form>
+
+            <!-- ================= STAGE 6: APPLICATION DOWNLOAD (master.menus: CRMM0010) ================= -->
+            @elseif($activeStep === 6)
                 @php
                     $appStudent = $applicationData ?? \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) ($appNo ?: ($user?->usercode ?? '0')));
                     $formLogo = asset('images/vignan-logo.png');
@@ -2486,7 +2657,7 @@
 
                 <div class="step-panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                     <div>
-                        <div class="step-panel-kicker">Stage 5 of {{ count($stages) }} &bull; Official Candidate Dossier</div>
+                        <div class="step-panel-kicker">Stage 6 of {{ count($stages) }} &bull; Official Candidate Dossier</div>
                         <h3>Application Form Preview &amp; Download</h3>
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
@@ -2502,7 +2673,7 @@
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
                     @csrf
-                    <input type="hidden" name="step" value="5">
+                    <input type="hidden" name="step" value="6">
 
                     <!-- EMBEDDED A4 ADMISSION APPLICATION FORM -->
                     <div class="embedded-a4-form" style="max-width: 820px; margin: 0 auto; background: #F4F7FB; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1B2430;">
@@ -2562,159 +2733,446 @@
                                 </tr>
                             </table>
 
-                            <!-- 2x2 Information Grid -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+                            <!-- Allotment & Examination Schedule Bar -->
+                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 10px 14px; margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Allotted Program</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        {{ $appStudent->program ?: ($programName ?: 'B.Tech - Bachelor of Technology') }}
+                                    </div>
+                                    @if(!empty($appStudent->branch) || !empty($branchName))
+                                        <div style="font-size: 10px; color: #1E7BD8; font-weight: 700;">{{ $appStudent->branch ?: $branchName }}</div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Allotted Campus</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        {{ $appStudent->campus ?: ($campusName ?: 'Vignan Main Campus (Vadlamudi)') }}
+                                    </div>
+                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Provisional Allotment Confirmed</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Booked Entrance Exam Slot</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        📅 {{ $appStudent->exam_date ?: 'Stage 5 Scheduled' }}
+                                    </div>
+                                    <div style="font-size: 10px; color: #B25E09; font-weight: 700;">⏰ {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
+                                </div>
+                            </div>
+
+                            <!-- 2-Column: Personal Information & Address Information -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                                 <tr>
                                     <td style="width: 50%; padding-right: 6px; vertical-align: top;">
-                                        <!-- 1. PERSONAL INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px;">
+                                        <!-- 1. PERSONAL & PARENT INFORMATION -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
                                             <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                1. Personal Information
+                                                1. Candidate &amp; Parent Details
                                             </h4>
                                             <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Full name</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->name ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Email</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0; word-break: break-all;">{{ $appStudent->email ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Phone</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->phone ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Date of birth</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $dobFormatted }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Gender</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->gender ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Category</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->category ?: 'N/A' }}</td></tr>
+                                                <tr><td style="width: 38%; color: #6B778A; padding: 3.5px 0;">Candidate Name</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->name ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Father / Parent</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->parent_name ?: ($appStudent->father_name ?: 'N/A') }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Parent Contact</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->parent_phone ?: ($appStudent->father_phone ?: 'N/A') }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Candidate Phone</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->phone ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Email ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0; word-break: break-all;">{{ $appStudent->email ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Date of Birth</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $dobFormatted }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Gender</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->gender ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Category</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->category ?: 'General' }}</td></tr>
                                             </table>
                                         </div>
                                     </td>
                                     <td style="width: 50%; padding-left: 6px; vertical-align: top;">
-                                        <!-- 2. EDUCATIONAL INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px;">
+                                        <!-- 2. ADDRESS INFORMATION -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
                                             <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                2. Educational Information
+                                                2. Permanent &amp; Contact Address
                                             </h4>
                                             <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">School</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->school_name ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Board</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->board ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Percentage</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0; color: #16a34a;">{{ (float)$appStudent->percentage > 0 ? number_format((float) $appStudent->percentage, 2) . ' %' : 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Passing year</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->passing_year ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Roll number</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->roll_number ?: 'N/A' }}</td></tr>
+                                                <tr><td style="width: 38%; color: #6B778A; padding: 3.5px 0;">Door / Street</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->street ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Mandal / City</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->city ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">District</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->district ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">State</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->state ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Country</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->country ?: 'India' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">PIN Code</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->pincode ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Admission Ref</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">#{{ $appStudent->id }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Student CRM ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->student_id ?: 'N/A' }}</td></tr>
                                             </table>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr><td colspan="2" style="height: 10px;"></td></tr>
+                            </table>
+
+                            <!-- 3. QUALIFYING ACADEMIC RECORDS (FULL WIDTH TABLE) -->
+                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; margin-top: 10px;">
+                                <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate)
+                                </h4>
+                                <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
+                                    <thead>
+                                        <tr style="background: #F8FAFC; border-bottom: 2px solid #E2E8F0; text-align: left; color: #475569; font-weight: 800;">
+                                            <th style="padding: 6px 8px; width: 18%;">Standard / Level</th>
+                                            <th style="padding: 6px 8px; width: 28%;">School / College Name</th>
+                                            <th style="padding: 6px 8px; width: 20%;">Board / University</th>
+                                            <th style="padding: 6px 8px; width: 10%; text-align: center;">Year</th>
+                                            <th style="padding: 6px 8px; width: 12%;">Roll / Hall Ticket</th>
+                                            <th style="padding: 6px 8px; width: 12%; text-align: right;">Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- 10th Standard -->
+                                        <tr style="border-bottom: 1px solid #E3E8EF;">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    10th Standard (SSC)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ $appStudent->academic->ssc_school ?: ($appStudent->school_name ?: 'Not Provided') }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ $appStudent->academic->ssc_board ?: ($appStudent->board ?: 'State Board') }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->ssc_year ?: ($appStudent->passing_year ?: 'N/A') }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->ssc_roll ?: ($appStudent->roll_number ?: 'N/A') }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ $appStudent->academic->ssc_percentage !== 'N/A' ? $appStudent->academic->ssc_percentage : ((float)$appStudent->percentage > 0 ? number_format((float)$appStudent->percentage, 2) . ' %' : 'N/A') }}
+                                            </td>
+                                        </tr>
+                                        <!-- 12th / Intermediate -->
+                                        <tr>
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    12th / Inter (10+2)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ $appStudent->academic->inter_college ?: 'Junior College Records' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ $appStudent->academic->inter_board ?: 'Board of Intermediate Education' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->inter_year ?: 'N/A' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->inter_roll ?: 'N/A' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ $appStudent->academic->inter_percentage ?: 'N/A' }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 2-Column: 4. Payment Information & 5. Verification Checklist -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                                 <tr>
                                     <td style="width: 50%; padding-right: 6px; vertical-align: top;">
-                                        <!-- 3. ADDRESS INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px;">
-                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                3. Address Information
-                                            </h4>
-                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Street</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->street ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">City</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->city ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">State</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->state ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Pincode</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->pincode ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Country</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->country ?: 'N/A' }}</td></tr>
-                                            </table>
-                                        </div>
-                                    </td>
-                                    <td style="width: 50%; padding-left: 6px; vertical-align: top;">
                                         <!-- 4. PAYMENT INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px;">
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
                                             <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                4. Payment Information
+                                                4. Admission Registration Fee
                                             </h4>
                                             <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Amount</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">INR {{ number_format((float) $appStudent->payment_amount) }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Method</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->payment_method }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Transaction ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0; font-size: 9.5px; word-break: break-all;">{{ $appStudent->transaction_id }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Status</td>
+                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Paid Amount</td><td style="font-weight: 800; border-bottom: 1px solid #E3E8EF; padding: 4px 0; color: #15803d; font-size: 12px;">INR {{ number_format((float) $appStudent->payment_amount) }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 4px 0;">Payment Gateway</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->payment_method }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 4px 0;">Transaction Ref</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0; font-size: 9.5px; word-break: break-all;">{{ $appStudent->transaction_id }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 4px 0;">Accounts Status</td>
                                                     <td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">
                                                         <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2px 8px; border-radius: 8px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
-                                                            {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }}
+                                                            ✓ {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }} &amp; VERIFIED
                                                         </span>
                                                     </td>
                                                 </tr>
                                             </table>
                                         </div>
                                     </td>
+                                    <td style="width: 50%; padding-left: 6px; vertical-align: top;">
+                                        <!-- 5. DOCUMENTS UPLOAD SUMMARY -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
+                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                                5. Document Verification Status
+                                            </h4>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                @foreach(array_chunk($formDocs, 2, true) as $dRow)
+                                                    <tr>
+                                                        @foreach($dRow as $dKey => $dLabel)
+                                                            @php
+                                                                $dExt = $formUploaded[$dKey] ?? null;
+                                                                $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
+                                                                $dType = $isUploaded ? ($dExt ?: 'VERIFIED') : 'Pending';
+                                                            @endphp
+                                                            <td style="width: 50%; padding: 2.5px;">
+                                                                <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: {{ $isUploaded ? '#E2F5EC' : '#FDF0DC' }}; color: #1B2430; border: 1px solid {{ $isUploaded ? '#a7f3d0' : '#fde68a' }};">
+                                                                    <span>{{ $dLabel }}</span>
+                                                                    <small style="color: {{ $isUploaded ? '#12875B' : '#B25E09' }}; font-weight: 800;">{{ $isUploaded ? '✓ ' . $dType : 'Pending' }}</small>
+                                                                </div>
+                                                            </td>
+                                                        @endforeach
+                                                    </tr>
+                                                @endforeach
+                                            </table>
+                                        </div>
+                                    </td>
                                 </tr>
                             </table>
 
-                            <!-- 5. DOCUMENTS UPLOADED -->
-                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; margin-top: 10px;">
-                                <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                    5. Documents Uploaded
-                                </h4>
-                                <table style="width: 100%; border-collapse: collapse;">
-                                    @foreach(array_chunk($formDocs, 3, true) as $dRow)
-                                        <tr>
-                                            @foreach($dRow as $dKey => $dLabel)
-                                                @php
-                                                    $dExt = $formUploaded[$dKey] ?? null;
-                                                    $isUploaded = !empty($dExt);
-                                                    $dType = $isUploaded ? $dExt : 'Pending';
-                                                @endphp
-                                                <td style="width: 33.33%; padding: 3px;">
-                                                    <div style="border-radius: 7px; padding: 6px 8px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: {{ $isUploaded ? '#E2F5EC' : '#FDF0DC' }}; color: #1B2430; border: 1px solid {{ $isUploaded ? '#a7f3d0' : '#fde68a' }};">
-                                                        <span>{{ $dLabel }}</span>
-                                                        <small style="color: {{ $isUploaded ? '#12875B' : '#B25E09' }}; font-weight: 800;">{{ $dType }}</small>
-                                                    </div>
-                                                </td>
-                                            @endforeach
-                                        </tr>
-                                    @endforeach
-                                </table>
-                            </div>
-
                             <!-- Instructions -->
                             <div style="background: #FFF8EA; border: 1px solid #F2DDB0; border-left: 4px solid #B25E09; border-radius: 10px; padding: 9px 14px; margin-top: 10px; font-size: 9.5px; line-height: 1.5; color: #1B2430;">
-                                <strong style="color: #B25E09; letter-spacing: 0.4px;">INSTRUCTIONS</strong>
+                                <strong style="color: #B25E09; letter-spacing: 0.4px;">INSTRUCTIONS &amp; DECLARATION</strong>
                                 <ul style="margin: 3px 0 0; padding-left: 14px;">
-                                    <li>This is a provisional seat allotment. Original documents must be submitted at the time of joining.</li>
-                                    <li>Tuition fee and scholarship eligibility are subject to university norms.</li>
-                                    <li>All information is valid as of the approval date.</li>
+                                    <li>This is a provisional seat allotment. Original certificates must be presented at the time of campus verification.</li>
+                                    <li>Tuition fee, merit scholarships, and entrance test criteria are governed by university admissions norms.</li>
+                                    <li>I hereby declare that all entries made in this application are authentic and true to the best of my knowledge.</li>
                                 </ul>
                             </div>
 
                             <!-- Signatures -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 28px;">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px;">
                                 <tr>
                                     <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
-                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px;">Signature of Parent</div>
+                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Signature of Parent / Guardian</div>
                                     </td>
                                     <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
-                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px;">Date</div>
+                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Date: {{ date('d/m/Y') }}</div>
                                     </td>
                                     <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
-                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px;">Signature of Student</div>
+                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Signature of Candidate</div>
                                     </td>
                                 </tr>
                             </table>
 
                             <!-- For Office Use Only -->
-                            <div style="border: 1px dashed #6B778A; background: #ffffff; border-radius: 8px; padding: 7px 12px; margin-top: 16px; font-size: 9.5px; color: #6B778A;">
-                                <strong style="font-size: 8.5px; letter-spacing: 0.4px; display: block; margin-bottom: 6px;">FOR OFFICE USE ONLY</strong>
+                            <div style="border: 1px dashed #6B778A; background: #ffffff; border-radius: 8px; padding: 7px 12px; margin-top: 14px; font-size: 9.5px; color: #6B778A;">
+                                <strong style="font-size: 8.5px; letter-spacing: 0.4px; display: block; margin-bottom: 6px;">FOR OFFICE USE ONLY &bull; UNIVERSITY ADMISSIONS DIRECTORATE</strong>
                                 <table style="width: 100%; border-collapse: collapse;">
                                     <tr>
                                         <td style="width: 33.33%;">Application No.: <strong>{{ $appStudent->id }}</strong></td>
-                                        <td style="width: 33.33%;">Verified by: ______________</td>
-                                        <td style="width: 33.33%;">Date: _________</td>
+                                        <td style="width: 33.33%;">Verification Officer: ________________</td>
+                                        <td style="width: 33.33%;">Approval Seal &amp; Date: _________</td>
                                     </tr>
                                 </table>
                             </div>
 
                             <!-- Footer -->
-                            <div style="text-align: center; font-size: 8.5px; color: #6B778A; margin-top: 14px;">
+                            <div style="text-align: center; font-size: 8.5px; color: #6B778A; margin-top: 12px;">
                                 Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;|&nbsp; https://admissions.vignan.ac.in
                             </div>
 
                         </div>
                     </div>
 
+                    <!-- ================= ATTACHED APPLICATION DOCUMENTS & UPLOADED CERTIFICATES ================= -->
+                    @php
+                        $standardSlots = [
+                            'marksheet10'   => ['title' => '10th Standard Marksheet / SSC Certificate', 'required' => true, 'desc' => 'Proof of date of birth and secondary academic marks'],
+                            'marksheet12'   => ['title' => '12th Standard / Intermediate Marksheet', 'required' => true, 'desc' => 'Proof of qualifying intermediate (10+2) marks memo'],
+                            'aadhaar'       => ['title' => 'Aadhaar Card / Government Identity Proof', 'required' => true, 'desc' => 'Official government photo identification certificate'],
+                            'photo'         => ['title' => 'Candidate Passport Photograph', 'required' => true, 'desc' => 'Recent color passport size photograph with plain background'],
+                            'tc'            => ['title' => 'Transfer Certificate (T.C.)', 'required' => false, 'desc' => 'Transfer certificate issued by previous junior college / school'],
+                            'study_conduct' => ['title' => 'Study & Conduct Certificate', 'required' => false, 'desc' => 'Bonafide / conduct certificate from last attended institution'],
+                            'btech'         => ['title' => 'Undergraduate (UG) Degree Certificate', 'required' => false, 'desc' => 'Bachelor degree marks memo or provisional certificate'],
+                        ];
+
+                        // Merge any extra files found on disk / database
+                        foreach ($uploadedDocs as $uK => $uVal) {
+                            if (!isset($standardSlots[$uK])) {
+                                $standardSlots[$uK] = [
+                                    'title' => $uVal['title'] ?? ('Uploaded Document: ' . $uVal['filename']),
+                                    'required' => false,
+                                    'desc' => 'Candidate uploaded document attachment',
+                                ];
+                            }
+                        }
+
+                        // Collect only uploaded documents for full inline rendering
+                        $actualUploadedList = [];
+                        foreach ($uploadedDocs as $uK => $uVal) {
+                            if (!empty($uVal['path']) || !empty($uVal['url'])) {
+                                $actualUploadedList[$uK] = array_merge(
+                                    $standardSlots[$uK] ?? ['title' => ucwords(str_replace('_', ' ', $uK)), 'required' => false, 'desc' => 'Uploaded document'],
+                                    $uVal
+                                );
+                            }
+                        }
+                        $uploadedCount = count($actualUploadedList);
+                        $docIndex = 0;
+                    @endphp
+
+                    {{-- SECTION DIVIDER HEADER --}}
+                    <div style="max-width: 820px; margin: 2rem auto 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.25rem;">
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                            <span style="font-size: 1.25rem;">📎</span>
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; letter-spacing: 0.2px;">
+                                    Attached Application Documents ({{ $uploadedCount }})
+                                </h4>
+                                <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                    Physical files attached to Application #{{ $appStudent->id }} for candidate {{ $appStudent->name }}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="display: inline-block; font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px; background: #16a34a; color: #ffffff;">
+                                ✓ {{ $uploadedCount }} File(s) Attached
+                            </span>
+                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.74rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 10px; text-decoration: none;">
+                                <span>📤 Add / Update Documents (Step 4)</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- 1. FULL INLINE ATTACHED DOCUMENTS (RENDERED DIRECTLY UNDER THE MAIN FORM) --}}
+                    @if($uploadedCount > 0)
+                        @foreach($actualUploadedList as $slotKey => $docItem)
+                            @php
+                                $docIndex++;
+                                $cleanExt = strtolower($docItem['ext'] ?? pathinfo($docItem['filename'] ?? '', PATHINFO_EXTENSION) ?: 'file');
+                                $fileExt = strtoupper($cleanExt);
+                                $fileName = $docItem['filename'] ?? basename((string)($docItem['path'] ?? ''));
+                                $fileUrl = $docItem['url'] ?? asset($docItem['path'] ?? '');
+                                $isImage = in_array($cleanExt, ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg']) || !empty($docItem['is_image']);
+                                $isPdf = ($cleanExt === 'pdf');
+                            @endphp
+
+                            <div class="embedded-a4-attachment" style="max-width: 820px; margin: 1.25rem auto 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.12); border: 1.5px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif;">
+                                <!-- Document Header -->
+                                <div style="background: linear-gradient(135deg, #0F2A4A 0%, #1e3a8a 100%); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; color: #ffffff;">
+                                            @if($isImage) 🖼️ @elseif($isPdf) 📄 @else 📎 @endif
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 9px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                ATTACHED APPLICATION DOCUMENT &bull; ATTACHMENT {{ $docIndex }} OF {{ $uploadedCount }}
+                                            </div>
+                                            <h4 style="margin: 2px 0 0 0; color: #ffffff; font-size: 15px; font-weight: 800;">
+                                                {{ $docItem['title'] }}
+                                            </h4>
+                                            <div style="color: #cbd5e1; font-size: 11px; margin-top: 2px;">
+                                                File: <strong style="color: #ffffff;">{{ $fileName }}</strong> ({{ $fileExt }}) &bull; Application #{{ $appStudent->id }} &bull; CRM ID: {{ $appStudent->student_id }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: #22c55e; color: #ffffff; display: inline-flex; align-items: center; gap: 4px;">
+                                            <span>✓ Verified &amp; Uploaded</span>
+                                        </span>
+                                        <a href="{{ $fileUrl }}" target="_blank" style="text-decoration: none; font-size: 11px; font-weight: 700; color: #0F2A4A; background: #ffffff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 5px 12px; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;">
+                                            <span>🔍 View Fullscreen</span>
+                                        </a>
+                                        <a href="{{ $fileUrl }}" download="{{ $fileName }}" style="text-decoration: none; font-size: 11px; font-weight: 700; color: #ffffff; background: #16a34a; border: 1px solid #15803d; border-radius: 6px; padding: 5px 12px; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;">
+                                            <span>📥 Download</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Document Body Preview Container -->
+                                <div style="padding: 16px; background: #f8fafc; text-align: center;">
+                                    @if($isImage)
+                                        <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: inline-block; max-width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+                                            <img src="{{ $fileUrl }}" alt="{{ $docItem['title'] }}" style="max-width: 100%; height: auto; max-height: 850px; display: block; margin: 0 auto; border-radius: 4px; border: 1px solid #cbd5e1;">
+                                        </div>
+                                    @elseif($isPdf)
+                                        <div style="background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+                                            <iframe src="{{ $fileUrl }}#toolbar=0" style="width: 100%; height: 800px; border: none; display: block;" title="{{ $docItem['title'] }}">
+                                                <div style="padding: 2rem; text-align: center; color: #64748b;">
+                                                    <p>PDF preview is not supported by your browser directly.</p>
+                                                    <a href="{{ $fileUrl }}" target="_blank" style="color: #2563eb; font-weight: 700;">Click here to view PDF</a>
+                                                </div>
+                                            </iframe>
+                                        </div>
+                                    @else
+                                        <div style="padding: 40px 20px; background: #ffffff; border-radius: 8px; border: 1.5px dashed #cbd5e1;">
+                                            <div style="font-size: 3rem;">📄</div>
+                                            <h5 style="margin: 10px 0 5px; font-size: 16px; color: #0f172a;">{{ $fileName }}</h5>
+                                            <p style="font-size: 12px; color: #64748b; margin: 0 0 15px;">Document format: {{ $fileExt }} &bull; Archived with candidate admission dossier</p>
+                                            <a href="{{ $fileUrl }}" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #ffffff; background: #1e40af; border-radius: 6px; padding: 8px 18px;">
+                                                <span>Open Document &rarr;</span>
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Document Verification Footer -->
+                                <div style="background: #ffffff; border-top: 1px solid #e2e8f0; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 10.5px; color: #64748b;">
+                                    <div>
+                                        Applicant: <strong>{{ $appStudent->name }}</strong> (#{{ $appStudent->id }}) &nbsp;|&nbsp; CRM ID: <strong>{{ $appStudent->student_id }}</strong>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        Vignan's Foundation for Science, Technology &amp; Research &nbsp;|&nbsp; Document Verification Ledger
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div style="max-width: 820px; margin: 1.25rem auto 0 auto; background: #ffffff; border-radius: 10px; padding: 2rem; border: 1.5px dashed #cbd5e1; text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
+                            <h4 style="margin: 0 0 0.5rem 0; color: #0f172a; font-weight: 800;">No Documents Attached Yet</h4>
+                            <p style="margin: 0 0 1rem 0; color: #64748b; font-size: 0.85rem;">
+                                Please upload your 10th marksheet, 12th marksheet, Aadhaar card, and photo in Stage 4 so they appear here under your application form.
+                            </p>
+                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.84rem; padding: 0.55rem 1.2rem; border-radius: 6px;">
+                                <span>📤 Go to Stage 4: Document Upload &rarr;</span>
+                            </a>
+                        </div>
+                    @endif
+
+                    {{-- 2. COMPACT SUMMARY CHECKLIST OF ALL SLOTS (REQUIRED & OPTIONAL) --}}
+                    <div style="max-width: 820px; margin: 1.5rem auto 0 auto; background: #ffffff; border-radius: 10px; border: 1px solid #cbd5e1; overflow: hidden; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);">
+                        <div style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                            <div style="font-size: 11px; font-weight: 800; color: #0F2A4A; text-transform: uppercase; letter-spacing: 0.4px;">
+                                📋 Candidate Document Dossier Checklist
+                            </div>
+                            <div style="font-size: 10.5px; color: #64748b;">
+                                {{ $uploadedCount }} attached &bull; {{ count($standardSlots) - $uploadedCount }} pending / optional
+                            </div>
+                        </div>
+                        <div style="padding: 10px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px;">
+                            @foreach($standardSlots as $sKey => $sMeta)
+                                @php
+                                    $hasThis = !empty($uploadedDocs[$sKey]);
+                                    $thisFname = $hasThis ? ($uploadedDocs[$sKey]['filename'] ?? '') : '';
+                                    $thisUrl = $hasThis ? ($uploadedDocs[$sKey]['url'] ?? '#') : '#';
+                                @endphp
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 6px; background: {{ $hasThis ? '#f0fdf4' : '#f8fafc' }}; border: 1px solid {{ $hasThis ? '#86efac' : '#e2e8f0' }}; font-size: 11px;">
+                                    <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 6px;">
+                                        <div style="font-weight: 700; color: #0f172a;">{{ $sMeta['title'] }}</div>
+                                        @if($hasThis)
+                                            <div style="font-size: 9.5px; color: #166534; overflow: hidden; text-overflow: ellipsis;">📎 {{ $thisFname }}</div>
+                                        @else
+                                            <div style="font-size: 9.5px; color: #94a3b8;">{{ $sMeta['required'] ? 'Required document' : 'Optional document' }}</div>
+                                        @endif
+                                    </div>
+                                    <div style="flex-shrink: 0;">
+                                        @if($hasThis)
+                                            <a href="{{ $thisUrl }}" target="_blank" style="text-decoration: none; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: #22c55e; color: #ffffff;">
+                                                View
+                                            </a>
+                                        @else
+                                            <span style="font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: #e2e8f0; color: #64748b;">
+                                                Pending
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
-                        <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Application upload' }}
+                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
+                            &larr; Stage 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }}
                         </a>
-                        @if(isset($stages[6]))
+                        @if(isset($stages[7]))
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Proceed to Stage 6: {{ $stages[6]['title'] }} &rarr;</span>
+                                <span>Proceed to Stage 7: {{ $stages[7]['title'] }} &rarr;</span>
                             </button>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #16a34a;">
@@ -2724,26 +3182,31 @@
                     </div>
                 </form>
 
-            <!-- ================= STAGE 6: OPTIONAL SUBSEQUENT STAGE ================= -->
-            @elseif($activeStep === 6 && isset($stages[6]))
+            <!-- ================= STAGE 7: V-SAT RESULTS (master.menus: CRMM0007) ================= -->
+            @elseif($activeStep === 7 && isset($stages[7]))
+                @php
+                    $isStage7Done = ($stages[7]['status'] ?? 'pending') === 'completed';
+                    $examDateFormatted = $examSchedule?->examdate ? \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') : 'Booked in Stage 5';
+                    $slotFormatted = $examSchedule?->exam_slot ?? 'Session Scheduled';
+                @endphp
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 6 of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
-                        <h3>{{ $stages[6]['title'] ?? 'VSAT Result' }} &amp; Merit Scorecard</h3>
-                        <p>Official V-SAT (Vignan Scholastic Aptitude Test) scorecard, rank percentile, and merit scholarship eligibility.</p>
+                        <div class="step-panel-kicker">Stage 7 of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
+                        <h3>{{ $stages[7]['title'] ?? 'V-SAT Results' }}</h3>
+                        <p>{{ $stages[7]['subtitle'] ?? 'Official V-SAT examination scorecard and admission merit records.' }}</p>
                     </div>
-                    @if(($stages[6]['status'] ?? 'pending') === 'completed')
-                        <span class="step-header-tag tag-success">✓ Verified</span>
+                    @if($isStage7Done)
+                        <span class="step-header-tag tag-success">✓ Onboarding Completed</span>
                     @else
-                        <span class="step-header-tag tag-success">✓ Merit Qualified</span>
+                        <span class="step-header-tag tag-pending">Results &amp; Verification</span>
                     @endif
                 </div>
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="6">
+                    <input type="hidden" name="step" value="7">
 
-                    <!-- Official VSAT Merit Card -->
+                    <!-- Candidate Examination Record from DB -->
                     <div class="section-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.75rem;">
@@ -2752,79 +3215,75 @@
                                 </div>
                                 <div>
                                     <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e3a8a;">V-SAT 2026 National Entrance Examination</h4>
-                                    <span style="font-size:0.8rem; color:#475569;">Hall Ticket: <strong>VSAT26-{{ $appNo ?: '' }}</strong> &bull; Exam Mode: Online Computer Based</span>
+                                    <span style="font-size:0.8rem; color:#475569;">Application No: <strong>#{{ $appNo }}</strong> &bull; Candidate: <strong>{{ $displayName }}</strong></span>
                                 </div>
                             </div>
-                            <span class="meta-badge meta-badge-success" style="font-size:0.85rem; padding:0.4rem 0.85rem;">✓ Qualified for Counseling</span>
+                            <span class="meta-badge {{ $isStage7Done ? 'meta-badge-success' : 'meta-badge-info' }}" style="font-size:0.85rem; padding:0.4rem 0.85rem;">
+                                {{ $crmStudent?->std_status ?: 'Provisional Admission Registered' }}
+                            </span>
                         </div>
 
+                        <!-- Dynamic Metrics Grid from Database -->
                         <div class="form-grid-3">
                             <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
-                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">All India Rank (AIR)</div>
-                                <div style="font-size:1.6rem; font-weight:900; color:#2563eb; margin-top:0.2rem;">1,420</div>
-                                <span style="font-size:0.75rem; color:#16a34a; font-weight:700;">Top 3.2% Nationally</span>
+                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Registered Program</div>
+                                <div style="font-size:1.15rem; font-weight:800; color:#2563eb; margin-top:0.25rem;">
+                                    {{ $program?->program_short_name ?: ($crmStudent?->programlevel ?: 'Undergraduate') }}
+                                </div>
+                                <span style="font-size:0.75rem; color:#16a34a; font-weight:700;">{{ $branchName ?: 'General Allotment' }}</span>
                             </div>
                             <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
-                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Percentile Score</div>
-                                <div style="font-size:1.6rem; font-weight:900; color:#0f172a; margin-top:0.2rem;">96.85 %</div>
-                                <span style="font-size:0.75rem; color:#475569;">Total Marks: 94 / 120</span>
+                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Scheduled Slot</div>
+                                <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-top:0.25rem;">
+                                    {{ $examDateFormatted }}
+                                </div>
+                                <span style="font-size:0.75rem; color:#475569;">{{ $slotFormatted }}</span>
                             </div>
                             <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
-                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Scholarship Granted</div>
-                                <div style="font-size:1.4rem; font-weight:900; color:#16a34a; margin-top:0.2rem;">25% Fee Waiver</div>
-                                <span style="font-size:0.75rem; color:#15803d; font-weight:600;">Category-A Merit Slab</span>
+                                <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Admission Status</div>
+                                <div style="font-size:1.15rem; font-weight:800; color:#16a34a; margin-top:0.25rem;">
+                                    {{ ($crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
+                                </div>
+                                <span style="font-size:0.75rem; color:#15803d; font-weight:600;">Stage 7 of {{ count($stages) }} Verified</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Subject-wise Breakdown -->
-                    <div class="section-box">
+                    <!-- Admission Dossier Summary -->
+                    <div class="section-box" style="margin-top: 1.25rem;">
                         <div class="section-box-title">
-                            <span>Subject-wise Mark Distribution</span>
+                            <span>Candidate Registration Dossier Summary</span>
                         </div>
                         <div class="form-grid-3">
                             <div class="field-group">
-                                <label class="field-label">Mathematics / Biology</label>
-                                <input type="text" class="field-input" value="42 / 50 Marks (84%)" readonly style="font-weight:700;">
+                                <label class="field-label">Candidate Name</label>
+                                <input type="text" class="field-input" value="{{ $displayName }}" readonly style="font-weight:700; background:#f8fafc;">
                             </div>
                             <div class="field-group">
-                                <label class="field-label">Physics</label>
-                                <input type="text" class="field-input" value="26 / 35 Marks (74.3%)" readonly style="font-weight:700;">
+                                <label class="field-label">Registered Phone Number</label>
+                                <input type="text" class="field-input" value="{{ $cleanPhone ?: ($crmStudent?->phoneno ?? 'N/A') }}" readonly style="font-weight:700; background:#f8fafc;">
                             </div>
                             <div class="field-group">
-                                <label class="field-label">Chemistry &amp; English</label>
-                                <input type="text" class="field-input" value="26 / 35 Marks (74.3%)" readonly style="font-weight:700;">
+                                <label class="field-label">Selected Campus</label>
+                                <input type="text" class="field-input" value="{{ $campusName ?: ($crmStudent?->campuscode ?? 'Vignan Main Campus (Vadlamudi)') }}" readonly style="font-weight:700; background:#f8fafc;">
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Parent / Emergency Contact Record (Preserved) -->
-                    <div class="section-box">
-                        <div class="section-box-title">
-                            <span>Parent &amp; Emergency Contact Records</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="field-group">
-                                <label class="field-label">Father's Name <span class="required-star">*</span></label>
-                                <input type="text" name="father_name" class="field-input" value="{{ $personalInfo?->parent_name }}" placeholder="Enter Father's Name" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Father's Contact Number <span class="required-star">*</span></label>
-                                <input type="tel" name="father_phone" class="field-input" value="{{ $personalInfo?->parentphono }}" placeholder="Enter Father's 10-digit Phone" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Mother's Name</label>
-                                <input type="text" name="mother_name" class="field-input" value="{{ $personalInfo?->mother_name ?? '' }}" placeholder="Enter Mother's Name">
-                            </div>
+                        <!-- University Notice regarding V-SAT merit rankings -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
+                            <strong style="color: #14532d; font-weight: 800; display: block; margin-bottom: 0.3rem;">University Examination &amp; Counseling Notice:</strong>
+                            <p style="margin: 0;">
+                                Candidate details for Application <strong>#{{ $appNo }}</strong> have been verified and confirmed across all onboarding stages in accordance with university admissions policy. Official V-SAT entrance scores, rank percentiles, and merit scholarship category allocations are generated and published following examination slot completion.
+                            </p>
                         </div>
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            &larr; Stage 5: {{ $stages[5]['title'] }}
+                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
+                            &larr; Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #15803d;">
-                            <span>✓ Complete &amp; Save Application</span>
+                            <span>✓ Complete Onboarding &amp; Finalize Registration</span>
                         </button>
                     </div>
                 </form>
