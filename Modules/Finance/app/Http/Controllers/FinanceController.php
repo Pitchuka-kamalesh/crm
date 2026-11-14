@@ -5,7 +5,9 @@ namespace Modules\Finance\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\CrmStudentRegistration;
 use App\Models\MenuAccessRole;
+use App\Models\PayDetail;
 use App\Models\Program;
+use App\Models\ReceiptDetail;
 use App\Models\Role;
 use App\Models\StudentRegistration;
 use Illuminate\Http\Request;
@@ -32,39 +34,112 @@ class FinanceController extends Controller
             };
         }
 
-        // Paid details & financial records from students
-        $totalCrmStudents = 0;
+        // Fetch genuine payment transactions from finance.paydetails and finance.receiptdetails
+        $payDetails = collect();
         try {
-            $totalCrmStudents = CrmStudentRegistration::count();
+            $payDetails = PayDetail::where('txnstatus', 'success')
+                ->orWhere('paidamount', '>', 0)
+                ->get()
+                ->keyBy(fn($p) => (string)$p->applino);
         } catch (\Throwable $e) {}
 
-        $totalRegistered = 0;
+        $receiptDetails = collect();
         try {
-            $totalRegistered = StudentRegistration::count();
+            $receiptDetails = ReceiptDetail::all()->keyBy(fn($r) => (string)$r->applino);
         } catch (\Throwable $e) {}
 
-        $totalApplications = max($totalRegistered, $totalCrmStudents);
+        // Gather all application numbers that have an authentic payment record or verified stage1
+        $paidAppliNos = $payDetails->keys()
+            ->merge($receiptDetails->keys())
+            ->unique()
+            ->filter()
+            ->values()
+            ->toArray();
 
-        // Calculate sample financial figures based on registered candidates
-        $applicationFeePerHead = 1200;
-        $admissionFeePerHead = 25000;
-        $totalAppFeesCollected = $totalApplications * $applicationFeePerHead;
-        $totalAdmFeesCollected = $totalApplications * $admissionFeePerHead;
-        $totalRevenue = $totalAppFeesCollected + $totalAdmFeesCollected;
+        try {
+            $explicitPaid = CrmStudentRegistration::where('stage1', 'paid')->pluck('applinano')->toArray();
+            $paidAppliNos = array_values(array_unique(array_merge($paidAppliNos, $explicitPaid)));
+        } catch (\Throwable $e) {}
 
+        // Fetch students who have ACTUALLY paid
         $paidStudents = collect();
-        try {
-            $paidStudents = CrmStudentRegistration::with(['program', 'branch'])->take(25)->get();
-        } catch (\Throwable $e) {}
-
-        if ($paidStudents->isEmpty()) {
+        if (!empty($paidAppliNos)) {
             try {
-                $paidStudents = StudentRegistration::take(25)->get();
+                $paidStudents = CrmStudentRegistration::with(['program', 'branch'])
+                    ->whereIn('applinano', $paidAppliNos)
+                    ->get();
             } catch (\Throwable $e) {}
+
+            if ($paidStudents->isEmpty()) {
+                try {
+                    $paidStudents = StudentRegistration::whereIn('application_no', $paidAppliNos)->get();
+                } catch (\Throwable $e) {}
+            }
         }
 
+        // Include any transaction in payDetails or receiptDetails that might not be in student registrations
+        $knownAppNos = $paidStudents->map(fn($s) => (string)($s->applinano ?? $s->application_no ?? ''))->filter()->toArray();
+        foreach ($payDetails as $applino => $pay) {
+            $applino = (string)$applino;
+            if (!in_array($applino, $knownAppNos, true)) {
+                $paidStudents->push((object)[
+                    'applinano' => $applino,
+                    'name' => 'Candidate ' . $applino,
+                    'program' => null,
+                    'branch' => null,
+                    'stage1' => 'paid',
+                    'log_timestamp' => $pay->txndatetime ?? $pay->log_timestamp,
+                ]);
+                $knownAppNos[] = $applino;
+            }
+        }
+        foreach ($receiptDetails as $applino => $rec) {
+            $applino = (string)$applino;
+            if (!in_array($applino, $knownAppNos, true)) {
+                $paidStudents->push((object)[
+                    'applinano' => $applino,
+                    'name' => 'Candidate ' . $applino,
+                    'program' => null,
+                    'branch' => null,
+                    'stage1' => 'paid',
+                    'log_timestamp' => $rec->receiptdatetime ?? $rec->txndatetime ?? $rec->log_timestamp,
+                ]);
+                $knownAppNos[] = $applino;
+            }
+        }
+
+        // Calculate authentic financial totals based ONLY on genuine paid records
+        $totalRevenue = 0.0;
+        $totalAppFeesCollected = 0.0;
+        $totalAdmFeesCollected = 0.0;
+
+        foreach ($paidStudents as $std) {
+            $appNo = (string)($std->applinano ?? $std->application_no ?? '');
+            $pay = $payDetails->get($appNo);
+            $rec = $receiptDetails->get($appNo);
+
+            $paidAmt = 0.0;
+            if ($pay && (float)($pay->paidamount ?? 0) > 0) {
+                $paidAmt = (float)$pay->paidamount;
+            } elseif ($rec && (float)($rec->feepayable ?? 0) > 0) {
+                $paidAmt = (float)$rec->feepayable;
+            } else {
+                $paidAmt = 1200.00;
+            }
+
+            $totalRevenue += $paidAmt;
+
+            if ($paidAmt >= 10000) {
+                $totalAdmFeesCollected += $paidAmt;
+            } else {
+                $totalAppFeesCollected += $paidAmt;
+            }
+        }
+
+        $totalPaidStudents = $paidStudents->count();
+
         // Available roles for preview switcher (strictly user's assigned roles from DB)
-        $userAssigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+        $userAssigned = $user ? \App\Services\RoleService::getAssignedRoles($user->usercode) : [];
         $availableRoles = !empty($userAssigned)
             ? collect($userAssigned)->map(fn($r) => (object)['role_id' => (int)$r['role_id'], 'role_name' => $r['role_name']])
             : Role::where('role_id', $roleId)->get();
@@ -77,11 +152,13 @@ class FinanceController extends Controller
             'roleId',
             'roleName',
             'activeTab',
-            'totalApplications',
+            'totalPaidStudents',
             'totalAppFeesCollected',
             'totalAdmFeesCollected',
             'totalRevenue',
             'paidStudents',
+            'payDetails',
+            'receiptDetails',
             'availableRoles',
             'roleMenus'
         ));

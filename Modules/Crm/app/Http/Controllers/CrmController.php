@@ -9,12 +9,15 @@ use App\Models\CommunicationLog;
 use App\Models\CouponInfo;
 use App\Models\CrmStudentRegistration;
 use App\Models\Employee;
+use App\Models\Lead;
 use App\Models\MenuAccessRole;
 use App\Models\PayDetail;
+use App\Models\ReceiptDetail;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\StudentRegistration;
 use App\Models\TelecallerLead;
+use App\Models\TelecallerLeadTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -35,16 +38,29 @@ class CrmController extends Controller
         if (!$activeTab) {
             if ($request->is('*coupoungenration*') || $request->is('*percoupongen*')) {
                 $activeTab = 'couponinfo';
+            } elseif ($request->is('*crmdatatracking*') || $request->is('*datatracking*')) {
+                $activeTab = 'stdsearch';
+            } elseif ($request->is('*telecallerkpi*')) {
+                $activeTab = 'telecallerkpi';
+            } elseif ($request->is('*leadskpi*')) {
+                $activeTab = 'leadskpi';
+            } elseif ($request->is('*studentkpi*')) {
+                $activeTab = 'studentkpi';
             } else {
                 $activeTab = match ($currentRoute) {
                     'crm.stddata', 'crm.enquirylist' => 'stddata',
-                    'crm.stdsearch', 'crm.registerlist' => 'stdsearch',
+                    'crm.stdsearch', 'crm.registerlist', 'crm.crmdatatracking' => 'stdsearch',
                     'crm.couponinfo', 'crm.coupoungenration', 'crm.percoupongen' => 'couponinfo',
                     'crm.employeelist' => 'employeelist',
-                    'kpi.index', 'kpi.studentkpi' => 'kpi',
+                    'kpi.telecallerkpi' => 'telecallerkpi',
+                    'kpi.leadskpi' => 'leadskpi',
+                    'kpi.index', 'kpi.studentkpi' => 'studentkpi',
                     default => 'stddata', // Default to Student Data (Enquiries) instead of overview dashboard
                 };
             }
+        }
+        if ($activeTab === 'kpi') {
+            $activeTab = 'studentkpi';
         }
 
         // Summary counts from Eloquent Models (Read-Only)
@@ -110,7 +126,10 @@ class CrmController extends Controller
         $allStudents = collect();
         // 1. Fetch from crm.student_registration (Core CRM table)
         try {
-            $crmQuery = CrmStudentRegistration::with(['program', 'branch']);
+            $crmQuery = CrmStudentRegistration::with([
+                'program', 'branch', 'campus', 'state', 'country',
+                'personalInfo', 'academicDetails', 'payDetail'
+            ]);
             if ($searchQuery) {
                 $crmQuery->where(function ($q) use ($searchQuery) {
                     $q->where('name', 'like', "%{$searchQuery}%")
@@ -239,10 +258,90 @@ class CrmController extends Controller
         $couponBatches = collect();
         $personalCoupons = collect();
         $payDetails = collect();
+        $paidAppNos = collect();
         try {
             $couponBatches = CouponInfo::where('coupontype', 'DEFAULT')->orderBy('id', 'asc')->get();
             $personalCoupons = CouponInfo::where('coupontype', 'PERSONAL')->get()->keyBy('applino');
             $payDetails = PayDetail::all()->keyBy('applino');
+
+            // Genuine verified payment records from paydetails (status success or paidamount > 0) and receiptdetails
+            $pdPaid = PayDetail::where(function($q) {
+                $q->where('txnstatus', 'success')
+                  ->orWhere('paidamount', '>', 0);
+            })->pluck('applino')->map(fn($v) => (string)$v);
+
+            $rdPaid = ReceiptDetail::pluck('applino')->map(fn($v) => (string)$v);
+            $paidAppNos = $pdPaid->merge($rdPaid)->unique()->filter()->values();
+        } catch (\Throwable $e) {}
+
+        // Genuine Student KPI & Funnel Metrics for 'kpi' tab
+        $kpiTotal = max(1, $allStudents->count() ?: $totalApplications);
+        $kpiStage1Paid = $allStudents->filter(function($s) use ($paidAppNos) {
+            $st1 = strtolower(trim((string)($s->stage1 ?? '')));
+            $appNo = (string)($s->applinano ?? $s->application_no ?? '');
+            // Strictly genuine: status 'paid' or verified payment record
+            return $st1 === 'paid' || ($appNo !== '' && $paidAppNos->contains($appNo));
+        })->count();
+
+        $kpiStage2Done = $allStudents->filter(function($s) {
+            $st2 = strtolower(trim((string)($s->stage2 ?? '')));
+            return in_array($st2, ['completed', 'approved', 'done'], true);
+        })->count();
+
+        $kpiStage3Done = $allStudents->filter(function($s) {
+            $st3 = strtolower(trim((string)($s->stage3 ?? '')));
+            return in_array($st3, ['completed', 'approved', 'done'], true);
+        })->count();
+
+        $kpiStage4Done = $allStudents->filter(function($s) {
+            $st4 = strtolower(trim((string)($s->stage4 ?? '')));
+            return in_array($st4, ['completed', 'approved', 'done'], true);
+        })->count();
+
+        $kpiStage5Done = $allStudents->filter(function($s) {
+            $st5 = strtolower(trim((string)($s->stage5 ?? '')));
+            return in_array($st5, ['completed', 'approved', 'done'], true);
+        })->count();
+
+        $kpiBranchDistribution = $allStudents->groupBy(function($s) {
+            return $s->branch?->branch_long_name ?? $s->branch?->branch_short_name ?? 'General Engineering';
+        })->map(fn($group) => $group->count())->sortDesc()->take(6);
+
+        // Genuine Telecaller KPI Metrics
+        $totalTelecallerLeads = 0;
+        try {
+            $totalTelecallerLeads = TelecallerLead::count();
+        } catch (\Throwable $e) {}
+
+        $telecallerStats = collect();
+        try {
+            $telecallerStats = Employee::whereIn('emp_code', function($q) {
+                $q->select('emp_id')->from('master.roles_assigned')->where('roles_role_id', 4);
+            })->orWhereIn('emp_code', function($q) {
+                $q->select('empcode')->from('crm.telecaller_leads');
+            })->get()->map(function($emp) use ($paidAppNos) {
+                $leads = TelecallerLead::where('empcode', $emp->emp_code)->get();
+                $leadsCount = $leads->count();
+                $paidCount = $leads->filter(fn($l) => $paidAppNos->contains((string)$l->applino))->count();
+                $tasksCount = TelecallerLeadTask::where('empcode', $emp->emp_code)->count();
+                $convRate = $leadsCount > 0 ? round(($paidCount / $leadsCount) * 100, 1) : 0;
+                return (object)[
+                    'emp_code' => $emp->emp_code,
+                    'name' => $emp->full_name,
+                    'email' => $emp->email ?? 'N/A',
+                    'leads_count' => $leadsCount,
+                    'tasks_count' => $tasksCount,
+                    'paid_count' => $paidCount,
+                    'conversion_rate' => $convRate,
+                    'status' => $leadsCount > 0 ? 'Active' : 'Standby',
+                ];
+            });
+        } catch (\Throwable $e) {}
+
+        // Genuine Leads KPI Metrics
+        $totalRawLeads = 0;
+        try {
+            $totalRawLeads = Lead::count();
         } catch (\Throwable $e) {}
 
         return view('crm::index', compact(
@@ -274,7 +373,18 @@ class CrmController extends Controller
             'leadAssignments',
             'couponBatches',
             'personalCoupons',
-            'payDetails'
+            'payDetails',
+            'paidAppNos',
+            'kpiTotal',
+            'kpiStage1Paid',
+            'kpiStage2Done',
+            'kpiStage3Done',
+            'kpiStage4Done',
+            'kpiStage5Done',
+            'kpiBranchDistribution',
+            'totalTelecallerLeads',
+            'telecallerStats',
+            'totalRawLeads'
         ));
     }
 
