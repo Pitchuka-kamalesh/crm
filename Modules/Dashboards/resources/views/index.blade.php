@@ -1547,7 +1547,7 @@
                             </div>
                         @else
                             @php
-                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? '2027000005';
+                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? (string) session('student_applino', '');
                                 $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
                             @endphp
                             <div style="margin-bottom: 0.65rem; text-align: left;">
@@ -1899,8 +1899,8 @@
                 <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
                     <!-- CARD 2: 3. EDUCATION DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <h3 class="mockup-card-title" id="step3-card-title" style="margin: 0;">3. Education Details: {{ $degreeLevel === 'phd' ? 'Ph.D (10th + Inter + UG + PG)' : ($degreeLevel === 'mtech' ? 'M.Tech (10th + Inter + UG)' : 'B.Tech (10th + Inter)') }}</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <h3 class="mockup-card-title" id="step3-card-title" style="margin: 0;">3. Education Details</h3>
                             @if($stages[3]['status'] === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
@@ -1908,29 +1908,10 @@
                             @endif
                         </div>
 
-                        <!-- Degree Stream Selector: B.Tech (10th + Inter) | M.Tech (10th + Inter + B.Tech) | PhD (10th + Inter + UG + PG) -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.15rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 1rem;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b;">Degree Stream:</span>
-                                <button type="button" class="degree-pill-btn {{ $degreeLevel === 'btech' ? 'active' : '' }}" id="pill-btech" onclick="setDegreeLevel('btech')">
-                                    🎓 B.Tech &bull; 10th + Inter
-                                </button>
-                                <button type="button" class="degree-pill-btn {{ $degreeLevel === 'mtech' ? 'active' : '' }}" id="pill-mtech" onclick="setDegreeLevel('mtech')">
-                                    🎓 M.Tech &bull; 10th + Inter + B.Tech (UG)
-                                </button>
-                                <button type="button" class="degree-pill-btn {{ $degreeLevel === 'phd' ? 'active' : '' }}" id="pill-phd" onclick="setDegreeLevel('phd')">
-                                    🎓 Ph.D &bull; 10th + Inter + UG + PG
-                                </button>
-                                <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
-                            </div>
-                            <span id="degree-badge-indicator" class="mockup-pill-badge" style="font-size: 0.76rem; padding: 0.25rem 0.7rem; background: #0f2744; color: #fff;">
-                                {{ $degreeLevel === 'phd' ? '10th + Inter + UG + PG' : ($degreeLevel === 'mtech' ? '10th + Inter + B.Tech (UG)' : '10th + Inter') }}
-                            </span>
-                        </div>
-
                         <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep3Form(this);">
                             @csrf
                             <input type="hidden" name="step" value="3">
+                            <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
 
                             <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
                             <div class="mockup-subbox" id="sec-10th-details">
@@ -2166,35 +2147,21 @@
 
                         <script>
                             function setDegreeLevel(level) {
-                                document.querySelectorAll('.degree-pill-btn').forEach(function(b) {
-                                    b.classList.remove('active');
-                                });
-                                const activeBtn = document.getElementById('pill-' + level);
-                                if (activeBtn) activeBtn.classList.add('active');
-
                                 const hiddenInput = document.getElementById('degree_level_input');
                                 if (hiddenInput) hiddenInput.value = level;
 
                                 const ugSec = document.getElementById('sec-ug-details');
                                 const pgSec = document.getElementById('sec-pg-details');
-                                const indicator = document.getElementById('degree-badge-indicator');
-                                const titleEl = document.getElementById('step3-card-title');
 
                                 if (level === 'btech') {
                                     if (ugSec) ugSec.style.display = 'none';
                                     if (pgSec) pgSec.style.display = 'none';
-                                    if (indicator) indicator.textContent = '10th + Inter';
-                                    if (titleEl) titleEl.textContent = '3. Education Details: B.Tech (10th + Inter)';
                                 } else if (level === 'mtech') {
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'none';
-                                    if (indicator) indicator.textContent = '10th + Inter + B.Tech (UG)';
-                                    if (titleEl) titleEl.textContent = '3. Education Details: M.Tech (10th + Inter + UG)';
                                 } else if (level === 'phd') {
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'block';
-                                    if (indicator) indicator.textContent = '10th + Inter + UG + PG';
-                                    if (titleEl) titleEl.textContent = '3. Education Details: Ph.D (10th + Inter + UG + PG)';
                                 }
                             }
 
@@ -2289,26 +2256,7 @@
                 <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body" id="stage4-upload-form">
                     @csrf
                     <input type="hidden" name="step" value="4">
-
-                    <!-- Degree Stream Filter Selector for Stage 4 Documents -->
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.15rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 1rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b;">Degree Stream:</span>
-                            <button type="button" class="degree-pill-btn {{ ($degreeLevel ?? 'btech') === 'btech' ? 'active' : '' }}" id="stage4-pill-btech" onclick="setStage4DegreeLevel('btech')">
-                                🎓 B.Tech &bull; 10th + Inter
-                            </button>
-                            <button type="button" class="degree-pill-btn {{ ($degreeLevel ?? 'btech') === 'mtech' ? 'active' : '' }}" id="stage4-pill-mtech" onclick="setStage4DegreeLevel('mtech')">
-                                🎓 M.Tech &bull; 10th + Inter + B.Tech (UG)
-                            </button>
-                            <button type="button" class="degree-pill-btn {{ ($degreeLevel ?? 'btech') === 'phd' ? 'active' : '' }}" id="stage4-pill-phd" onclick="setStage4DegreeLevel('phd')">
-                                🎓 Ph.D &bull; 10th + Inter + UG + PG
-                            </button>
-                            <input type="hidden" name="degree_level" id="stage4_degree_level_input" value="{{ $degreeLevel ?? 'btech' }}">
-                        </div>
-                        <span id="stage4-degree-badge-indicator" class="mockup-pill-badge" style="font-size: 0.76rem; padding: 0.25rem 0.7rem; background: #0f2744; color: #fff;">
-                            {{ ($degreeLevel ?? 'btech') === 'phd' ? 'Ph.D: 10th + Inter + UG + PG' : (($degreeLevel ?? 'btech') === 'mtech' ? 'M.Tech: 10th + Inter + B.Tech (UG)' : 'B.Tech: 10th + Inter') }}
-                        </span>
-                    </div>
+                    <input type="hidden" name="degree_level" id="stage4_degree_level_input" value="{{ $degreeLevel ?? 'btech' }}">
 
                     @php
                         $docDefinitions = [
@@ -2396,12 +2344,15 @@
                             @foreach($docDefinitions as $docKey => $docMeta)
                                 @php
                                     $docFile = $uploadedDocs[$docKey] ?? null;
+                                    $cardLevels = explode(' ', $docMeta['levels']);
+                                    $isLevelMatch = in_array($degreeLevel ?? 'btech', $cardLevels);
                                 @endphp
                                 <div class="kyc-doc-card doc-stream-item"
                                      data-doc-key="{{ $docKey }}"
                                      data-levels="{{ $docMeta['levels'] }}"
                                      data-required="{{ $docMeta['is_required'] ? '1' : '0' }}"
-                                     id="doc-card-{{ $docKey }}">
+                                     id="doc-card-{{ $docKey }}"
+                                     style="{{ $isLevelMatch ? 'display: flex;' : 'display: none;' }} flex-direction: column; justify-content: space-between; min-height: 155px;">
                                     <div class="kyc-doc-top">
                                         <div class="kyc-doc-icon">{{ $docMeta['icon'] }}</div>
                                         <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
@@ -2456,21 +2407,8 @@
 
                     <script>
                         function setStage4DegreeLevel(level) {
-                            document.querySelectorAll('[id^="stage4-pill-"]').forEach(btn => {
-                                btn.classList.remove('active');
-                            });
-                            const activeBtn = document.getElementById('stage4-pill-' + level);
-                            if (activeBtn) activeBtn.classList.add('active');
-
                             const hiddenInput = document.getElementById('stage4_degree_level_input');
                             if (hiddenInput) hiddenInput.value = level;
-
-                            const badge = document.getElementById('stage4-degree-badge-indicator');
-                            if (badge) {
-                                if (level === 'btech') badge.textContent = 'B.Tech: 10th + Inter';
-                                else if (level === 'mtech') badge.textContent = 'M.Tech: 10th + Inter + B.Tech (UG)';
-                                else if (level === 'phd') badge.textContent = 'Ph.D: 10th + Inter + UG + PG';
-                            }
 
                             // Filter cards: B.Tech shows only 10th, Inter, Aadhaar, Photo, TC, Conduct
                             document.querySelectorAll('.doc-stream-item').forEach(card => {
@@ -2772,16 +2710,22 @@
 
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] }}
+                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Application upload' }}
                         </a>
-                        <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Proceed to Stage 6: {{ $stages[6]['title'] ?? 'VSAT Result' }} &rarr;</span>
-                        </button>
+                        @if(isset($stages[6]))
+                            <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                <span>Proceed to Stage 6: {{ $stages[6]['title'] }} &rarr;</span>
+                            </button>
+                        @else
+                            <button type="submit" class="btn-step-next" style="background: #16a34a;">
+                                <span>✓ Complete Onboarding &amp; Confirm Submission</span>
+                            </button>
+                        @endif
                     </div>
                 </form>
 
-            <!-- ================= STAGE 6: VSAT RESULTS (master.menus: CRMM0007) ================= -->
-            @elseif($activeStep === 6)
+            <!-- ================= STAGE 6: OPTIONAL SUBSEQUENT STAGE ================= -->
+            @elseif($activeStep === 6 && isset($stages[6]))
                 <div class="step-panel-header">
                     <div>
                         <div class="step-panel-kicker">Stage 6 of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
@@ -2808,7 +2752,7 @@
                                 </div>
                                 <div>
                                     <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e3a8a;">V-SAT 2026 National Entrance Examination</h4>
-                                    <span style="font-size:0.8rem; color:#475569;">Hall Ticket: <strong>VSAT26-{{ $appNo ?: '2027000005' }}</strong> &bull; Exam Mode: Online Computer Based</span>
+                                    <span style="font-size:0.8rem; color:#475569;">Hall Ticket: <strong>VSAT26-{{ $appNo ?: '' }}</strong> &bull; Exam Mode: Online Computer Based</span>
                                 </div>
                             </div>
                             <span class="meta-badge meta-badge-success" style="font-size:0.85rem; padding:0.4rem 0.85rem;">✓ Qualified for Counseling</span>

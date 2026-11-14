@@ -81,15 +81,15 @@ class ApplicationController extends Controller
                 ->first();
         }
 
-        $applino = $crmStudent?->applinano ?? $id;
-        $phone = $crmStudent?->phoneno ?? $cleanPhone ?: 'N/A';
+        $applino = $crmStudent?->applinano ?? (!empty($id) && $id !== '0' ? $id : ($usercode ?: ''));
+        $phone = $crmStudent?->phoneno ?? ($cleanPhone ?: '');
 
         $personalInfo = StudentPersonalInfo::where('applino', $applino)
-            ->when($phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))
+            ->when(!empty($phone) && $phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))
             ->first();
 
         $academicDetails = StudentAcademicDetail::where('applino', $applino)
-            ->when($phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))
+            ->when(!empty($phone) && $phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))
             ->first();
 
         $payDetail = PayDetail::where('applino', $applino)
@@ -101,7 +101,7 @@ class ApplicationController extends Controller
             ->orderBy('id', 'desc')
             ->first();
 
-        $percentage = 74.98;
+        $percentage = 0.0;
         if ($academicDetails) {
             if ($academicDetails->tenth_marks_type === 'CGPA' && (float) $academicDetails->tenth_cgpa > 0) {
                 $percentage = (float) $academicDetails->tenth_cgpa * 9.5;
@@ -111,7 +111,7 @@ class ApplicationController extends Controller
             }
         }
 
-        $stateVal = $personalInfo?->state ?: ($crmStudent?->state?->state_name ?? 'Andhra Pradesh');
+        $stateVal = $personalInfo?->state ?: ($crmStudent?->state?->state_name ?? '');
         if (is_numeric($stateVal)) {
             $resolvedState = State::where('state_id', (int) $stateVal)->value('state_name');
             $stateVal = $resolvedState ?: $stateVal;
@@ -144,7 +144,7 @@ class ApplicationController extends Controller
             }
         }
 
-        $studentCrmId = $personalInfo?->crmid ?: ($crmStudent?->crmid ?: ('V-SAT-' . substr($applino, -4)));
+        $studentCrmId = $personalInfo?->crmid ?: ($crmStudent?->crmid ?: (!empty($applino) ? ('V-SAT-' . substr($applino, -4)) : ''));
 
         return (object) [
             'id' => $applino,
@@ -172,7 +172,7 @@ class ApplicationController extends Controller
             'country' => $countryVal ?: '',
             'payment_amount' => (float) ($payDetail?->paidamount ?? $receipt?->feepayable ?? ($isPaid ? 200.00 : 700.00)),
             'payment_method' => $payDetail?->paytype ?? $receipt?->paytype ?? 'PayU (Online)',
-            'transaction_id' => $payDetail?->txnpayuid ?? $payDetail?->txncrmid ?? $receipt?->receiptno ?? ($isPaid ? ('PAYU261112' . $applino) : 'PENDING'),
+            'transaction_id' => $payDetail?->txnpayuid ?? $payDetail?->txncrmid ?? $receipt?->receiptno ?? ($isPaid ? ('TXN_' . $applino) : 'PENDING'),
             'payment_status' => $isPaid ? 'Completed' : 'Pending',
             'photo_path' => $photoPath,
             'documents' => $docsState,

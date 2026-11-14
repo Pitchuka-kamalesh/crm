@@ -1904,7 +1904,7 @@
                                            id="modalAppliNo" 
                                            name="applino" 
                                            class="form-input" 
-                                           placeholder="e.g. 2027000005 or V-SAT-0002" 
+                                           placeholder="e.g. Enter Application Number or CRM ID" 
                                            oninput="updateModalCouponCode(this.value)"
                                            required 
                                            style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">
@@ -2002,7 +2002,7 @@
                         modal.style.display = 'flex';
                         const input = document.getElementById('modalAppliNo');
                         if (input) {
-                            input.value = appliNo || '2027000005';
+                            input.value = appliNo || '';
                             updateModalCouponCode(input.value);
                         }
                     }
