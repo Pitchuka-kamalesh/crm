@@ -2344,54 +2344,18 @@
                 <!-- TAB: STUDENT KPI & CONVERSION ANALYTICS -->
                 <div class="content-card">
                     <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
-                        <div>
-                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                                <span>🎓 Student KPI &amp; Conversion Analytics</span>
-                            </div>
-                            <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #475569;">Registration:</span>
-                                    <strong style="color: #0284c7;">100%</strong>
-                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiTotal }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #047857;">Fee Payment:</span>
-                                    <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #1e40af;">Personal Profile:</span>
-                                    <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #6d28d9;">Academic Records:</span>
-                                    <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #c2410c;">Application Form:</span>
-                                    <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #64748b;">Seat Allotment:</span>
-                                    <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
-                                </span>
-                            </div>
+                        <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                            <span>🎓 Student KPI &amp; Conversion Analytics</span>
                         </div>
-
-                        <!-- Header Metadata Badges (Intake Cycle & Total Count) -->
-                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                            <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span>📅</span> Intake Cycle 2026–27
-                            </span>
-                            <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
-                                {{ $kpiTotal }} Total Enquiries
-                            </span>
+                        <div>
+                            <button type="button" onclick="exportStudentKpiCsv()" style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 1.15rem; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Export CSV</span>
+                            </button>
                         </div>
                     </div>
 
@@ -2594,7 +2558,7 @@
                                     <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Student Progress</div>
                                 </div>
                                 <div style="position: relative;">
-                                    <input type="text" id="kpiSearchInput" placeholder="Search by student name, application no, branch..." onkeyup="filterKpiTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 300px; outline: none; background: #ffffff;">
+                                    <input type="text" id="kpiSearchInput" placeholder="Search student name, application no, branch..." onkeyup="filterKpiTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 280px; outline: none; background: #ffffff;">
                                     <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -2617,18 +2581,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Prompt row shown by default when search input is empty -->
-                                        <tr id="kpiSearchPromptRow">
-                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
-                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">Type in the search box above to view student progress</div>
-                                            </td>
-                                        </tr>
                                         <!-- Empty match state when search yields zero rows -->
                                         <tr id="kpiNoResultsRow" style="display: none;">
-                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">❌</div>
-                                                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student records found</div>
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
+                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">No matching student records found</div>
                                             </td>
                                         </tr>
                                         @foreach($allStudents as $student)
@@ -2649,7 +2606,7 @@
                                                 $completedSteps = 1 + ($isS1 ? 1 : 0) + ($isS2 ? 1 : 0) + ($isS3 ? 1 : 0);
                                                 $progressPct = round(($completedSteps / 5) * 100);
                                             @endphp
-                                            <tr class="kpi-row" style="display: none;">
+                                            <tr class="kpi-row">
                                                 <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
                                                 <td>
                                                     <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
@@ -2885,22 +2842,12 @@
                     const input = document.getElementById('kpiSearchInput');
                     const filter = (input ? input.value : '').toLowerCase().trim();
                     const rows = document.querySelectorAll('#kpiTable tbody tr.kpi-row');
-                    const promptRow = document.getElementById('kpiSearchPromptRow');
                     const noResultsRow = document.getElementById('kpiNoResultsRow');
 
-                    if (!filter) {
-                        rows.forEach(row => row.style.display = 'none');
-                        if (promptRow) promptRow.style.display = '';
-                        if (noResultsRow) noResultsRow.style.display = 'none';
-                        return;
-                    }
-
-                    if (promptRow) promptRow.style.display = 'none';
                     let visibleCount = 0;
-
                     rows.forEach(row => {
                         const text = row.innerText.toLowerCase();
-                        if (text.includes(filter)) {
+                        if (!filter || text.includes(filter)) {
                             row.style.display = '';
                             visibleCount++;
                         } else {
@@ -2912,246 +2859,244 @@
                         noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
                     }
                 }
+
+                function exportStudentKpiCsv() {
+                    const headers = ['#', 'Application No', 'Student Name', 'Phone', 'Branch / Program', 'Registration', 'Payment (Stage 1)', 'Personal Profile (Stage 2)', 'Academic Records (Stage 3)', 'Progress %'];
+                    const rows = [];
+                    document.querySelectorAll('#kpiTable tbody tr.kpi-row').forEach((row, i) => {
+                        if (row.style.display !== 'none') {
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 8) {
+                                const appNo = cells[0].innerText.trim();
+                                const name = cells[1].querySelector('div:first-child')?.innerText.trim() || cells[1].innerText.trim();
+                                const phone = cells[1].querySelector('div:nth-child(2)')?.innerText.replace(/[^0-9]/g, '').trim() || '';
+                                const branch = cells[2].innerText.trim();
+                                const reg = cells[3].innerText.trim();
+                                const s1 = cells[4].innerText.trim();
+                                const s2 = cells[5].innerText.trim();
+                                const s3 = cells[6].innerText.trim();
+                                const progress = cells[7].innerText.trim();
+                                rows.push([i + 1, appNo, name, phone, branch, reg, s1, s2, s3, progress]);
+                            }
+                        }
+                    });
+                    downloadCsv('Student_KPI_Report_2026.csv', headers, rows);
+                }
+
+                function downloadCsv(filename, headers, rows) {
+                    let csvContent = "\uFEFF";
+                    csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\r\n";
+                    rows.forEach(row => {
+                        csvContent += row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(",") + "\r\n";
+                    });
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
                 </script>
 
             @elseif(($activeTab ?? '') === 'telecallerkpi')
                 <!-- TAB: TELECALLER KPI & OUTREACH ANALYTICS -->
+                <style>
+                    .telecaller-filter-wrapper:hover {
+                        border-color: #94a3b8 !important;
+                        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
+                    }
+                    .telecaller-filter-wrapper:focus-within {
+                        border-color: #2563eb !important;
+                        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+                    }
+                    .kpi-metric-card:hover {
+                        border-color: #cbd5e1 !important;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
+                    }
+                </style>
                 <div class="content-card">
-                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
-                        <div>
-                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                                <span>🎧 Telecaller KPI &amp; Outreach Analytics</span>
+                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0; white-space: nowrap;">
+                                <span>Telecaller KPI &amp; Outreach Performance</span>
                             </div>
-                            <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #475569;">Allotted Leads:</span>
-                                    <strong style="color: #0284c7;">100%</strong>
-                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ number_format($totalTelecallerLeads) }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #047857;">Fee Payment:</span>
-                                    <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #1e40af;">Personal Profile:</span>
-                                    <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #6d28d9;">Academic Records:</span>
-                                    <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #c2410c;">Application Form:</span>
-                                    <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #64748b;">Seat Allotment:</span>
-                                    <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
-                                </span>
+
+                            <!-- Telecaller Selection Dropdown Filter -->
+                            <div class="telecaller-filter-wrapper" style="position: relative; display: inline-flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 9px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
+                                <div style="display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; height: 38px; background: #f8fafc; border-right: 1.5px solid #cbd5e1; font-size: 0.74rem; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.4px; user-select: none; white-space: nowrap;">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    <span>Telecallers:</span>
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px; padding: 0 6px; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 0.72rem; border-radius: 999px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);">
+                                        {{ count($telecallerStats) }}
+                                    </span>
+                                </div>
+                                <div style="position: relative; display: inline-flex; align-items: center;">
+                                    <select id="telecallerDropdownFilter" onchange="handleTelecallerChange(this.value)" style="height: 38px; min-width: 250px; padding: 0 36px 0 13px; font-size: 0.85rem; font-weight: 700; color: #0f172a; background: #ffffff; border: none; outline: none; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; font-family: inherit;">
+                                        <option value="all" {{ ($selectedTelecaller ?? 'all') === 'all' ? 'selected' : '' }}>
+                                            All Telecallers
+                                        </option>
+                                        @foreach($telecallerStats as $tOpt)
+                                            <option value="{{ $tOpt->emp_code }}" {{ ($selectedTelecaller ?? '') === $tOpt->emp_code ? 'selected' : '' }}>
+                                                {{ $tOpt->name }} (Emp: {{ $tOpt->emp_code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position: absolute; right: 12px; pointer-events: none; color: #64748b;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Header Metadata Badges -->
-                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                            <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span>📅</span> Intake Cycle 2026–27
-                            </span>
-                            <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
-                                {{ number_format($totalTelecallerLeads) }} Allotted Leads
-                            </span>
+                        <!-- Right Side: Clean Metric Pills & Export Button -->
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: nowrap;">
+                            <!-- Total Leads Allotted Badge (Clearly Displayed) -->
+                            <div style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2563eb;"></span>
+                                <span id="headerTeleAllottedLabel" style="font-size: 0.74rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.3px;">TOTAL LEADS ALLOTTED:</span>
+                                <strong id="headerTeleAllottedBadge" style="font-size: 0.96rem; font-weight: 800; color: #1d4ed8; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($totalTelecallerLeads) }}
+                                </strong>
+                            </div>
+
+                            <!-- Calls Logged Badge -->
+                            <div style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #16a34a;"></span>
+                                <span id="headerTeleTasksLabel" style="font-size: 0.74rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.3px;">CALLS LOGGED:</span>
+                                <strong id="headerTeleTasksBadge" style="font-size: 0.96rem; font-weight: 800; color: #15803d; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($teleTasksCount) }}
+                                </strong>
+                            </div>
+
+                            <!-- Export CSV Button -->
+                            <button type="button" onclick="exportTelecallerKpiCsv()" style="height: 36px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Export CSV</span>
+                            </button>
                         </div>
                     </div>
 
                     <div style="padding: 1.5rem;">
-                        <!-- 1. TOP EXECUTIVE METRIC CARDS -->
+                        <!-- 1. TOP EXECUTIVE METRIC CARDS (100% GENUINE DATABASE DATA) -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
-                            <!-- Card 1: Total Allotted Leads -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Allotted Leads</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalTelecallerLeads) }}</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Assigned for Calling</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            <!-- Card 1: Allotted Leads -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Total Allotted Leads</div>
+                                <div id="kpiCardAllottedValue" style="font-size: 1.95rem; font-weight: 800; color: #0f172a; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalTelecallerLeads) }}</div>
                             </div>
 
-                            <!-- Card 2: Fee Payment Conversion -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid Leads</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                            <!-- Card 2: Calls Logged -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Call Tasks Logged</div>
+                                <div id="kpiCardTasksValue" style="font-size: 1.95rem; font-weight: 800; color: #2563eb; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</div>
                             </div>
 
-                            <!-- Card 3: Profile Completion -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Profiles Submitted</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            <!-- Card 3: Leads Contacted -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Leads Contacted</div>
+                                <div id="kpiCardContactedValue" style="font-size: 1.95rem; font-weight: 800; color: #059669; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleDistinctContacted) }}</div>
                             </div>
 
-                            <!-- Card 4: Academic Verified -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Enrolments Completed</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            <!-- Card 4: Pending Outreach -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Pending Outreach</div>
+                                <div id="kpiCardPendingValue" style="font-size: 1.95rem; font-weight: 800; color: #d97706; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($telePendingCount) }}</div>
                             </div>
                         </div>
 
-                        <!-- 2. VISUAL KPI ANALYTICS (BAR GRAPHS & CHARTS) -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
-                            <!-- Chart 1: Admissions Funnel Progression (Vertical Bar Graph) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                        <!-- 2. GENUINE CALL STAGES & TOUCHPOINT BREAKDOWN -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem;">
+                            <!-- Stage Breakdown List -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                                     <div>
-                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Milestone Outreach Funnel</div>
-                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Counselor lead progression through conversion stages</div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Logged Call Stages Breakdown</div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">Authentic stage categories from telecaller lead tasks</div>
                                     </div>
-                                    <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Outreach Funnel</span>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 0.2rem 0.6rem; border-radius: 20px;">Task Stages</span>
                                 </div>
-                                <div style="position: relative; flex-grow: 1; min-height: 270px; max-height: 310px;" id="telecallerFunnelContainer">
-                                    <canvas id="telecallerFunnelChart"></canvas>
+                                <div id="kpiStagesContainer" style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; justify-content: center;">
+                                    @forelse($teleTaskStages as $index => $tStage)
+                                        @php
+                                            $sPct = $teleTasksCount > 0 ? round(($tStage->count / $teleTasksCount) * 100, 1) : 0;
+                                            $themeColors = [
+                                                ['bg' => '#eff6ff', 'text' => '#1d4ed8', 'badge' => '#2563eb', 'dot' => '#3b82f6'],
+                                                ['bg' => '#ecfdf5', 'text' => '#047857', 'badge' => '#059669', 'dot' => '#10b981'],
+                                                ['bg' => '#f5f3ff', 'text' => '#6d28d9', 'badge' => '#7c3aed', 'dot' => '#8b5cf6'],
+                                                ['bg' => '#fffbeb', 'text' => '#92400e', 'badge' => '#d97706', 'dot' => '#f59e0b'],
+                                            ];
+                                            $col = $themeColors[$index % count($themeColors)];
+                                        @endphp
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: {{ $col['bg'] }}; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: {{ $col['dot'] }};"></span>
+                                                <span style="font-weight: 700; color: {{ $col['text'] }}; font-size: 0.85rem;">{{ $tStage->stage_name }}</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <strong style="color: {{ $col['badge'] }}; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">{{ $tStage->count }}</strong>
+                                                <span style="font-size: 0.75rem; color: #64748b;">({{ $sPct }}%)</span>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">
+                                            No call stages recorded in database yet.
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
 
-                            <!-- Chart 2: Fee Clearance Health (Donut / Doughnut Chart + Clear Metrics) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                            <!-- Outreach Progress Summary Card -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                                     <div>
-                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Payment Clearance Status</div>
-                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Stage 1 fee payment conversion from allotted leads</div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Outreach Pipeline Status</div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">Genuine lead disposition overview from database</div>
                                     </div>
-                                    <span style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #d1fae5;">Calling Health</span>
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 0.2rem 0.6rem; border-radius: 20px;">Live Pipeline</span>
                                 </div>
-
-                                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.25rem; align-items: center; flex-grow: 1;" id="telecallerPaymentContainer">
-                                    <!-- Donut Chart with Center Text -->
-                                    <div style="position: relative; width: 175px; height: 175px; margin: 0 auto;">
-                                        <canvas id="telecallerPaymentChart"></canvas>
-                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                                            <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                            <div style="font-size: 0.7rem; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px;">Cleared</div>
-                                        </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; justify-content: center;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Total Allocated Leads</span>
+                                        <strong id="kpiPipeAllotted" style="color: #0f172a; font-size: 0.95rem;">{{ number_format($totalTelecallerLeads) }}</strong>
                                     </div>
-
-                                    <!-- High-Visibility Clear Metric Cards -->
-                                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.04em;">Fee Paid</span>
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 1px 7px; border-radius: 4px;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</span>
-                                            </div>
-                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
-                                                {{ $kpiStage1Paid }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
-                                            </div>
-                                            <div style="font-size: 0.72rem; color: #16a34a; font-weight: 500;">Verified via Payment Gateway</div>
-                                        </div>
-
-                                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Fee Due</span>
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #d97706; background: #fef3c7; padding: 1px 7px; border-radius: 4px;">{{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%</span>
-                                            </div>
-                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
-                                                {{ max(0, $kpiTotal - $kpiStage1Paid) }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
-                                            </div>
-                                            <div style="font-size: 0.72rem; color: #d97706; font-weight: 500;">Pending Outreach Follow-up</div>
-                                        </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Unique Leads Reached</span>
+                                        <strong id="kpiPipeContacted" style="color: #059669; font-size: 0.95rem;">{{ number_format($teleDistinctContacted) }}</strong>
                                     </div>
-                                </div>
-
-                                <!-- Segmented Clearance Bar -->
-                                <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: #64748b; margin-bottom: 0.35rem;">
-                                        <span>Paid: {{ $kpiStage1Paid }} ({{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%)</span>
-                                        <span>Pending: {{ max(0, $kpiTotal - $kpiStage1Paid) }} ({{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%)</span>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Pending First Call</span>
+                                        <strong id="kpiPipePending" style="color: #d97706; font-size: 0.95rem;">{{ number_format($telePendingCount) }}</strong>
                                     </div>
-                                    <div style="width: 100%; height: 8px; background: #fef3c7; border-radius: 999px; overflow: hidden; display: flex;">
-                                        <div style="width: {{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%; height: 100%; background: #10b981; border-radius: 999px 0 0 999px;"></div>
-                                        <div style="width: {{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%; height: 100%; background: #f59e0b; border-radius: 0 999px 999px 0;"></div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Total Call Tasks Logged</span>
+                                        <strong id="kpiPipeTasks" style="color: #2563eb; font-size: 0.95rem;">{{ number_format($teleTasksCount) }}</strong>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 3. COUNSELOR PERFORMANCE SCORECARDS (EXECUTIVE CARDS GRID) -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.75rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.15rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                        <!-- 3. COUNSELOR LEAD OUTREACH DIRECTORY TABLE (GENUINE CALL TASKS & REMARKS) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
                                 <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Counselor Performance &amp; Lead Allocation</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Individual counselor outreach volume and conversion efficiency</div>
-                                </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #f0f9ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #e0f2fe;">Active Staff</span>
-                            </div>
-
-                            @php
-                                $counselorRank = 1;
-                            @endphp
-
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-                                @forelse($telecallerStats as $stat)
-                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.1rem 1.15rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                <div style="width: 32px; height: 32px; border-radius: 8px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
-                                                    🎧
-                                                </div>
-                                                <span style="font-size: 0.7rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
-                                                    Senior Counselor
-                                                </span>
-                                            </div>
-                                            <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 1px solid #f1f5f9; padding: 2px 7px; border-radius: 6px;">
-                                                #{{ $counselorRank++ }}
-                                            </span>
-                                        </div>
-
-                                        <div>
-                                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 0.2rem;">{{ $stat->name }}</div>
-                                            <div style="font-size: 0.75rem; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem;">ID: {{ $stat->emp_code }}</div>
-                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                                <span style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">
-                                                    {{ number_format($stat->leads_count) }} <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">assigned</span>
-                                                </span>
-                                                <span style="font-size: 0.8rem; font-weight: 700; color: #059669;">
-                                                    {{ $kpiStage1Paid }} Fee Paid
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-                                            <div style="width: 51.5%; height: 100%; background: #10b981; border-radius: 4px;"></div>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div style="padding: 1rem; color: #64748b; font-size: 0.85rem;">No active telecallers registered in the system.</div>
-                                @endforelse
-                            </div>
-                        </div>
-
-                        <!-- 4. DETAILED SEARCHABLE CANDIDATE OUTREACH RECORDS TABLE -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                                <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Detailed Candidate Outreach Records</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Live searchable directory of candidate milestones and counselor outreach status</div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Counselor Lead Outreach Directory</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Actual allotted leads and logged calling task stages from PostgreSQL</div>
                                 </div>
                                 <div style="position: relative;">
-                                    <input type="text" id="telecallerSearchInput" placeholder="Search by student name, application no, counselor, phone..." onkeyup="filterTelecallerTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 320px; outline: none; background: #ffffff;">
+                                    <input type="text" id="telecallerSearchInput" placeholder="Search phone, counselor, stage, remark..." onkeyup="filterTelecallerTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 310px; outline: none; background: #ffffff;">
                                     <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -3163,115 +3108,65 @@
                                 <table class="crm-table" id="telecallerTable">
                                     <thead>
                                         <tr>
-                                            <th>Application #</th>
-                                            <th>Student Name</th>
+                                            <th>#</th>
+                                            <th>Lead Contact</th>
+                                            <th>Application No</th>
                                             <th>Assigned Counselor</th>
-                                            <th>Branch / Program</th>
-                                            <th>Registration</th>
-                                            <th>Payment (Stage 1)</th>
-                                            <th>Personal (Stage 2)</th>
-                                            <th>Academic (Stage 3)</th>
-                                            <th>Progress</th>
+                                            <th>Allocation Date</th>
+                                            <th>Latest Call Stage</th>
+                                            <th>Calls Made</th>
+                                            <th>Latest Counselor Remark</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Prompt row shown by default when search input is empty -->
-                                        <tr id="telecallerSearchPromptRow">
-                                            <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
-                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">Type in the search box above to view candidate outreach progress</div>
-                                            </td>
-                                        </tr>
-                                        <!-- Empty match state when search yields zero rows -->
-                                        <tr id="telecallerNoResultsRow" style="display: none;">
-                                            <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">❌</div>
-                                                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching candidate records found</div>
-                                            </td>
-                                        </tr>
-                                        @foreach($allStudents as $student)
-                                            @php
-                                                $sAppNo = (string)($student->applinano ?? $student->application_no ?? 'N/A');
-                                                $sName = $student->name ?? $student->student_name ?? 'Candidate';
-                                                $sBranch = $student->branch?->branch_long_name ?? $student->branch?->branch_short_name ?? $student->program?->program_long_name ?? 'B.Tech';
-                                                
-                                                $s1 = strtolower(trim((string)($student->stage1 ?? '')));
-                                                $s2 = strtolower(trim((string)($student->stage2 ?? '')));
-                                                $s3 = strtolower(trim((string)($student->stage3 ?? '')));
-                                                
-                                                // Genuine fee payment check: status 'paid' or verified in finance records
-                                                $isS1 = ($s1 === 'paid') || (isset($paidAppNos) && $paidAppNos->contains($sAppNo));
-                                                $isS2 = in_array($s2, ['completed', 'approved', 'done'], true);
-                                                $isS3 = in_array($s3, ['completed', 'approved', 'done'], true);
-                                                
-                                                $completedSteps = 1 + ($isS1 ? 1 : 0) + ($isS2 ? 1 : 0) + ($isS3 ? 1 : 0);
-                                                $progressPct = round(($completedSteps / 5) * 100);
-                                                $counselorName = $leadAssignments[$sAppNo]['employee'] ?? 'Ganesh kumar (03434)';
-                                            @endphp
-                                            <tr class="telecaller-row" style="display: none;">
-                                                <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
+                                        @forelse($telecallerLeadsList as $index => $tLead)
+                                            <tr class="telecaller-row" data-empcode="{{ $tLead->empcode }}">
+                                                <td style="color: #64748b; font-weight: 600;">{{ $index + 1 }}</td>
                                                 <td>
-                                                    <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
-                                                    @if(!empty($student->phoneno ?? $student->mobile))
-                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    <span style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.86rem;">{{ $tLead->phoneno }}</span>
+                                                </td>
+                                                <td>
+                                                    @if($tLead->applino && $tLead->applino !== '0')
+                                                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: #1e40af;">{{ $tLead->applino }}</span>
+                                                    @else
+                                                        <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Not Registered</span>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <span style="font-size: 0.78rem; font-weight: 600; color: #0284c7; background: #f0f9ff; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                                                        🎧 {{ $counselorName }}
+                                                    <div style="font-weight: 600; color: #1e293b;">{{ $tLead->emp_name ?? 'Ganesh kumar' }}</div>
+                                                    <div style="font-size: 0.72rem; color: #0284c7; font-weight: 600;">Emp: {{ $tLead->empcode }}</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size: 0.8rem; color: #334155; font-weight: 600;">{{ $tLead->assigndatetime ? date('d M Y, h:i A', strtotime($tLead->assigndatetime)) : 'N/A' }}</div>
+                                                </td>
+                                                <td>
+                                                    @if($tLead->call_count > 0)
+                                                        <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                                            {{ $tLead->latest_stage }}
+                                                        </span>
+                                                    @else
+                                                        <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                                                            Pending Call
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b;">{{ $tLead->call_count }} call(s)</span>
+                                                </td>
+                                                <td style="max-width: 280px;">
+                                                    <span style="font-size: 0.78rem; color: #475569; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $tLead->latest_remark }}">
+                                                        {{ $tLead->latest_remark }}
                                                     </span>
-                                                </td>
-                                                <td>
-                                                    <span style="font-size: 0.825rem; color: #475569; font-weight: 600;">{{ $sBranch }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                        ✓ Done
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    @if($isS1)
-                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            ✓ Paid
-                                                        </span>
-                                                    @else
-                                                        <span class="badge-status badge-pending" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            Pending
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($isS2)
-                                                        <span class="badge-status badge-paid" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            ✓ Done
-                                                        </span>
-                                                    @else
-                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
-                                                            Pending
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($isS3)
-                                                        <span class="badge-status badge-paid" style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            ✓ Verified
-                                                        </span>
-                                                    @else
-                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
-                                                            Pending
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                        <div style="flex-grow: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; width: 60px;">
-                                                            <div style="height: 100%; width: {{ $progressPct }}%; background: {{ $progressPct >= 80 ? '#10b981' : ($progressPct >= 40 ? '#3b82f6' : '#f59e0b') }};"></div>
-                                                        </div>
-                                                        <span style="font-size: 0.72rem; font-weight: 700; color: #475569;">{{ $progressPct }}%</span>
-                                                    </div>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">No telecaller allocated leads found.</td>
+                                            </tr>
+                                        @endforelse
+                                        <tr id="telecallerNoRowsFound" style="display: none;">
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No leads allocated to this telecaller yet.</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -3280,163 +3175,148 @@
                 </div>
 
                 <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    initTelecallerVisualCharts();
-                });
-                if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                    setTimeout(initTelecallerVisualCharts, 50);
+                const telecallerData = {
+                    all: {
+                        emp_code: 'all',
+                        name: 'All Telecallers',
+                        allotted: {{ $totalTelecallerLeads }},
+                        tasks: {{ $teleTasksCount }},
+                        contacted: {{ $teleDistinctContacted }},
+                        pending: {{ $telePendingCount }},
+                        stages: {!! json_encode($teleTaskStages) !!}
+                    },
+                    @foreach($telecallerStats as $tStat)
+                    '{{ $tStat->emp_code }}': {
+                        emp_code: '{{ $tStat->emp_code }}',
+                        name: '{{ addslashes($tStat->name) }}',
+                        allotted: {{ $tStat->leads_count }},
+                        tasks: {{ $tStat->tasks_count }},
+                        contacted: {{ $tStat->contacted_count }},
+                        pending: {{ $tStat->pending_count }},
+                        stages: {!! json_encode($tStat->stages) !!}
+                    },
+                    @endforeach
+                };
+
+                function selectTelecaller(empCode) {
+                    const dropdown = document.getElementById('telecallerDropdownFilter');
+                    if (dropdown) {
+                        const targetVal = (dropdown.value === empCode) ? 'all' : empCode;
+                        dropdown.value = targetVal;
+                        handleTelecallerChange(targetVal);
+                    }
                 }
 
-                function initTelecallerVisualCharts() {
-                    const funnelLabels = [
-                        ['Allotted', 'Leads'],
-                        ['Fee', 'Payment'],
-                        ['Personal', 'Profile'],
-                        ['Academic', 'Records'],
-                        ['Application', 'Form'],
-                        ['Seat', 'Allotment']
-                    ];
-                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
-                    const totalApplicants = {{ (int)$kpiTotal }};
-                    const paidCount = {{ (int)$kpiStage1Paid }};
-                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+                function handleTelecallerChange(empCode) {
+                    const data = telecallerData[empCode] || telecallerData['all'];
 
-                    if (typeof Chart !== 'undefined') {
-                        // 1. Funnel Vertical Bar Chart
-                        const funnelCanvas = document.getElementById('telecallerFunnelChart');
-                        if (funnelCanvas && !funnelCanvas.dataset.chartInit) {
-                            funnelCanvas.dataset.chartInit = 'true';
-                            new Chart(funnelCanvas, {
-                                type: 'bar',
-                                data: {
-                                    labels: funnelLabels,
-                                    datasets: [{
-                                        label: 'Applicants',
-                                        data: funnelCounts,
-                                        backgroundColor: [
-                                            'rgba(2, 132, 199, 0.85)',
-                                            'rgba(16, 185, 129, 0.85)',
-                                            'rgba(37, 99, 235, 0.85)',
-                                            'rgba(124, 58, 237, 0.85)',
-                                            'rgba(234, 88, 12, 0.85)',
-                                            'rgba(8, 145, 178, 0.85)'
-                                        ],
-                                        borderColor: [
-                                            '#0284c7',
-                                            '#10b981',
-                                            '#2563eb',
-                                            '#7c3aed',
-                                            '#ea580c',
-                                            '#0891b2'
-                                        ],
-                                        borderWidth: 1.5,
-                                        borderRadius: 8,
-                                        borderSkipped: false,
-                                        maxBarThickness: 46
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            backgroundColor: '#0f172a',
-                                            padding: 10,
-                                            titleFont: { size: 12, weight: 'bold' },
-                                            bodyFont: { size: 12 },
-                                            cornerRadius: 8,
-                                            callbacks: {
-                                                title: function(context) {
-                                                    const fullNames = ['Allotted Leads', 'Fee Payment', 'Personal Profile', 'Academic Records', 'Application Form', 'Seat Allotment'];
-                                                    const idx = context[0].dataIndex;
-                                                    return fullNames[idx] || '';
-                                                },
-                                                label: function(context) {
-                                                    const val = context.raw;
-                                                    const pct = totalApplicants > 0 ? ((val / totalApplicants) * 100).toFixed(1) : 0;
-                                                    return ` ${val} Candidates (${pct}%)`;
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            grid: { display: false },
-                                            ticks: {
-                                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 11 },
-                                                color: '#334155',
-                                                maxRotation: 0,
-                                                minRotation: 0,
-                                                autoSkip: false,
-                                                padding: 6
-                                            }
-                                        },
-                                        y: {
-                                            beginAtZero: true,
-                                            suggestedMax: 35,
-                                            grid: { color: '#f1f5f9' },
-                                            ticks: {
-                                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
-                                                color: '#64748b',
-                                                stepSize: 5
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }
+                    // 1. Update Header Pills
+                    const allottedBadge = document.getElementById('headerTeleAllottedBadge');
+                    const allottedLabel = document.getElementById('headerTeleAllottedLabel');
+                    const tasksBadge = document.getElementById('headerTeleTasksBadge');
+                    const tasksLabel = document.getElementById('headerTeleTasksLabel');
 
-                        // 2. Fee Clearance Donut Chart
-                        const paymentCanvas = document.getElementById('telecallerPaymentChart');
-                        if (paymentCanvas && !paymentCanvas.dataset.chartInit) {
-                            paymentCanvas.dataset.chartInit = 'true';
-                            new Chart(paymentCanvas, {
-                                type: 'doughnut',
-                                data: {
-                                    labels: ['Fee Paid', 'Fee Due'],
-                                    datasets: [{
-                                        data: [paidCount, dueCount],
-                                        backgroundColor: ['#10b981', '#f59e0b'],
-                                        borderColor: '#ffffff',
-                                        borderWidth: 3,
-                                        hoverOffset: 3
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    cutout: '72%',
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: { enabled: false }
-                                    }
-                                }
-                            });
-                        }
+                    if (allottedBadge) allottedBadge.textContent = Number(data.allotted).toLocaleString();
+                    if (tasksBadge) tasksBadge.textContent = Number(data.tasks).toLocaleString();
+                    if (allottedLabel) {
+                        allottedLabel.textContent = (empCode === 'all') 
+                            ? 'TOTAL LEADS ALLOTTED:' 
+                            : 'LEADS ALLOTTED (' + data.name + '):';
                     }
+                    if (tasksLabel) {
+                        tasksLabel.textContent = (empCode === 'all') 
+                            ? 'CALLS LOGGED:' 
+                            : 'CALLS LOGGED (' + data.name + '):';
+                    }
+
+                    // 2. Update Top 4 Metric Cards
+                    const cardAllottedVal = document.getElementById('kpiCardAllottedValue');
+                    const cardTasksVal = document.getElementById('kpiCardTasksValue');
+                    const cardContactedVal = document.getElementById('kpiCardContactedValue');
+                    const cardPendingVal = document.getElementById('kpiCardPendingValue');
+
+                    if (cardAllottedVal) cardAllottedVal.textContent = Number(data.allotted).toLocaleString();
+                    if (cardTasksVal) cardTasksVal.textContent = Number(data.tasks).toLocaleString();
+                    if (cardContactedVal) cardContactedVal.textContent = Number(data.contacted).toLocaleString();
+                    if (cardPendingVal) cardPendingVal.textContent = Number(data.pending).toLocaleString();
+
+                    // 3. Update Call Stages Breakdown
+                    renderStagesList(data.stages, data.tasks);
+
+                    // 4. Update Pipeline Status Card
+                    const pipeAllotted = document.getElementById('kpiPipeAllotted');
+                    const pipeContacted = document.getElementById('kpiPipeContacted');
+                    const pipePending = document.getElementById('kpiPipePending');
+                    const pipeTasks = document.getElementById('kpiPipeTasks');
+                    if (pipeAllotted) pipeAllotted.textContent = Number(data.allotted).toLocaleString();
+                    if (pipeContacted) pipeContacted.textContent = Number(data.contacted).toLocaleString();
+                    if (pipePending) pipePending.textContent = Number(data.pending).toLocaleString();
+                    if (pipeTasks) pipeTasks.textContent = Number(data.tasks).toLocaleString();
+
+                    // 5. Filter Directory Table
+                    filterTelecallerTable();
+
+                    // 6. Update URL without page reload
+                    try {
+                        const url = new URL(window.location.href);
+                        if (empCode !== 'all') {
+                            url.searchParams.set('telecaller', empCode);
+                        } else {
+                            url.searchParams.delete('telecaller');
+                        }
+                        window.history.replaceState(null, '', url.toString());
+                    } catch (e) {}
+                }
+
+                function renderStagesList(stages, totalTasks) {
+                    const container = document.getElementById('kpiStagesContainer');
+                    if (!container) return;
+                    if (!stages || stages.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No call stages recorded in database for this telecaller yet.</div>';
+                        return;
+                    }
+                    const themeColors = [
+                        { bg: '#eff6ff', text: '#1d4ed8', badge: '#2563eb', dot: '#3b82f6' },
+                        { bg: '#ecfdf5', text: '#047857', badge: '#059669', dot: '#10b981' },
+                        { bg: '#f5f3ff', text: '#6d28d9', badge: '#7c3aed', dot: '#8b5cf6' },
+                        { bg: '#fffbeb', text: '#92400e', badge: '#d97706', dot: '#f59e0b' }
+                    ];
+                    let html = '';
+                    stages.forEach((stg, i) => {
+                        const col = themeColors[i % themeColors.length];
+                        const count = Number(stg.count || 0);
+                        const pct = totalTasks > 0 ? ((count / totalTasks) * 100).toFixed(1) : 0;
+                        html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: ${col.bg}; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: ${col.dot};"></span>
+                                <span style="font-weight: 700; color: ${col.text}; font-size: 0.85rem;">${stg.stage_name}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <strong style="color: ${col.badge}; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">${count}</strong>
+                                <span style="font-size: 0.75rem; color: #64748b;">(${pct}%)</span>
+                            </div>
+                        </div>`;
+                    });
+                    container.innerHTML = html;
                 }
 
                 function filterTelecallerTable() {
+                    const dropdown = document.getElementById('telecallerDropdownFilter');
+                    const selectedEmp = dropdown ? dropdown.value : 'all';
                     const input = document.getElementById('telecallerSearchInput');
                     const filter = (input ? input.value : '').toLowerCase().trim();
                     const rows = document.querySelectorAll('#telecallerTable tbody tr.telecaller-row');
-                    const promptRow = document.getElementById('telecallerSearchPromptRow');
-                    const noResultsRow = document.getElementById('telecallerNoResultsRow');
-
-                    if (!filter) {
-                        rows.forEach(row => row.style.display = 'none');
-                        if (promptRow) promptRow.style.display = '';
-                        if (noResultsRow) noResultsRow.style.display = 'none';
-                        return;
-                    }
-
-                    if (promptRow) promptRow.style.display = 'none';
+                    const noRows = document.getElementById('telecallerNoRowsFound');
+                    
                     let visibleCount = 0;
-
                     rows.forEach(row => {
+                        const rowEmp = row.getAttribute('data-empcode');
+                        const matchesEmp = (selectedEmp === 'all' || rowEmp === selectedEmp);
                         const text = row.innerText.toLowerCase();
-                        if (text.includes(filter)) {
+                        const matchesText = !filter || text.includes(filter);
+
+                        if (matchesEmp && matchesText) {
                             row.style.display = '';
                             visibleCount++;
                         } else {
@@ -3444,261 +3324,263 @@
                         }
                     });
 
-                    if (noResultsRow) {
-                        noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+                    if (noRows) {
+                        noRows.style.display = (visibleCount === 0) ? '' : 'none';
+                        if (visibleCount === 0 && selectedEmp !== 'all') {
+                            const name = (telecallerData[selectedEmp] && telecallerData[selectedEmp].name) 
+                                ? telecallerData[selectedEmp].name 
+                                : 'this telecaller';
+                            noRows.querySelector('td').textContent = 'No leads allocated to ' + name + ' yet.';
+                        } else if (visibleCount === 0) {
+                            noRows.querySelector('td').textContent = 'No matching allocated leads found.';
+                        }
                     }
+                }
+
+                function exportTelecallerKpiCsv() {
+                    const dropdown = document.getElementById('telecallerDropdownFilter');
+                    const selectedEmp = dropdown ? dropdown.value : 'all';
+                    const opt = dropdown ? dropdown.options[dropdown.selectedIndex] : null;
+                    const suffix = (selectedEmp === 'all') ? 'All' : (selectedEmp);
+
+                    const headers = ['#', 'Lead Phone', 'Application No', 'Assigned Counselor', 'Counselor Emp Code', 'Allocation Date', 'Call Stage', 'Calls Made', 'Latest Remark'];
+                    const rows = [];
+                    document.querySelectorAll('#telecallerTable tbody tr.telecaller-row').forEach((row, i) => {
+                        if (row.style.display !== 'none') {
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 8) {
+                                const phone = cells[1].innerText.replace(/\n.*/, '').trim();
+                                const applino = cells[2].innerText.trim();
+                                const counselor = cells[3].innerText.replace(/\n.*/, '').trim();
+                                const empCode = (cells[3].innerText.match(/Emp:\s*(\S+)/) || [])[1] || '03434';
+                                const allocDate = cells[4].innerText.trim();
+                                const stage = cells[5].innerText.trim();
+                                const callsCount = cells[6].innerText.trim();
+                                const remark = cells[7].innerText.trim();
+                                rows.push([i + 1, phone, applino, counselor, empCode, allocDate, stage, callsCount, remark]);
+                            }
+                        }
+                    });
+                    downloadCsv('Telecaller_KPI_Report_' + suffix + '.csv', headers, rows);
+                }
+
+                function downloadCsv(filename, headers, rows) {
+                    let csvContent = "\uFEFF";
+                    csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\r\n";
+                    rows.forEach(row => {
+                        csvContent += row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(",") + "\r\n";
+                    });
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+                function initTelecallerKpi() {
+                    const dropdown = document.getElementById('telecallerDropdownFilter');
+                    if (dropdown && dropdown.value && dropdown.value !== 'all') {
+                        handleTelecallerChange(dropdown.value);
+                    }
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initTelecallerKpi);
+                } else {
+                    initTelecallerKpi();
                 }
                 </script>
 
-            @elseif(($activeTab ?? '') === 'leadskpi')
+@elseif(($activeTab ?? '') === 'leadskpi')
                 <!-- TAB: LEADS KPI & ACQUISITION ANALYTICS -->
                 <div class="content-card">
-                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
-                        <div>
-                            <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                                <span>🎯 Leads KPI &amp; Acquisition Analytics</span>
-                            </div>
-                            <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #475569;">Raw Inflow:</span>
-                                    <strong style="color: #0284c7;">100%</strong>
-                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ number_format($totalRawLeads) }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #047857;">Fee Payment:</span>
-                                    <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #1e40af;">Personal Profile:</span>
-                                    <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #6d28d9;">Academic Records:</span>
-                                    <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #c2410c;">Application Form:</span>
-                                    <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
-                                </span>
-                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                    <span style="font-weight: 700; color: #64748b;">Seat Allotment:</span>
-                                    <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
-                                    <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
-                                </span>
-                            </div>
+                    <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                        <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0; white-space: nowrap;">
+                            <span>Leads KPI &amp; Acquisition Analytics</span>
                         </div>
-
-                        <!-- Header Metadata Badges -->
-                        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                            <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span>📅</span> Intake Cycle 2026–27
-                            </span>
-                            <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
-                                {{ number_format($totalRawLeads) }} Raw Enquiries
-                            </span>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: nowrap;">
+                            <div style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2563eb;"></span>
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.3px;">TOTAL INFLOW:</span>
+                                <strong style="font-size: 0.96rem; font-weight: 800; color: #1d4ed8; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($totalRawLeads) }}
+                                </strong>
+                            </div>
+                            <div style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #16a34a;"></span>
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.3px;">ALLOTTED:</span>
+                                <strong style="font-size: 0.96rem; font-weight: 800; color: #15803d; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($allocatedLeadsCount) }}
+                                </strong>
+                            </div>
+                            <button type="button" onclick="exportLeadsKpiCsv()" style="height: 36px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Export CSV</span>
+                            </button>
                         </div>
                     </div>
 
                     <div style="padding: 1.5rem;">
-                        <!-- 1. TOP EXECUTIVE METRIC CARDS -->
+                        <!-- 1. TOP EXECUTIVE METRIC CARDS (100% GENUINE DATABASE DATA) -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
-                            <!-- Card 1: Total Raw Inflow -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Raw Enquiries</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalRawLeads) }}</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Inflow Captured</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📥</div>
+                            <!-- Card 1: Total Inflow Leads -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Total Inflow Leads</div>
+                                <div style="font-size: 1.95rem; font-weight: 800; color: #0f172a; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalRawLeads) }}</div>
                             </div>
 
-                            <!-- Card 2: Fee Payment Conversion -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid Leads</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                            <!-- Card 2: Assigned for Outreach -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Assigned for Outreach</div>
+                                <div style="font-size: 1.95rem; font-weight: 800; color: #2563eb; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($allocatedLeadsCount) }}</div>
                             </div>
 
-                            <!-- Card 3: Profile Completion -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Profiles Submitted</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                            <!-- Card 3: Unallocated Pool -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Unallocated Pool</div>
+                                <div style="font-size: 1.95rem; font-weight: 800; color: #ea580c; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($unallocatedPoolCount) }}</div>
                             </div>
 
-                            <!-- Card 4: Academic Verified -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Enrolments Completed</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            <!-- Card 4: Registered Leads -->
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Registered Leads</div>
+                                <div style="font-size: 1.95rem; font-weight: 800; color: #059669; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($leadsRegCount) }}</div>
                             </div>
                         </div>
 
-                        <!-- 2. VISUAL KPI ANALYTICS (BAR GRAPHS & CHARTS) -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
-                            <!-- Chart 1: Admissions Funnel Progression (Vertical Bar Graph) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
-                                    <div>
-                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Milestone Progression Funnel</div>
-                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Applicant conversion through enrollment stages</div>
-                                    </div>
-                                    <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Enrollment Funnel</span>
+                        <!-- 2. VISUAL ANALYTICS ROW (100% GENUINE DYNAMIC DATA) -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem;">
+                            <!-- Chart 1: Daily Inflow Trend -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Daily Lead Inflow Trend</div>
+                                    <span id="kpiTrendPeriodBadge" style="font-size: 0.74rem; font-weight: 700; color: #1d4ed8; background: #eff6ff; border: 1.5px solid #bfdbfe; padding: 0.25rem 0.75rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace;">
+                                        {{ number_format($totalRawLeads) }} Leads Total
+                                    </span>
                                 </div>
-                                <div style="position: relative; flex-grow: 1; min-height: 270px; max-height: 310px;" id="leadsFunnelContainer">
-                                    <canvas id="leadsFunnelChart"></canvas>
+
+                                <!-- LIVE FILTERS: Year, Month, Date (Professional Toolbar) -->
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.45rem 0.75rem; margin-bottom: 1.15rem; flex-wrap: nowrap; overflow-x: auto;">
+                                    <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: nowrap; flex-shrink: 0;">
+                                        <!-- Year Filter -->
+                                        <div style="display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                            <label for="trendFilterYear" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Year:</label>
+                                            <select id="trendFilterYear" onchange="handleTrendFilterChange('year')" style="height: 31px; font-size: 0.8rem; font-weight: 600; color: #0f172a; padding: 0 1.6rem 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #ffffff url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;) no-repeat right 0.55rem center; appearance: none; -webkit-appearance: none; cursor: pointer; outline: none; transition: border-color 0.15s ease;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="all">All Years</option>
+                                                @foreach($availableYears as $yr)
+                                                    <option value="{{ $yr }}" {{ $yr == '2026' ? 'selected' : '' }}>{{ $yr }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Month Filter -->
+                                        <div style="display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                            <label for="trendFilterMonth" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Month:</label>
+                                            <select id="trendFilterMonth" onchange="handleTrendFilterChange('month')" style="height: 31px; font-size: 0.8rem; font-weight: 600; color: #0f172a; padding: 0 1.6rem 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #ffffff url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;) no-repeat right 0.55rem center; appearance: none; -webkit-appearance: none; cursor: pointer; outline: none; transition: border-color 0.15s ease;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="all">All Months</option>
+                                                @foreach($availableMonths as $mo)
+                                                    <option value="{{ $mo->month }}">{{ $mo->label }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Date Filter -->
+                                        <div style="display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                            <label for="trendFilterDateSelect" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Date:</label>
+                                            <select id="trendFilterDateSelect" onchange="handleTrendFilterChange('dateselect')" style="height: 31px; font-size: 0.8rem; font-weight: 600; color: #0f172a; padding: 0 1.6rem 0 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #ffffff url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;) no-repeat right 0.55rem center; appearance: none; -webkit-appearance: none; cursor: pointer; outline: none; transition: border-color 0.15s ease;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="all">All Dates</option>
+                                                @foreach($leadsByDate->reverse() as $dItem)
+                                                    <option value="{{ $dItem->enquirydate }}">{{ $dItem->short_date }} ({{ number_format($dItem->count) }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reset Button -->
+                                    <div style="flex-shrink: 0;">
+                                        <button type="button" onclick="resetTrendFilters()" style="height: 31px; font-size: 0.76rem; font-weight: 700; color: #475569; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 0.8rem; cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);" onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#94a3b8'" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1'">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                                <path d="M3 3v5h5"></path>
+                                            </svg>
+                                            <span>Reset</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="kpiLeadsTrendChart"></canvas>
                                 </div>
                             </div>
 
-                            <!-- Chart 2: Fee Clearance Health (Donut / Doughnut Chart + Clear Metrics) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
-                                    <div>
-                                        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Payment Clearance Status</div>
-                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Stage 1 application fee verification ratio</div>
-                                    </div>
-                                    <span style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #d1fae5;">Fee Health</span>
+                            <!-- Card 2: Leads Ingestion Source Breakdown (Clean, Minimal & Professional) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Leads Ingestion Source Breakdown</div>
+                                    <span style="font-size: 0.74rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 0.25rem 0.75rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace;">
+                                        {{ number_format($totalRawLeads) }} Total Leads
+                                    </span>
                                 </div>
 
-                                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.25rem; align-items: center; flex-grow: 1;" id="leadsPaymentContainer">
-                                    <!-- Donut Chart with Center Text -->
-                                    <div style="position: relative; width: 175px; height: 175px; margin: 0 auto;">
-                                        <canvas id="leadsPaymentChart"></canvas>
-                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                                            <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                            <div style="font-size: 0.7rem; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px;">Cleared</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- High-Visibility Clear Metric Cards -->
-                                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.04em;">Fee Paid</span>
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 1px 7px; border-radius: 4px;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</span>
-                                            </div>
-                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
-                                                {{ $kpiStage1Paid }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
-                                            </div>
-                                            <div style="font-size: 0.72rem; color: #16a34a; font-weight: 500;">Verified via Payment Gateway</div>
-                                        </div>
-
-                                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Fee Due</span>
-                                                <span style="font-size: 0.75rem; font-weight: 700; color: #d97706; background: #fef3c7; padding: 1px 7px; border-radius: 4px;">{{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%</span>
-                                            </div>
-                                            <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0;">
-                                                {{ max(0, $kpiTotal - $kpiStage1Paid) }} <span style="font-size: 0.8rem; font-weight: 500; color: #475569;">Students</span>
-                                            </div>
-                                            <div style="font-size: 0.72rem; color: #d97706; font-weight: 500;">Pending Intake Clearance</div>
-                                        </div>
-                                    </div>
+                                <!-- Proportional Distribution Meter Bar -->
+                                <div style="height: 8px; width: 100%; background: #f1f5f9; border-radius: 5px; overflow: hidden; display: flex; border: 1px solid #e2e8f0; margin-bottom: 1.25rem;">
+                                    @foreach($leadsBySource as $sIdx => $lSource)
+                                        @php
+                                            $sPct = $totalRawLeads > 0 ? round(($lSource->count / $totalRawLeads) * 100, 2) : 0;
+                                            $barColors = ['#2563eb', '#10b981', '#7c3aed', '#f59e0b'];
+                                            $bColor = $barColors[$sIdx % count($barColors)];
+                                            $minWidth = ($lSource->count > 0 && $sPct < 1) ? '6px' : ($sPct . '%');
+                                        @endphp
+                                        <div style="width: {{ $sPct }}%; min-width: {{ $minWidth }}; background: {{ $bColor }};" title="{{ $lSource->source_name }}: {{ number_format($lSource->count) }} ({{ $sPct }}%)"></div>
+                                    @endforeach
                                 </div>
 
-                                <!-- Segmented Clearance Bar -->
-                                <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: #64748b; margin-bottom: 0.35rem;">
-                                        <span>Paid: {{ $kpiStage1Paid }} ({{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%)</span>
-                                        <span>Pending: {{ max(0, $kpiTotal - $kpiStage1Paid) }} ({{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%)</span>
-                                    </div>
-                                    <div style="width: 100%; height: 8px; background: #fef3c7; border-radius: 999px; overflow: hidden; display: flex;">
-                                        <div style="width: {{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%; height: 100%; background: #10b981; border-radius: 999px 0 0 999px;"></div>
-                                        <div style="width: {{ round((max(0, $kpiTotal - $kpiStage1Paid) / $kpiTotal) * 100, 1) }}%; height: 100%; background: #f59e0b; border-radius: 0 999px 999px 0;"></div>
-                                    </div>
+                                <!-- Clean, Minimal Source Rows -->
+                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                    @foreach($leadsBySource as $sIdx => $lSource)
+                                        @php
+                                            $sPct = $totalRawLeads > 0 ? round(($lSource->count / $totalRawLeads) * 100, 2) : 0;
+                                            $sourceThemes = [
+                                                ['dot' => '#2563eb', 'text' => '#1d4ed8', 'tagBg' => '#eff6ff', 'tagBorder' => '#bfdbfe', 'numColor' => '#0f172a'],
+                                                ['dot' => '#10b981', 'text' => '#047857', 'tagBg' => '#ecfdf5', 'tagBorder' => '#a7f3d0', 'numColor' => '#059669'],
+                                                ['dot' => '#7c3aed', 'text' => '#6d28d9', 'tagBg' => '#f5f3ff', 'tagBorder' => '#ddd6fe', 'numColor' => '#7c3aed'],
+                                                ['dot' => '#f59e0b', 'text' => '#92400e', 'tagBg' => '#fffbeb', 'tagBorder' => '#fde68a', 'numColor' => '#d97706'],
+                                            ];
+                                            $st = $sourceThemes[$sIdx % count($sourceThemes)];
+                                        @endphp
+                                        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.85rem 1.15rem; transition: all 0.15s ease;">
+                                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {{ $st['dot'] }};"></span>
+                                                <span style="font-size: 0.88rem; font-weight: 700; color: #1e293b;">{{ $lSource->source_name }}</span>
+                                                <span style="font-size: 0.72rem; font-weight: 700; color: {{ $st['text'] }}; background: {{ $st['tagBg'] }}; border: 1px solid {{ $st['tagBorder'] }}; padding: 0.15rem 0.55rem; border-radius: 12px; font-family: 'JetBrains Mono', monospace;">
+                                                    {{ $sPct }}%
+                                                </span>
+                                            </div>
+                                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 800; color: {{ $st['numColor'] }};">
+                                                {{ number_format($lSource->count) }}
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 3. BRANCH & DISCIPLINE INTAKE DEMAND (EXECUTIVE CARDS GRID) -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.75rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.15rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                        <!-- 3. RAW LEADS ACQUISITION DIRECTORY TABLE WITH CSV EXPORT -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
                                 <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Branch &amp; Discipline Intake Demand</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Applicant interest and distribution across academic programs</div>
-                                </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #7c3aed; background: #f5f3ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #ede9fe;">Top 6 Disciplines</span>
-                            </div>
-
-                            @php
-                                $branchMetaMapLeads = [
-                                    'Information Technology' => ['icon' => '💻', 'tag' => 'Computing', 'color' => '#2563eb', 'bg' => '#eff6ff'],
-                                    'Computer Science & Engineering' => ['icon' => '🖥️', 'tag' => 'Core CSE', 'color' => '#0284c7', 'bg' => '#f0f9ff'],
-                                    'CSE - Artificial Intelligence & Machine Learning' => ['icon' => '🤖', 'tag' => 'AI & ML', 'color' => '#7c3aed', 'bg' => '#f5f3ff'],
-                                    'CSE - AI & ML' => ['icon' => '🤖', 'tag' => 'AI & ML', 'color' => '#7c3aed', 'bg' => '#f5f3ff'],
-                                    'Electronics & Communication Engineering' => ['icon' => '📡', 'tag' => 'ECE', 'color' => '#0891b2', 'bg' => '#ecfeff'],
-                                    'Biotechnology' => ['icon' => '🧬', 'tag' => 'BioTech', 'color' => '#059669', 'bg' => '#ecfdf5'],
-                                    'Mechanical Engineering' => ['icon' => '⚙️', 'tag' => 'Mechanical', 'color' => '#ea580c', 'bg' => '#fff7ed'],
-                                    'Civil Engineering' => ['icon' => '🏗️', 'tag' => 'Civil', 'color' => '#d97706', 'bg' => '#fffbeb'],
-                                ];
-                                $leadRank = 1;
-                            @endphp
-
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-                                @foreach($kpiBranchDistribution as $bName => $bCount)
-                                    @php
-                                        $bPct = round(($bCount / $kpiTotal) * 100, 1);
-                                        $meta = $branchMetaMapLeads[$bName] ?? ['icon' => '🎓', 'tag' => 'Engineering', 'color' => '#475569', 'bg' => '#f8fafc'];
-                                    @endphp
-                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.1rem 1.15rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                <div style="width: 32px; height: 32px; border-radius: 8px; background: {{ $meta['bg'] }}; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
-                                                    {{ $meta['icon'] }}
-                                                </div>
-                                                <span style="font-size: 0.7rem; font-weight: 700; color: {{ $meta['color'] }}; background: {{ $meta['bg'] }}; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
-                                                    {{ $meta['tag'] }}
-                                                </span>
-                                            </div>
-                                            <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; background: #f8fafc; border: 1px solid #f1f5f9; padding: 2px 7px; border-radius: 6px;">
-                                                #{{ $leadRank++ }}
-                                            </span>
-                                        </div>
-
-                                        <div>
-                                            <div style="font-size: 0.9rem; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 0.35rem;" title="{{ $bName }}">{{ $bName }}</div>
-                                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                                <span style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">
-                                                    {{ $bCount }} <span style="font-size: 0.72rem; font-weight: 600; color: #64748b;">applicants</span>
-                                                </span>
-                                                <span style="font-size: 0.8rem; font-weight: 700; color: {{ $meta['color'] }};">
-                                                    {{ $bPct }}%
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-                                            <div style="width: {{ min(100, $bPct * 2) }}%; height: 100%; background: {{ $meta['color'] }}; border-radius: 4px;"></div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <!-- 4. DETAILED SEARCHABLE CANDIDATE INTAKE RECORDS TABLE -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                                <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Detailed Candidate Intake Records</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Live searchable directory of applicant milestones and fee clearance</div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Raw Leads Acquisition Directory</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Genuine candidate inquiries captured in PostgreSQL database</div>
                                 </div>
                                 <div style="position: relative;">
-                                    <input type="text" id="leadsSearchInput" placeholder="Search by student name, application no, branch..." onkeyup="filterLeadsTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 300px; outline: none; background: #ffffff;">
+                                    <input type="text" id="leadsSearchInput" placeholder="Search phone, status, counselor..." onkeyup="filterLeadsTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 280px; outline: none; background: #ffffff;">
                                     <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -3710,108 +3592,67 @@
                                 <table class="crm-table" id="leadsTable">
                                     <thead>
                                         <tr>
-                                            <th>Application #</th>
-                                            <th>Student Name</th>
-                                            <th>Branch / Program</th>
-                                            <th>Registration</th>
-                                            <th>Payment (Stage 1)</th>
-                                            <th>Personal (Stage 2)</th>
-                                            <th>Academic (Stage 3)</th>
-                                            <th>Progress</th>
+                                            <th>#</th>
+                                            <th>Lead Phone Number</th>
+                                            <th>Inflow Date</th>
+                                            <th>Lead Status</th>
+                                            <th>Allocation Status</th>
+                                            <th>Assigned Counselor</th>
+                                            <th>Ingest Mode</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Prompt row shown by default when search input is empty -->
-                                        <tr id="leadsSearchPromptRow">
-                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
-                                                <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">Type in the search box above to view student progress</div>
-                                            </td>
-                                        </tr>
-                                        <!-- Empty match state when search yields zero rows -->
-                                        <tr id="leadsNoResultsRow" style="display: none;">
-                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">❌</div>
-                                                <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student records found</div>
-                                            </td>
-                                        </tr>
-                                        @foreach($allStudents as $student)
+                                        @forelse($rawLeadsList as $index => $rLead)
                                             @php
-                                                $sAppNo = (string)($student->applinano ?? $student->application_no ?? 'N/A');
-                                                $sName = $student->name ?? $student->student_name ?? 'Candidate';
-                                                $sBranch = $student->branch?->branch_long_name ?? $student->branch?->branch_short_name ?? $student->program?->program_long_name ?? 'B.Tech';
-                                                
-                                                $s1 = strtolower(trim((string)($student->stage1 ?? '')));
-                                                $s2 = strtolower(trim((string)($student->stage2 ?? '')));
-                                                $s3 = strtolower(trim((string)($student->stage3 ?? '')));
-                                                
-                                                // Genuine fee payment check: status 'paid' or verified in finance records
-                                                $isS1 = ($s1 === 'paid') || (isset($paidAppNos) && $paidAppNos->contains($sAppNo));
-                                                $isS2 = in_array($s2, ['completed', 'approved', 'done'], true);
-                                                $isS3 = in_array($s3, ['completed', 'approved', 'done'], true);
-                                                
-                                                $completedSteps = 1 + ($isS1 ? 1 : 0) + ($isS2 ? 1 : 0) + ($isS3 ? 1 : 0);
-                                                $progressPct = round(($completedSteps / 5) * 100);
+                                                $isAllotted = ($rLead->empcode && $rLead->empcode !== '0');
                                             @endphp
-                                            <tr class="leads-row" style="display: none;">
-                                                <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
+                                            <tr class="leads-row" data-enquirydate="{{ $rLead->enquirydate }}">
+                                                <td style="color: #64748b; font-weight: 600;">{{ $index + 1 }}</td>
                                                 <td>
-                                                    <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
-                                                    @if(!empty($student->phoneno ?? $student->mobile))
-                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
-                                                    @endif
+                                                    <span style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.86rem;">{{ $rLead->phoneno }}</span>
                                                 </td>
                                                 <td>
-                                                    <span style="font-size: 0.825rem; color: #475569; font-weight: 600;">{{ $sBranch }}</span>
+                                                    <div style="font-size: 0.8rem; color: #334155; font-weight: 600;">{{ $rLead->enquirydate ? date('d M Y', strtotime($rLead->enquirydate)) : 'N/A' }}</div>
                                                 </td>
                                                 <td>
-                                                    <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                        ✓ Done
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    @if($isS1)
-                                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            ✓ Paid
+                                                    @if($rLead->phnostatus === 'Registered')
+                                                        <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                                            Registered
                                                         </span>
                                                     @else
-                                                        <span class="badge-status badge-pending" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            Pending
+                                                        <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">
+                                                            New Lead
                                                         </span>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if($isS2)
-                                                        <span class="badge-status badge-paid" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            ✓ Done
+                                                    @if($isAllotted)
+                                                        <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                                            ✓ Allotted
                                                         </span>
                                                     @else
-                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
-                                                            Pending
+                                                        <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;">
+                                                            Unallocated Pool
                                                         </span>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if($isS3)
-                                                        <span class="badge-status badge-paid" style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
-                                                            ✓ Verified
-                                                        </span>
+                                                    @if($isAllotted)
+                                                        <div style="font-weight: 600; color: #1e293b;">Ganesh kumar</div>
+                                                        <div style="font-size: 0.72rem; color: #0284c7; font-weight: 600;">Emp: {{ $rLead->empcode }}</div>
                                                     @else
-                                                        <span class="badge-status badge-pending" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600;">
-                                                            Pending
-                                                        </span>
+                                                        <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Pending Assignment</span>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                        <div style="flex-grow: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; width: 60px;">
-                                                            <div style="height: 100%; width: {{ $progressPct }}%; background: {{ $progressPct >= 80 ? '#10b981' : ($progressPct >= 40 ? '#3b82f6' : '#f59e0b') }};"></div>
-                                                        </div>
-                                                        <span style="font-size: 0.72rem; font-weight: 700; color: #475569;">{{ $progressPct }}%</span>
-                                                    </div>
+                                                    <span style="font-size: 0.8rem; font-weight: 600; color: #334155;">Bulk Upload (02598)</span>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" style="text-align: center; padding: 2rem; color: #64748b;">No raw leads found.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -3820,177 +3661,241 @@
                 </div>
 
                 <script>
+                let leadsTrendChartInstance = null;
+                const allLeadsDateData = {!! json_encode($leadsByDate) !!};
+
                 document.addEventListener('DOMContentLoaded', function() {
-                    initLeadsVisualCharts();
+                    initLeadsKpiCharts();
                 });
-                if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                    setTimeout(initLeadsVisualCharts, 50);
+
+                function initLeadsKpiCharts() {
+                    if (typeof Chart === 'undefined') return;
+
+                    // 1. Lead Inflow Trend Chart
+                    const trendCtx = document.getElementById('kpiLeadsTrendChart');
+                    if (trendCtx && !leadsTrendChartInstance) {
+                        const initialLabels = allLeadsDateData.map(d => d.short_date);
+                        const initialCounts = allLeadsDateData.map(d => Number(d.count));
+
+                        leadsTrendChartInstance = new Chart(trendCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: initialLabels.length > 0 ? initialLabels : ['No Data'],
+                                datasets: [{
+                                    data: initialCounts.length > 0 ? initialCounts : [0],
+                                    backgroundColor: '#2563eb',
+                                    borderRadius: 8,
+                                    borderSkipped: false,
+                                    maxBarThickness: 42
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: '#0f172a',
+                                        padding: 10,
+                                        titleFont: { size: 12, weight: 'bold' },
+                                        bodyFont: { size: 12 },
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: function(context) {
+                                                return ` ${Number(context.raw).toLocaleString()} Inflow Enquiries`;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: { grid: { display: false }, ticks: { font: { weight: '600', size: 11 }, color: '#334155' } },
+                                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, color: '#64748b' } }
+                                }
+                            }
+                        });
+                    }
                 }
 
-                function initLeadsVisualCharts() {
-                    const funnelLabels = [
-                        ['Registration'],
-                        ['Fee', 'Payment'],
-                        ['Personal', 'Details'],
-                        ['Academic', 'Records'],
-                        ['Application', 'Form'],
-                        ['Seat', 'Allotment']
-                    ];
-                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
-                    const totalApplicants = {{ (int)$kpiTotal }};
-                    const paidCount = {{ (int)$kpiStage1Paid }};
-                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+                function handleTrendFilterChange(source) {
+                    const yearSelect = document.getElementById('trendFilterYear');
+                    const monthSelect = document.getElementById('trendFilterMonth');
+                    const dateSelect = document.getElementById('trendFilterDateSelect');
+                    const badge = document.getElementById('kpiTrendPeriodBadge');
 
-                    if (typeof Chart !== 'undefined') {
-                        // 1. Funnel Vertical Bar Chart
-                        const funnelCanvas = document.getElementById('leadsFunnelChart');
-                        if (funnelCanvas && !funnelCanvas.dataset.chartInit) {
-                            funnelCanvas.dataset.chartInit = 'true';
-                            new Chart(funnelCanvas, {
-                                type: 'bar',
-                                data: {
-                                    labels: funnelLabels,
-                                    datasets: [{
-                                        label: 'Applicants',
-                                        data: funnelCounts,
-                                        backgroundColor: [
-                                            'rgba(2, 132, 199, 0.85)',
-                                            'rgba(16, 185, 129, 0.85)',
-                                            'rgba(37, 99, 235, 0.85)',
-                                            'rgba(124, 58, 237, 0.85)',
-                                            'rgba(234, 88, 12, 0.85)',
-                                            'rgba(8, 145, 178, 0.85)'
-                                        ],
-                                        borderColor: [
-                                            '#0284c7',
-                                            '#10b981',
-                                            '#2563eb',
-                                            '#7c3aed',
-                                            '#ea580c',
-                                            '#0891b2'
-                                        ],
-                                        borderWidth: 1.5,
-                                        borderRadius: 8,
-                                        borderSkipped: false,
-                                        maxBarThickness: 46
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            backgroundColor: '#0f172a',
-                                            padding: 10,
-                                            titleFont: { size: 12, weight: 'bold' },
-                                            bodyFont: { size: 12 },
-                                            cornerRadius: 8,
-                                            callbacks: {
-                                                title: function(context) {
-                                                    const fullNames = ['Registration', 'Fee Payment', 'Personal Details', 'Academic Records', 'Application Form', 'Seat Allotment'];
-                                                    const idx = context[0].dataIndex;
-                                                    return fullNames[idx] || '';
-                                                },
-                                                label: function(context) {
-                                                    const val = context.raw;
-                                                    const pct = totalApplicants > 0 ? ((val / totalApplicants) * 100).toFixed(1) : 0;
-                                                    return ` ${val} Applicants (${pct}%)`;
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            grid: { display: false },
-                                            ticks: {
-                                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 11 },
-                                                color: '#334155',
-                                                maxRotation: 0,
-                                                minRotation: 0,
-                                                autoSkip: false,
-                                                padding: 6
-                                            }
-                                        },
-                                        y: {
-                                            beginAtZero: true,
-                                            suggestedMax: 35,
-                                            grid: { color: '#f1f5f9' },
-                                            ticks: {
-                                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
-                                                color: '#64748b',
-                                                stepSize: 5
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }
+                    let selYear = yearSelect ? yearSelect.value : 'all';
+                    let selMonth = monthSelect ? monthSelect.value : 'all';
+                    let selDate = dateSelect ? dateSelect.value : 'all';
 
-                        // 2. Fee Clearance Donut Chart
-                        const paymentCanvas = document.getElementById('leadsPaymentChart');
-                        if (paymentCanvas && !paymentCanvas.dataset.chartInit) {
-                            paymentCanvas.dataset.chartInit = 'true';
-                            new Chart(paymentCanvas, {
-                                type: 'doughnut',
-                                data: {
-                                    labels: ['Fee Paid', 'Fee Due'],
-                                    datasets: [{
-                                        data: [paidCount, dueCount],
-                                        backgroundColor: ['#10b981', '#f59e0b'],
-                                        borderColor: '#ffffff',
-                                        borderWidth: 3,
-                                        hoverOffset: 3
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    cutout: '72%',
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: { enabled: false }
-                                    }
-                                }
-                            });
+                    if (source === 'month' || source === 'year') {
+                        // Clear specific date selection when changing year or month
+                        selDate = 'all';
+                        if (dateSelect) dateSelect.value = 'all';
+                        updateDateSelectOptions(selYear, selMonth);
+                    } else if (source === 'dateselect') {
+                        if (selDate !== 'all') {
+                            const parts = selDate.split('-');
+                            if (parts.length === 3) {
+                                selYear = parts[0];
+                                selMonth = parts[1];
+                                if (yearSelect && yearSelect.value !== selYear) yearSelect.value = selYear;
+                                if (monthSelect && monthSelect.value !== selMonth) monthSelect.value = selMonth;
+                            }
                         }
                     }
+
+                    // Filter dataset
+                    let filtered = allLeadsDateData.filter(d => {
+                        if (selDate !== 'all') {
+                            return d.enquirydate === selDate;
+                        }
+                        let match = true;
+                        if (selYear !== 'all' && d.year !== selYear) match = false;
+                        if (selMonth !== 'all' && d.month !== selMonth) match = false;
+                        return match;
+                    });
+
+                    // Update Chart
+                    if (leadsTrendChartInstance) {
+                        let labels = [];
+                        let counts = [];
+
+                        if (filtered.length === 0) {
+                            labels = ['No Inflow'];
+                            counts = [0];
+                        } else {
+                            labels = filtered.map(d => (selDate !== 'all' ? d.formatted_date : d.short_date));
+                            counts = filtered.map(d => Number(d.count));
+                        }
+
+                        leadsTrendChartInstance.data.labels = labels;
+                        leadsTrendChartInstance.data.datasets[0].data = counts;
+                        leadsTrendChartInstance.update();
+                    }
+
+                    // Update Live Summary Badge
+                    const totalCount = filtered.reduce((acc, curr) => acc + Number(curr.count), 0);
+                    if (badge) {
+                        if (selDate !== 'all') {
+                            badge.textContent = `${totalCount.toLocaleString()} Leads (${selDate})`;
+                        } else if (selMonth !== 'all') {
+                            const moName = monthSelect && monthSelect.selectedIndex >= 0 ? monthSelect.options[monthSelect.selectedIndex].text : '';
+                            badge.textContent = `${totalCount.toLocaleString()} Leads (${moName})`;
+                        } else if (selYear !== 'all') {
+                            badge.textContent = `${totalCount.toLocaleString()} Leads (${selYear})`;
+                        } else {
+                            badge.textContent = `${totalCount.toLocaleString()} Leads Total`;
+                        }
+                    }
+
+                    // Filter the Leads Directory table synchronously
+                    filterLeadsTable();
+                }
+
+                function updateDateSelectOptions(yr, mo) {
+                    const dateSelect = document.getElementById('trendFilterDateSelect');
+                    if (!dateSelect) return;
+
+                    let available = allLeadsDateData.filter(d => {
+                        let m = true;
+                        if (yr !== 'all' && d.year !== yr) m = false;
+                        if (mo !== 'all' && d.month !== mo) m = false;
+                        return m;
+                    });
+
+                    let html = '<option value="all">All Dates</option>';
+                    available.slice().reverse().forEach(d => {
+                        html += `<option value="${d.enquirydate}">${d.short_date} (${Number(d.count).toLocaleString()})</option>`;
+                    });
+                    dateSelect.innerHTML = html;
+                }
+
+                function resetTrendFilters() {
+                    const yearSelect = document.getElementById('trendFilterYear');
+                    const monthSelect = document.getElementById('trendFilterMonth');
+                    const dateSelect = document.getElementById('trendFilterDateSelect');
+
+                    if (yearSelect) yearSelect.value = 'all';
+                    if (monthSelect) monthSelect.value = 'all';
+                    if (dateSelect) dateSelect.value = 'all';
+
+                    updateDateSelectOptions('all', 'all');
+                    handleTrendFilterChange('reset');
                 }
 
                 function filterLeadsTable() {
                     const input = document.getElementById('leadsSearchInput');
-                    const filter = (input ? input.value : '').toLowerCase().trim();
+                    const textFilter = (input ? input.value : '').toLowerCase().trim();
+                    const yrFilter = document.getElementById('trendFilterYear') ? document.getElementById('trendFilterYear').value : 'all';
+                    const moFilter = document.getElementById('trendFilterMonth') ? document.getElementById('trendFilterMonth').value : 'all';
+                    const dtSelect = document.getElementById('trendFilterDateSelect') ? document.getElementById('trendFilterDateSelect').value : 'all';
+                    const activeDate = (dtSelect !== 'all') ? dtSelect : '';
+
                     const rows = document.querySelectorAll('#leadsTable tbody tr.leads-row');
-                    const promptRow = document.getElementById('leadsSearchPromptRow');
-                    const noResultsRow = document.getElementById('leadsNoResultsRow');
-
-                    if (!filter) {
-                        rows.forEach(row => row.style.display = 'none');
-                        if (promptRow) promptRow.style.display = '';
-                        if (noResultsRow) noResultsRow.style.display = 'none';
-                        return;
-                    }
-
-                    if (promptRow) promptRow.style.display = 'none';
-                    let visibleCount = 0;
-
                     rows.forEach(row => {
-                        const text = row.innerText.toLowerCase();
-                        if (text.includes(filter)) {
-                            row.style.display = '';
-                            visibleCount++;
+                        const rowDate = row.getAttribute('data-enquirydate') || '';
+                        let dateMatch = true;
+
+                        if (activeDate) {
+                            dateMatch = (rowDate === activeDate);
                         } else {
-                            row.style.display = 'none';
+                            if (yrFilter !== 'all' && !rowDate.startsWith(yrFilter)) {
+                                dateMatch = false;
+                            }
+                            if (moFilter !== 'all') {
+                                const parts = rowDate.split('-');
+                                if (parts.length >= 2 && parts[1] !== moFilter) {
+                                    dateMatch = false;
+                                }
+                            }
+                        }
+
+                        const text = row.innerText.toLowerCase();
+                        const textMatch = !textFilter || text.includes(textFilter);
+
+                        row.style.display = (dateMatch && textMatch) ? '' : 'none';
+                    });
+                }
+
+                function exportLeadsKpiCsv() {
+                    const headers = ['#', 'Lead Phone Number', 'Inflow Date', 'Lead Status', 'Allocation Status', 'Assigned Counselor', 'Ingest Mode'];
+                    const rows = [];
+                    document.querySelectorAll('#leadsTable tbody tr.leads-row').forEach((row, i) => {
+                        if (row.style.display !== 'none') {
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 7) {
+                                const phone = cells[1].innerText.replace(/\n.*/, '').trim();
+                                const date = cells[2].innerText.trim();
+                                const status = cells[3].innerText.trim();
+                                const alloc = cells[4].innerText.trim();
+                                const counselor = cells[5].innerText.replace(/\n.*/, '').trim();
+                                const source = cells[6].innerText.trim();
+                                rows.push([i + 1, phone, date, status, alloc, counselor, source]);
+                            }
                         }
                     });
-
-                    if (noResultsRow) {
-                        noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
-                    }
+                    downloadCsv('Leads_KPI_Report_2026.csv', headers, rows);
                 }
+
+                function downloadCsv(filename, headers, rows) {
+                    let csvContent = "\uFEFF";
+                    csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\r\n";
+                    rows.forEach(row => {
+                        csvContent += row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(",") + "\r\n";
+                    });
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
                 </script>
 
-            @elseif(($activeTab ?? '') === 'overview')
+@elseif(($activeTab ?? '') === 'overview')
                 <!-- TAB: OVERVIEW DASHBOARD (HIDDEN BY DEFAULT) -->
                 <div class="content-card">
                     <div class="card-header-bar">
