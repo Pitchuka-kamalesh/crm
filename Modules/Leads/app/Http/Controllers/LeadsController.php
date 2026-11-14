@@ -48,6 +48,15 @@ class LeadsController extends Controller
         $programFilter = $request->input('program', 'all');
 
         $totalLeadsCount = Lead::count();
+        $normalLeadsCount = 0;
+        try {
+            $normalLeadsCount = Lead::where(function ($q) {
+                $q->whereIn('log_userid', ['PORTAL', 'SELF_REGISTER', 'AUTOSAVE', 'MANUAL'])
+                  ->orWhereNotNull('applino')
+                  ->orWhere('phnostatus', '!=', 'New Lead');
+            })->count();
+        } catch (\Throwable $e) {}
+        $bulkLeadsCount = max(0, $totalLeadsCount - $normalLeadsCount);
         $maxPageLimit = max(100, $totalLeadsCount);
 
         $perPage = (int) $request->input('per_page', 25);
@@ -390,6 +399,8 @@ class LeadsController extends Controller
             'perPage',
             'maxPageLimit',
             'totalLeadsCount',
+            'bulkLeadsCount',
+            'normalLeadsCount',
             'studentMap',
             'phoneStudentMap',
             'leadModelMap',
