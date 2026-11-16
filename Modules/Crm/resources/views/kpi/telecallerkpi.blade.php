@@ -169,30 +169,30 @@
                 </div>
 
                 <div style="padding: 1.5rem;">
-                    <!-- 1. TOP EXECUTIVE METRIC CARDS (100% GENUINE DATABASE DATA) -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                    <!-- 1. TOP EXECUTIVE METRIC CARDS (COMPACT SINGLE-ROW BOXES) -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem;">
                         <!-- Card 1: Allotted Leads -->
-                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Total Allotted Leads</div>
-                            <div id="kpiCardAllottedValue" style="font-size: 1.95rem; font-weight: 800; color: #0f172a; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalTelecallerLeads) }}</div>
+                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Total Allotted Leads</span>
+                            <strong id="kpiCardAllottedValue" style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalTelecallerLeads) }}</strong>
                         </div>
 
                         <!-- Card 2: Calls Logged -->
-                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Call Tasks Logged</div>
-                            <div id="kpiCardTasksValue" style="font-size: 1.95rem; font-weight: 800; color: #2563eb; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</div>
+                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Call Tasks Logged</span>
+                            <strong id="kpiCardTasksValue" style="font-size: 1.35rem; font-weight: 800; color: #2563eb; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</strong>
                         </div>
 
                         <!-- Card 3: Leads Contacted -->
-                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Leads Contacted</div>
-                            <div id="kpiCardContactedValue" style="font-size: 1.95rem; font-weight: 800; color: #059669; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleDistinctContacted) }}</div>
+                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Leads Contacted</span>
+                            <strong id="kpiCardContactedValue" style="font-size: 1.35rem; font-weight: 800; color: #059669; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleDistinctContacted) }}</strong>
                         </div>
 
                         <!-- Card 4: Pending Outreach -->
-                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Pending Outreach</div>
-                            <div id="kpiCardPendingValue" style="font-size: 1.95rem; font-weight: 800; color: #d97706; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($telePendingCount) }}</div>
+                        <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Pending Outreach</span>
+                            <strong id="kpiCardPendingValue" style="font-size: 1.35rem; font-weight: 800; color: #d97706; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($telePendingCount) }}</strong>
                         </div>
                     </div>
 
