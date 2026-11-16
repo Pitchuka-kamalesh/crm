@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
     <!-- Shared Enterprise CRM Styles -->
-    <link rel="stylesheet" href="/css/crm-dashboard.css">
+    <link rel="stylesheet" href="/css/crm-dashboard.css?v={{ file_exists(public_path('css/crm-dashboard.css')) ? filemtime(public_path('css/crm-dashboard.css')) : time() }}">
 
     <!-- Chart.js for High-Impact Analytics -->
     <script src="/js/chart.min.js"></script>
@@ -1914,10 +1914,10 @@
                                 <div style="margin-bottom: 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code:</span>
-                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: V-SAT-0002</span>
+                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: Dynamic</span>
                                     </div>
-                                    <div id="modalCouponPreview" style="font-size: 1.18rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
-                                        27000005P1
+                                    <div id="modalCouponPreview" style="font-size: 1.15rem; font-weight: 800; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+                                        Enter Application Number or CRM ID
                                     </div>
                                     <div style="font-size: 0.70rem; color: #60a5fa; margin-top: 2px;">
                                         Generated dynamically with branch-wise CRM ID (B.Tech &rarr; V-SAT, M.Tech &rarr; MTECH, PhD &rarr; PHD).
@@ -1978,7 +1978,7 @@
 
                     function formatPersonalCouponPreview(val) {
                         val = (val || '').trim();
-                        if (!val) return '--------';
+                        if (!val) return 'Enter Application Number or CRM ID';
                         if (candidateCrmMap[val]) {
                             return candidateCrmMap[val].code;
                         }
@@ -2019,7 +2019,10 @@
                         const candBadge = document.getElementById('modalCandidateBadge');
 
                         let derivedCode = formatPersonalCouponPreview(val);
-                        if (preview) preview.textContent = derivedCode;
+                        if (preview) {
+                            preview.textContent = derivedCode;
+                            preview.style.color = (val && derivedCode !== 'Enter Application Number or CRM ID') ? '#2563eb' : '#94a3b8';
+                        }
 
                         const matched = candidateCrmMap[val];
                         if (matched) {
@@ -2029,12 +2032,12 @@
                                 candBadge.innerHTML = `👤 <strong>${matched.name}</strong> • ${matched.prog} • App: <code>${matched.applino}</code>`;
                             }
                         } else {
-                            if (crmTag) crmTag.textContent = val.includes('-') ? `CRM ID: ${val}` : 'CRM ID: V-SAT-XXXX';
+                            if (crmTag) crmTag.textContent = val.includes('-') ? `CRM ID: ${val}` : 'CRM ID: Dynamic';
                             if (candBadge) candBadge.style.display = 'none';
                         }
                     }
 
-                    @if(request()->is('*percoupongen*') || request()->has('generate') || request()->has('openModal'))
+                    @if(request()->filled('applino') || request()->has('openModal'))
                     document.addEventListener('DOMContentLoaded', function() {
                         openPersonalCouponModal('{{ request('applino', '') }}');
                     });

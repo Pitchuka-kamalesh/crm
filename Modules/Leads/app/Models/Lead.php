@@ -53,13 +53,17 @@ class Lead extends Model
 
     public function scopeAllocated(Builder $query): Builder
     {
-        return $query->whereNotNull('empcode')->where('empcode', '!=', '');
+        return $query->whereNotNull('empcode')
+            ->where('empcode', '!=', '')
+            ->where('empcode', '!=', '0');
     }
 
     public function scopeUnallocated(Builder $query): Builder
     {
         return $query->where(function ($q) {
-            $q->whereNull('empcode')->orWhere('empcode', '');
+            $q->whereNull('empcode')
+              ->orWhere('empcode', '')
+              ->orWhere('empcode', '0');
         });
     }
 

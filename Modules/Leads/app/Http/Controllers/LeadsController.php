@@ -12,7 +12,8 @@ use Modules\Leads\Models\TelecallerLeadTask;
 use Modules\Auth\Models\Employee;
 use Modules\Auth\Models\MenuAccessRole;
 use Modules\Auth\Models\Role;
-use App\Common\Services\RoleService;
+use Modules\Auth\Services\RoleService;
+use Modules\Leads\Services\TelecallerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -260,7 +261,7 @@ class LeadsController extends Controller
         }
 
         // Metrics from TelecallerService
-        $metrics = \App\Services\TelecallerService::getMetrics();
+        $metrics = TelecallerService::getMetrics();
         $totalAllotted = $metrics['total_allocated'];
         $unallocatedCount = $metrics['unallocated'];
         $totalTasksCount = $metrics['total_tasks'];
@@ -293,7 +294,7 @@ class LeadsController extends Controller
                     $lead->applino ?? null,
                 ];
             })->all();
-            $stageEligibilityMap = \App\Services\TelecallerService::getStageEligibilityMap($pageApplinos);
+            $stageEligibilityMap = TelecallerService::getStageEligibilityMap($pageApplinos);
 
             try {
                 $pagePhones = $leads->getCollection()
@@ -351,7 +352,7 @@ class LeadsController extends Controller
         }
 
         // Telecallers list (Role 4 in roles_assigned / employees)
-        $telecallers = \App\Services\TelecallerService::getTelecallers();
+        $telecallers = TelecallerService::getTelecallers();
         $availablePrograms = Program::orderBy('program_short_name')->get();
 
         // Available roles for switcher (strictly user's assigned roles from DB)
@@ -450,7 +451,7 @@ class LeadsController extends Controller
 
         $empCode = trim((string) $request->input('empcode', ''));
         if ($empCode !== '') {
-            \App\Services\TelecallerService::allocateLeads([
+            TelecallerService::allocateLeads([
                 'empcode' => $empCode,
                 'allot_mode' => 'single',
                 'applino' => $student->applinano,
@@ -539,7 +540,7 @@ class LeadsController extends Controller
         $validationAppli = ($student?->applinano && $student->applinano !== '0')
             ? (string) $student->applinano
             : (string) $tApplino;
-        $allowedStages = \App\Services\TelecallerService::getAllowedStagesForLead($validationAppli);
+        $allowedStages = TelecallerService::getAllowedStagesForLead($validationAppli);
         if (array_key_exists($customStageName, $allowedStages) && !$allowedStages[$customStageName]) {
             return response()->json([
                 'success' => false,
@@ -549,7 +550,7 @@ class LeadsController extends Controller
 
         // Record telecaller stage action strictly in crm.telecaller_leads_tasks
         try {
-            $taskRes = \App\Services\TelecallerService::logLeadTask([
+            $taskRes = TelecallerService::logLeadTask([
                 'applino' => $tApplino,
                 'phoneno' => $tPhoneno,
                 'empcode' => $tEmpcode,
@@ -631,7 +632,7 @@ class LeadsController extends Controller
 
         // Record status update action strictly in crm.telecaller_leads_tasks
         try {
-            $taskRes = \App\Services\TelecallerService::logLeadTask([
+            $taskRes = TelecallerService::logLeadTask([
                 'applino' => $tApplino,
                 'phoneno' => $tPhoneno,
                 'empcode' => $tEmpcode,
@@ -666,7 +667,7 @@ class LeadsController extends Controller
      */
     public function allocate(Request $request)
     {
-        $res = \App\Services\TelecallerService::allocateLeads([
+        $res = TelecallerService::allocateLeads([
             'empcode' => $request->input('empcode'),
             'crmid' => auth()->user()?->usercode ?? 'SYSTEM',
             'allot_mode' => $request->input('allot_mode', 'selected'),
@@ -693,7 +694,7 @@ class LeadsController extends Controller
      */
     public function logTask(Request $request)
     {
-        $res = \App\Services\TelecallerService::logLeadTask([
+        $res = TelecallerService::logLeadTask([
             'applino' => $request->input('applino'),
             'phoneno' => $request->input('phoneno'),
             'empcode' => $request->input('empcode') ?: (auth()->user()?->usercode ?? ''),

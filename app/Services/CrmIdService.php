@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\CrmIdService as BaseCrmIdService;
+use Modules\Crm\Services\CrmIdService as BaseCrmIdService;
 
 /**
- * Compatibility alias for App\Common\Services\CrmIdService
+ * Compatibility alias for Modules\Crm\Services\CrmIdService
  */
 class CrmIdService extends BaseCrmIdService
 {

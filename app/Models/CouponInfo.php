@@ -11,31 +11,7 @@ class CouponInfo extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
 
-    protected $fillable = [
-        'id',
-        'couponsno',
-        'admyear',
-        'campuscode',
-        'coupontype',
-        'couponname',
-        'applino',
-        'crmid',
-        'coupcount',
-        'coucharcount',
-        'couponcodestart',
-        'currentcouponcode',
-        'discountamount',
-        'discount',
-        'coupcurrcount',
-        'coupstatus',
-        'usercode',
-        'user_ip',
-        'log_userid',
-        'log_ipaddress',
-        'log_timestamp',
-        'created_at',
-        'updated_at',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'id' => 'integer',

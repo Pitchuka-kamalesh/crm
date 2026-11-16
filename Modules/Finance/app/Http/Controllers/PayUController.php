@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\CrmStudentRegistration;
 use App\Models\PayDetail;
 use App\Models\ReceiptDetail;
-use App\Services\CouponService;
-use App\Services\PayUService;
+use Modules\Finance\Services\CouponService;
+use Modules\Finance\Services\PayUService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -137,9 +137,12 @@ class PayUController extends Controller
             Log::warning('[PayU] Pre-record insert skipped: ' . $e->getMessage());
         }
 
+        $isProduction = $this->payuService->isProduction();
+
         return view('payments.payu_checkout', compact(
             'params',
             'gatewayUrl',
+            'isProduction',
             'applino',
             'name',
             'email',
@@ -187,9 +190,9 @@ class PayUController extends Controller
                 txnid: $txnid ?: ('TXN' . date('ymdHis') . rand(1000, 9999)),
                 mihpayid: $mihpayid,
                 amount: $amount,
-                payType: 'PayU (' . ($mode ?: 'Online') . ')',
-                receiptPayType: 'PayU',
-                txnRemark: 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | PayU ID: ' . $mihpayid,
+                payType: 'Online (' . ($mode ?: 'Direct') . ')',
+                receiptPayType: 'Online',
+                txnRemark: 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | Ref ID: ' . $mihpayid,
                 breakdown: $breakdown,
                 defCoupon: $usedDefCoupon,
                 perCoupon: $usedPerCoupon
@@ -202,7 +205,7 @@ class PayUController extends Controller
                 : "";
 
             return redirect()->route('payu.receipt')
-                ->with('status', "✓ Payment Successful! Net Paid: ₹" . number_format($amount) . " confirmed via PayU (ID: {$mihpayid}){$discountMsg}. Receipt: {$receiptNo}.");
+                ->with('status', "✓ Payment Successful! Net Paid: ₹" . number_format($amount) . " confirmed{$discountMsg}. Receipt: {$receiptNo}.");
         } else {
             // Unsuccessful or cancelled payment
             try {

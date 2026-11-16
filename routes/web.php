@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-require_once base_path('Modules/Auth/routes/web.php');
-require_once base_path('Modules/Crm/routes/web.php');
-require_once base_path('Modules/Finance/routes/web.php');
-require_once base_path('Modules/Leads/routes/web.php');
-require_once base_path('Modules/Dashboards/routes/web.php');
-require_once base_path('Modules/Sms/routes/web.php');
+require base_path('Modules/Auth/routes/web.php');
+require base_path('Modules/Crm/routes/web.php');
+require base_path('Modules/Finance/routes/web.php');
+require base_path('Modules/Leads/routes/web.php');
+require base_path('Modules/Dashboards/routes/web.php');
+require base_path('Modules/Sms/routes/web.php');

@@ -15,7 +15,7 @@ class StudentMobileLoginTest extends TestCase
         parent::setUp();
         config([
             'database.default' => 'pgsql',
-            'database.connections.pgsql.database' => 'vu_crm',
+            'database.connections.pgsql.database' => 'vu_crm26',
         ]);
     }
 
@@ -148,6 +148,23 @@ class StudentMobileLoginTest extends TestCase
         $studentUser = User::where('user_type', 1)->first();
         $this->assertNotNull($studentUser, 'Expected at least one student user in vu_crm');
 
+        $cleanPhone = preg_replace('/\D/', '', $studentUser->phnno ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+        $appNo = ($studentUser->usercode && $studentUser->usercode !== '0') ? $studentUser->usercode : '2027000010';
+
+        $crmStudent = CrmStudentRegistration::firstOrCreate(
+            ['phoneno' => $cleanPhone],
+            ['applinano' => $appNo, 'name' => 'Test Student']
+        );
+        $crmStudent->update([
+            'applinano' => $appNo,
+            'stage1' => 'paid',
+            'stage2' => 'completed',
+            'stage3' => 'completed',
+        ]);
+
         $step4Response = $this->actingAs($studentUser)->get('/dashboards?step=4');
         $step4Response->assertStatus(200);
         $step4Response->assertDontSee('SSC_Marks_Memo_Verified.pdf');
@@ -155,7 +172,7 @@ class StudentMobileLoginTest extends TestCase
         $step4Response->assertDontSee('Aadhaar_Front_Back.pdf');
         $step4Response->assertDontSee('Candidate_Passport_Photo.jpg');
 
-        $appId = $studentUser->usercode ?: '2027000010';
+        $appId = $appNo;
 
         $showResponse = $this->actingAs($studentUser)->get("/application/{$appId}");
         $showResponse->assertStatus(200);

@@ -3,9 +3,9 @@
 namespace Modules\Sms\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\CommunicationLog;
-use App\Services\SmsService;
-use App\Services\WhatsAppService;
+use Modules\Sms\Models\CommunicationLog;
+use Modules\Sms\Services\SmsService;
+use Modules\Sms\Services\WhatsAppService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

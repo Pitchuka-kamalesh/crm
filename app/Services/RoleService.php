@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\RoleService as BaseRoleService;
+use Modules\Auth\Services\RoleService as BaseRoleService;
 
 /**
- * Compatibility alias for App\Common\Services\RoleService
+ * Compatibility alias for Modules\Auth\Services\RoleService
  */
 class RoleService extends BaseRoleService
 {

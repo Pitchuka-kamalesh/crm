@@ -2931,3 +2931,100 @@ select.form-control-custom {
     background: #f8fafc;
     border-top: 1px solid #e2e8f0;
 }
+
+/* ==========================================================================
+   ENTERPRISE CRM PAGINATION STYLING
+   ========================================================================== */
+
+.table-pagination-area,
+.tele-pagination-bar {
+    padding: 0.9rem 1.4rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.table-pagination-area .pagination,
+.tele-pagination-bar .pagination,
+.pagination-wrapper .pagination,
+ul.pagination {
+    display: inline-flex;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.pagination .page-item {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pagination .page-item .page-link,
+.pagination .page-item span.page-link,
+.pagination .page-item a.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease-in-out;
+    line-height: 1;
+}
+
+.pagination .page-item .page-link:hover,
+.pagination .page-item a.page-link:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item.active span.page-link {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0284c7 !important;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(2, 132, 199, 0.25);
+}
+
+.pagination .page-item.disabled .page-link,
+.pagination .page-item.disabled span.page-link {
+    color: #94a3b8 !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Guard against raw SVG expanding without Tailwind */
+.pagination svg,
+.pagination-wrapper svg,
+nav svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+/* Clean up unstyled mobile text if default view renders */
+.pagination-wrapper nav > div:first-child:not(:only-child) {
+    display: none;
+}
+

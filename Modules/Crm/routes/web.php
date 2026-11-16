@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Crm\Http\Controllers\CrmController;
+use Modules\Crm\Http\Controllers\StudentKpiController;
+use Modules\Crm\Http\Controllers\TelecallerKpiController;
+use Modules\Crm\Http\Controllers\LeadsKpiController;
+use Modules\Crm\Http\Controllers\DiscountCouponController;
 
 Route::middleware(['auth'])->group(function () {
     // CRM Navigation & Enquiries
@@ -25,11 +29,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/crm/coupoungenration', [CrmController::class, 'index']);
     Route::get('/crm/percoupongen', [CrmController::class, 'index'])->name('crm.percoupongen');
     Route::get('/percoupongen', [CrmController::class, 'index']);
+    Route::get('/discountcoupon', [DiscountCouponController::class, 'index'])->name('crm.discountcoupon');
+    Route::get('/crm/discountcoupon', [DiscountCouponController::class, 'index']);
+    Route::post('/crm/discountcoupon/store', [DiscountCouponController::class, 'store'])->name('crm.discountcoupon.store');
+    Route::post('/crm/discountcoupon/stop/{id}', [DiscountCouponController::class, 'stop'])->name('crm.discountcoupon.stop');
+    Route::post('/crm/discountcoupon/activate/{id}', [DiscountCouponController::class, 'activate'])->name('crm.discountcoupon.activate');
 
     // KPI & Analytics Dashboards
-    Route::get('/kpi', [CrmController::class, 'index'])->name('kpi.index');
-    Route::get('/kpi/index', [CrmController::class, 'index']);
-    Route::get('/kpi/studentkpi', [CrmController::class, 'index'])->name('kpi.studentkpi');
-    Route::get('/kpi/telecallerkpi', [CrmController::class, 'index'])->name('kpi.telecallerkpi');
-    Route::get('/kpi/leadskpi', [CrmController::class, 'index'])->name('kpi.leadskpi');
+    Route::get('/kpi', [StudentKpiController::class, 'index'])->name('kpi.index');
+    Route::get('/kpi/index', [StudentKpiController::class, 'index']);
+    Route::get('/kpi/studentkpi', [StudentKpiController::class, 'index'])->name('kpi.studentkpi');
+    Route::get('/kpi/telecallerkpi', [TelecallerKpiController::class, 'index'])->name('kpi.telecallerkpi');
+    Route::get('/kpi/leadskpi', [LeadsKpiController::class, 'index'])->name('kpi.leadskpi');
 });

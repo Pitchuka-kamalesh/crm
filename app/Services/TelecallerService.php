@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\TelecallerService as BaseTelecallerService;
+use Modules\Leads\Services\TelecallerService as BaseTelecallerService;
 
 /**
- * Compatibility alias for App\Common\Services\TelecallerService
+ * Compatibility alias for Modules\Leads\Services\TelecallerService
  */
 class TelecallerService extends BaseTelecallerService
 {

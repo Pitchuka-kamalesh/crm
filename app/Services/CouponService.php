@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\CouponService as BaseCouponService;
+use Modules\Finance\Services\CouponService as BaseCouponService;
 
 /**
- * Compatibility alias for App\Common\Services\CouponService
+ * Compatibility alias for Modules\Finance\Services\CouponService
  */
 class CouponService extends BaseCouponService
 {

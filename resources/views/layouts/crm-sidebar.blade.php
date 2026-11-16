@@ -37,7 +37,7 @@
             <span class="user-strip-name" title="{{ $user->name ?? 'User' }}">{{ $user->name ?? 'User' }}</span>
         </div>
         <span class="user-strip-role-badge">
-            {{ \App\Common\Services\RoleService::getRoleBadgeLabel($roleId) }}
+            {{ \App\Common\Services\RoleService::getRoleBadgeLabel($roleId ?? (auth()->user() ? auth()->user()->getActiveRoleId() : 2)) }}
         </span>
     </div>
 
@@ -48,7 +48,7 @@
             $currentPath = trim(request()->path(), '/');
 
             // Dynamic menu tree computed via MenuService (matching CDOE architecture)
-            $menuGroups = \App\Common\Services\MenuService::getMenusForUser($user ?? auth()->user());
+            $menuGroups = \Modules\Auth\Services\MenuService::getMenusForUser($user ?? auth()->user());
         @endphp
 
         <!-- DYNAMIC ROLE-BASED MENUS (Strictly from database master.menus & master.menu_access_roles) -->
@@ -59,7 +59,7 @@
                 $isGroupOpen = false;
                 if ($hasSubmenus) {
                     foreach ($group['submenus'] as $subItem) {
-                        if (\App\Common\Services\MenuService::isSubActive($subItem['menu']->controller_ref, $currentPath, $currentTab)) {
+                        if (\Modules\Auth\Services\MenuService::isSubActive($subItem['menu']->controller_ref, $currentPath, $currentTab)) {
                             $isGroupOpen = true;
                             break;
                         }
@@ -67,7 +67,7 @@
                 } else {
                     $isGroupOpen = ($currentPath === trim($main->controller_ref, '/'));
                 }
-                $mainUrl = \App\Common\Services\MenuService::resolveMenuUrl($main->controller_ref);
+                $mainUrl = \Modules\Auth\Services\MenuService::resolveMenuUrl($main->controller_ref);
             @endphp
 
             @if($hasSubmenus)
@@ -75,7 +75,7 @@
                 <div class="accordion-group {{ $isGroupOpen ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
                     <button type="button" class="accordion-header {{ $isGroupOpen ? 'active' : '' }}" onclick="toggleAccordion('group-{{ strtolower($main->menu_code) }}')">
                         <div class="header-left">
-                            {!! \App\Common\Services\MenuService::getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
+                            {!! \Modules\Auth\Services\MenuService::getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
                             <span>{{ $main->menu_name }}</span>
                         </div>
                         <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -86,8 +86,8 @@
                         @foreach($group['submenus'] as $subItem)
                             @php
                                 $sub = $subItem['menu'];
-                                $subUrl = \App\Common\Services\MenuService::resolveMenuUrl($sub->controller_ref);
-                                $isSubActive = \App\Common\Services\MenuService::isSubActive($sub->controller_ref, $currentPath, $currentTab);
+                                $subUrl = \Modules\Auth\Services\MenuService::resolveMenuUrl($sub->controller_ref);
+                                $isSubActive = \Modules\Auth\Services\MenuService::isSubActive($sub->controller_ref, $currentPath, $currentTab);
                                 $subName = trim($sub->menu_name);
                             @endphp
                             <a href="{{ $subUrl }}" class="submenu-link {{ $isSubActive ? 'active' : '' }}">
@@ -104,7 +104,7 @@
                 <div class="accordion-group {{ $isMainActive ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
                     <a href="{{ $mainUrl }}" class="accordion-header {{ $isMainActive ? 'active' : '' }}" style="text-decoration: none;">
                         <div class="header-left">
-                            {!! \App\Common\Services\MenuService::getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
+                            {!! \Modules\Auth\Services\MenuService::getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
                             <span>{{ $main->menu_name }}</span>
                         </div>
                     </a>

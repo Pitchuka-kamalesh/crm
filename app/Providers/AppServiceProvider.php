@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Enterprise clean pagination
+        \Illuminate\Pagination\Paginator::useBootstrapFour();
+
         // Register Module View Namespaces
         $modules = ['Auth', 'Crm', 'Dashboards', 'Finance', 'Leads', 'Sms'];
         foreach ($modules as $module) {
@@ -30,9 +33,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Ensure crmid column exists on student_registration and fix any legacy CRMA_/CRMP_ IDs
         if (!app()->runningInConsole()) {
-            \App\Services\CrmIdService::ensureColumnExists();
-            \App\Services\CrmIdService::fixAllLegacyCrmIds();
-            \App\Services\MenuSyncService::ensureKpiAndSmsMenus();
+            \Modules\Crm\Services\CrmIdService::ensureColumnExists();
+            \Modules\Crm\Services\CrmIdService::fixAllLegacyCrmIds();
+            \Modules\Auth\Services\MenuSyncService::ensureKpiAndSmsMenus();
             try {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS discount NUMERIC(10,2) DEFAULT 0.00;");
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS crmid VARCHAR(50);");
