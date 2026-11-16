@@ -61,6 +61,28 @@ class ExamController extends Controller
 
         $distinctDates = $schedules->pluck('examdate')->filter()->unique()->values();
 
+        $distinctYears = $schedules->map(function ($s) {
+            return !empty($s->examdate) ? Carbon::parse($s->examdate)->format('Y') : null;
+        })->filter()->unique()->sort()->values();
+        if ($distinctYears->isEmpty()) {
+            $distinctYears = collect([Carbon::now()->format('Y')]);
+        }
+
+        $monthsList = collect([
+            '01' => 'January',
+            '02' => 'February',
+            '03' => 'March',
+            '04' => 'April',
+            '05' => 'May',
+            '06' => 'June',
+            '07' => 'July',
+            '08' => 'August',
+            '09' => 'September',
+            '10' => 'October',
+            '11' => 'November',
+            '12' => 'December',
+        ]);
+
         $viewName = view()->exists('dashboards::exam.examslotdata') ? 'dashboards::exam.examslotdata' : 'exam.examslotdata';
 
         return view($viewName, compact(
@@ -73,7 +95,9 @@ class ExamController extends Controller
             'slot2Count',
             'confirmedCount',
             'todayBookings',
-            'distinctDates'
+            'distinctDates',
+            'distinctYears',
+            'monthsList'
         ));
     }
 }

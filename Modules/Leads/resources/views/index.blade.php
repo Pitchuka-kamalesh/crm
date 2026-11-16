@@ -2554,6 +2554,7 @@
                                     <option value="all" {{ ($allocStatusFilter ?? 'all') === 'all' ? 'selected' : '' }}>Status: All Leads</option>
                                     <option value="unallocated" {{ ($allocStatusFilter ?? '') === 'unallocated' ? 'selected' : '' }}>Unallocated (empcode = 0)</option>
                                     <option value="allocated" {{ ($allocStatusFilter ?? '') === 'allocated' ? 'selected' : '' }}>Allocated (empcode != 0)</option>
+                                    <option value="completed" {{ ($allocStatusFilter ?? '') === 'completed' ? 'selected' : '' }}>Completed (In Exam Schedule)</option>
                                 </select>
 
                                 <select id="callerFilterSelect" onchange="applyExtraFilter('caller', this.value)" style="padding: 0.38rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">

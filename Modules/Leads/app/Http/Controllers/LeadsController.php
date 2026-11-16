@@ -99,16 +99,32 @@ class LeadsController extends Controller
             }
 
             if ($allocStatusFilter === 'allocated') {
-                $leadsQuery->whereNotNull('empcode')->where('empcode', '<>', '0');
+                $leadsQuery->whereNotNull('empcode')
+                    ->where('empcode', '<>', '0')
+                    ->whereRaw("NOT EXISTS (SELECT 1 FROM finance.exam_schedule es WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT)) OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino))");
             } elseif ($allocStatusFilter === 'unallocated') {
                 $leadsQuery->where(function ($q) {
                     $q->whereNull('empcode')->orWhere('empcode', '0');
-                });
+                })->whereRaw("NOT EXISTS (SELECT 1 FROM finance.exam_schedule es WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT)) OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino))");
+            } elseif ($allocStatusFilter === 'completed') {
+                $leadsQuery->whereRaw("EXISTS (SELECT 1 FROM finance.exam_schedule es WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT)) OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino))");
             }
 
-            // Till allotment employee code, emp time stamp be 0; newly uploaded leads appear first
+            // Ordering: 0 = unallocated, 1 = allocated, 2 = completed (in exam_schedule moved to last)
             $leads = $leadsQuery
-                ->orderByRaw("(CASE WHEN empcode IS NULL OR empcode = '0' THEN 0 ELSE 1 END) ASC, log_timestamp DESC NULLS LAST, enquirydate DESC NULLS LAST")
+                ->orderByRaw("
+                    (CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM finance.exam_schedule es 
+                            WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT))
+                               OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino)
+                        ) THEN 2
+                        WHEN empcode IS NULL OR empcode = '0' THEN 0
+                        ELSE 1
+                    END) ASC,
+                    log_timestamp DESC NULLS LAST,
+                    enquirydate DESC NULLS LAST
+                ")
                 ->paginate($perPage)
                 ->withQueryString();
         } elseif ($activeTab === 'allotted') {
@@ -283,6 +299,22 @@ class LeadsController extends Controller
         $latestTasks = collect();
         $latestStageTasksByPhone = collect();
         $latestStageTasksByAppli = collect();
+        $examScheduledPhones = collect();
+        $examScheduledApplis = collect();
+        try {
+            $examScheduledPhones = \App\Models\ExamSchedule::pluck('phoneno')
+                ->filter()
+                ->map(fn($p) => (string) preg_replace('/\D/', '', $p))
+                ->filter()
+                ->unique()
+                ->values();
+            $examScheduledApplis = \App\Models\ExamSchedule::pluck('applino')
+                ->filter()
+                ->map(fn($a) => (string) trim($a))
+                ->filter()
+                ->unique()
+                ->values();
+        } catch (\Throwable $e) {}
         try {
             $dbAllocations = TelecallerLead::with('employee')
                 ->get()
@@ -356,7 +388,9 @@ class LeadsController extends Controller
                 'latestStageTasksByPhone',
                 'latestStageTasksByAppli',
                 'activeTab',
-                'stageEligibilityMap'
+                'stageEligibilityMap',
+                'examScheduledPhones',
+                'examScheduledApplis'
             ));
         }
 
@@ -407,7 +441,9 @@ class LeadsController extends Controller
             'studentMap',
             'phoneStudentMap',
             'leadModelMap',
-            'recentUploadedFiles'
+            'recentUploadedFiles',
+            'examScheduledPhones',
+            'examScheduledApplis'
         ));
     }
 
