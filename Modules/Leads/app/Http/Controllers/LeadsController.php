@@ -98,27 +98,29 @@ class LeadsController extends Controller
                 $leadsQuery->where('empcode', $callerFilter);
             }
 
+            $examExistsSql = "EXISTS (
+                SELECT 1 FROM finance.exam_schedule es 
+                WHERE (es.phoneno IS NOT NULL AND CAST(es.phoneno AS TEXT) <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT))
+                   OR (crm.leads.applino IS NOT NULL AND CAST(crm.leads.applino AS TEXT) <> '' AND CAST(crm.leads.applino AS TEXT) <> '0' AND CAST(es.applino AS TEXT) = CAST(crm.leads.applino AS TEXT))
+            )";
+
             if ($allocStatusFilter === 'allocated') {
                 $leadsQuery->whereNotNull('empcode')
                     ->where('empcode', '<>', '0')
-                    ->whereRaw("NOT EXISTS (SELECT 1 FROM finance.exam_schedule es WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT)) OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino))");
+                    ->whereRaw("NOT ({$examExistsSql})");
             } elseif ($allocStatusFilter === 'unallocated') {
                 $leadsQuery->where(function ($q) {
                     $q->whereNull('empcode')->orWhere('empcode', '0');
-                })->whereRaw("NOT EXISTS (SELECT 1 FROM finance.exam_schedule es WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT)) OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino))");
+                })->whereRaw("NOT ({$examExistsSql})");
             } elseif ($allocStatusFilter === 'completed') {
-                $leadsQuery->whereRaw("EXISTS (SELECT 1 FROM finance.exam_schedule es WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT)) OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino))");
+                $leadsQuery->whereRaw($examExistsSql);
             }
 
             // Ordering: 0 = unallocated, 1 = allocated, 2 = completed (in exam_schedule moved to last)
             $leads = $leadsQuery
                 ->orderByRaw("
                     (CASE
-                        WHEN EXISTS (
-                            SELECT 1 FROM finance.exam_schedule es 
-                            WHERE (es.phoneno IS NOT NULL AND es.phoneno <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT))
-                               OR (crm.leads.applino IS NOT NULL AND crm.leads.applino <> '' AND es.applino = crm.leads.applino)
-                        ) THEN 2
+                        WHEN {$examExistsSql} THEN 2
                         WHEN empcode IS NULL OR empcode = '0' THEN 0
                         ELSE 1
                     END) ASC,
