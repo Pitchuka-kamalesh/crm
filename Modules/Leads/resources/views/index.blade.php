@@ -1760,15 +1760,21 @@
                                 </div>
                             </div>
 
-                            <!-- 3. Allocate Button -->
-                            <div style="flex-shrink: 0;">
-                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 42px; margin: 0; padding: 0 1.5rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- 3. Allocate Buttons: Manual (Half Size) & Auto Allocate -->
+                            <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
+                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 42px; margin: 0; padding: 0 0.85rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" title="Allocate selected or bucket leads to chosen telecaller">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
                                         <polyline points="16 11 18 13 22 9"/>
                                     </svg>
-                                    <span>Allocate to Telecaller</span>
+                                    <span>Allocate</span>
+                                </button>
+                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 42px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: 1px solid #4338ca; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(79, 70, 229, 0.28); transition: all 0.2s ease;" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                    </svg>
+                                    <span>Auto Allocate</span>
                                 </button>
                             </div>
                         </div>
@@ -2795,6 +2801,103 @@
     </div>
 </div>
 
+<!-- ================= AUTO ALLOCATE MODAL WIDGET ================= -->
+<div class="wizard-overlay" id="autoAllocateModal" onclick="if(event.target.id==='autoAllocateModal') closeAutoAllocateModal()">
+    <div class="wizard-modal-box" style="max-width: 540px; border-radius: 14px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);">
+        <div class="wizard-modal-header" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 1.15rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: #fff;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="candidate-header-name" style="color: #ffffff; font-size: 1.05rem; font-weight: 700;">Auto Allocate Leads</div>
+                    <div class="candidate-header-sub" style="color: #c7d2fe; font-size: 0.76rem;">Sequential Round-Robin Distribution Engine</div>
+                </div>
+            </div>
+            <button type="button" class="btn-close-modal" onclick="closeAutoAllocateModal()" title="Close" style="color: #ffffff; opacity: 0.8; font-size: 1.25rem;">✕</button>
+        </div>
+        
+        <form id="autoAllocateForm" onsubmit="event.preventDefault(); executeAutoAllocate();" style="padding: 1.4rem 1.6rem; background: #ffffff;">
+            <!-- Summary stats row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; text-align: center;">
+                    <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px;">Total Telecallers</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; line-height: 1.2;" id="autoModalTelecallerCount">{{ $telecallers->count() }}</div>
+                    <div style="font-size: 0.72rem; color: #10b981; font-weight: 600; margin-top: 3px;">Active & Ready</div>
+                </div>
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1rem; text-align: center;">
+                    <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #3b82f6; margin-bottom: 4px;">Available To Allocate</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #1d4ed8; line-height: 1.2;" id="autoModalAvailableCount">{{ $unallocatedCount }}</div>
+                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">Unallocated Leads</div>
+                </div>
+            </div>
+
+            <!-- Next in queue banner -->
+            @php
+                $nextName = $nextTelecallerInfo['next_telecaller']?->full_name ?? ($nextTelecallerInfo['next_telecaller']?->emp_code ?? 'None');
+                $nextCode = $nextTelecallerInfo['next_telecaller']?->emp_code ?? '';
+            @endphp
+            <div style="background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 8px; padding: 0.7rem 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #c026d3;"></span>
+                    <span style="font-size: 0.78rem; font-weight: 600; color: #86198f;">Next in Sequence:</span>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: #701a75;" id="autoModalNextTelecaller">
+                    {{ $nextName }} @if($nextCode) <span style="font-weight: 500; font-size: 0.72rem; opacity: 0.85;">({{ $nextCode }})</span> @endif
+                </div>
+            </div>
+
+            <!-- Input to specify count to allocate -->
+            <div style="margin-bottom: 1.25rem;">
+                <label for="autoAllocateCountInput" style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem;">
+                    Number of Students to Allocate <span class="required-dot">*</span>
+                </label>
+                <div style="position: relative;">
+                    <input 
+                        type="number" 
+                        id="autoAllocateCountInput" 
+                        name="count" 
+                        min="1" 
+                        max="{{ $unallocatedCount }}" 
+                        placeholder="Enter number (Max {{ $unallocatedCount }})" 
+                        class="incharge-input incharge-input-no-icon" 
+                        style="height: 42px; font-size: 0.92rem; font-weight: 600; padding: 0.5rem 0.85rem; border: 2px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box;"
+                        required
+                        oninput="validateAutoAllocateInput(this)"
+                    >
+                    <button type="button" onclick="document.getElementById('autoAllocateCountInput').value = {{ $unallocatedCount }}; validateAutoAllocateInput(document.getElementById('autoAllocateCountInput'));" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-weight: 700; background: #e0e7ff; color: #4338ca; border: none; border-radius: 5px; padding: 4px 8px; cursor: pointer;">
+                        MAX
+                    </button>
+                </div>
+                <div id="autoAllocateValidationMsg" style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">
+                    Enter a count between 1 and {{ $unallocatedCount }}. Leads are distributed sequentially in continuous round-robin fashion.
+                </div>
+            </div>
+
+            <!-- Live distribution preview -->
+            <div id="autoAllocatePreviewBox" style="display: none; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 0.7rem 0.85rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #334155;">
+                <span id="autoAllocatePreviewText"></span>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                <button type="button" onclick="closeAutoAllocateModal()" class="tele-btn-action" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 0.55rem 1.15rem; font-size: 0.82rem; font-weight: 600; border-radius: 7px; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" id="btnConfirmAutoAllocate" class="incharge-btn-submit" style="height: 40px; padding: 0 1.4rem; font-size: 0.84rem; font-weight: 600; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border: none; border-radius: 7px; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);">
+                    <svg id="autoAllocateSpinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none; animation: spin 1s linear infinite;">
+                        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                        <path d="M12 2a10 10 0 0 1 10 10"></path>
+                    </svg>
+                    <span id="autoAllocateBtnText">Allocate Leads Now</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Toast -->
 <!-- Call Duration 3-Column Roller Popover -->
 <div id="durationRollerPopover" class="duration-roller-popover" role="dialog" aria-label="Call Duration Picker">
@@ -3301,6 +3404,135 @@
             modal.classList.remove('active');
             document.body.style.overflow = '';
         }
+    }
+
+    function openAutoAllocateModal() {
+        const modal = document.getElementById('autoAllocateModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            const input = document.getElementById('autoAllocateCountInput');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
+            const preview = document.getElementById('autoAllocatePreviewBox');
+            if (preview) preview.style.display = 'none';
+        }
+    }
+
+    function closeAutoAllocateModal() {
+        const modal = document.getElementById('autoAllocateModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function validateAutoAllocateInput(input) {
+        const max = parseInt(input.getAttribute('max') || '0', 10);
+        const val = parseInt(input.value || '0', 10);
+        const msg = document.getElementById('autoAllocateValidationMsg');
+        const btn = document.getElementById('btnConfirmAutoAllocate');
+        const preview = document.getElementById('autoAllocatePreviewBox');
+        const previewText = document.getElementById('autoAllocatePreviewText');
+        const telecallerCount = parseInt(document.getElementById('autoModalTelecallerCount')?.textContent || '1', 10);
+
+        if (isNaN(val) || val <= 0) {
+            if (msg) {
+                msg.style.color = '#ef4444';
+                msg.textContent = 'Please enter a valid count greater than 0.';
+            }
+            if (btn) btn.disabled = true;
+            if (preview) preview.style.display = 'none';
+            return false;
+        } else if (val > max) {
+            if (msg) {
+                msg.style.color = '#ef4444';
+                msg.textContent = `Count cannot exceed the ${max} unallocated leads available.`;
+            }
+            if (btn) btn.disabled = true;
+            if (preview) preview.style.display = 'none';
+            return false;
+        } else {
+            if (msg) {
+                msg.style.color = '#10b981';
+                msg.textContent = `✓ Ready. ${val} lead(s) will be allocated across ${telecallerCount} active telecaller(s).`;
+            }
+            if (btn) btn.disabled = false;
+
+            if (preview && previewText && telecallerCount > 0) {
+                const basePerTc = Math.floor(val / telecallerCount);
+                const remainder = val % telecallerCount;
+                let previewDesc = `<strong>Distribution Plan:</strong> Base of ${basePerTc} lead(s) per telecaller`;
+                if (remainder > 0) {
+                    previewDesc += `, plus +1 extra lead for the first ${remainder} telecaller(s) starting from next in sequence.`;
+                } else {
+                    previewDesc += ` evenly across all telecallers.`;
+                }
+                previewText.innerHTML = previewDesc;
+                preview.style.display = 'block';
+            }
+            return true;
+        }
+    }
+
+    function executeAutoAllocate() {
+        const input = document.getElementById('autoAllocateCountInput');
+        const val = parseInt(input?.value || '0', 10);
+        const max = parseInt(input?.getAttribute('max') || '0', 10);
+
+        if (!val || val <= 0 || val > max) {
+            validateAutoAllocateInput(input);
+            return;
+        }
+
+        const btn = document.getElementById('btnConfirmAutoAllocate');
+        const spinner = document.getElementById('autoAllocateSpinner');
+        const btnText = document.getElementById('autoAllocateBtnText');
+
+        if (btn) btn.disabled = true;
+        if (spinner) spinner.style.display = 'inline-block';
+        if (btnText) btnText.textContent = 'Allocating...';
+
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+            || (typeof csrfToken !== 'undefined' ? csrfToken : '');
+
+        fetch('{{ route("leads.autoAllocate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ count: val })
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (response.ok && data.success) {
+                closeAutoAllocateModal();
+                if (typeof showToast === 'function') {
+                    showToast(`✓ ${data.message}`);
+                } else {
+                    alert(data.message);
+                }
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                alert(data.message || 'Auto allocation failed.');
+                if (btn) btn.disabled = false;
+                if (spinner) spinner.style.display = 'none';
+                if (btnText) btnText.textContent = 'Allocate Leads Now';
+            }
+        })
+        .catch(err => {
+            console.error('Auto allocation error:', err);
+            alert('An error occurred while connecting to the server. Please try again.');
+            if (btn) btn.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Allocate Leads Now';
+        });
     }
 
     function submitAddLeadModal() {

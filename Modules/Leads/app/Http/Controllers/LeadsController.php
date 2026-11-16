@@ -409,6 +409,8 @@ class LeadsController extends Controller
         // Role-based assigned menus from master.menu_access_roles (with crm fallback)
         $roleMenus = MenuAccessRole::forRole($roleId);
 
+        $nextTelecallerInfo = TelecallerService::getNextTelecallerInfo();
+
         return view('leads::index', compact(
             'user',
             'roleId',
@@ -445,7 +447,8 @@ class LeadsController extends Controller
             'leadModelMap',
             'recentUploadedFiles',
             'examScheduledPhones',
-            'examScheduledApplis'
+            'examScheduledApplis',
+            'nextTelecallerInfo'
         ));
     }
 
@@ -730,6 +733,25 @@ class LeadsController extends Controller
             'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
             'log_ipaddress' => $request->ip() ?: '127.0.0.1',
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json($res, $res['success'] ? 200 : 422);
+        }
+
+        return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
+    }
+
+    /**
+     * Auto-allocate leads sequentially across active telecallers in round-robin order.
+     */
+    public function autoAllocate(Request $request)
+    {
+        $count = (int) $request->input('count', 0);
+        $res = TelecallerService::autoAllocateRoundRobin(
+            $count,
+            auth()->user()?->usercode ?? 'SYSTEM',
+            $request->ip() ?: '127.0.0.1'
+        );
 
         if ($request->wantsJson()) {
             return response()->json($res, $res['success'] ? 200 : 422);
