@@ -1248,6 +1248,25 @@
             box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
         }
 
+        fieldset[disabled] .mockup-input,
+        fieldset[disabled] .mockup-select,
+        fieldset[disabled] textarea,
+        .mockup-input:disabled,
+        .mockup-select:disabled {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+            border-color: #cbd5e1 !important;
+            cursor: not-allowed !important;
+            opacity: 0.92;
+        }
+        fieldset[disabled] input[type="radio"],
+        fieldset[disabled] input[type="checkbox"] {
+            cursor: not-allowed !important;
+        }
+        fieldset[disabled] label {
+            cursor: default !important;
+        }
+
         .mockup-subbox {
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
@@ -1412,7 +1431,7 @@
 
             <div class="meta-badges-cluster">
                 @php
-                    $isPaid = ($crmStudent?->stage1 === 'paid' || !empty($isStage1Paid));
+                    $isPaid = (!empty($isPaid) || $crmStudent?->stage4 === 'paid' || $crmStudent?->stage1 === 'paid' || !empty($isStage1Paid));
                 @endphp
                 @if($appNo)
                 <span class="meta-badge">
@@ -1528,9 +1547,20 @@
                             @endif
                         </div>
 
+                        @if($isPaid)
+                            <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.25rem;">🔒</span>
+                                <div>
+                                    <div style="font-weight: 700; color: #1e40af; font-size: 0.88rem;">Personal Profile Fixed (Read-Only)</div>
+                                    <div style="color: #3b82f6; font-size: 0.78rem;">Your personal details are locked because admission fee payment has been completed. Details can only be viewed.</div>
+                                </div>
+                            </div>
+                        @endif
+
                         <form action="{{ route('dashboards.save-step') }}" method="POST">
                             @csrf
                             <input type="hidden" name="step" value="1">
+                            <fieldset @if($isPaid) disabled @endif style="border: none; margin: 0; padding: 0;">
 
                             <!-- Row 1: Candidate Name & Parent Name (2 Columns) -->
                             <div class="mockup-field-row-2">
@@ -1676,11 +1706,18 @@
                                     </div>
                                 </div>
                             </div>
+                            </fieldset>
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
-                                <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                    <span>Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
-                                </button>
+                                @if($isPaid)
+                                    <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
+                                        <span>Next: Stage 2 - {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                    </a>
+                                @else
+                                    <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                        <span>Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                    </button>
+                                @endif
                             </div>
                         </form>
 
@@ -1759,11 +1796,22 @@
                             @endif
                         </div>
 
+                        @if($isPaid)
+                            <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.25rem;">🔒</span>
+                                <div>
+                                    <div style="font-weight: 700; color: #1e40af; font-size: 0.88rem;">Academic Details Fixed (Read-Only)</div>
+                                    <div style="color: #3b82f6; font-size: 0.78rem;">Your academic details are locked because admission fee payment has been completed. Details can only be viewed.</div>
+                                </div>
+                            </div>
+                        @endif
+
                         <form id="step2AcademicForm" action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep2Form(this);">
                             @csrf
                             <input type="hidden" name="step" value="2">
                             <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
                             <input type="hidden" name="eval_type" id="eval_type" value="{{ $academicDetails?->tenth_marks_type ?? 'Marks' }}">
+                            <fieldset @if($isPaid) disabled @endif style="border: none; margin: 0; padding: 0;">
 
                             <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
                             <div class="mockup-subbox" id="sec-10th-details">
@@ -1974,15 +2022,21 @@
                                     </div>
                                 </div>
                             </div>
-
+                            </fieldset>
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
                                 <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
                                     &larr; Stage 1: {{ $stages[1]['title'] ?? 'Personal Profile' }}
                                 </a>
-                                <button type="submit" class="btn-step-next" style="background: #0f2744;">
-                                    <span>Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
-                                </button>
+                                @if($isPaid)
+                                    <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-next" style="background: #0f2744; text-decoration: none;">
+                                        <span>Next: Stage 3 - {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    </a>
+                                @else
+                                    <button type="submit" class="btn-step-next" style="background: #0f2744;">
+                                        <span>Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    </button>
+                                @endif
                             </div>
                         </form>
 
@@ -2263,6 +2317,16 @@
                     @endif
                 </div>
 
+                @if($isPaid)
+                    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1.15rem; margin: 1rem 1.5rem 0; display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.25rem;">🔒</span>
+                        <div>
+                            <div style="font-weight: 700; color: #1e40af; font-size: 0.88rem;">Documents Fixed (Read-Only)</div>
+                            <div style="color: #3b82f6; font-size: 0.78rem;">Your uploaded documents are locked because admission fee payment has been completed. Details can only be viewed.</div>
+                        </div>
+                    </div>
+                @endif
+
                 <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body" id="stage3-upload-form">
                     @csrf
                     <input type="hidden" name="step" value="3">
@@ -2388,19 +2452,25 @@
                                         <p class="kyc-doc-sub">{{ $docMeta['sub'] }}</p>
                                     </div>
                                     @if($docFile)
-                                        <div style="font-size:0.78rem; color:#059669; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.4rem;">
-                                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">File: {{ $docFile['filename'] }}</span>
-                                            <a href="{{ $docFile['url'] }}" target="_blank" style="color:#1d4ed8; text-decoration:underline; flex-shrink:0;">View</a>
+                                        <div style="font-size:0.8rem; color:#059669; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.4rem; background: #ecfdf5; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #a7f3d0;">
+                                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 {{ $docFile['filename'] }}</span>
+                                            <a href="{{ $docFile['url'] }}" target="_blank" style="color:#1d4ed8; text-decoration:underline; flex-shrink:0;">View / Download</a>
                                         </div>
                                     @endif
-                                    <div id="file-feedback-{{ $docKey }}" style="display: none; font-size: 0.74rem; font-weight: 700; color: #15803d; margin-bottom: 0.35rem;"></div>
-                                    <input type="file"
-                                           name="docs[{{ $docKey }}]"
-                                           id="file-input-{{ $docKey }}"
-                                           accept=".pdf,.jpg,.jpeg,.png"
-                                           class="field-input doc-file-input"
-                                           style="padding:0.4rem; font-size:0.75rem;"
-                                           onchange="handleDocFileChange(this, '{{ $docKey }}')">
+                                    @if(!$isPaid)
+                                        <div id="file-feedback-{{ $docKey }}" style="display: none; font-size: 0.74rem; font-weight: 700; color: #15803d; margin-bottom: 0.35rem;"></div>
+                                        <input type="file"
+                                               name="docs[{{ $docKey }}]"
+                                               id="file-input-{{ $docKey }}"
+                                               accept=".pdf,.jpg,.jpeg,.png"
+                                               class="field-input doc-file-input"
+                                               style="padding:0.4rem; font-size:0.75rem;"
+                                               onchange="handleDocFileChange(this, '{{ $docKey }}')">
+                                    @elseif(!$docFile)
+                                        <div style="font-size: 0.76rem; color: #94a3b8; font-style: italic; margin-top: 0.25rem;">
+                                            No document uploaded
+                                        </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
@@ -2410,9 +2480,15 @@
                         <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
                             &larr; Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }}
                         </a>
-                        <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
-                        </button>
+                        @if($isPaid)
+                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
+                                <span>Next: Stage 4 - {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                            </a>
+                        @else
+                            <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                <span>Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                            </button>
+                        @endif
                     </div>
 
                     <script>

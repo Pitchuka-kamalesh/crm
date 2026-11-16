@@ -374,6 +374,7 @@ class DashboardsController extends Controller
             'stages',
             'totalSteps',
             'roleMenus',
+            'isPaid',
             'isStage1Paid',
             'completedCount',
             'progressPercent'
@@ -544,8 +545,16 @@ class DashboardsController extends Controller
             }
         }
 
+        $isPaid = ($crmStudent && ($crmStudent->stage4 === 'paid' || $crmStudent->stage1 === 'paid')) || $hasPaidRecord;
+
+        // Security validation: If fee payment is completed, steps 1, 2, and 3 are fixed / read-only
+        if ($isPaid && in_array($step, [1, 2, 3])) {
+            return redirect()->route('dashboards.index', ['step' => $step])
+                ->with('info', 'Your details are fixed and cannot be modified after fee payment.');
+        }
+
         // Security validation: Block saving higher steps if fee payment in Step 4 is not completed
-        if ($step > 4 && (!$crmStudent || ($crmStudent->stage4 !== 'paid' && $crmStudent->stage1 !== 'paid')) && !$hasPaidRecord) {
+        if ($step > 4 && !$isPaid) {
             return redirect()->route('dashboards.index', ['step' => 4])
                 ->withErrors(['error' => 'Admission fee payment in Step 4 must be completed before booking an exam slot.']);
         }
