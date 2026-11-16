@@ -1093,30 +1093,48 @@ class DashboardsController extends Controller
                 $minDateFormatted = \Carbon\Carbon::parse($minExamDate)->format('d M Y');
 
                 $existingExamSchedule = $crmStudent ? \App\Models\ExamSchedule::where('applino', $crmStudent->applinano)->first() : null;
+                $existingDate = $existingExamSchedule?->examdate ? \Carbon\Carbon::parse($existingExamSchedule->examdate)->format('Y-m-d') : null;
+
+                // Reschedule cutoff: 2 days before exam date at 5:00 PM
+                // (e.g., if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                $editDeadline = $existingDate
+                    ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                    : null;
+
+                $isSlotLocked = $existingExamSchedule && $editDeadline && $now->gt($editDeadline);
+
+                if ($isSlotLocked) {
+                    if ($crmStudent && $crmStudent->stage5 !== 'completed') {
+                        $crmStudent->update([
+                            'stage5' => 'completed',
+                            'log_ipaddress' => $request->ip(),
+                            'log_timestamp' => now(),
+                        ]);
+                    }
+                    return redirect()->route('dashboards.index', ['step' => 6])
+                        ->with('info', 'Your exam slot is locked and confirmed.');
+                }
 
                 $request->validate([
-                    'examdate'  => $existingExamSchedule ? ['nullable'] : ['required', 'date', 'after_or_equal:' . $minExamDate],
+                    'examdate'  => ['required', 'date', 'after_or_equal:' . $minExamDate],
                     'exam_slot' => ['required', 'string', 'max:100'],
                 ], [
                     'examdate.required'  => 'Please select your preferred examination date.',
                     'examdate.after_or_equal' => $isBefore5PM
-                        ? 'Bookings made today before 5:00 PM can only be scheduled starting from tomorrow (' . $minDateFormatted . ').'
-                        : 'Bookings made after 5:00 PM cutoff can only be scheduled starting from day after tomorrow (' . $minDateFormatted . ').',
+                        ? 'Exam date can only be scheduled starting from tomorrow (' . $minDateFormatted . ').'
+                        : 'Bookings after 5:00 PM cutoff can only be scheduled starting from day after tomorrow (' . $minDateFormatted . ').',
                     'exam_slot.required' => 'Please select your preferred exam time slot.',
                 ]);
 
                 if ($crmStudent) {
                     $examCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
-                    $finalExamDate = ($existingExamSchedule && !empty($existingExamSchedule->examdate))
-                        ? $existingExamSchedule->examdate
-                        : $request->input('examdate');
 
                     \App\Models\ExamSchedule::updateOrCreate(
                         ['applino' => $crmStudent->applinano],
                         [
                             'crmid'        => $examCrmId,
                             'phoneno'      => $crmStudent->phoneno,
-                            'examdate'     => $finalExamDate,
+                            'examdate'     => $request->input('examdate'),
                             'exam_slot'    => $request->input('exam_slot'),
                             'exam_status'  => 1,
                             'loguserid'    => $user?->usercode ?? $user?->name ?? 'STUDENT',
@@ -1132,7 +1150,9 @@ class DashboardsController extends Controller
                     ]);
                 }
                 $nextStep = 6;
-                $msg = 'Stage 5: Exam Slot confirmed and booked successfully!';
+                $msg = $existingExamSchedule
+                    ? 'Stage 5: Exam slot updated successfully!'
+                    : 'Stage 5: Exam Slot confirmed and booked successfully!';
             } elseif ($step === 6) {
                 // Step 6: Application Download
                 if ($crmStudent) {

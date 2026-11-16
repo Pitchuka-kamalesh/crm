@@ -2708,7 +2708,15 @@
 
                     $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';
                     $hasBookedSlot = !empty($examSchedule?->examdate) && !empty($examSchedule?->exam_slot);
-                    $isAppInExamSchedule = !empty($examSchedule);
+
+                    // Cutoff: 2 days before booked exam date at 5:00 PM
+                    // (e.g. if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                    $editDeadline = $existingDate
+                        ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                        : null;
+
+                    $isSlotLocked = $hasBookedSlot && ($editDeadline ? $now->gt($editDeadline) : false);
+                    $canEditSlot = !$hasBookedSlot || !$isSlotLocked;
                 @endphp
 
                 <div class="step-panel-header">
@@ -2750,11 +2758,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #ffffff; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 8px;">
-                                @if($isAppInExamSchedule)
-                                    Exam date is scheduled &amp; locked
+                            <div style="font-size: 0.78rem; font-weight: 700; background: #ffffff; padding: 5px 12px; border-radius: 8px; {{ $isSlotLocked ? 'color: #b45309; border: 1px solid #fde68a;' : 'color: #15803d; border: 1px solid #bbf7d0;' }}">
+                                @if($isSlotLocked)
+                                    🔒 Exam slot is confirmed &amp; locked
                                 @else
-                                    To change slot, select date/slot below &amp; click Confirm
+                                    ✏️ Rescheduling open until {{ $editDeadline ? $editDeadline->format('d M Y, 5:00 PM') : '' }}
                                 @endif
                             </div>
                         </div>
@@ -2771,9 +2779,13 @@
                             <div class="field-group">
                                 <label class="field-label">
                                     Exam Date <span class="required-star">*</span>
-                                    @if($isAppInExamSchedule)
+                                    @if($isSlotLocked)
                                         <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
-                                            🔒 Date Locked (Already Scheduled)
+                                            🔒 Date Locked
+                                        </span>
+                                    @elseif($hasBookedSlot)
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
+                                            ✏️ Reschedule Allowed
                                         </span>
                                     @endif
                                 </label>
@@ -2783,13 +2795,18 @@
                                        class="field-input"
                                        min="{{ $minExamDate }}"
                                        value="{{ $defaultDate }}"
-                                       {{ $isAppInExamSchedule ? 'readonly style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }}
+                                       {{ $isSlotLocked ? 'readonly style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }}
                                        required>
-                                @if($isAppInExamSchedule)
+                                @if($isSlotLocked)
                                     <input type="hidden" name="examdate" value="{{ $defaultDate }}">
-                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
                                         <span>🔒</span>
-                                        <span>Your exam date is already scheduled in the examination schedule ({{ \Carbon\Carbon::parse($defaultDate)->format('d M Y') }}). Date selection is locked.</span>
+                                        <span>Your exam date is now locked. Cutoff deadline was {{ $editDeadline ? $editDeadline->format('d M Y, 5:00 PM') : '' }}.</span>
+                                    </div>
+                                @elseif($hasBookedSlot)
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #15803d; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                        <span>⏰</span>
+                                        <span>You can edit your exam date &amp; slot any number of times before <strong>{{ $editDeadline ? $editDeadline->format('d M Y, 5:00 PM') : '' }}</strong>.</span>
                                     </div>
                                 @else
                                     <div style="margin-top: 6px; font-size: 0.76rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
@@ -2803,13 +2820,13 @@
                             <div class="field-group">
                                 <label class="field-label">
                                     Select Slot <span class="required-star">*</span>
-                                    @if($isAppInExamSchedule)
+                                    @if($isSlotLocked)
                                         <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
-                                            🔒 Slot Locked (Already Scheduled)
+                                            🔒 Slot Locked
                                         </span>
                                     @endif
                                 </label>
-                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isAppInExamSchedule ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
+                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
                                     <option value="S1 11:00 AM to 1:00 PM" {{ str_contains($currentSlot, 'S1') || str_contains($currentSlot, '11') ? 'selected' : '' }}>
                                         S1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
@@ -2817,16 +2834,16 @@
                                         S2 2:00 PM to 4:00 PM (Afternoon Session)
                                     </option>
                                 </select>
-                                @if($isAppInExamSchedule)
+                                @if($isSlotLocked)
                                     <input type="hidden" name="exam_slot" value="{{ $currentSlot }}">
                                 @endif
                                 <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
                                     <span>✓</span>
                                     <span id="slotLiveStatus">
-                                        @if($isAppInExamSchedule)
+                                        @if($isSlotLocked)
                                             Confirmed slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
                                         @else
-                                            Standard 2-hour CBT entrance test session.
+                                            Current slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session).
                                         @endif
                                     </span>
                                 </div>
@@ -2839,7 +2856,13 @@
                             &larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>{{ $isAppInExamSchedule ? 'Proceed to Stage 6: Application Download &rarr;' : 'Confirm Slot & Proceed to Stage 6: ' . ($stages[6]['title'] ?? 'Application Download') . ' &rarr;' }}</span>
+                            @if($isSlotLocked)
+                                <span>Proceed to Stage 6: Application Download &rarr;</span>
+                            @elseif($hasBookedSlot)
+                                <span>Update Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                            @else
+                                <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                            @endif
                         </button>
                     </div>
 
