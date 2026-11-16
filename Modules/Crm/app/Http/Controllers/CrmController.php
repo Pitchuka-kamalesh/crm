@@ -24,7 +24,6 @@ use Modules\Crm\Services\CrmIdService;
 use Modules\Crm\Services\KpiAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CrmController extends Controller
@@ -328,27 +327,9 @@ class CrmController extends Controller
             'kpiStage4Done',
             'kpiStage5Done',
             'kpiBranchDistribution',
-            'selectedTelecaller',
             'totalTelecallerLeads',
-            'teleGaneshCount',
-            'teleUnassignedCount',
-            'teleTasksCount',
-            'teleDistinctContacted',
-            'telePendingCount',
-            'teleTaskStages',
-            'telecallerLeadsList',
             'telecallerStats',
-            'totalTelecallersCount',
-            'totalRawLeads',
-            'leadsNewCount',
-            'leadsRegCount',
-            'allocatedLeadsCount',
-            'unallocatedPoolCount',
-            'leadsByDate',
-            'availableYears',
-            'availableMonths',
-            'leadsBySource',
-            'rawLeadsList'
+            'totalRawLeads'
         ));
     }
 
