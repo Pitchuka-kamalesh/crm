@@ -884,6 +884,15 @@ class DashboardsController extends Controller
                     if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'pu2_college_state')) {
                         $academicPayload['pu2_college_state'] = $interStateVal;
                     }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_city')) {
+                        $academicPayload['jr_city'] = $interCityVal;
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_state')) {
+                        $academicPayload['jr_state'] = $interStateVal;
+                    }
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_district')) {
+                        $academicPayload['jr_district'] = $interDistrictVal;
+                    }
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
                     if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {

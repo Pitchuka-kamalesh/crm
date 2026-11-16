@@ -1820,22 +1820,24 @@
                                 <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
                                 <input type="hidden" name="course_choice" value="Inter">
 
-                                <!-- Row 1: Jr. College Name / Institute Name, Jr. City, Jr. State, Jr. District (4 Columns) -->
-                                <div class="mockup-field-row-4">
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
-                                    </div>
+                                <!-- Row 1: Jr. College Name / Institute Name (Full Width) -->
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">Jr. College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
+                                </div>
+
+                                <!-- Row 2: 3 Separate Distinct Columns for Jr. City, Jr. State, Jr. District -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Jr. City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_city" class="mockup-input" value="{{ $academicDetails?->pu2_college_city }}" placeholder="Enter Jr. City" required>
+                                        <input type="text" name="inter_city" class="mockup-input" value="{{ $academicDetails?->pu2_college_city ?? $academicDetails?->jr_city }}" placeholder="Enter Jr. City" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Jr. State: <span style="color:#ef4444;">*</span></label>
                                         <select name="inter_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
-                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ (($academicDetails?->pu2_college_state ?? '') == $s->state_name || (!$academicDetails && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
+                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ (($academicDetails?->pu2_college_state ?? $academicDetails?->jr_state ?? '') == $s->state_name || (!$academicDetails && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
                                                 </option>
                                             @endforeach
@@ -1846,7 +1848,7 @@
                                         <select name="inter_district" id="geo-inter-district-select" class="mockup-select" required>
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
-                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ (($academicDetails?->pu2_college_district ?? '') == $d->DISTRICT_NAME || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ (($academicDetails?->pu2_college_district ?? $academicDetails?->jr_district ?? '') == $d->DISTRICT_NAME || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
                                                 </option>
                                             @endforeach
