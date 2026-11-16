@@ -9,9 +9,6 @@ use Modules\Auth\Models\MenuAccessRole;
 use Modules\Auth\Services\RoleService;
 use Modules\Leads\Models\TelecallerLead;
 use Modules\Leads\Models\TelecallerLeadTask;
-use Modules\Finance\Models\PayDetail;
-use Modules\Finance\Models\ReceiptDetail;
-use Modules\Crm\Models\CrmStudentRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +17,7 @@ use Illuminate\View\View;
 class TelecallerKpiController extends Controller
 {
     /**
-     * Display the Telecaller KPI dashboard, Counselor Leaderboard & Outreach Analytics.
+     * Display the Telecaller KPI & Outreach Performance dashboard.
      */
     public function index(Request $request): View
     {
@@ -46,7 +43,7 @@ class TelecallerKpiController extends Controller
                 : Role::where('role_id', $roleId)->get();
         } catch (\Throwable $e) {}
 
-        // 1. Retrieve telecallers: if logged in as telecaller, strictly isolate to their own profile
+        // 1. Identify Telecallers pool
         if ($isTelecaller) {
             $telecallers = Employee::where('emp_code', $userEmpCode)->get();
             if ($telecallers->isEmpty()) {
@@ -58,136 +55,148 @@ class TelecallerKpiController extends Controller
                     'phone_primary'   => $user?->phoneno ?? 'N/A',
                 ]]);
             }
+            $selectedTelecaller = $userEmpCode;
         } else {
             $telecallers = Employee::whereIn('emp_code', function ($q) {
                 $q->select('emp_id')->from('master.roles_assigned')->where('roles_role_id', 4);
-            })->orWhereIn('emp_code', function ($q) {
+            })->orWhere('role_id', 4)
+            ->orWhereIn('emp_code', function ($q) {
                 $q->select('empcode')->from('crm.telecaller_leads');
             })->orderBy('full_name')->get();
+
+            $selectedTelecaller = (string)$request->query('telecaller', $request->query('employee', 'all'));
         }
 
-        // 2. Verified fee payments from finance.paydetails and finance.receiptdetails
-        $pdPaid = PayDetail::where(function ($q) {
-            $q->where('txnstatus', 'success')
-              ->orWhere('paidamount', '>', 0);
-        })->pluck('applino')->map(fn($v) => (string)$v);
+        // 2. Pre-fetch aggregations grouped by empcode
+        $leadCountsByEmp = TelecallerLead::select('empcode', DB::raw('count(*) as cnt'))
+            ->when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
+            ->groupBy('empcode')
+            ->pluck('cnt', 'empcode');
 
-        $rdPaid = ReceiptDetail::pluck('applino')->map(fn($v) => (string)$v);
-        $verifiedPaidAppNos = $pdPaid->merge($rdPaid)->unique()->filter()->values();
+        $taskCountsByEmp = TelecallerLeadTask::select('empcode', DB::raw('count(*) as cnt'))
+            ->when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
+            ->groupBy('empcode')
+            ->pluck('cnt', 'empcode');
 
-        // 3. Pre-fetch aggregations: strictly scoped to the telecaller if role 4
+        $contactedByEmp = TelecallerLeadTask::select('empcode', DB::raw('count(DISTINCT phoneno) as cnt'))
+            ->when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
+            ->whereNotNull('phoneno')
+            ->groupBy('empcode')
+            ->pluck('cnt', 'empcode');
+
+        // Task stages grouped by empcode
+        $stagesRaw = DB::table('crm.telecaller_leads_tasks')
+            ->select('empcode', 'stage_name', DB::raw('count(*) as count'))
+            ->when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
+            ->whereNotNull('stage_name')
+            ->groupBy('empcode', 'stage_name')
+            ->orderBy('count', 'desc')
+            ->get()
+            ->groupBy('empcode');
+
+        // Overall Global Aggregates (or Scoped to user if Telecaller)
         if ($isTelecaller) {
-            $leadCountsByEmp = TelecallerLead::where('empcode', $userEmpCode)
-                ->select('empcode', DB::raw('count(*) as cnt'))
-                ->groupBy('empcode')
-                ->pluck('cnt', 'empcode');
+            $totalTelecallerLeads = (int)($leadCountsByEmp[$userEmpCode] ?? 0);
+            $teleTasksCount = (int)($taskCountsByEmp[$userEmpCode] ?? 0);
+            $teleDistinctContacted = (int)($contactedByEmp[$userEmpCode] ?? 0);
+            $telePendingCount = max(0, $totalTelecallerLeads - $teleDistinctContacted);
 
-            $taskCountsByEmp = TelecallerLeadTask::where('empcode', $userEmpCode)
-                ->select('empcode', DB::raw('count(*) as cnt'))
-                ->groupBy('empcode')
-                ->pluck('cnt', 'empcode');
-
-            $allLeadsByEmp = TelecallerLead::where('empcode', $userEmpCode)
-                ->select('empcode', 'applino')
-                ->get()
-                ->groupBy('empcode');
-
-            $totalAllocatedLeads = (int)($leadCountsByEmp[$userEmpCode] ?? 0);
-            $totalOutreachCalls = (int)($taskCountsByEmp[$userEmpCode] ?? 0);
+            $teleTaskStages = DB::table('crm.telecaller_leads_tasks')
+                ->select('stage_name', DB::raw('count(*) as count'))
+                ->where('empcode', $userEmpCode)
+                ->whereNotNull('stage_name')
+                ->groupBy('stage_name')
+                ->orderBy('count', 'desc')
+                ->get();
         } else {
-            $leadCountsByEmp = TelecallerLead::select('empcode', DB::raw('count(*) as cnt'))
-                ->groupBy('empcode')
-                ->pluck('cnt', 'empcode');
+            $totalTelecallerLeads = TelecallerLead::count();
+            $teleTasksCount = TelecallerLeadTask::count();
+            $teleDistinctContacted = TelecallerLeadTask::whereNotNull('phoneno')->distinct('phoneno')->count('phoneno');
+            $telePendingCount = max(0, $totalTelecallerLeads - $teleDistinctContacted);
 
-            $taskCountsByEmp = TelecallerLeadTask::select('empcode', DB::raw('count(*) as cnt'))
-                ->groupBy('empcode')
-                ->pluck('cnt', 'empcode');
-
-            $allLeadsByEmp = TelecallerLead::select('empcode', 'applino')->get()->groupBy('empcode');
-
-            // Total allocated leads across the system
-            $totalAllocatedLeads = TelecallerLead::count();
-            $totalOutreachCalls = TelecallerLeadTask::count();
+            $teleTaskStages = DB::table('crm.telecaller_leads_tasks')
+                ->select('stage_name', DB::raw('count(*) as count'))
+                ->whereNotNull('stage_name')
+                ->groupBy('stage_name')
+                ->orderBy('count', 'desc')
+                ->get();
         }
 
-        // 4. Calculate counselor statistics for executive leaderboard (or single telecaller summary)
-        $telecallerLeaderboard = $telecallers->map(function ($emp) use ($leadCountsByEmp, $taskCountsByEmp, $allLeadsByEmp, $verifiedPaidAppNos) {
+        // Build individual telecaller stats for dropdown filtering and live JS switching
+        $telecallerStats = $telecallers->map(function ($emp) use ($leadCountsByEmp, $taskCountsByEmp, $contactedByEmp, $stagesRaw) {
             $empCode = (string)$emp->emp_code;
-            $allocatedCount = (int)($leadCountsByEmp[$empCode] ?? 0);
-            $completedCalls = (int)($taskCountsByEmp[$empCode] ?? 0);
-            
-            // Leads that have not had completed outreach calls yet
-            $pendingFollowups = max(0, $allocatedCount - $completedCalls);
-
-            // Fee paid conversions from finance.paydetails for this counselor's allocated leads
-            $empLeads = $allLeadsByEmp[$empCode] ?? collect();
-            $paidConversions = $empLeads->filter(fn($l) => $verifiedPaidAppNos->contains((string)$l->applino))->count();
-
-            $conversionRate = $allocatedCount > 0 ? round(($paidConversions / $allocatedCount) * 100, 1) : 0;
+            $leadsCount = (int)($leadCountsByEmp[$empCode] ?? 0);
+            $tasksCount = (int)($taskCountsByEmp[$empCode] ?? 0);
+            $contactedCount = (int)($contactedByEmp[$empCode] ?? 0);
+            $pendingCount = max(0, $leadsCount - $contactedCount);
+            $empStages = ($stagesRaw->get($empCode) ?? collect())->values();
 
             return (object)[
-                'emp_code'          => $empCode,
-                'name'              => $emp->full_name,
-                'email'             => $emp->ofc_mailid ?: ($emp->personal_mailid ?: 'N/A'),
-                'phone'             => $emp->phone_primary ?: 'N/A',
-                'allocated_leads'   => $allocatedCount,
-                'completed_calls'   => $completedCalls,
-                'pending_followups' => $pendingFollowups,
-                'paid_conversions'  => $paidConversions,
-                'conversion_rate'   => $conversionRate,
-                'status'            => $allocatedCount > 0 ? 'Active' : 'Standby',
+                'emp_code'        => $empCode,
+                'name'            => $emp->full_name,
+                'email'           => $emp->ofc_mailid ?: ($emp->personal_mailid ?: 'N/A'),
+                'phone'           => $emp->phone_primary ?: 'N/A',
+                'leads_count'     => $leadsCount,
+                'tasks_count'     => $tasksCount,
+                'contacted_count' => $contactedCount,
+                'pending_count'   => $pendingCount,
+                'stages'          => $empStages,
+                'status'          => $leadsCount > 0 ? 'Active' : 'Standby',
             ];
-        })->sortByDesc('paid_conversions')->values();
+        });
 
-        // Total conversions across telecaller pool
-        $totalTelecallerConversions = $telecallerLeaderboard->sum('paid_conversions');
-        $overallConversionRate = $totalAllocatedLeads > 0 ? round(($totalTelecallerConversions / $totalAllocatedLeads) * 100, 1) : 0;
-
-        // 5. Call disposition stage breakdown: scoped to this telecaller if role 4
-        $stageQuery = TelecallerLeadTask::select('stage_name', DB::raw('count(*) as count'))
-            ->whereNotNull('stage_name');
-
-        if ($isTelecaller) {
-            $stageQuery->where('empcode', $userEmpCode);
-        }
-
-        $stageBreakdown = $stageQuery->groupBy('stage_name')
-            ->orderByDesc('count')
-            ->pluck('count', 'stage_name');
-
-        if ($stageBreakdown->isEmpty()) {
-            $stageBreakdown = collect(['Initial Contact' => 0, 'Follow-up Scheduled' => 0, 'Completed' => 0]);
-        }
-
-        // 6. Interactive Employee Filter & Detailed Outreach Leads Table
-        $filterEmp = $isTelecaller ? $userEmpCode : $request->input('employee');
-        $search = trim($request->input('q', ''));
-
-        $detailQuery = TelecallerLead::with([
-            'employee',
-            'student.branch',
-            'student.program',
-            'tasks' => fn($q) => $q->latest('log_timestamp'),
-        ]);
+        // 3. Counselor Lead Outreach Directory List
+        $leadsQuery = DB::table('crm.telecaller_leads as tl')
+            ->leftJoin('master.employees as e', 'e.emp_code', '=', 'tl.empcode')
+            ->select(
+                'tl.applino',
+                'tl.phoneno',
+                'tl.empcode',
+                'tl.assigndatetime',
+                'tl.leadcount',
+                'e.full_name as emp_name',
+                'e.phone_primary as emp_phone',
+                'e.ofc_mailid as emp_email'
+            );
 
         if ($isTelecaller) {
-            $detailQuery->where('empcode', $userEmpCode);
-        } elseif ($filterEmp && $filterEmp !== 'all') {
-            $detailQuery->where('empcode', $filterEmp);
+            $leadsQuery->where('tl.empcode', $userEmpCode);
         }
 
-        if ($search !== '') {
-            $detailQuery->where(function ($q) use ($search) {
-                $q->where('applino', 'like', "%{$search}%")
-                  ->orWhere('phoneno', 'like', "%{$search}%")
-                  ->orWhere('crmid', 'like', "%{$search}%")
-                  ->orWhereHas('student', function ($sq) use ($search) {
-                      $sq->where('name', 'like', "%{$search}%");
-                  });
-            });
-        }
+        $telecallerLeadsList = $leadsQuery
+            ->orderBy('tl.leadcount', 'asc')
+            ->take(500)
+            ->get();
 
-        $leadsTable = $detailQuery->latest('assigndatetime')->paginate(20)->withQueryString();
+        // Batch load latest tasks and call counts for directory leads
+        $leadPhones = $telecallerLeadsList->pluck('phoneno')->filter()->unique()->values()->all();
+
+        $callCountsByPhone = DB::table('crm.telecaller_leads_tasks')
+            ->whereIn('phoneno', $leadPhones)
+            ->select('phoneno', DB::raw('count(*) as cnt'))
+            ->groupBy('phoneno')
+            ->pluck('cnt', 'phoneno');
+
+        $latestTasks = DB::table('crm.telecaller_leads_tasks')
+            ->whereIn('phoneno', $leadPhones)
+            ->orderBy('leadtaskid', 'desc')
+            ->get()
+            ->groupBy('phoneno');
+
+        $telecallerLeadsList = $telecallerLeadsList->map(function ($lead) use ($callCountsByPhone, $latestTasks) {
+            $phone = (string)$lead->phoneno;
+            $tasksForLead = $latestTasks->get($phone);
+            $latestTask = $tasksForLead ? $tasksForLead->first() : null;
+
+            $lead->call_count = (int)($callCountsByPhone[$phone] ?? 0);
+            $lead->latest_stage = $latestTask ? $latestTask->stage_name : 'Pending Call';
+            $lead->latest_calltime = $latestTask ? $latestTask->stage_calltime : null;
+            $lead->latest_duration = $latestTask ? $latestTask->stage_call_duration : null;
+            $lead->latest_remark = $latestTask ? ($latestTask->stage_remark ?: 'Call logged') : 'No calls recorded yet';
+            $lead->call_person = $latestTask ? $latestTask->stage_callperson : null;
+
+            return $lead;
+        });
 
         return view('crm::kpi.telecallerkpi', compact(
             'user',
@@ -197,17 +206,14 @@ class TelecallerKpiController extends Controller
             'isTelecaller',
             'roleMenus',
             'availableRoles',
-            'telecallers',
-            'telecallerLeaderboard',
-            'totalAllocatedLeads',
-            'totalOutreachCalls',
-            'totalTelecallerConversions',
-            'overallConversionRate',
-            'stageBreakdown',
-            'verifiedPaidAppNos',
-            'leadsTable',
-            'filterEmp',
-            'search'
+            'selectedTelecaller',
+            'totalTelecallerLeads',
+            'teleTasksCount',
+            'teleDistinctContacted',
+            'telePendingCount',
+            'teleTaskStages',
+            'telecallerStats',
+            'telecallerLeadsList'
         ));
     }
 }
