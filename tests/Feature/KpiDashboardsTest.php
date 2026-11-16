@@ -168,13 +168,25 @@ class KpiDashboardsTest extends TestCase
         $user = User::first();
         $this->assertNotNull($user);
 
-        $response = $this->actingAs($user)->post('/payu/initiate');
-        $response->assertStatus(200);
-        $response->assertSee('Admission Fee Settlement');
-        $response->assertSee('Official Admission Fee Receipt (Form VFSTR-REC)');
-        $response->assertDontSee('Choose a Payment Method');
-        $response->assertDontSee('Select UPI App');
-        $response->assertSee('Test Simulator: Mark as Paid without Real Gateway');
+        // If a 100% concession coupon is active, temporarily pause it so checkout view renders
+        $fullCoupons = CouponInfo::where('coupstatus', 'ACTIVE')->where('discountamount', '>=', 1200)->get();
+        foreach ($fullCoupons as $fc) {
+            $fc->update(['coupstatus' => 'PAUSED_TEST']);
+        }
+
+        try {
+            $response = $this->actingAs($user)->post('/payu/initiate');
+            $response->assertStatus(200);
+            $response->assertSee('Admission Fee Settlement');
+            $response->assertSee('Official Admission Fee Receipt (Form VFSTR-REC)');
+            $response->assertDontSee('Choose a Payment Method');
+            $response->assertDontSee('Select UPI App');
+            $response->assertSee('Test Simulator: Mark as Paid without Real Gateway');
+        } finally {
+            foreach ($fullCoupons as $fc) {
+                $fc->update(['coupstatus' => 'ACTIVE']);
+            }
+        }
     }
 
     public function test_payu_checkout_strictly_hides_test_simulator_in_production(): void
@@ -211,5 +223,15 @@ class KpiDashboardsTest extends TestCase
         // Revert environment
         app()->detectEnvironment(fn () => $originalEnv);
         config(['app.env' => $originalEnv, 'app.debug' => true]);
+    }
+
+    public function test_finance_paiddetails_tab_renders_successfully(): void
+    {
+        $user = User::first();
+        $this->assertNotNull($user);
+
+        $response = $this->actingAs($user)->get('/finance/paiddetails?tab=paiddetails');
+        $response->assertStatus(200);
+        $response->assertSee('Paid Details Ledger');
     }
 }

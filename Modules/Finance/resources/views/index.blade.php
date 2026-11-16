@@ -147,10 +147,12 @@
                                         }
                                     }
 
-                                    $programName = $student->branch?->branch_long_name 
-                                        ?? $student->branch?->branch_short_name 
-                                        ?? $student->program?->program_long_name 
+                                    $programName = data_get($student, 'branch.branch_long_name')
+                                        ?? data_get($student, 'branch.branch_short_name')
+                                        ?? data_get($student, 'program.program_long_name')
                                         ?? 'B.Tech Program';
+
+                                    $studentPhone = data_get($student, 'phoneno') ?: (data_get($student, 'mobile') ?: data_get($student, 'phone'));
                                 @endphp
                                 <tr class="finance-row">
                                     <td style="white-space: nowrap;">
@@ -158,8 +160,8 @@
                                     </td>
                                     <td style="white-space: nowrap;">
                                         <div style="font-weight: 700; color: #1e293b;">{{ $name }}</div>
-                                        @if(!empty($student->phoneno ?? $student->mobile))
-                                            <div style="font-size: 0.75rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                        @if(!empty($studentPhone))
+                                            <div style="font-size: 0.75rem; color: #64748b;">📞 {{ $studentPhone }}</div>
                                         @endif
                                     </td>
                                     <td style="white-space: nowrap;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: #334155;">{{ $appNo }}</span></td>

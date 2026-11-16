@@ -321,23 +321,14 @@
             </div>
         </div>
 
-        <!-- Direct Secure Admission Fee Settlement Form (No external PayU gateway redirect; zero 504 errors) -->
-        <form action="{{ route('payu.response') }}" method="POST" id="payuGatewayForm" onsubmit="const b=document.getElementById('btnPayNow'); const o=document.getElementById('processingOverlay'); if(b){ b.disabled=true; } if(o){ o.classList.add('active'); }">
-            @csrf
-            <input type="hidden" name="status" value="success">
-            <input type="hidden" name="txnid" value="{{ $txnid }}">
-            <input type="hidden" name="amount" value="{{ $amount }}">
-            <input type="hidden" name="udf1" value="{{ $applino }}">
-            <input type="hidden" name="udf4" value="{{ $params['udf4'] ?? 'KEDAR' }}">
-            <input type="hidden" name="udf5" value="{{ $params['udf5'] ?? '' }}">
-            <input type="hidden" name="mihpayid" value="VFSTR{{ date('His') }}{{ rand(1000, 9999) }}">
-            <input type="hidden" name="bank_ref_no" value="BANK{{ date('Ymd') }}{{ rand(1000, 9999) }}">
-            <input type="hidden" name="mode" value="Online Portal">
-            <input type="hidden" name="firstname" value="{{ $name }}">
-            <input type="hidden" name="email" value="{{ $email }}">
+        <!-- Official PayU Payment Gateway Form (Redirects directly to PayU) -->
+        <form action="{{ $gatewayUrl }}" method="POST" id="payuGatewayForm" onsubmit="const b=document.getElementById('btnPayNow'); const o=document.getElementById('processingOverlay'); if(b){ b.disabled=true; } if(o){ o.classList.add('active'); }">
+            @foreach($params as $paramKey => $paramValue)
+                <input type="hidden" name="{{ $paramKey }}" value="{{ $paramValue }}">
+            @endforeach
 
             <button type="submit" id="btnPayNow" class="btn-pay-now">
-                <span>💳 Confirm & Pay ₹{{ number_format($amount, 2) }} (Generate Official Receipt) &rarr;</span>
+                <span>💳 Proceed to PayU Gateway (₹{{ number_format($amount, 2) }}) &rarr;</span>
             </button>
         </form>
 
@@ -401,8 +392,8 @@
 
 <div class="processing-overlay" id="processingOverlay">
     <div class="spinner-ring"></div>
-    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Processing Admission Fee Settlement...</h3>
-    <p style="font-size: 0.84rem; color: #cbd5e1;">Generating digitally-verified fee receipt and unlocking Stage 2</p>
+    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Redirecting to PayU Payment Gateway...</h3>
+    <p style="font-size: 0.84rem; color: #cbd5e1;">Transferring securely to complete your admission fee payment of ₹{{ number_format($amount, 2) }}</p>
 </div>
 
 </body>

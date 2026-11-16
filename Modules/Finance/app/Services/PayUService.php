@@ -83,12 +83,15 @@ class PayUService
         $udf3 = $params['udf3'] ?? '';
         $udf4 = $params['udf4'] ?? '';
         $udf5 = $params['udf5'] ?? '';
+        $udf6 = $params['udf6'] ?? '';
+        $udf7 = $params['udf7'] ?? '';
+        $udf8 = $params['udf8'] ?? '';
+        $udf9 = $params['udf9'] ?? '';
+        $udf10 = $params['udf10'] ?? '';
 
-        // Reverse hash format: salt|status|udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
-        $keyString = $key . '|' . $txnid . '|' . $amount . '|' . $productinfo . '|' . $firstname . '|' . $email . '|' . $udf1 . '|' . $udf2 . '|' . $udf3 . '|' . $udf4 . '|' . $udf5;
-        $keyArray = explode('|', $keyString);
-        $reverseKeyArray = array_reverse($keyArray);
-        $reverseKeyString = implode('|', $reverseKeyArray);
+        // Official PayU reverse hash format:
+        // sha512(additionalCharges|salt|status|udf10|udf9|udf8|udf7|udf6|udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+        $reverseKeyString = $udf10 . '|' . $udf9 . '|' . $udf8 . '|' . $udf7 . '|' . $udf6 . '|' . $udf5 . '|' . $udf4 . '|' . $udf3 . '|' . $udf2 . '|' . $udf1 . '|' . $email . '|' . $firstname . '|' . $productinfo . '|' . $amount . '|' . $txnid . '|' . $key;
 
         if (!empty($params['additionalCharges'])) {
             $calcHash = strtolower(hash('sha512', $params['additionalCharges'] . '|' . $this->salt . '|' . $status . '|' . $reverseKeyString));

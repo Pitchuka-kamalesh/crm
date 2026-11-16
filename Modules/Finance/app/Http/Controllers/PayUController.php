@@ -179,9 +179,19 @@ class PayUController extends Controller
         }
 
         $isTestEnv = ((int) config('services.payu.env_prod', 0) === 0);
-        $userCancelled = ($errorMsg === 'Payment cancelled by candidate');
 
-        if ($status === 'success' || ($isTestEnv && !empty($applino) && !$userCancelled)) {
+        if ($status === 'success') {
+            // Verify hash if payload contains a response hash from PayU
+            if (!empty($payload['hash'])) {
+                $isHashValid = $this->payuService->verifyHash($payload);
+                if (!$isHashValid) {
+                    Log::warning('[PayU Response] Hash mismatch detected for txnid: ' . $txnid);
+                    if ($this->payuService->isProduction()) {
+                        return redirect()->route('dashboards.index', ['step' => 1])
+                            ->withErrors(['error' => 'Payment verification failed: Security signature mismatch from gateway.']);
+                    }
+                }
+            }
             $usedDefCoupon = $defCoupon ?: ($breakdown['def_coupon'] ?? '');
             $usedPerCoupon = $perCoupon ?: ($breakdown['per_coupon'] ?? '');
             $receiptNo = $this->recordSuccessfulPayment(

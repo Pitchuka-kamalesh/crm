@@ -2656,8 +2656,9 @@
                                                 <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
                                                 <td>
                                                     <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
-                                                    @if(!empty($student->phoneno ?? $student->mobile))
-                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    @php $sPhone = data_get($student, 'phoneno') ?: data_get($student, 'mobile'); @endphp
+                                                    @if(!empty($sPhone))
+                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $sPhone }}</div>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -3215,8 +3216,9 @@
                                                 <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
                                                 <td>
                                                     <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
-                                                    @if(!empty($student->phoneno ?? $student->mobile))
-                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    @php $sPhone = data_get($student, 'phoneno') ?: data_get($student, 'mobile'); @endphp
+                                                    @if(!empty($sPhone))
+                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $sPhone }}</div>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -3760,8 +3762,9 @@
                                                 <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 600; color: #334155;">{{ $sAppNo }}</span></td>
                                                 <td>
                                                     <div style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">{{ $sName }}</div>
-                                                    @if(!empty($student->phoneno ?? $student->mobile))
-                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $student->phoneno ?? $student->mobile }}</div>
+                                                    @php $sPhone = data_get($student, 'phoneno') ?: data_get($student, 'mobile'); @endphp
+                                                    @if(!empty($sPhone))
+                                                        <div style="font-size: 0.72rem; color: #64748b;">📞 {{ $sPhone }}</div>
                                                     @endif
                                                 </td>
                                                 <td>

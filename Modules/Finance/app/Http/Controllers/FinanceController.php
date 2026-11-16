@@ -85,6 +85,9 @@ class FinanceController extends Controller
                 $paidStudents->push((object)[
                     'applinano' => $applino,
                     'name' => 'Candidate ' . $applino,
+                    'phoneno' => null,
+                    'mobile' => null,
+                    'phone' => null,
                     'program' => null,
                     'branch' => null,
                     'stage1' => 'paid',
@@ -99,6 +102,9 @@ class FinanceController extends Controller
                 $paidStudents->push((object)[
                     'applinano' => $applino,
                     'name' => 'Candidate ' . $applino,
+                    'phoneno' => null,
+                    'mobile' => null,
+                    'phone' => null,
                     'program' => null,
                     'branch' => null,
                     'stage1' => 'paid',
