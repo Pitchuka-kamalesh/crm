@@ -1606,8 +1606,8 @@
                                             <span>via advertisement</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="checkbox" name="referee_by[]" value="via @by own" {{ in_array('via @by own', $savedRefs) ? 'checked' : '' }}>
-                                            <span>via @by own</span>
+                                            <input type="checkbox" name="referee_by[]" value="via @google search(by own)" {{ (in_array('via @google search(by own)', $savedRefs) || in_array('via @by own', $savedRefs)) ? 'checked' : '' }}>
+                                            <span>via @google search(by own)</span>
                                         </label>
                                         <label class="mockup-radio-label">
                                             <input type="checkbox" name="referee_by[]" value="via Emp vtstr" {{ in_array('via Emp vtstr', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
@@ -1771,108 +1771,125 @@
 
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">School / College Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / College Name" required>
+                                        <label class="mockup-label">School / College Name:</label>
+                                        <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / College Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Board of Study: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board of Study (e.g. BSEAP, CBSE, ICSE)" required>
+                                        <label class="mockup-label">Board of Study:</label>
+                                        <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board of Study (e.g. BSEAP, CBSE, ICSE)">
                                     </div>
                                 </div>
 
                                 <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Roll No / Hall Ticket No: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Roll / Hall Ticket No" required>
+                                        <label class="mockup-label">Roll No / Hall Ticket No:</label>
+                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Roll / Hall Ticket No">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030" required>
+                                        <label class="mockup-label">Passing Year:</label>
+                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
                                     </div>
                                 </div>
 
                                 <!-- EXACT DATABASE FIELDS: tenth_marks_type, tenth_marks_conducted, tenth_marks_earned, tenth_percentage -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Marks Type:</label>
                                         <select name="tenth_marks_type" id="tenth_marks_type" class="mockup-select" onchange="onTenthMarksTypeChange(this.value)">
                                             <option value="Marks" {{ ($academicDetails?->tenth_marks_type === 'Marks' || $academicDetails?->tenth_marks_type === 'marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Conducted: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()" required>
+                                        <label class="mockup-label">Marks Conducted:</label>
+                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()" required>
+                                        <label class="mockup-label">Marks Earned:</label>
+                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem; font-weight:600; color:#64748b;">(Auto-calculated, Min 60%)</span></label>
-                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
-                                        <div id="tenth_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 10th percentage must be at least 60% to proceed.</div>
+                                        <label class="mockup-label">Percentage (%):</label>
+                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- ================= SUBBOX 2: 12th / INTERMEDIATE / DIPLOMA INFO ================= -->
+                            <!-- ================= SUBBOX 2: 12th / INTERMEDIATE INFO ================= -->
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
-                                <h4 class="mockup-subbox-title">12th / Intermediate / Diploma Details</h4>
+                                <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
+                                <input type="hidden" name="course_choice" value="Inter">
 
-                                <div class="mockup-field-row-3">
+                                <!-- Row 1: Jr. College Name / Institute Name, Jr. City, Jr. State, Jr. District (4 Columns) -->
+                                <div class="mockup-field-row-4">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Course Choice: <span style="color:#ef4444;">*</span></label>
-                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="course_choice" value="Inter" checked>
-                                                <span>Inter</span>
-                                            </label>
-                                        </div>
+                                        <label class="mockup-label">Jr. College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
                                     </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Jr. City: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_city" class="mockup-input" value="{{ $academicDetails?->pu2_college_city }}" placeholder="Enter Jr. City" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Jr. State: <span style="color:#ef4444;">*</span></label>
+                                        <select name="inter_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ (($academicDetails?->pu2_college_state ?? '') == $s->state_name || (!$academicDetails && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Jr. District: <span style="color:#ef4444;">*</span></label>
+                                        <select name="inter_district" id="geo-inter-district-select" class="mockup-select" required>
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ (($academicDetails?->pu2_college_district ?? '') == $d->DISTRICT_NAME || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
 
+                                <!-- Row 2: Status (First Year / Second Year), Year, Hall Tkt (3 Columns) -->
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
-                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
+                                        <div class="mockup-radio-row" style="margin-top: 0.45rem;">
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year') ? 'checked' : '' }}>
+                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year' && $academicDetails?->pu2_current_status !== 'Second Year') ? 'checked' : '' }} required>
                                                 <span>First Year</span>
                                             </label>
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="Second year" {{ ($academicDetails?->pu2_current_status === 'Second year') ? 'checked' : '' }}>
+                                                <input type="radio" name="subset_choice" value="Second Year" {{ ($academicDetails?->pu2_current_status === 'Second year' || $academicDetails?->pu2_current_status === 'Second Year') ? 'checked' : '' }} required>
                                                 <span>Second Year</span>
                                             </label>
                                         </div>
                                     </div>
-
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="2026" min="2000" max="2030" required>
+                                        <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="e.g. 2026" min="2000" max="2030" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Hall Tkt:</label>
+                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket No (optional)">
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Junior College / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Junior College / Institute Name" required>
-                                    </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket / Roll No: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Inter / Diploma Roll No" required>
-                                    </div>
-                                </div>
-
-                                <!-- EXACT DATABASE FIELDS: pu2_marks_type, pu2_marks_conducted, pu2_marks_earned, pu2_percentage -->
+                                <!-- Row 3: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (4 Columns) -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
-                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)">
+                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)" required>
                                             <option value="Marks" {{ ($academicDetails?->pu2_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->pu2_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Conducted: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
                                         <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted ?? 1000 }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
@@ -1880,7 +1897,7 @@
                                         <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem; font-weight:600; color:#64748b;">(Auto-calculated, Min 60%)</span></label>
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span></label>
                                         <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
                                         <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
@@ -2005,7 +2022,6 @@
                                 const earned = parseFloat(document.getElementById('tenth_marks_earned')?.value || 0);
                                 const type = document.getElementById('tenth_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('tenth_percentage');
-                                const warning = document.getElementById('tenth_pct_warning');
                                 if (!pctInput) return;
 
                                 let pct = 0;
@@ -2019,9 +2035,6 @@
                                     }
                                 }
                                 pctInput.value = pct > 0 ? pct.toFixed(2) : '';
-                                if (warning) {
-                                    warning.style.display = (pct > 0 && pct < 60) ? 'block' : 'none';
-                                }
                             }
 
                             function onTenthMarksTypeChange(val) {
@@ -2070,17 +2083,33 @@
                                 calculatePu2Pct();
                             }
 
+                            function onInterStateChange(stateId) {
+                                const distSelect = document.getElementById('geo-inter-district-select');
+                                if (!distSelect) return;
+                                const currentSelectedDist = distSelect.value;
+                                distSelect.innerHTML = '<option value="">-- Select District --</option>';
+                                let foundSelected = false;
+                                allDistrictsData.forEach(function(d) {
+                                    if (!stateId || d.STATE_ID == stateId) {
+                                        const opt = document.createElement('option');
+                                        opt.value = d.DISTRICT_ID;
+                                        opt.textContent = d.DISTRICT_NAME;
+                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                            opt.selected = true;
+                                            foundSelected = true;
+                                        }
+                                        distSelect.appendChild(opt);
+                                    }
+                                });
+                                if (!foundSelected && distSelect.options.length > 1) {
+                                    distSelect.options[1].selected = true;
+                                }
+                            }
+
                             function validateStep2Form(form) {
-                                calculateTenthPct();
                                 calculatePu2Pct();
-                                const tenthPct = parseFloat(document.getElementById('tenth_percentage')?.value || 0);
                                 const pu2Pct = parseFloat(document.getElementById('pu2_percentage')?.value || 0);
 
-                                if (tenthPct < 60) {
-                                    alert('10th SSC percentage must be at least 60% to proceed to the next step (Current: ' + (tenthPct > 0 ? tenthPct.toFixed(2) + '%' : 'Not entered') + ').');
-                                    document.getElementById('tenth_marks_earned')?.focus();
-                                    return false;
-                                }
                                 if (pu2Pct < 60) {
                                     alert('12th / Intermediate percentage must be at least 60% to proceed to the next step (Current: ' + (pu2Pct > 0 ? pu2Pct.toFixed(2) + '%' : 'Not entered') + ').');
                                     document.getElementById('pu2_marks_earned')?.focus();
@@ -2096,6 +2125,10 @@
                                 }
                                 if (!document.getElementById('pu2_percentage')?.value) {
                                     calculatePu2Pct();
+                                }
+                                const interStateSelect = document.getElementById('geo-inter-state-select');
+                                if (interStateSelect && interStateSelect.value) {
+                                    onInterStateChange(interStateSelect.value);
                                 }
                             });
                         </script>

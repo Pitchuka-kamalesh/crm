@@ -723,23 +723,47 @@ class DashboardsController extends Controller
                 $nextStep = 2;
                 $msg = 'Stage 1: Personal Profile saved successfully!';
             } elseif ($step === 2) {
-                // Validation for Step 3
+                // Validation for Step 2 (Academic Info)
                 if (!$request->has('eval_type') && $request->has('tenth_marks_type')) {
                     $request->merge(['eval_type' => $request->input('tenth_marks_type')]);
                 }
 
                 $request->validate([
-                    'school_co_name' => ['required', 'string', 'max:255'],
-                    'boad_of_study' => ['required', 'string', 'max:255'],
-                    'roll_no' => ['required', 'string', 'max:50'],
-                    'passing_year' => ['required', 'integer', 'min:2000', 'max:2030'],
+                    // 10th School / SSC Details are not mandatory
+                    'school_co_name' => ['nullable', 'string', 'max:255'],
+                    'boad_of_study' => ['nullable', 'string', 'max:255'],
+                    'roll_no' => ['nullable', 'string', 'max:50'],
+                    'passing_year' => ['nullable', 'integer', 'min:2000', 'max:2030'],
                     'eval_type' => ['nullable', 'string'],
                     'tenth_marks_type' => ['nullable', 'string'],
+                    'tenth_marks_conducted' => ['nullable', 'numeric'],
+                    'tenth_marks_earned' => ['nullable', 'numeric'],
+                    'tenth_percentage' => ['nullable', 'numeric'],
+
+                    // 12th / Inter fields (all mandatory except hall ticket)
+                    'inter_college' => ['required', 'string', 'max:255'],
+                    'inter_city' => ['required', 'string', 'max:100'],
+                    'inter_state' => ['required'],
+                    'inter_district' => ['required'],
+                    'subset_choice' => ['required', 'string'],
+                    'inter_year' => ['required', 'integer', 'min:2000', 'max:2030'],
+                    'inter_hallticket' => ['nullable', 'string', 'max:50'],
+                    'pu2_marks_type' => ['required', 'string'],
+                    'pu2_marks_conducted' => ['required', 'numeric', 'min:1'],
+                    'pu2_marks_earned' => ['required', 'numeric', 'min:0'],
+                    'pu2_percentage' => ['required', 'numeric', 'min:60'],
                 ], [
-                    'school_co_name.required' => 'School / College name is required.',
-                    'boad_of_study.required' => 'Board of study is required.',
-                    'roll_no.required' => 'Roll / Hall ticket number is required.',
-                    'passing_year.required' => 'Passing year is required.',
+                    'inter_college.required' => 'Jr. College Name / Institute Name is required.',
+                    'inter_city.required' => 'Jr. City is required.',
+                    'inter_state.required' => 'Jr. State is required.',
+                    'inter_district.required' => 'Jr. District is required.',
+                    'subset_choice.required' => 'Please select First Year or Second Year.',
+                    'inter_year.required' => 'Year is required.',
+                    'pu2_marks_type.required' => 'Marks Type is required.',
+                    'pu2_marks_conducted.required' => 'Total Marks (Conducted) is required.',
+                    'pu2_marks_earned.required' => 'Marks Earned is required.',
+                    'pu2_percentage.required' => 'Percentage is required.',
+                    'pu2_percentage.min' => '12th / Intermediate percentage must be at least 60% to proceed.',
                 ]);
 
                 if ($crmStudent) {
@@ -800,28 +824,41 @@ class DashboardsController extends Controller
                         ? (float)$request->input('pu2_percentage')
                         : (($pu2Conducted > 0 && $pu2Earned) ? round(($pu2Earned / $pu2Conducted) * 100, 2) : $pu2MarksRaw);
 
-                    if ($tenthPct !== null && $tenthPct < 60.0) {
-                        throw \Illuminate\Validation\ValidationException::withMessages([
-                            'tenth_percentage' => '10th SSC percentage must be at least 60% to proceed to the next stage (Entered: ' . number_format($tenthPct, 2) . '%).',
-                        ]);
-                    }
-
                     if ($pu2Pct !== null && $pu2Pct < 60.0) {
                         throw \Illuminate\Validation\ValidationException::withMessages([
                             'pu2_percentage' => '12th / Intermediate percentage must be at least 60% to proceed to the next stage (Entered: ' . number_format($pu2Pct, 2) . '%).',
                         ]);
                     }
 
+                    // Resolve Jr. State and District
+                    $interStateInput = $request->input('inter_state') ?? $request->input('pu2_state');
+                    if (is_numeric($interStateInput)) {
+                        $sObj = State::where('state_id', (int)$interStateInput)->first();
+                        $interStateVal = $sObj?->state_name ?? 'Andhra Pradesh';
+                    } else {
+                        $interStateVal = (string)($interStateInput ?? 'Andhra Pradesh');
+                    }
+
+                    $interDistrictInput = $request->input('inter_district') ?? $request->input('pu2_district') ?? $request->input('pu2_college_district');
+                    if (is_numeric($interDistrictInput)) {
+                        $dObj = District::where('DISTRICT_ID', (int)$interDistrictInput)->first();
+                        $interDistrictVal = $dObj?->DISTRICT_NAME ?? 'Guntur';
+                    } else {
+                        $interDistrictVal = (string)($interDistrictInput ?? 'Guntur');
+                    }
+
+                    $interCityVal = $request->input('inter_city') ?? $request->input('pu2_college_city') ?? $request->input('inter_location') ?? '';
+
                     $academicPayload = [
                         'crmid' => $academicCrmId,
                         'phoneno' => $crmStudent->phoneno,
                         'progmid' => $crmStudent->programid,
                         'branchid' => $crmStudent->branchid,
-                        'tenth_school_name' => $tenthSchool,
-                        'tenth_study_board' => $tenthBoard,
+                        'tenth_school_name' => $tenthSchool ?: null,
+                        'tenth_study_board' => $tenthBoard ?: null,
                         'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location'),
                         'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location'),
-                        'tenth_roll_no' => $tenthRoll,
+                        'tenth_roll_no' => $tenthRoll ?: null,
                         'tenth_passed_year' => $tenthYear ?: null,
                         'tenth_marks_type' => $request->input('tenth_marks_type') ?? $evalType,
                         'tenth_marks_conducted' => $tenthConducted,
@@ -829,7 +866,8 @@ class DashboardsController extends Controller
                         'tenth_percentage' => $tenthPct,
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
                         'pu2_study_board' => $courseChoice,
-                        'pu2_college_city' => $request->input('inter_location') ?? $request->input('pu2_college_city'),
+                        'pu2_college_city' => $interCityVal,
+                        'pu2_college_district' => $interDistrictVal,
                         'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
                         'pu2_passed_year' => $request->filled('inter_year') ? (int) $request->input('inter_year') : ($request->filled('pu2_passed_year') ? (int) $request->input('pu2_passed_year') : null),
                         'pu2_marks_type' => $pu2Type,
@@ -842,6 +880,10 @@ class DashboardsController extends Controller
                         'log_datetime' => now(),
                         'log_ipaddress' => $request->ip(),
                     ];
+
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'pu2_college_state')) {
+                        $academicPayload['pu2_college_state'] = $interStateVal;
+                    }
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
                     if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {

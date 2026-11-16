@@ -40,6 +40,7 @@ class StudentAcademicDetail extends Model
         'pu2_study_board',
         'pu2_college_city',
         'pu2_college_district',
+        'pu2_college_state',
         'pu2_roll_no',
         'pu2_passed_year',
         'pu2_marks_type',
