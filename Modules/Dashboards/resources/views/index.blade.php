@@ -1514,142 +1514,14 @@
         <!-- STEP CONTENT PANEL -->
         <section class="step-panel-card">
 
-            <!-- ================= STAGE 1: FEE PAYMENT ================= -->
+            <!-- ================= STAGE 1: PERSONAL PROFILE ================= -->
             @if($activeStep === 1)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 1 of {{ count($stages) }} &bull; Seat Confirmation</div>
-                        <h3>
-                            <span>Seat Confirmation &amp; Admission Fee</span>
-                        </h3>
-                    </div>
-                    @if($isPaid)
-                        <span class="step-header-tag tag-success">✓ Fee Paid</span>
-                    @else
-                        <span class="step-header-tag tag-pending">Payment Pending</span>
-                    @endif
-                </div>
-
-                <div class="step-panel-body">
-                    <!-- FEE PAYMENT STATUS & ACTION -->
-                    <div class="section-box" style="text-align: center; padding: 1rem 1.25rem;">
-                        @if($isPaid)
-                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.5rem 1.75rem; max-width: 640px; margin: 0 auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12); text-align: center;">
-                                <div style="display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 0.75rem;">
-                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #16a34a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800;">
-                                        ✓
-                                    </div>
-                                    <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 38px; width: auto; object-fit: contain;">
-                                </div>
-                                <h3 style="font-size: 1.18rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem;">
-                                    Admission Registration Fee Paid &amp; Verified
-                                </h3>
-                                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
-                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to fill your personal profile.
-                                </p>
-                                <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
-                                        <span>📥 Download / View Official Receipt</span>
-                                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                    </a>
-                                    <a href="{{ route('dashboards.index', ['step' => 2]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                                        <span>Proceed to Step 2: Personal Profile &rarr;</span>
-                                    </a>
-                                </div>
-                            </div>
-                        @else
-                            @php
-                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? (string) session('student_applino', '');
-                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
-                            @endphp
-                            <div style="margin-bottom: 0.65rem; text-align: left;">
-                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
-                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely to lock your provisional registration and instantly receive your verified admission receipt.</p>
-                            </div>
-
-                            <!-- Admission Fee Summary Box with Concessions -->
-                            <div style="max-width: 480px; margin: 0 auto 0.75rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; text-align: left;">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
-                                    <span>Base Admission Fee:</span>
-                                    <strong style="color: #0f172a;">₹ {{ number_format($feeBreakdown['base_fee'], 2) }}</strong>
-                                </div>
-
-                                @if($feeBreakdown['def_discount'] > 0)
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
-                                        <span>Early Bird Concession ({{ $feeBreakdown['def_coupon'] }}):</span>
-                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['def_discount'], 2) }}</strong>
-                                    </div>
-                                @endif
-
-                                @if($feeBreakdown['per_discount'] > 0)
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
-                                        <span>Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
-                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
-                                    </div>
-                                @endif
-
-                                <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
-                                    <span style="font-weight: 600;">Total Concession Deducted:</span>
-                                    <strong style="color: #047857;">- ₹ <span id="dispTotalConcessionVal">{{ number_format($feeBreakdown['total_discount'], 2) }}</span></strong>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
-                                    <span>Payment Mode:</span>
-                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'Online Admission Settlement' }}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
-                                    <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
-                                    <span style="font-size: 1.15rem; font-weight: 800; color: #059669;">₹ <span id="dispTotalPayableVal">{{ number_format($feeBreakdown['net_payable'], 2) }}</span></span>
-                                </div>
-                            </div>
-
-                            <form id="payuSubmitForm" action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
-                                @csrf
-                                <input type="hidden" id="payuAmountInput" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
-                                <button type="submit" id="btnPayUGateway" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
-                                    @if($feeBreakdown['net_payable'] <= 0)
-                                        <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
-                                    @else
-                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> & Issue Receipt</span>
-                                    @endif
-                                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-
-                    <!-- DOWNLOAD CARDS -->
-                    
-
-                    <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
-                        <div style="display: flex; align-items: center; gap: 0.45rem;">
-                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Status:</span>
-                            @if($isPaid)
-                                <span class="step-header-tag tag-success">✓ Fee Paid</span>
-                            @else
-                                <span class="step-header-tag tag-pending">Payment Pending</span>
-                            @endif
-                        </div>
-                        @if($isPaid)
-                            <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
-                                <span>Proceed to Step 2: {{ $stages[2]['title'] }} &rarr;</span>
-                            </a>
-                        @else
-                            <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 2">
-                                <span>🔒 Step 2: {{ $stages[2]['title'] }} (Locked until Fee Payment)</span>
-                            </button>
-                        @endif
-                    </div>
-                </div>
-
-            <!-- ================= STAGE 2: PERSONAL INFO (SEPARATE STEP 2) ================= -->
-            @elseif($activeStep === 2)
                 <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
                     <!-- CARD 1: 2. PERSONAL DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <h3 class="mockup-card-title">2. Personal Details</h3>
-                            @if($stages[2]['status'] === 'completed')
+                            <h3 class="mockup-card-title">1. {{ $stages[1]['title'] ?? 'Personal Profile' }}</h3>
+                            @if(($stages[1]['status'] ?? '') === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
                                 <span class="step-header-tag tag-pending" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">In Progress</span>
@@ -1658,7 +1530,7 @@
 
                         <form action="{{ route('dashboards.save-step') }}" method="POST">
                             @csrf
-                            <input type="hidden" name="step" value="2">
+                            <input type="hidden" name="step" value="1">
 
                             <!-- Row 1: Candidate Name & Parent Name (2 Columns) -->
                             <div class="mockup-field-row-2">
@@ -1676,11 +1548,11 @@
                             <div class="mockup-field-row-2" style="margin-top: 1rem;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Student Number: <span style="color:#ef4444;">*</span></label>
-                                    <input type="tel" name="student_number" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($crmStudent?->phoneno ?: ($personalInfo?->phoneno ?: ($user?->phnno ?: '')))), -10) }}" placeholder="Enter 10-digit Student Number" maxlength="10" pattern="[0-9]{10}" required>
+                                    <input type="tel" name="student_number" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($crmStudent?->phoneno ?: ($personalInfo?->phoneno ?: ($user?->phnno ?: '')))), -10) }}" placeholder="Enter 10-digit Student Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" required>
                                 </div>
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">Parent Phone Number:</label>
-                                    <input type="tel" name="parent_phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: '')), -10) }}" placeholder="Enter 10-digit Parent Phone Number" maxlength="10" pattern="[0-9]{10}">
+                                    <label class="mockup-label">Parent Phone Number: <span style="color:#ef4444;">*</span></label>
+                                    <input type="tel" name="parent_phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: '')), -10) }}" placeholder="Enter 10-digit Parent Phone Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" required>
                                 </div>
                             </div>
 
@@ -1688,7 +1560,7 @@
                             <div class="mockup-field-row-3" style="margin-top: 1rem; align-items: start;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Date of Birth: <span style="color:#ef4444;">*</span></label>
-                                    <input type="date" name="dob" id="studentDobInput" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" max="{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}" onchange="if(this.value > '{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}') { this.value = ''; }" required>
+                                    <input type="date" name="dob" id="studentDobInput" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" max="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" onchange="if(this.value > '{{ \Carbon\Carbon::now()->format('Y-m-d') }}') { this.value = ''; alert('Date of Birth cannot be a future date.'); }" required>
                                 </div>
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Gender: <span style="color:#ef4444;">*</span></label>
@@ -1800,17 +1672,14 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Pincode: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pincode" class="mockup-input" value="{{ $personalInfo?->pincode }}" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}" required>
+                                        <input type="text" name="pincode" class="mockup-input" value="{{ $personalInfo?->pincode }}" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" required>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
-                                <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
-                                    &larr; Stage 1: {{ $stages[1]['title'] }}
-                                </a>
+                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
                                 <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                    <span>Save Personal Info &amp; Proceed to Stage 3 &rarr;</span>
+                                    <span>Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
                                 </button>
                             </div>
                         </form>
@@ -1876,23 +1745,23 @@
                     </div>
                 </div>
 
-            <!-- ================= STAGE 3: ACADEMIC DETAILS (SEPARATE STEP 3) ================= -->
-            @elseif($activeStep === 3)
+            <!-- ================= STAGE 2: ACADEMIC DETAILS ================= -->
+            @elseif($activeStep === 2)
                 <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
                     <!-- CARD 2: 3. EDUCATION DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <h3 class="mockup-card-title" id="step3-card-title" style="margin: 0;">3. Education Details</h3>
-                            @if($stages[3]['status'] === 'completed')
+                            <h3 class="mockup-card-title" id="step2-card-title" style="margin: 0;">2. {{ $stages[2]['title'] ?? 'Education Details' }}</h3>
+                            @if(($stages[2]['status'] ?? '') === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
                                 <span class="step-header-tag tag-pending" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">In Progress</span>
                             @endif
                         </div>
 
-                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep3Form(this);">
+                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep2Form(this);">
                             @csrf
-                            <input type="hidden" name="step" value="3">
+                            <input type="hidden" name="step" value="2">
                             <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
                             <input type="hidden" name="eval_type" id="eval_type" value="{{ $academicDetails?->tenth_marks_type ?? 'Marks' }}">
 
@@ -2102,11 +1971,11 @@
 
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
-                                <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev" style="text-decoration: none;">
-                                    &larr; Stage 2: {{ $stages[2]['title'] }}
+                                <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
+                                    &larr; Stage 1: {{ $stages[1]['title'] ?? 'Personal Profile' }}
                                 </a>
                                 <button type="submit" class="btn-step-next" style="background: #0f2744;">
-                                    <span>Save Academic Info &amp; Proceed to Stage 4 &rarr;</span>
+                                    <span>Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
                                 </button>
                             </div>
                         </form>
@@ -2201,7 +2070,7 @@
                                 calculatePu2Pct();
                             }
 
-                            function validateStep3Form(form) {
+                            function validateStep2Form(form) {
                                 calculateTenthPct();
                                 calculatePu2Pct();
                                 const tenthPct = parseFloat(document.getElementById('tenth_percentage')?.value || 0);
@@ -2233,25 +2102,25 @@
                     </div>
                 </div>
 
-            <!-- ================= STAGE 4: APPLICATION UPLOAD (master.menus: CRMM0006) ================= -->
-            @elseif($activeStep === 4)
+            <!-- ================= STAGE 3: APPLICATION UPLOAD (CRMM0006) ================= -->
+            @elseif($activeStep === 3)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 4 of {{ count($stages) }} &bull; Document Verification</div>
-                        <h3>{{ $stages[4]['title'] }}</h3>
+                        <div class="step-panel-kicker">Stage 3 of {{ count($stages) }} &bull; Document Verification</div>
+                        <h3>{{ $stages[3]['title'] ?? 'Document upload' }}</h3>
                         <p>Upload and submit required academic certificates, identity documents, and photograph.</p>
                     </div>
-                    @if($stages[4]['status'] === 'completed')
+                    @if(($stages[3]['status'] ?? '') === 'completed')
                         <span class="step-header-tag tag-success">✓ Uploaded</span>
                     @else
                         <span class="step-header-tag tag-pending">In Progress</span>
                     @endif
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body" id="stage4-upload-form">
+                <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body" id="stage3-upload-form">
                     @csrf
-                    <input type="hidden" name="step" value="4">
-                    <input type="hidden" name="degree_level" id="stage4_degree_level_input" value="{{ $degreeLevel ?? 'btech' }}">
+                    <input type="hidden" name="step" value="3">
+                    <input type="hidden" name="degree_level" id="stage3_degree_level_input" value="{{ $degreeLevel ?? 'btech' }}">
 
                     @php
                         $docDefinitions = [
@@ -2392,17 +2261,17 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
-                            &larr; Stage 3: {{ $stages[3]['title'] }}
+                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
+                            &larr; Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Save Documents &amp; Proceed to Stage 5: {{ $stages[5]['title'] }} &rarr;</span>
+                            <span>Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
                         </button>
                     </div>
 
                     <script>
-                        function setStage4DegreeLevel(level) {
-                            const hiddenInput = document.getElementById('stage4_degree_level_input');
+                        function setStage3DegreeLevel(level) {
+                            const hiddenInput = document.getElementById('stage3_degree_level_input');
                             if (hiddenInput) hiddenInput.value = level;
 
                             // Filter cards: B.Tech shows only 10th, Inter, Aadhaar, Photo, TC, Conduct
@@ -2456,10 +2325,141 @@
                         }
 
                         document.addEventListener('DOMContentLoaded', function() {
-                            setStage4DegreeLevel('{{ $degreeLevel ?? 'btech' }}');
+                            setStage3DegreeLevel('{{ $degreeLevel ?? 'btech' }}');
                         });
                     </script>
                 </form>
+
+            <!-- ================= STAGE 4: FEE PAYMENT ================= -->
+            @elseif($activeStep === 4)
+                <div class="step-panel-header">
+                    <div>
+                        <div class="step-panel-kicker">Stage 4 of {{ count($stages) }} &bull; Seat Confirmation</div>
+                        <h3>
+                            <span>{{ $stages[4]['title'] ?? 'Fee Payment' }}</span>
+                        </h3>
+                    </div>
+                    @if($isPaid)
+                        <span class="step-header-tag tag-success">✓ Fee Paid</span>
+                    @else
+                        <span class="step-header-tag tag-pending">Payment Pending</span>
+                    @endif
+                </div>
+
+                <div class="step-panel-body">
+                    <!-- FEE PAYMENT STATUS & ACTION -->
+                    <div class="section-box" style="text-align: center; padding: 1rem 1.25rem;">
+                        @if($isPaid)
+                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.5rem 1.75rem; max-width: 640px; margin: 0 auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12); text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 0.75rem;">
+                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #16a34a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800;">
+                                        ✓
+                                    </div>
+                                    <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 38px; width: auto; object-fit: contain;">
+                                </div>
+                                <h3 style="font-size: 1.18rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem;">
+                                    Admission Registration Fee Paid &amp; Verified
+                                </h3>
+                                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
+                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to exam slot booking.
+                                </p>
+                                <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
+                                        <span>📥 Download / View Official Receipt</span>
+                                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                    <a href="{{ route('dashboards.index', ['step' => 5]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                                        <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                                    </a>
+                                </div>
+                            </div>
+                        @else
+                            @php
+                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? (string) session('student_applino', '');
+                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
+                            @endphp
+                            <div style="margin-bottom: 0.65rem; text-align: left;">
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
+                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely to lock your provisional registration and instantly receive your verified admission receipt.</p>
+                            </div>
+
+                            <!-- Admission Fee Summary Box with Concessions -->
+                            <div style="max-width: 480px; margin: 0 auto 0.75rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; text-align: left;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
+                                    <span>Base Admission Fee:</span>
+                                    <strong style="color: #0f172a;">₹ {{ number_format($feeBreakdown['base_fee'], 2) }}</strong>
+                                </div>
+
+                                @if($feeBreakdown['def_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
+                                        <span>Early Bird Concession ({{ $feeBreakdown['def_coupon'] }}):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['def_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                @if($feeBreakdown['per_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
+                                        <span>Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
+                                    <span style="font-weight: 600;">Total Concession Deducted:</span>
+                                    <strong style="color: #047857;">- ₹ <span id="dispTotalConcessionVal">{{ number_format($feeBreakdown['total_discount'], 2) }}</span></strong>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
+                                    <span>Payment Mode:</span>
+                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'Online Admission Settlement' }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
+                                    <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: #059669;">₹ <span id="dispTotalPayableVal">{{ number_format($feeBreakdown['net_payable'], 2) }}</span></span>
+                                </div>
+                            </div>
+
+                            <form id="payuSubmitForm" action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
+                                @csrf
+                                <input type="hidden" id="payuAmountInput" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
+                                <button type="submit" id="btnPayUGateway" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
+                                    @if($feeBreakdown['net_payable'] <= 0)
+                                        <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
+                                    @else
+                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> & Issue Receipt</span>
+                                    @endif
+                                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    <!-- DOWNLOAD CARDS -->
+                    
+
+                    <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
+                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev" style="text-decoration: none;">
+                            &larr; Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }}
+                        </a>
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Status:</span>
+                            @if($isPaid)
+                                <span class="step-header-tag tag-success">✓ Fee Paid</span>
+                            @else
+                                <span class="step-header-tag tag-pending">Payment Pending</span>
+                            @endif
+                        </div>
+                        @if($isPaid)
+                            <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
+                                <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                            </a>
+                        @else
+                            <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 5">
+                                <span>🔒 Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} (Locked until Fee Payment)</span>
+                            </button>
+                        @endif
+                    </div>
+                </div>
 
             <!-- ================= STAGE 5: EXAM SLOT BOOKING (master.menus: EXAM00002) ================= -->
             @elseif($activeStep === 5)
@@ -2614,7 +2614,7 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Document upload' }}
+                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
                             <span>{{ $isAppInExamSchedule ? 'Proceed to Stage 6: Application Download &rarr;' : 'Confirm Slot & Proceed to Stage 6: ' . ($stages[6]['title'] ?? 'Application Download') . ' &rarr;' }}</span>
@@ -3356,5 +3356,113 @@
             });
         });
     </script>
+
+    @if(!$hasAcceptedTerms)
+        <!-- ================= TERMS & CONDITIONS POPUP MODAL ================= -->
+        <div id="termsConditionsModalOverlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1.25rem;">
+            <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                
+                <!-- Modal Header -->
+                <div style="background: linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 0.85rem;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                        📜
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.12rem; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;">Terms &amp; Conditions Agreement</h3>
+                        <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #cbd5e1;">VFSTR Vignan University &bull; Admissions Onboarding</p>
+                    </div>
+                </div>
+
+                <!-- Modal Body with 3 Sample Lines -->
+                <div style="padding: 1.5rem 1.65rem; color: #334155; font-size: 0.88rem; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
+                    <p style="font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 0.85rem;">Please review and confirm your acceptance of the admission terms before proceeding:</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #3b82f6;">
+                            <span style="font-weight: 800; color: #2563eb; font-size: 0.85rem; line-height: 1.4;">1.</span>
+                            <span style="color: #334155; font-size: 0.84rem;">I confirm that all personal, contact, academic, and category details provided by me in this application are accurate and authentic to the best of my knowledge.</span>
+                        </div>
+
+                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #10b981;">
+                            <span style="font-weight: 800; color: #059669; font-size: 0.85rem; line-height: 1.4;">2.</span>
+                            <span style="color: #334155; font-size: 0.84rem;">I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.</span>
+                        </div>
+
+                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #f59e0b;">
+                            <span style="font-weight: 800; color: #d97706; font-size: 0.85rem; line-height: 1.4;">3.</span>
+                            <span style="color: #334155; font-size: 0.84rem;">I understand that providing any false, incomplete, or misleading information will result in immediate cancellation of my admission and forfeiture of fees.</span>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox (Ticked by default as requested) -->
+                    <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;">
+                        <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none; margin: 0;">
+                            <input type="checkbox" id="termsAgreementCheckbox" checked onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a;">I have read, understood, and accept all the terms and conditions stated above.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div style="padding: 1rem 1.65rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
+                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
+                        <span>I Agree &amp; Continue &rarr;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleTermsSubmitBtn(chk) {
+                const btn = document.getElementById('btnAcceptTermsModal');
+                if (!btn) return;
+                if (chk.checked) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                }
+            }
+
+            function submitTermsAgreement() {
+                const chk = document.getElementById('termsAgreementCheckbox');
+                if (chk && !chk.checked) {
+                    alert('Please tick the checkbox to agree to the terms and conditions.');
+                    return;
+                }
+                const btn = document.getElementById('btnAcceptTermsModal');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Saving agreement...';
+                }
+
+                fetch('{{ route("dashboards.accept-terms") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ terms: 'yes' })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const overlay = document.getElementById('termsConditionsModalOverlay');
+                    if (overlay) {
+                        overlay.style.transition = 'opacity 0.25s ease-out';
+                        overlay.style.opacity = '0';
+                        setTimeout(() => { overlay.style.display = 'none'; }, 250);
+                    }
+                })
+                .catch(err => {
+                    const overlay = document.getElementById('termsConditionsModalOverlay');
+                    if (overlay) overlay.style.display = 'none';
+                });
+            }
+        </script>
+    @endif
 </body>
 </html>

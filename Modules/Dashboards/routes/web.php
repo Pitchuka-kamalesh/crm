@@ -17,6 +17,7 @@ Route::get('/application/{id}/download', [ApplicationController::class, 'downloa
 
 Route::middleware(['auth'])->group(function () {
     // Multi-step Student Onboarding
+    Route::post('dashboards/accept-terms', [DashboardsController::class, 'acceptTerms'])->name('dashboards.accept-terms');
     Route::post('dashboards/save-step', [DashboardsController::class, 'saveStep'])->name('dashboards.save-step');
     Route::post('dashboards/save-education', [DashboardsController::class, 'saveEducation'])->name('dashboards.save-education');
     Route::post('dashboards/autosave', [DashboardsController::class, 'autosave'])->name('dashboards.autosave');

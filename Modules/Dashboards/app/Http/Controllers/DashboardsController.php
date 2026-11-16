@@ -21,6 +21,7 @@ use Modules\Auth\Services\RoleService;
 use Modules\Crm\Services\CrmIdService;
 use Modules\Finance\Services\CouponService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,9 +38,12 @@ class DashboardsController extends Controller
     {
         $user = Auth::user();
         $usercode = $user?->usercode ?? '';
-        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? $user?->phone ?? $user?->mobile ?? '');
         if (strlen($cleanPhone) > 10) {
             $cleanPhone = substr($cleanPhone, -10);
+        }
+        if (!$cleanPhone && is_numeric($usercode) && strlen($usercode) === 10) {
+            $cleanPhone = $usercode;
         }
 
         // Active step (1 through 7, default 1)
@@ -59,10 +63,9 @@ class DashboardsController extends Controller
         } catch (\Throwable $e) {}
 
         $appNo = $crmStudent?->applinano ?: ($usercode ?: '');
-        $regNo = ($crmStudent?->std_status === 'Admitted' || $crmStudent?->stage1 === 'paid') ? ($crmStudent?->applinano ?: '') : '';
         $displayName = trim((string) ($crmStudent?->name ?: ($user?->name ?: 'Applicant')));
 
-        // Resolve payment status: Check crm.student_registration.stage1, finance.paydetails, and finance.receiptdetails
+        // Resolve payment status: Check crm.student_registration.stage4/stage1, finance.paydetails, and finance.receiptdetails
         $hasPaidRecord = false;
         try {
             if ($appNo && $appNo !== '0') {
@@ -76,33 +79,45 @@ class DashboardsController extends Controller
             }
         } catch (\Throwable $e) {}
 
-        if ($hasPaidRecord && $crmStudent && $crmStudent->stage1 !== 'paid') {
+        if ($hasPaidRecord && $crmStudent && $crmStudent->stage4 !== 'paid') {
             try {
-                $crmStudent->update(['stage1' => 'paid']);
+                $crmStudent->update(['stage4' => 'paid', 'stage1' => 'paid']);
             } catch (\Throwable $e) {}
         }
 
-        if ($hasPaidRecord && !$crmStudent && $cleanPhone) {
+        // Ensure CRM student registration record exists for this student candidate
+        if (!$crmStudent && $cleanPhone) {
             try {
-                $crmStudent = CrmStudentRegistration::create([
-                    'applinano' => ($appNo && $appNo !== '0') ? $appNo : ('VU2026' . substr($cleanPhone, -6)),
-                    'name' => $displayName ?: 'Candidate',
-                    'phoneno' => $cleanPhone,
-                    'stage1' => 'paid',
-                    'stage2' => 'pending',
-                    'std_status' => 'Admitted',
-                    'campuscode' => 'VAD',
-                    'programlevel' => 'UG',
-                    'log_userid' => ($appNo && $appNo !== '0') ? $appNo : 'PORTAL',
-                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
-                    'log_timestamp' => now(),
-                ]);
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                    ? $appNo
+                    : ('VU2026' . substr($cleanPhone, -6));
+                $crmStudent = CrmStudentRegistration::firstOrCreate(
+                    ['phoneno' => $cleanPhone],
+                    [
+                        'applinano' => $appliCandidate,
+                        'name' => ($displayName && $displayName !== 'Applicant') ? $displayName : ($user?->name ?: $cleanPhone),
+                        'phoneno' => $cleanPhone,
+                        'emailid' => $user?->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
+                        'stage1' => $hasPaidRecord ? 'paid' : 'pending',
+                        'stage2' => 'pending',
+                        'std_status' => $hasPaidRecord ? 'Admitted' : 'Registered',
+                        'campuscode' => 'VAD',
+                        'programlevel' => 'UG',
+                        'log_userid' => $appliCandidate,
+                        'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                        'log_timestamp' => now(),
+                    ]
+                );
                 $appNo = $crmStudent->applinano;
                 if ($user && ($user->usercode === '0' || empty($user->usercode))) {
                     $user->update(['usercode' => $appNo]);
                 }
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+                Log::error('Could not ensure crmStudent in index: ' . $e->getMessage());
+            }
         }
+
+        $regNo = ($crmStudent?->std_status === 'Admitted' || $crmStudent?->stage4 === 'paid' || $crmStudent?->stage1 === 'paid') ? ($crmStudent?->applinano ?: '') : '';
 
         // Check Exam Slot Booking from finance.exam_schedule
         $examSchedule = null;
@@ -117,49 +132,9 @@ class DashboardsController extends Controller
             Log::warning('Could not load exam schedule: ' . $e->getMessage());
         }
 
-        // Validation gate: Enforce sequential step unlocking based on real DB status
-        $isStage1Paid = ($crmStudent && $crmStudent->stage1 === 'paid') || $hasPaidRecord;
-        $isStage2Done = ($crmStudent && ($crmStudent->stage2 === 'completed' || $crmStudent->stage2 === 'paid'));
-        $isStage3Done = ($crmStudent && ($crmStudent->stage3 === 'completed' || $crmStudent->stage3 === 'paid'));
-        $isStage4Done = ($crmStudent && ($crmStudent->stage4 === 'completed' || $crmStudent->stage4 === 'paid'));
-        $isStage5Done = ($crmStudent && ($crmStudent->stage5 === 'completed' || $crmStudent->stage5 === 'paid')) || !empty($examSchedule);
-        $isStage6Done = ($crmStudent && ($crmStudent->stage6 === 'completed' || $crmStudent->stage6 === 'paid'));
-
-        // If Stage 1 payment is not completed, block access to Steps 2+
-        if ($activeStep > 1 && !$isStage1Paid) {
-            return redirect()->route('dashboards.index', ['step' => 1])
-                ->with('warning', 'Please complete the Admission Fee Payment in Step 1 to unlock your Personal Profile and further onboarding steps.');
-        }
-
-        // If Stage 2 is not completed, block access to Step 3+
-        if ($activeStep > 2 && !$isStage2Done) {
-            return redirect()->route('dashboards.index', ['step' => 2])
-                ->with('warning', 'Please complete your Personal Profile in Step 2 before proceeding to Academic Info.');
-        }
-
-        // If Stage 3 is not completed, block access to Step 4+
-        if ($activeStep > 3 && !$isStage3Done) {
-            return redirect()->route('dashboards.index', ['step' => 3])
-                ->with('warning', 'Please complete your Academic Info in Step 3 before proceeding.');
-        }
-
-        // If Stage 4 is not completed, block access to Step 5+
-        if ($activeStep > 4 && !$isStage4Done) {
-            return redirect()->route('dashboards.index', ['step' => 4])
-                ->with('warning', 'Please complete Document Upload in Step 4 before booking Exam Slot.');
-        }
-
-        // If Stage 5 is not completed, block access to Step 6+
-        if ($activeStep > 5 && !$isStage5Done) {
-            return redirect()->route('dashboards.index', ['step' => 5])
-                ->with('warning', 'Please complete Exam Slot Booking in Step 5 before proceeding.');
-        }
-
-        // If Stage 6 is not completed, block access to Step 7
-        if ($activeStep > 6 && !$isStage6Done) {
-            return redirect()->route('dashboards.index', ['step' => 6])
-                ->with('warning', 'Please complete Application Download in Step 6 before viewing V-SAT Results.');
-        }
+        // Validation gate: Check if student has paid admission fee (applicable at Step 4)
+        $isPaid = ($crmStudent && ($crmStudent->stage4 === 'paid' || $crmStudent->stage1 === 'paid')) || $hasPaidRecord;
+        $isStage1Paid = $isPaid;
 
         // Always display Candidate / Student role
         $roleName = (RoleService::isStudent($user?->role_id) || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
@@ -274,10 +249,10 @@ class DashboardsController extends Controller
         // Safe 7-stage fallback if database roles/menus are not yet seeded
         if (empty($stageMeta)) {
             $stageMeta = [
-                1 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
-                2 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
-                3 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
-                4 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Document upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
+                1 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
+                2 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
+                3 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Document upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
+                4 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
                 5 => ['menu_id' => 123, 'menu_code' => 'EXAM00002', 'title' => 'Exam Slot Booking', 'subtitle' => 'Select Date & Time Slot for V-SAT / Entrance Exam', 'icon' => '📅', 'lock_status' => 0],
                 6 => ['menu_id' => 122, 'menu_code' => 'CRMM0010', 'title' => 'Application Download', 'subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥', 'lock_status' => 0],
                 7 => ['menu_id' => 124, 'menu_code' => 'CRMM0007', 'title' => 'V-SAT Results', 'subtitle' => 'Official V-SAT Scorecard & Merit Ranking', 'icon' => '🏆', 'lock_status' => 0],
@@ -287,16 +262,23 @@ class DashboardsController extends Controller
         ksort($stageMeta);
         $totalSteps = count($stageMeta);
 
-        // Calculate stage statuses strictly from crmStudent DB columns
+        // Calculate stage statuses dynamically from crmStudent DB columns and actual completed data
         $stages = [];
         foreach ($stageMeta as $i => $meta) {
             $col = 'stage' . $i;
             $val = $crmStudent ? (string)$crmStudent->{$col} : '';
-            // For stage 1, 'paid' or $isStage1Paid is completed; for other stages, 'completed' or 'paid' is completed
-            if ($i === 1) {
-                $isCompleted = ($val === 'paid' || $isStage1Paid);
-            } elseif ($i === 5) {
+            $mCode = $meta['menu_code'] ?? '';
+
+            if ($mCode === 'FINA0003') {
+                $isCompleted = ($val === 'paid' || $val === 'completed' || $isPaid || ($crmStudent && ($crmStudent->stage4 === 'paid' || $crmStudent->stage1 === 'paid')));
+            } elseif ($mCode === 'EXAM00002') {
                 $isCompleted = ($val === 'completed' || $val === 'paid' || !empty($examSchedule));
+            } elseif ($mCode === 'CRMM0004') {
+                $isCompleted = ($val === 'completed' || ($personalInfo !== null && !empty($personalInfo->gender)));
+            } elseif ($mCode === 'CRMM0005') {
+                $isCompleted = ($val === 'completed' || $academicDetails !== null);
+            } elseif ($mCode === 'CRMM0006') {
+                $isCompleted = ($val === 'completed' || !empty($uploadedDocs));
             } else {
                 $isCompleted = ($val === 'completed' || $val === 'paid');
             }
@@ -307,28 +289,27 @@ class DashboardsController extends Controller
                 'icon'              => $meta['icon'],
                 'status'            => $isCompleted ? 'completed' : 'pending',
                 'db_field'          => $col,
-                'db_value'          => $val ?: ($i === 1 ? 'not_paid' : 'NA'),
+                'db_value'          => $val ?: ($mCode === 'FINA0003' ? ($isCompleted ? 'paid' : 'not_paid') : 'NA'),
                 'menu_id'           => $meta['menu_id'] ?? null,
                 'menu_code'         => $meta['menu_code'] ?? null,
                 'is_locked_by_menu' => !empty($meta['lock_status']),
             ];
         }
 
-        // Enforce maximum allowed step based on actual completion
-        if (!$isStage1Paid) {
-            $maxAllowedStep = 1;
-        } elseif (!$isStage2Done) {
-            $maxAllowedStep = 2;
-        } elseif (!$isStage3Done) {
-            $maxAllowedStep = 3;
-        } elseif (!$isStage4Done) {
-            $maxAllowedStep = 4;
-        } elseif (!$isStage5Done) {
-            $maxAllowedStep = 5;
-        } elseif (!$isStage6Done) {
-            $maxAllowedStep = 6;
-        } else {
-            $maxAllowedStep = $totalSteps;
+        // Enforce maximum allowed step based on actual sequential completion of stages
+        $maxAllowedStep = 1;
+        for ($s = 1; $s <= $totalSteps; $s++) {
+            if (isset($stages[$s]) && $stages[$s]['status'] === 'completed') {
+                $maxAllowedStep = min($totalSteps, $s + 1);
+            } else {
+                break;
+            }
+        }
+
+        if ($activeStep > $maxAllowedStep) {
+            $prevStepTitle = $stages[$maxAllowedStep]['title'] ?? "Step {$maxAllowedStep}";
+            return redirect()->route('dashboards.index', ['step' => $maxAllowedStep])
+                ->with('warning', "Please complete {$prevStepTitle} before proceeding to the next step.");
         }
 
         // Overall progress percentage
@@ -359,7 +340,10 @@ class DashboardsController extends Controller
             Log::warning('Could not build application data: ' . $e->getMessage());
         }
 
+        $hasAcceptedTerms = ($personalInfo && $personalInfo->terms_accepted === 'yes');
+
         return view('dashboards::index', compact(
+            'hasAcceptedTerms',
             'user',
             'student',
             'crmStudent',
@@ -397,15 +381,107 @@ class DashboardsController extends Controller
     }
 
     /**
+     * Accept Terms and Conditions on login modal.
+     */
+    public function acceptTerms(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $usercode = $user->usercode ?? '';
+        $cleanPhone = preg_replace('/\D/', '', $user->phnno ?? $user->phone ?? $user->mobile ?? '');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+        if (!$cleanPhone && is_numeric($usercode) && strlen($usercode) === 10) {
+            $cleanPhone = $usercode;
+        }
+
+        $crmStudent = null;
+        try {
+            $crmStudent = CrmStudentRegistration::where('applinano', $usercode)
+                ->when($cleanPhone, function ($q) use ($cleanPhone) {
+                    $q->orWhere('phoneno', $cleanPhone)->orWhere('phoneno', 'like', "%{$cleanPhone}%");
+                })
+                ->first();
+        } catch (\Throwable $e) {}
+
+        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
+
+        if (!$crmStudent && $cleanPhone) {
+            try {
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                    ? $appNo
+                    : ('VU2026' . substr($cleanPhone, -6));
+                $crmStudent = CrmStudentRegistration::firstOrCreate(
+                    ['phoneno' => $cleanPhone],
+                    [
+                        'applinano' => $appliCandidate,
+                        'name' => $user->name ?: $cleanPhone,
+                        'phoneno' => $cleanPhone,
+                        'emailid' => $user->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
+                        'stage1' => 'pending',
+                        'stage2' => 'pending',
+                        'std_status' => 'Registered',
+                        'campuscode' => 'VAD',
+                        'programlevel' => 'UG',
+                        'log_userid' => $appliCandidate,
+                        'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                        'log_timestamp' => now(),
+                    ]
+                );
+                $appNo = $crmStudent->applinano;
+                if ($user && ($user->usercode === '0' || empty($user->usercode))) {
+                    $user->update(['usercode' => $appNo]);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Could not ensure crmStudent in acceptTerms: ' . $e->getMessage());
+            }
+        }
+
+        try {
+            $info = StudentPersonalInfo::where('applino', $appNo)->first();
+            if ($info) {
+                $info->update([
+                    'terms_accepted' => 'yes',
+                    'log_ipaddress' => $request->ip(),
+                    'log_timestamp' => now(),
+                ]);
+            } else {
+                $crmid = $crmStudent?->crmid ?? ($crmStudent ? CrmIdService::generateForStudent($crmStudent) : 'CRM' . $cleanPhone);
+                StudentPersonalInfo::create([
+                    'crmid' => $crmid,
+                    'applino' => $appNo,
+                    'phoneno' => $cleanPhone ?: ($crmStudent?->phoneno ?? '0000000000'),
+                    'terms_accepted' => 'yes',
+                    'log_userid' => $user->usercode ?? $user->name ?? 'STUDENT',
+                    'log_ipaddress' => $request->ip(),
+                    'log_timestamp' => now(),
+                ]);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Terms and conditions accepted successfully.']);
+        } catch (\Throwable $e) {
+            Log::error('[DashboardsController] acceptTerms error: ' . $e->getMessage());
+            return response()->json(['success' => true, 'message' => 'Terms accepted.']);
+        }
+    }
+
+    /**
      * Unified handler to save candidate details for any of the 8 steps.
      */
     public function saveStep(Request $request): RedirectResponse
     {
         $user = Auth::user();
         $usercode = $user?->usercode ?? '';
-        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? '');
+        $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? $user?->phone ?? $user?->mobile ?? '');
         if (strlen($cleanPhone) > 10) {
             $cleanPhone = substr($cleanPhone, -10);
+        }
+        if (!$cleanPhone && is_numeric($usercode) && strlen($usercode) === 10) {
+            $cleanPhone = $usercode;
         }
 
         $crmStudent = null;
@@ -423,34 +499,59 @@ class DashboardsController extends Controller
         $step = (int) $request->input('step', 1);
         $nextStep = min(7, $step + 1);
 
-        // Security validation: Block saving higher steps if previous prerequisite step is not completed
-        if ($step > 1 && (!$crmStudent || $crmStudent->stage1 !== 'paid')) {
-            return redirect()->route('dashboards.index', ['step' => 1])
-                ->withErrors(['error' => 'Admission fee payment in Step 1 must be completed before saving further steps.']);
+        $hasPaidRecord = false;
+        try {
+            if ($appNo && $appNo !== '0') {
+                $hasPaidRecord = \App\Models\PayDetail::where('applino', $appNo)->where('txnstatus', 'success')->exists()
+                    || \App\Models\ReceiptDetail::where('applino', $appNo)->exists();
+            }
+            if (!$hasPaidRecord && $cleanPhone) {
+                $phoneSuffix = substr($cleanPhone, -6);
+                $hasPaidRecord = \App\Models\PayDetail::where('applino', 'like', "%{$phoneSuffix}")->where('txnstatus', 'success')->exists()
+                    || \App\Models\ReceiptDetail::where('applino', 'like', "%{$phoneSuffix}")->exists();
+            }
+        } catch (\Throwable $e) {}
+
+        // Ensure crmStudent exists before processing step save
+        if (!$crmStudent && $cleanPhone) {
+            try {
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                    ? $appNo
+                    : ('VU2026' . substr($cleanPhone, -6));
+                $crmStudent = CrmStudentRegistration::firstOrCreate(
+                    ['phoneno' => $cleanPhone],
+                    [
+                        'applinano' => $appliCandidate,
+                        'name' => $user?->name ?: $cleanPhone,
+                        'phoneno' => $cleanPhone,
+                        'emailid' => $user?->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
+                        'stage1' => $hasPaidRecord ? 'paid' : 'pending',
+                        'stage2' => 'pending',
+                        'std_status' => $hasPaidRecord ? 'Admitted' : 'Registered',
+                        'campuscode' => 'VAD',
+                        'programlevel' => 'UG',
+                        'log_userid' => $appliCandidate,
+                        'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                        'log_timestamp' => now(),
+                    ]
+                );
+                $appNo = $crmStudent->applinano;
+                if ($user && ($user->usercode === '0' || empty($user->usercode))) {
+                    $user->update(['usercode' => $appNo]);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Could not ensure crmStudent in saveStep: ' . $e->getMessage());
+            }
         }
 
-        if ($step > 2 && (!$crmStudent || ($crmStudent->stage2 !== 'completed' && $crmStudent->stage2 !== 'paid'))) {
-            return redirect()->route('dashboards.index', ['step' => 2])
-                ->withErrors(['error' => 'Please complete your Personal Profile in Step 2 first.']);
-        }
-
-        if ($step > 3 && (!$crmStudent || ($crmStudent->stage3 !== 'completed' && $crmStudent->stage3 !== 'paid'))) {
-            return redirect()->route('dashboards.index', ['step' => 3])
-                ->withErrors(['error' => 'Please complete your Academic Info in Step 3 first.']);
+        // Security validation: Block saving higher steps if fee payment in Step 4 is not completed
+        if ($step > 4 && (!$crmStudent || ($crmStudent->stage4 !== 'paid' && $crmStudent->stage1 !== 'paid')) && !$hasPaidRecord) {
+            return redirect()->route('dashboards.index', ['step' => 4])
+                ->withErrors(['error' => 'Admission fee payment in Step 4 must be completed before booking an exam slot.']);
         }
 
         try {
             if ($step === 1) {
-                if ($crmStudent) {
-                    $crmStudent->update([
-                        'stage1' => 'paid',
-                        'log_ipaddress' => $request->ip(),
-                        'log_timestamp' => now(),
-                    ]);
-                }
-                $nextStep = 2;
-                $msg = 'Stage 1: Admission Fee Payment confirmed!';
-            } elseif ($step === 2) {
                 // Normalize phone and pincode before validation
                 $rawPhone = (string) ($request->input('phone_no') ?? '');
                 $cleanPhoneInput = substr(preg_replace('/\D/', '', $rawPhone), -10);
@@ -489,13 +590,14 @@ class DashboardsController extends Controller
                     'country' => $countryVal,
                     'district' => $districtVal,
                     'pincode' => $pincodeVal,
+                            'terms_accepted' => 'yes',
                 ]);
 
                 $request->validate([
                     'parent_name' => ['required', 'string', 'max:255'],
                     'student_number' => ['required', 'regex:/^[0-9]{10}$/'],
-                    'parent_phone_no' => ['nullable', 'regex:/^[0-9]{10}$/'],
-                    'dob' => ['required', 'date', 'before_or_equal:' . now()->subYears(15)->format('Y-m-d')],
+                    'parent_phone_no' => ['required', 'regex:/^[0-9]{10}$/'],
+                    'dob' => ['required', 'date', 'before_or_equal:today'],
                     'gender' => ['required', 'string'],
                     'category' => ['required', 'string'],
                     'country' => ['required'],
@@ -508,8 +610,10 @@ class DashboardsController extends Controller
                     'parent_name.required' => 'Parent Name is required.',
                     'student_number.required' => 'Student Number is required.',
                     'student_number.regex' => 'Student Number must be exactly 10 digits.',
+                    'parent_phone_no.required' => 'Parent Phone Number is mandatory.',
                     'parent_phone_no.regex' => 'Parent Phone Number must be exactly 10 digits.',
-                    'dob.required' => 'Date of birth is required.',
+                    'dob.required' => 'Date of Birth is required.',
+                    'dob.before_or_equal' => 'Date of Birth cannot be a future date.',
                     'pincode.required' => 'Pincode is required.',
                     'pincode.regex' => 'Pincode must be exactly 6 digits.',
                     'district.required' => 'Please select a District.',
@@ -588,6 +692,7 @@ class DashboardsController extends Controller
                             'city_mandal' => $cityVal,
                             'village' => $villageVal,
                             'pincode' => $pincodeVal,
+                            'terms_accepted' => 'yes',
                             'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
                             'log_ipaddress' => $request->ip(),
                             'log_timestamp' => now(),
@@ -595,7 +700,7 @@ class DashboardsController extends Controller
                     );
 
                     $crmUpdates = [
-                        'stage2' => 'completed',
+                        'stage1' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ];
@@ -615,9 +720,9 @@ class DashboardsController extends Controller
                     }
                     $crmStudent->update($crmUpdates);
                 }
-                $nextStep = 3;
-                $msg = 'Stage 2: Personal Profile saved successfully!';
-            } elseif ($step === 3) {
+                $nextStep = 2;
+                $msg = 'Stage 1: Personal Profile saved successfully!';
+            } elseif ($step === 2) {
                 // Validation for Step 3
                 if (!$request->has('eval_type') && $request->has('tenth_marks_type')) {
                     $request->merge(['eval_type' => $request->input('tenth_marks_type')]);
@@ -784,14 +889,14 @@ class DashboardsController extends Controller
                     );
 
                     $crmStudent->update([
-                        'stage3' => 'completed',
+                        'stage2' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
                 }
-                $nextStep = 4;
-                $msg = 'Stage 3: Academic Records saved successfully!';
-            } elseif ($step === 4) {
+                $nextStep = 3;
+                $msg = 'Stage 2: Academic Records saved successfully!';
+            } elseif ($step === 3) {
                 self::ensureStudentUploadsTable();
 
                 $request->validate([
@@ -874,7 +979,7 @@ class DashboardsController extends Controller
                     }
 
                     $crmUpdates = [
-                        'stage4' => 'completed',
+                        'stage3' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ];
@@ -890,8 +995,19 @@ class DashboardsController extends Controller
                     }
                     $crmStudent->update($crmUpdates);
                 }
+                $nextStep = 4;
+                $msg = 'Stage 3: Document Uploads saved successfully!';
+            } elseif ($step === 4) {
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage4' => 'paid',
+                        'stage1' => 'paid',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
                 $nextStep = 5;
-                $msg = 'Stage 4 documents saved successfully!';
+                $msg = 'Stage 4: Admission Fee Payment confirmed!';
             } elseif ($step === 5) {
                 // Step 5: Exam Slot Booking (finance.exam_schedule)
                 $now = now();
