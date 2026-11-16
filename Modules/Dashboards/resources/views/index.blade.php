@@ -1619,53 +1619,7 @@
                     </div>
 
                     <!-- DOWNLOAD CARDS -->
-                    <div class="section-box" style="padding: 1rem 1.25rem;">
-                        <div class="section-box-title" style="margin-bottom: 0.75rem;">
-                            <span>Admission Documents</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📜</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Provisional Allotment Order</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Dean Allotment Letter</p>
-                                </div>
-                                @if($isPaid)
-                                    <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-doc-download">
-                                        <span>Download PDF ↓</span>
-                                    </a>
-                                @else
-                                    <span class="doc-status-pill">Unlocks after fee payment</span>
-                                @endif
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🧾</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Official Fee Payment Receipt</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Accounts Verified Receipt</p>
-                                </div>
-                                @if($isPaid)
-                                    <a href="{{ route('payu.receipt') }}" class="btn-doc-download">
-                                        <span>Open Official Receipt &rarr;</span>
-                                    </a>
-                                @else
-                                    <span class="doc-status-pill">Unlocks after fee payment</span>
-                                @endif
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📅</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Campus Induction Schedule</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Orientation &amp; Move-in Guide</p>
-                                </div>
-                                <a href="javascript:alert('Downloading Orientation & Campus Induction Schedule (PDF)...')" class="btn-doc-download">
-                                    <span>Download Guide ↓</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
                         <div style="display: flex; align-items: center; gap: 0.45rem;">
@@ -1734,7 +1688,7 @@
                             <div class="mockup-field-row-3" style="margin-top: 1rem; align-items: start;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Date of Birth: <span style="color:#ef4444;">*</span></label>
-                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" required>
+                                    <input type="date" name="dob" id="studentDobInput" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" max="{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}" onchange="if(this.value > '{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}') { this.value = ''; }" required>
                                 </div>
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Gender: <span style="color:#ef4444;">*</span></label>
@@ -1975,7 +1929,6 @@
                                         <select name="tenth_marks_type" id="tenth_marks_type" class="mockup-select" onchange="onTenthMarksTypeChange(this.value)">
                                             <option value="Marks" {{ ($academicDetails?->tenth_marks_type === 'Marks' || $academicDetails?->tenth_marks_type === 'marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
-                                            <option value=">= 60%" {{ ($academicDetails?->tenth_marks_type === '>= 60%') ? 'selected' : '' }}>Grade (>= 60%)</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
@@ -2002,12 +1955,8 @@
                                         <label class="mockup-label">Course Choice: <span style="color:#ef4444;">*</span></label>
                                         <div class="mockup-radio-row" style="margin-top: 0.35rem;">
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="course_choice" value="Inter" {{ ($academicDetails?->pu2_study_board !== 'Diploma') ? 'checked' : '' }}>
+                                                <input type="radio" name="course_choice" value="Inter" checked>
                                                 <span>Inter</span>
-                                            </label>
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="course_choice" value="Diploma" {{ ($academicDetails?->pu2_study_board === 'Diploma') ? 'checked' : '' }}>
-                                                <span>Diploma</span>
                                             </label>
                                         </div>
                                     </div>
@@ -2508,6 +2457,7 @@
 
                     $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';
                     $hasBookedSlot = !empty($examSchedule?->examdate) && !empty($examSchedule?->exam_slot);
+                    $isAppInExamSchedule = !empty($examSchedule);
                 @endphp
 
                 <div class="step-panel-header">
@@ -2550,7 +2500,11 @@
                                 </div>
                             </div>
                             <div style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #ffffff; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 8px;">
-                                To change slot, select date/slot below &amp; click Confirm
+                                @if($isAppInExamSchedule)
+                                    Exam date is scheduled &amp; locked
+                                @else
+                                    To change slot, select date/slot below &amp; click Confirm
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -2564,18 +2518,34 @@
                         <div class="form-grid-2">
                             <!-- Date Selection with 5 PM Cutoff Enforcement -->
                             <div class="field-group">
-                                <label class="field-label">Exam Date <span class="required-star">*</span></label>
+                                <label class="field-label">
+                                    Exam Date <span class="required-star">*</span>
+                                    @if($isAppInExamSchedule)
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
+                                            🔒 Date Locked (Already Scheduled)
+                                        </span>
+                                    @endif
+                                </label>
                                 <input type="date"
                                        id="stage5ExamDateInput"
                                        name="examdate"
                                        class="field-input"
                                        min="{{ $minExamDate }}"
                                        value="{{ $defaultDate }}"
+                                       {{ $isAppInExamSchedule ? 'readonly style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }}
                                        required>
-                                <div style="margin-top: 6px; font-size: 0.76rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
-                                    <span>⏰</span>
-                                    <span><strong>5:00 PM Daily Cutoff:</strong> {{ $cutoffMessage }}</span>
-                                </div>
+                                @if($isAppInExamSchedule)
+                                    <input type="hidden" name="examdate" value="{{ $defaultDate }}">
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                        <span>🔒</span>
+                                        <span>Your exam date is already scheduled in the examination schedule ({{ \Carbon\Carbon::parse($defaultDate)->format('d M Y') }}). Date selection is locked.</span>
+                                    </div>
+                                @else
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                        <span>⏰</span>
+                                        <span><strong>5:00 PM Daily Cutoff:</strong> {{ $cutoffMessage }}</span>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Slot Selection (S1 11 AM - 1 PM or S2 2 PM - 4 PM) -->

@@ -495,7 +495,7 @@ class DashboardsController extends Controller
                     'parent_name' => ['required', 'string', 'max:255'],
                     'student_number' => ['required', 'regex:/^[0-9]{10}$/'],
                     'parent_phone_no' => ['nullable', 'regex:/^[0-9]{10}$/'],
-                    'dob' => ['required'],
+                    'dob' => ['required', 'date', 'before_or_equal:' . now()->subYears(15)->format('Y-m-d')],
                     'gender' => ['required', 'string'],
                     'category' => ['required', 'string'],
                     'country' => ['required'],
@@ -891,8 +891,10 @@ class DashboardsController extends Controller
 
                 $minDateFormatted = \Carbon\Carbon::parse($minExamDate)->format('d M Y');
 
+                $existingExamSchedule = $crmStudent ? \App\Models\ExamSchedule::where('applino', $crmStudent->applinano)->first() : null;
+
                 $request->validate([
-                    'examdate'  => ['required', 'date', 'after_or_equal:' . $minExamDate],
+                    'examdate'  => $existingExamSchedule ? ['nullable'] : ['required', 'date', 'after_or_equal:' . $minExamDate],
                     'exam_slot' => ['required', 'string', 'max:100'],
                 ], [
                     'examdate.required'  => 'Please select your preferred examination date.',
@@ -904,12 +906,16 @@ class DashboardsController extends Controller
 
                 if ($crmStudent) {
                     $examCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $finalExamDate = ($existingExamSchedule && !empty($existingExamSchedule->examdate))
+                        ? $existingExamSchedule->examdate
+                        : $request->input('examdate');
+
                     \App\Models\ExamSchedule::updateOrCreate(
                         ['applino' => $crmStudent->applinano],
                         [
                             'crmid'        => $examCrmId,
                             'phoneno'      => $crmStudent->phoneno,
-                            'examdate'     => $request->input('examdate'),
+                            'examdate'     => $finalExamDate,
                             'exam_slot'    => $request->input('exam_slot'),
                             'exam_status'  => 1,
                             'loguserid'    => $user?->usercode ?? $user?->name ?? 'STUDENT',
@@ -955,6 +961,8 @@ class DashboardsController extends Controller
             return redirect()->route('dashboards.index', ['step' => $nextStep])
                 ->with('status', $msg);
 
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            throw $ve;
         } catch (Exception $e) {
             Log::error('[DashboardsController] saveStep error: ' . $e->getMessage());
             return redirect()->route('dashboards.index', ['step' => $step])

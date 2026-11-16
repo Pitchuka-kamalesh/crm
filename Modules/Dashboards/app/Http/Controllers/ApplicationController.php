@@ -41,18 +41,23 @@ class ApplicationController extends Controller
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
         if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
-            return \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, [
-                'student' => $student,
-                'logo' => public_path('images/vignan-logo.png'),
-                'isPdf' => true,
-            ])
-                ->setOption([
-                    'isHtml5ParserEnabled' => true,
-                    'isRemoteEnabled' => true,
-                    'chroot' => public_path(),
+            try {
+                $filename = 'Application_Form_' . ($student->id ?: 'VU') . '_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $student->name ?: 'Candidate') . '.pdf';
+                return \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, [
+                    'student' => $student,
+                    'logo' => public_path('images/vignan-logo.png'),
+                    'isPdf' => true,
                 ])
-                ->setPaper('a4', 'portrait')
-                ->download('Application_Form_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $student->name) . '.pdf');
+                    ->setOptions([
+                        'isHtml5ParserEnabled' => true,
+                        'isRemoteEnabled' => true,
+                        'chroot' => public_path(),
+                    ])
+                    ->setPaper('a4', 'portrait')
+                    ->download($filename);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('DomPDF generation error: ' . $e->getMessage());
+            }
         }
 
         return view($viewName, [
