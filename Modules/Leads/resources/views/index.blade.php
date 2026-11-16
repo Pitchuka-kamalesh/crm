@@ -1807,62 +1807,86 @@
 
             @if($activeTab === 'upload')
                 <!-- LEADS UPLOAD HEADER & ACTIONS BAR (SPACE SAVER) -->
-                <div class="allocation-command-card" style="padding: 1.15rem 1.5rem; margin-bottom: 1.25rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                            <div style="font-size: 1.18rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 1.35rem;">📥</span>
+                <div class="allocation-command-card" style="padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: nowrap; overflow-x: auto;">
+                        <!-- Left Group: Title & Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                            <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                                <span style="font-size: 1.25rem;">📥</span>
                                 <span>Leads Upload</span>
                             </div>
                             <button type="button" 
                                     onclick="openLeadUploadModal()" 
                                     class="incharge-btn-submit" 
                                     id="btnHeaderBrowseComputer"
-                                    style="height: 38px; padding: 0 1.25rem; font-size: 0.84rem; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; border-radius: 8px; cursor: pointer; background: #2563eb; color: #ffffff; border: none; box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: all 0.15s ease;"
+                                    style="height: 36px; padding: 0 1.15rem; font-size: 0.825rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; cursor: pointer; background: #2563eb; color: #ffffff; border: none; box-shadow: 0 1px 3px rgba(37,99,235,0.25); white-space: nowrap; transition: all 0.15s ease;"
                                     onmouseover="this.style.background='#1d4ed8'"
                                     onmouseout="this.style.background='#2563eb'">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="7 10 12 15 17 10"></polyline>
                                     <line x1="12" y1="3" x2="12" y2="15"></line>
                                 </svg>
                                 <span>Browse Computer</span>
                             </button>
-                        </div>
-
-                        @php
-                            $totalUploadedLeadsCount = (int) $recentUploadedFiles->sum('total_records');
-                            $totalFilesCount = $recentUploadedFiles->count();
-                        @endphp
-                        <!-- Professional Uploaded Leads Metric Counter -->
-                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
-                                <span style="font-size: 0.76rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Total Leads Uploaded:</span>
-                                <strong id="headerTotalLeadsBadge" style="font-size: 0.96rem; font-weight: 800; color: #0f172a; font-family: 'JetBrains Mono', monospace;">
-                                    {{ number_format($totalUploadedLeadsCount) }}
-                                </strong>
-                            </div>
-
-                            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
-                                <span style="font-size: 0.76rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.4px;">Files Uploaded:</span>
-                                <strong id="headerTotalFilesBadge" style="font-size: 0.96rem; font-weight: 800; color: #15803d; font-family: 'JetBrains Mono', monospace;">
-                                    {{ number_format($totalFilesCount) }}
-                                </strong>
-                            </div>
-                        </div>
-
-                        <div>
                             <a href="{{ route('leads.downloadSample') }}" 
-                               style="display: inline-flex; align-items: center; gap: 8px; padding: 0.55rem 1.15rem; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; color: #0f172a; font-size: 0.82rem; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s ease;">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                               style="height: 36px; padding: 0 1.05rem; display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 0.825rem; font-weight: 700; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: all 0.15s ease;"
+                               onmouseover="this.style.borderColor='#94a3b8'; this.style.color='#0f172a'"
+                               onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#334155'">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="7 10 12 15 17 10"></polyline>
                                     <line x1="12" y1="3" x2="12" y2="15"></line>
                                 </svg>
                                 <span>Download Sample Template</span>
                             </a>
+                        </div>
+
+                        @php
+                            $effectiveTotalLeads = isset($totalLeadsCount) && $totalLeadsCount > 0
+                                ? $totalLeadsCount
+                                : (int) \App\Models\Lead::count();
+
+                            $effectiveNormalLeads = isset($normalLeadsCount)
+                                ? $normalLeadsCount
+                                : (int) \App\Models\Lead::where(function ($q) {
+                                      $q->whereIn('log_userid', ['PORTAL', 'SELF_REGISTER', 'AUTOSAVE', 'MANUAL'])
+                                        ->orWhereNotNull('applino')
+                                        ->orWhere('phnostatus', '!=', 'New Lead');
+                                  })->count();
+
+                            $effectiveBulkLeads = isset($bulkLeadsCount)
+                                ? $bulkLeadsCount
+                                : max(0, $effectiveTotalLeads - $effectiveNormalLeads);
+                        @endphp
+                        <!-- Right Group: Metric Badges (Strictly 1 Single Line) -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap;">
+                            <!-- 1. Total Leads -->
+                            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2563eb;"></span>
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px;">Total Leads Count:</span>
+                                <strong id="headerTotalLeadsBadge" style="font-size: 0.94rem; font-weight: 800; color: #0f172a; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($effectiveTotalLeads) }}
+                                </strong>
+                            </div>
+
+                            <!-- 2. Bulk Upload -->
+                            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #16a34a;"></span>
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.3px;">Bulk Upload:</span>
+                                <strong id="headerBulkLeadsBadge" style="font-size: 0.94rem; font-weight: 800; color: #15803d; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($effectiveBulkLeads) }}
+                                </strong>
+                            </div>
+
+                            <!-- 3. Normal Leads -->
+                            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #6366f1;"></span>
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.3px;">Normal:</span>
+                                <strong id="headerNormalLeadsBadge" style="font-size: 0.94rem; font-weight: 800; color: #1d4ed8; font-family: 'JetBrains Mono', monospace;">
+                                    {{ number_format($effectiveNormalLeads) }}
+                                </strong>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2361,15 +2385,17 @@
 
                                         // Update live metric counters in header
                                         const leadsBadge = document.getElementById('headerTotalLeadsBadge');
-                                        const filesBadge = document.getElementById('headerTotalFilesBadge');
-                                        if (leadsBadge && d.summary) {
-                                            const currentLeads = parseInt((leadsBadge.textContent || '0').replace(/,/g, ''), 10) || 0;
+                                        const bulkBadge = document.getElementById('headerBulkLeadsBadge');
+                                        if (d.summary) {
                                             const addedLeads = parseInt(d.summary.total_rows || d.summary.inserted_count || 0, 10) || 0;
-                                            leadsBadge.textContent = (currentLeads + addedLeads).toLocaleString();
-                                        }
-                                        if (filesBadge) {
-                                            const currentFiles = parseInt((filesBadge.textContent || '0').replace(/,/g, ''), 10) || 0;
-                                            filesBadge.textContent = (currentFiles + 1).toLocaleString();
+                                            if (leadsBadge) {
+                                                const currentLeads = parseInt((leadsBadge.textContent || '0').replace(/,/g, ''), 10) || 0;
+                                                leadsBadge.textContent = (currentLeads + addedLeads).toLocaleString();
+                                            }
+                                            if (bulkBadge) {
+                                                const currentBulk = parseInt((bulkBadge.textContent || '0').replace(/,/g, ''), 10) || 0;
+                                                bulkBadge.textContent = (currentBulk + addedLeads).toLocaleString();
+                                            }
                                         }
 
                                         // Reset form
