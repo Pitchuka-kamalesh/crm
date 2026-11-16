@@ -1914,13 +1914,13 @@
                                 <div style="margin-bottom: 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code:</span>
-                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: V-SAT-0002</span>
+                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: —</span>
                                     </div>
                                     <div id="modalCouponPreview" style="font-size: 1.18rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
-                                        27000005P1
+                                        — Enter Application No —
                                     </div>
                                     <div style="font-size: 0.70rem; color: #60a5fa; margin-top: 2px;">
-                                        Generated dynamically with branch-wise CRM ID (B.Tech &rarr; V-SAT, M.Tech &rarr; MTECH, PhD &rarr; PHD).
+                                        Personal coupon is specific to this student only (no start or end dates).
                                     </div>
                                 </div>
 
@@ -2018,6 +2018,13 @@
                         const crmTag = document.getElementById('modalCrmIdTag');
                         const candBadge = document.getElementById('modalCandidateBadge');
 
+                        if (!val) {
+                            if (preview) preview.textContent = '— Enter Application No —';
+                            if (crmTag) crmTag.textContent = 'CRM ID: —';
+                            if (candBadge) candBadge.style.display = 'none';
+                            return;
+                        }
+
                         let derivedCode = formatPersonalCouponPreview(val);
                         if (preview) preview.textContent = derivedCode;
 
@@ -2034,7 +2041,7 @@
                         }
                     }
 
-                    @if(request()->is('*percoupongen*') || request()->has('generate') || request()->has('openModal'))
+                    @if(request()->has('openModal') && request('applino'))
                     document.addEventListener('DOMContentLoaded', function() {
                         openPersonalCouponModal('{{ request('applino', '') }}');
                     });

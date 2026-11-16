@@ -291,7 +291,7 @@
                                 {{ $activeCoupon->couponname }}
                             </div>
                             <div style="font-size: 0.825rem; opacity: 0.9; margin-top: 0.2rem;">
-                                Active since: <strong>{{ $activeCoupon->coupstartdate ?: 'Today' }}</strong> • Base Fee: ₹1,200 &rarr; Net Payable: <strong>₹{{ number_format(max(0, 1200 - (float)$activeCoupon->discountamount), 2) }}</strong>
+                                Active since: <strong>{{ $activeCoupon->coupstartdate ?: 'Today' }}</strong> &bull; Quota: <strong>{{ (!empty($activeCoupon->coupstdcount) && $activeCoupon->coupstdcount < 999999) ? number_format($activeCoupon->coupstdcount) . ' Students' : 'All Students (Works until stopped)' }}</strong> &bull; Base Fee: ₹1,200 &rarr; Net Payable: <strong>₹{{ number_format(max(0, 1200 - (float)$activeCoupon->discountamount), 2) }}</strong>
                             </div>
                         </div>
                     </div>
@@ -401,16 +401,16 @@
                             <!-- 4. Quota Count -->
                             <div class="form-group">
                                 <label for="coupstdcount">
-                                    Student Quota (coupstdcount)
+                                    Student Quota (Optional)
                                 </label>
                                 <input type="number" 
                                        id="coupstdcount" 
                                        name="coupstdcount" 
                                        class="form-control-custom" 
-                                       placeholder="e.g. 500" 
-                                       value="{{ old('coupstdcount', 500) }}" 
+                                       placeholder="Leave empty for all students (works until stopped)" 
+                                       value="{{ old('coupstdcount') }}" 
                                        min="1">
-                                <div class="form-hint">Maximum students eligible for this coupon</div>
+                                <div class="form-hint">If count is entered, valid for that many students. If empty, works for ALL students until stopped.</div>
                             </div>
                         </div>
 
@@ -508,7 +508,7 @@
                                     </td>
                                     <td>
                                         <span style="font-size: 0.8rem; color: #334155;">
-                                            <strong>{{ $coup->coupcurrcount ?? 0 }}</strong> / {{ $coup->coupstdcount ?? ($coup->coupcount ?? 100) }}
+                                            <strong>{{ $coup->coupcurrcount ?? 0 }}</strong> / {{ (!empty($coup->coupstdcount) && $coup->coupstdcount < 999999) ? $coup->coupstdcount : 'All (Until Stopped)' }}
                                         </span>
                                     </td>
                                     <td>
