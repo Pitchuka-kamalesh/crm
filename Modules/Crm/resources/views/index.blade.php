@@ -2932,6 +2932,7 @@
                                 <span>Telecaller KPI &amp; Outreach Performance</span>
                             </div>
 
+                            @if(empty($isTelecaller))
                             <!-- Telecaller Selection Dropdown Filter -->
                             <div class="telecaller-filter-wrapper" style="position: relative; display: inline-flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 9px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
                                 <div style="display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; height: 38px; background: #f8fafc; border-right: 1.5px solid #cbd5e1; font-size: 0.74rem; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.4px; user-select: none; white-space: nowrap;">
@@ -2943,7 +2944,7 @@
                                     </svg>
                                     <span>Telecallers:</span>
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px; padding: 0 6px; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 0.72rem; border-radius: 999px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);">
-                                        {{ count($telecallerStats) }}
+                                        {{ count($telecallerStats ?? []) }}
                                     </span>
                                 </div>
                                 <div style="position: relative; display: inline-flex; align-items: center;">
@@ -2951,7 +2952,7 @@
                                         <option value="all" {{ ($selectedTelecaller ?? 'all') === 'all' ? 'selected' : '' }}>
                                             All Telecallers
                                         </option>
-                                        @foreach($telecallerStats as $tOpt)
+                                        @foreach(($telecallerStats ?? []) as $tOpt)
                                             <option value="{{ $tOpt->emp_code }}" {{ ($selectedTelecaller ?? '') === $tOpt->emp_code ? 'selected' : '' }}>
                                                 {{ $tOpt->name }} (Emp: {{ $tOpt->emp_code }})
                                             </option>
@@ -2962,6 +2963,7 @@
                                     </svg>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                         <!-- Right Side: Clean Metric Pills & Export Button -->

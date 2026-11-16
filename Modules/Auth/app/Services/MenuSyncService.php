@@ -98,16 +98,26 @@ class MenuSyncService
                 $o1 = $r['order_start'];
                 $o2 = $o1 + 1;
 
-                // Delete existing role assignments for 128 and 129
+                // Delete existing role assignments for 128 and 129 (and 108 for role 4)
                 DB::statement("DELETE FROM master.menu_access_roles WHERE menu_id IN (128, 129) AND role_id = {$roleId};");
-
-                DB::statement("
-                    INSERT INTO master.menu_access_roles 
-                        (menu_code, menu_id, role_id, campus_id, morder, mposition, log_userid, log_ipaddress, log_timestamp)
-                    VALUES 
-                        ('KPII0005', 128, {$roleId}, '1', {$o1}, 2, '02598', '192.168.111.111', NOW()),
-                        ('KPII0006', 129, {$roleId}, '1', {$o2}, 2, '02598', '192.168.111.111', NOW());
-                ");
+                if ($roleId === 4) {
+                    DB::statement("DELETE FROM master.menu_access_roles WHERE menu_id = 108 AND role_id = 4;");
+                    // Role 4 (Telecaller) gets ONLY Telecaller KPI (128)
+                    DB::statement("
+                        INSERT INTO master.menu_access_roles 
+                            (menu_code, menu_id, role_id, campus_id, morder, mposition, log_userid, log_ipaddress, log_timestamp)
+                        VALUES 
+                            ('KPII0005', 128, {$roleId}, '1', {$o1}, 2, '02598', '192.168.111.111', NOW());
+                    ");
+                } else {
+                    DB::statement("
+                        INSERT INTO master.menu_access_roles 
+                            (menu_code, menu_id, role_id, campus_id, morder, mposition, log_userid, log_ipaddress, log_timestamp)
+                        VALUES 
+                            ('KPII0005', 128, {$roleId}, '1', {$o1}, 2, '02598', '192.168.111.111', NOW()),
+                            ('KPII0006', 129, {$roleId}, '1', {$o2}, 2, '02598', '192.168.111.111', NOW());
+                    ");
+                }
             }
 
             // 6. Sync with crm schema if crm.menu_access_roles exists

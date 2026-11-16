@@ -127,15 +127,26 @@
                             <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
                         </div>
 
-                        <!-- Card 4: Active Counselors -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Active Telecallers</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ $telecallers->count() }}</div>
-                                <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">Assigned Role ID 4</div>
+                        <!-- Card 4: Active Counselors or My Profile -->
+                        @if(!empty($isTelecaller))
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">My Counselor ID</div>
+                                    <div style="font-size: 1.35rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0; font-family: 'JetBrains Mono', monospace;">{{ $user->usercode ?: 'Active' }}</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">● Assigned Counselor</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎧</div>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎧</div>
-                        </div>
+                        @else
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Active Telecallers</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ $telecallers->count() }}</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">Assigned Role ID 4</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎧</div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- 2. VISUAL CHARTS (COUNSELOR COMPARISON & CALL DISPOSITION) -->
@@ -144,8 +155,12 @@
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
                                 <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Counselor Performance Comparison</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Allocated leads vs completed outreach vs fee conversions</div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">
+                                        {{ !empty($isTelecaller) ? 'My Outreach & Conversion Progress' : 'Counselor Performance Comparison' }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                        {{ !empty($isTelecaller) ? 'Personal metrics: Allocated leads vs completed outreach vs fee conversions' : 'Allocated leads vs completed outreach vs fee conversions' }}
+                                    </div>
                                 </div>
                                 <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Counselors</span>
                             </div>
@@ -169,12 +184,16 @@
                         </div>
                     </div>
 
-                    <!-- 3. EXECUTIVE TELECALLER PERFORMANCE LEADERBOARD -->
+                    <!-- 3. EXECUTIVE TELECALLER PERFORMANCE LEADERBOARD / MY PERFORMANCE SUMMARY -->
                     <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.75rem; overflow: hidden;">
                         <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                             <div>
-                                <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">🏆 Executive Telecaller Performance Leaderboard</div>
-                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Counselors ranked by verified fee-paid conversions and outreach efficiency</div>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">
+                                    {{ !empty($isTelecaller) ? '👤 My Outreach & Conversion Performance' : '🏆 Executive Telecaller Performance Leaderboard' }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                    {{ !empty($isTelecaller) ? 'Personal performance metrics for your allotted leads' : 'Counselors ranked by verified fee-paid conversions and outreach efficiency' }}
+                                </div>
                             </div>
                             <span style="font-size: 0.75rem; font-weight: 700; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.35rem 0.75rem; border-radius: 6px;">
                                 Role ID 4 Verified
@@ -271,7 +290,8 @@
                                 <svg style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             </div>
 
-                            <!-- Employee Filter Dropdown -->
+                            @if(empty($isTelecaller))
+                            <!-- Employee Filter Dropdown (Admins / Incharges only) -->
                             <div style="min-width: 240px;">
                                 <select name="employee" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
                                     <option value="">All Telecallers / Counselors</option>
@@ -282,12 +302,13 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @endif
 
                             <button type="submit" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 700; color: #ffffff; background: #0284c7; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
                                 Filter Records
                             </button>
 
-                            @if($search || $filterEmp)
+                            @if($search || (!empty($filterEmp) && empty($isTelecaller)))
                                 <a href="{{ route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']) }}" style="padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; border-radius: 8px; text-decoration: none;">
                                     Reset
                                 </a>
@@ -299,7 +320,9 @@
                     <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
                         <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Candidate Outreach &amp; Call Task Logs</span>
+                                <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">
+                                    {{ !empty($isTelecaller) ? 'My Allotted Leads & Call Task Logs' : 'Candidate Outreach & Call Task Logs' }}
+                                </span>
                                 <span style="font-size: 0.75rem; color: #64748b; margin-left: 0.5rem;">(Showing {{ $leadsTable->firstItem() ?? 0 }} to {{ $leadsTable->lastItem() ?? 0 }} of {{ $leadsTable->total() }} records)</span>
                             </div>
                         </div>

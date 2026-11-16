@@ -22,10 +22,16 @@ class StudentKpiController extends Controller
     /**
      * Display the Student KPI dashboard & Conversion Funnel Analytics.
      */
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $user = Auth::user();
         $roleId = $user ? $user->getActiveRoleId() : RoleService::defaultStaffRoleId();
+
+        // Telecaller is restricted to Telecaller KPI only
+        if (RoleService::isTelecaller($roleId)) {
+            return redirect()->route('kpi.telecallerkpi')->with('error', 'Telecallers only have access to Telecaller KPI.');
+        }
+
         $roleName = $user ? $user->role_label : 'CRM Official';
         $activeTab = 'studentkpi';
 
