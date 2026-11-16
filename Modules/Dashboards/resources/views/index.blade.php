@@ -1759,7 +1759,7 @@
                             @endif
                         </div>
 
-                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep2Form(this);">
+                        <form id="step2AcademicForm" action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep2Form(this);">
                             @csrf
                             <input type="hidden" name="step" value="2">
                             <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
@@ -1819,6 +1819,7 @@
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
                                 <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
                                 <input type="hidden" name="course_choice" value="Inter">
+                                <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
                                 <!-- Row 1: Jr. College Name / Institute Name (Full Width) -->
                                 <div class="mockup-field-group">
@@ -1826,33 +1827,19 @@
                                     <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
                                 </div>
 
-                                <!-- Row 2: 3 Separate Distinct Columns for Jr. City, Jr. State, Jr. District -->
+                                <!-- Row 2: 3 Separate Distinct Columns for Jr. City, Jr. State, Jr. District (Text Inputs) -->
                                 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Jr. City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_city" class="mockup-input" value="{{ $academicDetails?->pu2_college_city ?? $academicDetails?->jr_city }}" placeholder="Enter Jr. City" required>
+                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter Jr. City" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Jr. State: <span style="color:#ef4444;">*</span></label>
-                                        <select name="inter_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
-                                            <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
-                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ (($academicDetails?->pu2_college_state ?? $academicDetails?->jr_state ?? '') == $s->state_name || (!$academicDetails && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
-                                                    {{ $s->state_name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" name="jr_state" class="mockup-input" value="{{ $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh' }}" placeholder="Enter Jr. State" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Jr. District: <span style="color:#ef4444;">*</span></label>
-                                        <select name="inter_district" id="geo-inter-district-select" class="mockup-select" required>
-                                            <option value="">-- Select District --</option>
-                                            @foreach($districts as $d)
-                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ (($academicDetails?->pu2_college_district ?? $academicDetails?->jr_district ?? '') == $d->DISTRICT_NAME || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
-                                                    {{ $d->DISTRICT_NAME }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" name="jr_district" class="mockup-input" value="{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur' }}" placeholder="Enter Jr. District" required>
                                     </div>
                                 </div>
 
@@ -1999,6 +1986,68 @@
                             </div>
                         </form>
 
+                        <!-- First Year Under 60% Undertaking Modal -->
+                        <div id="firstYearUndertakingModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem;">
+                            <div style="background: #ffffff; border-radius: 16px; max-width: 480px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden;">
+                                <div style="background: #eff6ff; border-bottom: 1px solid #dbeafe; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                                        ℹ️
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #1e3a8a;">Academic Undertaking</h3>
+                                        <p style="margin: 0.1rem 0 0; font-size: 0.76rem; color: #3b82f6;">First Year Candidate Acknowledgment</p>
+                                    </div>
+                                </div>
+                                <div style="padding: 1.25rem 1.35rem;">
+                                    <p style="font-size: 0.86rem; color: #334155; line-height: 1.5; margin: 0 0 1rem;">
+                                        As per university norms, candidate must obtain minimum <strong>60% or above</strong> in 12th / Intermediate. Since you are currently in <strong>First Year</strong>, you can proceed by confirming your undertaking below:
+                                    </p>
+                                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
+                                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #0f172a;">
+                                            <input type="checkbox" id="undertakingModalCheckbox" style="width: 19px; height: 19px; accent-color: #2563eb; cursor: pointer;">
+                                            <span>i will get 60%</span>
+                                        </label>
+                                    </div>
+                                    <div id="undertakingModalError" style="display: none; color: #dc2626; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.85rem;">
+                                        ⚠️ Please tick "i will get 60%" to proceed.
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+                                        <button type="button" onclick="closeUndertakingModal()" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.84rem; cursor: pointer;">
+                                            Cancel
+                                        </button>
+                                        <button type="button" onclick="confirmUndertakingAndProceed()" style="padding: 0.5rem 1.25rem; border-radius: 8px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                                            Proceed &rarr;
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Second Year Under 60% Not Eligible Modal -->
+                        <div id="secondYearNotEligibleModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem;">
+                            <div style="background: #ffffff; border-radius: 16px; max-width: 480px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden;">
+                                <div style="background: #fef2f2; border-bottom: 1px solid #fee2e2; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                                        ⚠️
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #991b1b;">Not Eligible</h3>
+                                        <p style="margin: 0.1rem 0 0; font-size: 0.76rem; color: #dc2626;">Eligibility Notice</p>
+                                    </div>
+                                </div>
+                                <div style="padding: 1.25rem 1.35rem;">
+                                    <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin: 0 0 1.25rem;">
+                                        You are not eligible according to university norms. Minimum 60% is required in 12th / Intermediate.
+                                    </p>
+                                    <div style="display: flex; justify-content: flex-end;">
+                                        <button type="button" onclick="closeNotEligibleModal()" style="padding: 0.5rem 1.25rem; border-radius: 8px; border: none; background: #dc2626; color: #ffffff; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                                            OK
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <script>
                             function setDegreeLevel(level) {
                                 const hiddenInput = document.getElementById('degree_level_input');
@@ -2108,14 +2157,76 @@
                                 }
                             }
 
+                            function getSelectedSubsetChoice() {
+                                const radios = document.getElementsByName('subset_choice');
+                                for (let i = 0; i < radios.length; i++) {
+                                    if (radios[i].checked) return radios[i].value;
+                                }
+                                return 'First Year';
+                            }
+
+                            function openUndertakingModal() {
+                                const modal = document.getElementById('firstYearUndertakingModal');
+                                if (modal) {
+                                    modal.style.display = 'flex';
+                                    const cb = document.getElementById('undertakingModalCheckbox');
+                                    if (cb) cb.checked = false;
+                                    const err = document.getElementById('undertakingModalError');
+                                    if (err) err.style.display = 'none';
+                                }
+                            }
+
+                            function closeUndertakingModal() {
+                                const modal = document.getElementById('firstYearUndertakingModal');
+                                if (modal) modal.style.display = 'none';
+                            }
+
+                            function openNotEligibleModal() {
+                                const modal = document.getElementById('secondYearNotEligibleModal');
+                                if (modal) modal.style.display = 'flex';
+                            }
+
+                            function closeNotEligibleModal() {
+                                const modal = document.getElementById('secondYearNotEligibleModal');
+                                if (modal) modal.style.display = 'none';
+                            }
+
+                            function confirmUndertakingAndProceed() {
+                                const cb = document.getElementById('undertakingModalCheckbox');
+                                const err = document.getElementById('undertakingModalError');
+                                if (!cb || !cb.checked) {
+                                    if (err) err.style.display = 'block';
+                                    return;
+                                }
+                                if (err) err.style.display = 'none';
+                                const hiddenIn = document.getElementById('undertaking_60_pct_input');
+                                if (hiddenIn) hiddenIn.value = 'yes';
+                                closeUndertakingModal();
+                                const form = document.getElementById('step2AcademicForm');
+                                if (form) form.submit();
+                            }
+
                             function validateStep2Form(form) {
                                 calculatePu2Pct();
                                 const pu2Pct = parseFloat(document.getElementById('pu2_percentage')?.value || 0);
+                                const subsetChoice = getSelectedSubsetChoice();
+                                const isSecondYear = (subsetChoice.toLowerCase() === 'second year');
 
-                                if (pu2Pct < 60) {
-                                    alert('12th / Intermediate percentage must be at least 60% to proceed to the next step (Current: ' + (pu2Pct > 0 ? pu2Pct.toFixed(2) + '%' : 'Not entered') + ').');
-                                    document.getElementById('pu2_marks_earned')?.focus();
-                                    return false;
+                                if (isSecondYear) {
+                                    if (pu2Pct < 60) {
+                                        openNotEligibleModal();
+                                        document.getElementById('pu2_marks_earned')?.focus();
+                                        return false;
+                                    }
+                                } else {
+                                    // First Year
+                                    if (pu2Pct < 60) {
+                                        const undertakingVal = document.getElementById('undertaking_60_pct_input')?.value;
+                                        if (undertakingVal !== 'yes') {
+                                            openUndertakingModal();
+                                            return false;
+                                        }
+                                    }
                                 }
                                 return true;
                             }
