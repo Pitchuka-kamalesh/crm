@@ -65,15 +65,42 @@ class DashboardsController extends Controller
         // Resolve payment status: Check crm.student_registration.stage1, finance.paydetails, and finance.receiptdetails
         $hasPaidRecord = false;
         try {
-            if ($appNo) {
+            if ($appNo && $appNo !== '0') {
                 $hasPaidRecord = \App\Models\PayDetail::where('applino', $appNo)->where('txnstatus', 'success')->exists()
                     || \App\Models\ReceiptDetail::where('applino', $appNo)->exists();
+            }
+            if (!$hasPaidRecord && $cleanPhone) {
+                $phoneSuffix = substr($cleanPhone, -6);
+                $hasPaidRecord = \App\Models\PayDetail::where('applino', 'like', "%{$phoneSuffix}")->where('txnstatus', 'success')->exists()
+                    || \App\Models\ReceiptDetail::where('applino', 'like', "%{$phoneSuffix}")->exists();
             }
         } catch (\Throwable $e) {}
 
         if ($hasPaidRecord && $crmStudent && $crmStudent->stage1 !== 'paid') {
             try {
                 $crmStudent->update(['stage1' => 'paid']);
+            } catch (\Throwable $e) {}
+        }
+
+        if ($hasPaidRecord && !$crmStudent && $cleanPhone) {
+            try {
+                $crmStudent = CrmStudentRegistration::create([
+                    'applinano' => ($appNo && $appNo !== '0') ? $appNo : ('VU2026' . substr($cleanPhone, -6)),
+                    'name' => $displayName ?: 'Candidate',
+                    'phoneno' => $cleanPhone,
+                    'stage1' => 'paid',
+                    'stage2' => 'pending',
+                    'std_status' => 'Admitted',
+                    'campuscode' => 'VAD',
+                    'programlevel' => 'UG',
+                    'log_userid' => ($appNo && $appNo !== '0') ? $appNo : 'PORTAL',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp' => now(),
+                ]);
+                $appNo = $crmStudent->applinano;
+                if ($user && ($user->usercode === '0' || empty($user->usercode))) {
+                    $user->update(['usercode' => $appNo]);
+                }
             } catch (\Throwable $e) {}
         }
 
