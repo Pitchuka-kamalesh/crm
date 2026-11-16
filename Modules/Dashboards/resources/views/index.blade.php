@@ -1940,8 +1940,9 @@
                                         <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" required>
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem; font-weight:600; color:#64748b;">(Auto-calculated, Min 60%)</span></label>
+                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
+                                        <div id="tenth_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 10th percentage must be at least 60% to proceed.</div>
                                     </div>
                                 </div>
                             </div>
@@ -2010,8 +2011,9 @@
                                         <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" required>
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem; font-weight:600; color:#64748b;">(Auto-calculated, Min 60%)</span></label>
+                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
+                                        <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
                                 </div>
                             </div>
@@ -2134,16 +2136,22 @@
                                 const earned = parseFloat(document.getElementById('tenth_marks_earned')?.value || 0);
                                 const type = document.getElementById('tenth_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('tenth_percentage');
+                                const warning = document.getElementById('tenth_pct_warning');
                                 if (!pctInput) return;
 
+                                let pct = 0;
                                 if (type === 'CGPA') {
                                     if (earned > 0) {
-                                        pctInput.value = (earned * 9.5).toFixed(2);
+                                        pct = earned * 9.5;
                                     }
                                 } else {
                                     if (conducted > 0 && earned > 0) {
-                                        pctInput.value = ((earned / conducted) * 100).toFixed(2);
+                                        pct = (earned / conducted) * 100;
                                     }
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                                if (warning) {
+                                    warning.style.display = (pct > 0 && pct < 60) ? 'block' : 'none';
                                 }
                             }
 
@@ -2164,16 +2172,22 @@
                                 const earned = parseFloat(document.getElementById('pu2_marks_earned')?.value || 0);
                                 const type = document.getElementById('pu2_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('pu2_percentage');
+                                const warning = document.getElementById('pu2_pct_warning');
                                 if (!pctInput) return;
 
+                                let pct = 0;
                                 if (type === 'CGPA') {
                                     if (earned > 0) {
-                                        pctInput.value = (earned * 9.5).toFixed(2);
+                                        pct = earned * 9.5;
                                     }
                                 } else {
                                     if (conducted > 0 && earned > 0) {
-                                        pctInput.value = ((earned / conducted) * 100).toFixed(2);
+                                        pct = (earned / conducted) * 100;
                                     }
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                                if (warning) {
+                                    warning.style.display = (pct > 0 && pct < 60) ? 'block' : 'none';
                                 }
                             }
 
@@ -2188,6 +2202,21 @@
                             }
 
                             function validateStep3Form(form) {
+                                calculateTenthPct();
+                                calculatePu2Pct();
+                                const tenthPct = parseFloat(document.getElementById('tenth_percentage')?.value || 0);
+                                const pu2Pct = parseFloat(document.getElementById('pu2_percentage')?.value || 0);
+
+                                if (tenthPct < 60) {
+                                    alert('10th SSC percentage must be at least 60% to proceed to the next step (Current: ' + (tenthPct > 0 ? tenthPct.toFixed(2) + '%' : 'Not entered') + ').');
+                                    document.getElementById('tenth_marks_earned')?.focus();
+                                    return false;
+                                }
+                                if (pu2Pct < 60) {
+                                    alert('12th / Intermediate percentage must be at least 60% to proceed to the next step (Current: ' + (pu2Pct > 0 ? pu2Pct.toFixed(2) + '%' : 'Not entered') + ').');
+                                    document.getElementById('pu2_marks_earned')?.focus();
+                                    return false;
+                                }
                                 return true;
                             }
 
@@ -2232,7 +2261,7 @@
                                 'sub' => 'Class X original certificate or DigiLocker attested copy',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'marksheet12' => [
                                 'icon' => '📑',
@@ -2240,7 +2269,7 @@
                                 'sub' => 'Short memo or internet copy with principal attestation',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'btech' => [
                                 'icon' => '🎓',
@@ -2248,7 +2277,7 @@
                                 'sub' => 'Consolidated Marks Memo (CMM) or Provisional Certificate',
                                 'levels' => 'mtech phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'mtech' => [
                                 'icon' => '📚',
@@ -2256,7 +2285,7 @@
                                 'sub' => 'Postgraduate Marks Memo or Degree Certificate',
                                 'levels' => 'phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'pg' => [
                                 'icon' => '🔬',
@@ -2264,7 +2293,7 @@
                                 'sub' => 'Doctoral coursework or post-master qualification certificate',
                                 'levels' => 'phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'aadhaar' => [
                                 'icon' => '🪪',
@@ -2272,7 +2301,7 @@
                                 'sub' => 'Government proof of identity & native address',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => true,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'photo' => [
                                 'icon' => '🖼️',
@@ -2280,7 +2309,7 @@
                                 'sub' => 'Recent studio color photo with white background',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => true,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'tc' => [
                                 'icon' => '🏛️',
@@ -2550,8 +2579,15 @@
 
                             <!-- Slot Selection (S1 11 AM - 1 PM or S2 2 PM - 4 PM) -->
                             <div class="field-group">
-                                <label class="field-label">Select Slot <span class="required-star">*</span></label>
-                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" required>
+                                <label class="field-label">
+                                    Select Slot <span class="required-star">*</span>
+                                    @if($isAppInExamSchedule)
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
+                                            🔒 Slot Locked (Already Scheduled)
+                                        </span>
+                                    @endif
+                                </label>
+                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isAppInExamSchedule ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
                                     <option value="S1 11:00 AM to 1:00 PM" {{ str_contains($currentSlot, 'S1') || str_contains($currentSlot, '11') ? 'selected' : '' }}>
                                         S1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
@@ -2559,9 +2595,18 @@
                                         S2 2:00 PM to 4:00 PM (Afternoon Session)
                                     </option>
                                 </select>
+                                @if($isAppInExamSchedule)
+                                    <input type="hidden" name="exam_slot" value="{{ $currentSlot }}">
+                                @endif
                                 <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
                                     <span>✓</span>
-                                    <span id="slotLiveStatus">Standard 2-hour CBT entrance test session.</span>
+                                    <span id="slotLiveStatus">
+                                        @if($isAppInExamSchedule)
+                                            Confirmed slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                        @else
+                                            Standard 2-hour CBT entrance test session.
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -2572,7 +2617,7 @@
                             &larr; Stage 4: {{ $stages[4]['title'] ?? 'Document upload' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                            <span>{{ $isAppInExamSchedule ? 'Proceed to Stage 6: Application Download &rarr;' : 'Confirm Slot & Proceed to Stage 6: ' . ($stages[6]['title'] ?? 'Application Download') . ' &rarr;' }}</span>
                         </button>
                     </div>
 

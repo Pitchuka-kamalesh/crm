@@ -42,10 +42,13 @@ class ApplicationController extends Controller
 
         if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
             try {
+                $logoPath = public_path('images/vignan-logo.png');
+                $logoBase64 = is_file($logoPath) ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))) : asset('images/vignan-logo.png');
+
                 $filename = 'Application_Form_' . ($student->id ?: 'VU') . '_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $student->name ?: 'Candidate') . '.pdf';
                 return \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, [
                     'student' => $student,
-                    'logo' => public_path('images/vignan-logo.png'),
+                    'logo' => $logoBase64,
                     'isPdf' => true,
                 ])
                     ->setOptions([
@@ -186,8 +189,38 @@ class ApplicationController extends Controller
         $uploadedDocs = \Modules\Dashboards\Http\Controllers\DashboardsController::getUploadedDocuments((string) $applino);
         $photoInfo = $uploadedDocs['photo'] ?? null;
         $photoPath = null;
-        if ($photoInfo && !empty($photoInfo['path']) && is_file($photoInfo['path'])) {
-            $photoPath = 'data:' . ($photoInfo['mime'] ?? 'image/jpeg') . ';base64,' . base64_encode((string) file_get_contents($photoInfo['path']));
+        $absPhotoPath = null;
+
+        if ($photoInfo) {
+            $candidates = [
+                $photoInfo['path'] ?? '',
+                $photoInfo['abs_path'] ?? '',
+                !empty($photoInfo['path']) ? public_path($photoInfo['path']) : '',
+                !empty($photoInfo['filename']) ? public_path('uploads/documents/' . $applino . '/' . $photoInfo['filename']) : '',
+            ];
+            foreach ($candidates as $cand) {
+                if (!empty($cand) && is_file($cand)) {
+                    $absPhotoPath = $cand;
+                    break;
+                }
+            }
+        }
+
+        // Direct directory scan fallback if photo wasn't indexed yet
+        if (!$absPhotoPath && !empty($applino)) {
+            $cleanApp = preg_replace('/[^A-Za-z0-9_-]/', '', (string)$applino);
+            $appDir = public_path('uploads/documents/' . $cleanApp);
+            if (is_dir($appDir)) {
+                $photoFiles = glob($appDir . DIRECTORY_SEPARATOR . 'photo_*');
+                if (!empty($photoFiles) && is_file($photoFiles[0])) {
+                    $absPhotoPath = $photoFiles[0];
+                }
+            }
+        }
+
+        if ($absPhotoPath && is_file($absPhotoPath)) {
+            $mime = mime_content_type($absPhotoPath) ?: ($photoInfo['mime'] ?? 'image/jpeg');
+            $photoPath = 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($absPhotoPath));
         } elseif ($photoInfo && !empty($photoInfo['url'])) {
             $photoPath = $photoInfo['url'];
         }

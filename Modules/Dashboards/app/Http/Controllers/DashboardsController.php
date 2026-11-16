@@ -695,6 +695,18 @@ class DashboardsController extends Controller
                         ? (float)$request->input('pu2_percentage')
                         : (($pu2Conducted > 0 && $pu2Earned) ? round(($pu2Earned / $pu2Conducted) * 100, 2) : $pu2MarksRaw);
 
+                    if ($tenthPct !== null && $tenthPct < 60.0) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'tenth_percentage' => '10th SSC percentage must be at least 60% to proceed to the next stage (Entered: ' . number_format($tenthPct, 2) . '%).',
+                        ]);
+                    }
+
+                    if ($pu2Pct !== null && $pu2Pct < 60.0) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'pu2_percentage' => '12th / Intermediate percentage must be at least 60% to proceed to the next stage (Entered: ' . number_format($pu2Pct, 2) . '%).',
+                        ]);
+                    }
+
                     $academicPayload = [
                         'crmid' => $academicCrmId,
                         'phoneno' => $crmStudent->phoneno,
@@ -1084,12 +1096,17 @@ class DashboardsController extends Controller
                         // Ensure file exists physically on disk (e.g. if restored from DB backup)
                         self::ensurePhysicalDocumentExists($fPath, $cleanAppli, $k, $fName);
 
+                        $relPath = str_starts_with($fPath, 'uploads/') ? $fPath : ('uploads/documents/' . $cleanAppli . '/' . $fName);
+                        $absPath = public_path($relPath);
+
                         $found[$k] = [
                             'key' => $k,
                             'title' => $titles[$k] ?? ucwords(str_replace('_', ' ', $k)),
                             'filename' => $fName,
-                            'path' => $fPath,
-                            'url' => asset(str_starts_with($fPath, 'uploads/') ? $fPath : ('uploads/documents/' . $cleanAppli . '/' . $fName)),
+                            'path' => is_file($absPath) ? $absPath : $relPath,
+                            'abs_path' => $absPath,
+                            'rel_path' => $relPath,
+                            'url' => asset($relPath),
                             'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
                             'ext' => $ext,
                             'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'webp']),
@@ -1110,12 +1127,15 @@ class DashboardsController extends Controller
                     $fullPath = $matches[0];
                     $filename = basename($fullPath);
                     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                    $relPath = 'uploads/documents/' . $cleanAppli . '/' . $filename;
                     $found[$key] = [
                         'key' => $key,
                         'title' => $titles[$key] ?? ucwords(str_replace('_', ' ', $key)),
                         'filename' => $filename,
-                        'path' => 'uploads/documents/' . $cleanAppli . '/' . $filename,
-                        'url' => asset('uploads/documents/' . $cleanAppli . '/' . $filename),
+                        'path' => $fullPath,
+                        'abs_path' => $fullPath,
+                        'rel_path' => $relPath,
+                        'url' => asset($relPath),
                         'mime' => $mimeMap[$ext] ?? 'application/octet-stream',
                         'ext' => $ext,
                         'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'webp']),
