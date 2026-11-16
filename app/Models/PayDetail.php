@@ -54,4 +54,36 @@ class PayDetail extends Model
     {
         return $this->belongsTo(CrmStudentRegistration::class, 'applino', 'applinano');
     }
+
+    public function receipt(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ReceiptDetail::class, 'applino', 'applino');
+    }
+
+    // ==========================================
+    // ELOQUENT QUERY SCOPES (REPLACES RAW SQL)
+    // ==========================================
+
+    public function scopeSuccess($query)
+    {
+        return $query->where('txnstatus', 'success');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('txnstatus', 'pending');
+    }
+
+    public function scopeFailed($query)
+    {
+        return $query->where('txnstatus', 'failed');
+    }
+
+    public function scopeByDateRange($query, $from, $to)
+    {
+        if (!empty($from) && !empty($to)) {
+            return $query->whereBetween('txndatetime', [$from, $to]);
+        }
+        return $query;
+    }
 }

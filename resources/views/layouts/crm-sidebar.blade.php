@@ -37,12 +37,7 @@
             <span class="user-strip-name" title="{{ $user->name ?? 'User' }}">{{ $user->name ?? 'User' }}</span>
         </div>
         <span class="user-strip-role-badge">
-            @if($roleId == 3) DEAN
-            @elseif($roleId == 2) INCHARGE
-            @elseif($roleId == 4) TELE CALLER
-            @elseif($roleId == 1) EMPLOYEE
-            @else STAFF
-            @endif
+            {{ \App\Common\Services\RoleService::getRoleBadgeLabel($roleId) }}
         </span>
     </div>
 
@@ -52,149 +47,11 @@
             $currentTab = $activeTab ?? request()->query('tab', '');
             $currentPath = trim(request()->path(), '/');
 
-            $isDashboardActive = ($currentTab === 'overview' || empty($currentTab)) 
-                && !request()->routeIs('leads.*') 
-                && !request()->routeIs('finance.*') 
-                && !request()->routeIs('sms.*')
-                && !request()->routeIs('kpi.*')
-                && !request()->routeIs('crm.std*');
-            if ($roleId == 4) {
-                $isDashboardActive = request()->routeIs('leads.allotted') && empty($currentTab);
-            }
-
-            $roleMenus = $roleMenus ?? \App\Models\MenuAccessRole::where('role_id', $roleId)->with('menu')->orderBy('morder')->get();
-
-            // Strictly group menus into Main (mposition = 1) and Sub (mposition = 2)
-            $menuGroups = [];
-            $currentMainId = null;
-
-            foreach ($roleMenus as $access) {
-                $menu = $access->menu;
-                if (!$menu) continue;
-
-                if ((int)$access->mposition === 1) {
-                    $currentMainId = $menu->menu_id;
-                    $menuGroups[$currentMainId] = [
-                        'main' => $menu,
-                        'access' => $access,
-                        'submenus' => [],
-                    ];
-                } elseif ((int)$access->mposition === 2) {
-                    $parentId = $menu->parent_menu_id ?: $currentMainId;
-                    if ($parentId && isset($menuGroups[$parentId])) {
-                        $menuGroups[$parentId]['submenus'][] = [
-                            'menu' => $menu,
-                            'access' => $access,
-                        ];
-                    } else {
-                        $keys = array_keys($menuGroups);
-                        if (!empty($keys)) {
-                            $lastKey = end($keys);
-                            $menuGroups[$lastKey]['submenus'][] = [
-                                'menu' => $menu,
-                                'access' => $access,
-                            ];
-                        }
-                    }
-                }
-            }
-
-            $resolveMenuUrl = function($controllerRef) {
-                if (preg_match('/step\D*(\d+)/i', $controllerRef, $matches)) {
-                    return route('dashboards.index', ['step' => (int)$matches[1]]);
-                }
-                if (str_starts_with($controllerRef, 'dashboards?step=')) {
-                    $step = (int)str_replace('dashboards?step=', '', $controllerRef);
-                    return route('dashboards.index', ['step' => $step]);
-                }
-                return match($controllerRef) {
-                    'crm/stddata' => route('crm.stddata', ['tab' => 'stddata']),
-                    'crm/stdsearch' => route('crm.stdsearch', ['tab' => 'stdsearch']),
-                    'crm/crmdatatracking', 'crm/datatracking' => route('crm.crmdatatracking', ['tab' => 'stdsearch']),
-                    'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => route('crm.couponinfo', ['tab' => 'couponinfo']),
-                    'crm/index' => route('crm.stddata', ['tab' => 'stddata']),
-                    'leads/allottedleads' => route('leads.allotted'),
-                    'leads/leadsallocation' => route('leads.allocation', ['tab' => 'allocation']),
-                    'leads/leadsupload' => route('leads.upload', ['tab' => 'upload']),
-                    'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => route('leads.input', ['tab' => 'input']),
-                    'leads/index' => route('leads.index'),
-                    'finance/paiddetails' => route('finance.paiddetails', ['tab' => 'paiddetails']),
-                    'finance/payfee' => route('dashboards.index', ['step' => 1]),
-                    'finance/index' => route('finance.index'),
-                    'kpi/studentkpi' => route('kpi.studentkpi', ['tab' => 'studentkpi']),
-                    'kpi/telecallerkpi' => route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']),
-                    'kpi/leadskpi' => route('kpi.leadskpi', ['tab' => 'leadskpi']),
-                    'kpi/index' => route('kpi.index', ['tab' => 'kpi']),
-                    'sms/index' => route('sms.index'),
-                    default => url('/' . ltrim($controllerRef, '/')),
-                };
-            };
-
-            $isSubActiveCheck = function($controllerRef) use ($currentPath, $currentTab) {
-                if (preg_match('/step\D*(\d+)/i', $controllerRef, $matches)) {
-                    $stepNum = (int)$matches[1];
-                    return (request()->routeIs('dashboards.*') && request()->query('step', 1) == $stepNum) || $currentPath === 'step' . $stepNum;
-                }
-                return match($controllerRef) {
-                    'crm/stddata' => $currentTab === 'stddata' || request()->routeIs('crm.stddata') || $currentPath === 'crm/stddata',
-                    'crm/crmdatatracking', 'crm/datatracking' => request()->routeIs('crm.crmdatatracking') || str_contains($currentPath, 'crmdatatracking'),
-                    'crm/stdsearch' => (request()->routeIs('crm.stdsearch') && !str_contains($currentPath, 'crmdatatracking')) || ($currentPath === 'crm/stdsearch' && !str_contains($currentPath, 'crmdatatracking')),
-                    'coupoungenration', 'crm/coupoungenration', 'crm/couponinfo', 'crm/coupon-info' => $currentTab === 'couponinfo' || request()->routeIs('crm.couponinfo*') || request()->routeIs('crm.coupoungenration*') || str_contains($currentPath, 'coupoungenration') || str_contains($currentPath, 'coupon-info') || str_contains($currentPath, 'couponinfo'),
-                    'leads/allottedleads' => request()->routeIs('leads.allotted') || str_contains($currentPath, 'allotted'),
-                    'leads/leadsallocation' => $currentTab === 'allocation' || request()->routeIs('leads.allocation') || str_contains($currentPath, 'allocation'),
-                    'leads/leadsupload' => $currentTab === 'upload' || request()->routeIs('leads.upload') || str_contains($currentPath, 'leadsupload'),
-                    'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => $currentTab === 'input' || request()->routeIs('leads.input') || str_contains($currentPath, 'leadsinput') || str_contains($currentPath, 'leads-input') || str_contains($currentPath, 'leads%20input') || str_contains($currentPath, 'leads input'),
-                    'finance/paiddetails' => request()->routeIs('finance.paiddetails') || str_contains($currentPath, 'paiddetails'),
-                    'finance/payfee' => str_contains($currentPath, 'payfee'),
-                    'kpi/studentkpi' => request()->routeIs('kpi.studentkpi') || $currentTab === 'studentkpi' || str_contains($currentPath, 'studentkpi'),
-                    'kpi/telecallerkpi' => request()->routeIs('kpi.telecallerkpi') || $currentTab === 'telecallerkpi' || str_contains($currentPath, 'telecallerkpi'),
-                    'kpi/leadskpi' => request()->routeIs('kpi.leadskpi') || $currentTab === 'leadskpi' || str_contains($currentPath, 'leadskpi'),
-                    default => $currentPath === trim($controllerRef, '/'),
-                };
-            };
-
-            $getMenuSvgIcon = function($iconName, $menuCode) {
-                if (str_starts_with($menuCode, 'DASH')) {
-                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-                }
-                if (str_starts_with($menuCode, 'CRM')) {
-                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
-                }
-                if (str_starts_with($menuCode, 'LEADS')) {
-                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="6"/><circle cx="12" cy="2"/></svg>';
-                }
-                if (str_starts_with($menuCode, 'FINA')) {
-                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="21" x2="21" y2="21"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>';
-                }
-                if (str_contains((string)$iconName, 'envelope') || str_starts_with($menuCode, 'SMS')) {
-                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-                }
-                if (str_starts_with($menuCode, 'KPI')) {
-                    return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>';
-                }
-                return '<svg class="menu-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/></svg>';
-            };
+            // Dynamic menu tree computed via MenuService (matching CDOE architecture)
+            $menuGroups = \App\Common\Services\MenuService::getMenusForUser($user ?? auth()->user());
         @endphp
 
         <!-- DYNAMIC ROLE-BASED MENUS (Strictly from database master.menus & master.menu_access_roles) -->
-        {{--
-            TEMPORARILY HIDDEN DASHBOARD BUTTON:
-            Hidden per user request. Can be restored by removing the Blade comment wrapper.
-
-            @if($roleId != 4)
-                @php
-                    $dashboardRoute = route('crm.alias', ['tab' => 'overview']);
-                @endphp
-                <a href="{{ $dashboardRoute }}" class="menu-btn-active-dashboard {{ $isDashboardActive ? 'active' : '' }}" id="nav-btn-dashboard" onclick="selectDashboardNav(event)" title="Portal Overview">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-            @endif
-        --}}
-
         @foreach($menuGroups as $mainId => $group)
             @php
                 $main = $group['main'];
@@ -202,7 +59,7 @@
                 $isGroupOpen = false;
                 if ($hasSubmenus) {
                     foreach ($group['submenus'] as $subItem) {
-                        if ($isSubActiveCheck($subItem['menu']->controller_ref)) {
+                        if (\App\Common\Services\MenuService::isSubActive($subItem['menu']->controller_ref, $currentPath, $currentTab)) {
                             $isGroupOpen = true;
                             break;
                         }
@@ -210,7 +67,7 @@
                 } else {
                     $isGroupOpen = ($currentPath === trim($main->controller_ref, '/'));
                 }
-                $mainUrl = $resolveMenuUrl($main->controller_ref);
+                $mainUrl = \App\Common\Services\MenuService::resolveMenuUrl($main->controller_ref);
             @endphp
 
             @if($hasSubmenus)
@@ -218,7 +75,7 @@
                 <div class="accordion-group {{ $isGroupOpen ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
                     <button type="button" class="accordion-header {{ $isGroupOpen ? 'active' : '' }}" onclick="toggleAccordion('group-{{ strtolower($main->menu_code) }}')">
                         <div class="header-left">
-                            {!! $getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
+                            {!! \App\Common\Services\MenuService::getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
                             <span>{{ $main->menu_name }}</span>
                         </div>
                         <svg class="chevron-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -229,16 +86,9 @@
                         @foreach($group['submenus'] as $subItem)
                             @php
                                 $sub = $subItem['menu'];
-                                $subUrl = $resolveMenuUrl($sub->controller_ref);
-                                $isSubActive = $isSubActiveCheck($sub->controller_ref);
+                                $subUrl = \App\Common\Services\MenuService::resolveMenuUrl($sub->controller_ref);
+                                $isSubActive = \App\Common\Services\MenuService::isSubActive($sub->controller_ref, $currentPath, $currentTab);
                                 $subName = trim($sub->menu_name);
-                                if (in_array(strtolower($subName), ['student kpi', 'studentkpi', 'std kpi'], true)) {
-                                    $subName = 'Student KPI';
-                                } elseif (in_array(strtolower($subName), ['telecaller kpi', 'telecallerkpi'], true)) {
-                                    $subName = 'Telecaller KPI';
-                                } elseif (in_array(strtolower($subName), ['leads kpi', 'leadskpi'], true)) {
-                                    $subName = 'Leads KPI';
-                                }
                             @endphp
                             <a href="{{ $subUrl }}" class="submenu-link {{ $isSubActive ? 'active' : '' }}">
                                 {{ $subName }}
@@ -254,7 +104,7 @@
                 <div class="accordion-group {{ $isMainActive ? 'open' : '' }}" id="group-{{ strtolower($main->menu_code) }}">
                     <a href="{{ $mainUrl }}" class="accordion-header {{ $isMainActive ? 'active' : '' }}" style="text-decoration: none;">
                         <div class="header-left">
-                            {!! $getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
+                            {!! \App\Common\Services\MenuService::getMenuSvgIcon($main->icon_name, $main->menu_code) !!}
                             <span>{{ $main->menu_name }}</span>
                         </div>
                     </a>

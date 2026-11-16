@@ -51,4 +51,32 @@ class CouponInfo extends Model
     {
         return $this->belongsTo(CrmStudentRegistration::class, 'applino', 'applinano');
     }
+
+    // ==========================================
+    // ELOQUENT QUERY SCOPES (REPLACES RAW SQL)
+    // ==========================================
+
+    public function scopeActive($query)
+    {
+        return $query->where('coupstatus', 1);
+    }
+
+    public function scopePersonal($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('coupontype', 2)->orWhere('coupontype', 'personal');
+        });
+    }
+
+    public function scopeDefault($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('coupontype', 1)->orWhere('coupontype', 'default');
+        });
+    }
+
+    public function scopeByCandidate($query, $applino)
+    {
+        return $query->where('applino', $applino);
+    }
 }

@@ -3,15 +3,16 @@
 namespace Modules\Leads\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\CrmStudentRegistration;
-use App\Models\Employee;
-use App\Models\Lead;
-use App\Models\MenuAccessRole;
-use App\Models\Program;
-use App\Models\Role;
-use App\Models\StudentRegistration;
-use App\Models\TelecallerLead;
-use App\Models\TelecallerLeadTask;
+use Modules\Crm\Models\CrmStudentRegistration;
+use Modules\Crm\Models\Program;
+use Modules\Crm\Models\StudentRegistration;
+use Modules\Leads\Models\Lead;
+use Modules\Leads\Models\TelecallerLead;
+use Modules\Leads\Models\TelecallerLeadTask;
+use Modules\Auth\Models\Employee;
+use Modules\Auth\Models\MenuAccessRole;
+use Modules\Auth\Models\Role;
+use App\Common\Services\RoleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class LeadsController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $roleId = $user ? $user->getActiveRoleId() : \App\Services\RoleService::telecallerRoleId();
+        $roleId = $user ? $user->getActiveRoleId() : RoleService::telecallerRoleId();
         $roleName = $user ? $user->role_label : 'Tele Caller';
 
         $currentRoute = $request->route() ? $request->route()->getName() : '';
@@ -36,7 +37,7 @@ class LeadsController extends Controller
                 'leads.upload' => 'upload',
                 'leads.input' => 'input',
                 'leads.allotted' => 'allotted',
-                default => (str_contains($request->path(), 'leadsupload') ? 'upload' : (\App\Services\RoleService::isTelecaller($roleId) ? 'allotted' : 'input')),
+                default => (str_contains($request->path(), 'leadsupload') ? 'upload' : (RoleService::isTelecaller($roleId) ? 'allotted' : 'input')),
             };
         }
 
@@ -111,11 +112,12 @@ class LeadsController extends Controller
                 ->withQueryString();
         } elseif ($activeTab === 'allotted') {
             // Strict telecaller isolation: telecaller can ONLY view their own allocated leads
-            $telecallerEmpCode = ($roleId === 4 || empty($callerFilter) || $callerFilter === 'all') 
+            $isTelecaller = RoleService::isTelecaller($roleId);
+            $telecallerEmpCode = ($isTelecaller || empty($callerFilter) || $callerFilter === 'all') 
                 ? ($user?->usercode ?? '') 
                 : $callerFilter;
 
-            if ($roleId === 4) {
+            if ($isTelecaller) {
                 $telecallerEmpCode = $user?->usercode ?? '';
             }
 
@@ -510,11 +512,11 @@ class LeadsController extends Controller
         $fullRemark = $remarks ?: ('Stage status updated to ' . $customStageName);
 
         $user = auth()->user();
-        $roleId = $user ? $user->getActiveRoleId() : 4;
+        $roleId = $user ? $user->getActiveRoleId() : RoleService::telecallerRoleId();
         $cleanTarget = str_replace('APP', '', $applinano);
 
         // Strict telecaller isolation: telecaller can ONLY touch their own allocated leads
-        if ($roleId === 4 && $user) {
+        if (RoleService::isTelecaller($roleId) && $user) {
             $empCode = $user->usercode;
             $isAllocated = TelecallerLead::where('empcode', $empCode)
                 ->where(function ($q) use ($applinano, $cleanTarget) {
@@ -603,7 +605,7 @@ class LeadsController extends Controller
         $status = $request->input('status');
 
         $user = auth()->user();
-        $roleId = $user ? $user->getActiveRoleId() : 4;
+        $roleId = $user ? $user->getActiveRoleId() : RoleService::telecallerRoleId();
         $cleanTarget = str_replace('APP', '', $applinano);
 
         $student = CrmStudentRegistration::where('applinano', $applinano)
@@ -611,7 +613,7 @@ class LeadsController extends Controller
             ->first();
 
         // Strict telecaller isolation: telecaller can ONLY touch their own allocated leads
-        if ($roleId === 4 && $user) {
+        if (RoleService::isTelecaller($roleId) && $user) {
             $empCode = $user->usercode;
             $isAllocated = TelecallerLead::where('empcode', $empCode)
                 ->where(function ($q) use ($applinano, $cleanTarget, $student) {
@@ -754,7 +756,7 @@ class LeadsController extends Controller
             }
         }
 
-        $query = \App\Models\TelecallerLeadTask::query();
+        $query = TelecallerLeadTask::query();
         $hasFilter = false;
         $query->where(function ($q) use ($cleanAppli, $phone, &$hasFilter) {
             if ($phone !== '' && $phone !== '0') {
@@ -889,8 +891,7 @@ class LeadsController extends Controller
         // Query existing phone numbers in crm.leads in chunks
         $existingPhones = [];
         foreach (array_chunk($uniquePhonesInFile, 1000) as $chunk) {
-            $found = DB::table('crm.leads')
-                ->whereIn('phoneno', array_map('intval', $chunk))
+            $found = \Modules\Leads\Models\Lead::whereIn('phoneno', array_map('intval', $chunk))
                 ->pluck('phoneno')
                 ->map(fn($p) => (string) $p)
                 ->toArray();
@@ -932,7 +933,7 @@ class LeadsController extends Controller
             }
 
             foreach (array_chunk($recordsToInsert, 500) as $chunk) {
-                DB::table('crm.leads')->insertOrIgnore($chunk);
+                \Modules\Leads\Models\Lead::insertOrIgnore($chunk);
                 $insertedCount += count($chunk);
             }
         }

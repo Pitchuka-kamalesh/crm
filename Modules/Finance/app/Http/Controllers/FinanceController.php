@@ -3,13 +3,13 @@
 namespace Modules\Finance\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\CrmStudentRegistration;
-use App\Models\MenuAccessRole;
-use App\Models\PayDetail;
-use App\Models\Program;
-use App\Models\ReceiptDetail;
-use App\Models\Role;
-use App\Models\StudentRegistration;
+use Modules\Crm\Models\CrmStudentRegistration;
+use Modules\Crm\Models\Program;
+use Modules\Crm\Models\StudentRegistration;
+use Modules\Finance\Models\PayDetail;
+use Modules\Finance\Models\ReceiptDetail;
+use Modules\Auth\Models\MenuAccessRole;
+use Modules\Auth\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;

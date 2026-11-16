@@ -93,6 +93,9 @@
 
     .footer { position: absolute; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 8.5px; color: #6B778A; }
 
+    /* attached document page styling */
+    .page-attachment { width: 210mm; min-height: 297mm; margin: 20px auto 0 auto; background: #ffffff; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.12); page-break-before: always; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
     /* download toolbar (hidden in the PDF and when printing) */
     .toolbar { width: 210mm; margin: 0 auto; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
     .btn { display: inline-block; background: #1E7BD8; color: #fff; text-decoration: none; font-weight: bold; font-size: 13px;
@@ -103,7 +106,8 @@
     .btn svg { vertical-align: -3px; margin-right: 6px; }
     @media print {
         body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .page { box-shadow: none; width: 100%; margin: 0; padding: 0; }
+        .page { box-shadow: none; width: 100%; margin: 0; padding: 0; page-break-after: always; }
+        .page-attachment { box-shadow: none; width: 100%; margin: 0; padding: 0; page-break-before: always; page-break-after: always; }
         .toolbar { display: none !important; }
     }
 </style>
@@ -169,45 +173,71 @@
             <tr>
                 <td class="gap-r">
                     <div class="card">
-                        <h3>1. Personal Information</h3>
+                        <h3>1. Candidate &amp; Parent Details</h3>
                         <table class="fields">
                             <tr><td class="l">Full name</td><td class="v">{{ $student->name }}</td></tr>
-                            <tr><td class="l">Email</td><td class="v">{{ $student->email }}</td></tr>
-                            <tr><td class="l">Phone</td><td class="v">{{ $student->phone }}</td></tr>
+                            <tr><td class="l">Father / Parent</td><td class="v">{{ $student->parent_name ?: ($student->father_name ?: 'N/A') }}</td></tr>
+                            <tr><td class="l">Parent Contact</td><td class="v">{{ $student->parent_phone ?: ($student->father_phone ?: 'N/A') }}</td></tr>
+                            <tr><td class="l">Candidate Phone</td><td class="v">{{ $student->phone }}</td></tr>
+                            <tr><td class="l">Email ID</td><td class="v">{{ $student->email }}</td></tr>
                             <tr><td class="l">Date of birth</td><td class="v">{{ $dob }}</td></tr>
-                            <tr><td class="l">Gender</td><td class="v">{{ $student->gender }}</td></tr>
-                            <tr><td class="l">Category</td><td class="v">{{ $student->category }}</td></tr>
+                            <tr><td class="l">Gender</td><td class="v">{{ $student->gender ?: 'N/A' }}</td></tr>
+                            <tr><td class="l">Category</td><td class="v">{{ $student->category ?: 'General' }}</td></tr>
                         </table>
                     </div>
                 </td>
                 <td class="gap-l">
                     <div class="card">
-                        <h3>2. Educational Information</h3>
+                        <h3>2. Address Information</h3>
                         <table class="fields">
-                            <tr><td class="l">School</td><td class="v">{{ $student->school_name }}</td></tr>
-                            <tr><td class="l">Board</td><td class="v">{{ $student->board }}</td></tr>
-                            <tr><td class="l">Percentage</td><td class="v">{{ number_format((float) $student->percentage, 2) }} %</td></tr>
-                            <tr><td class="l">Passing year</td><td class="v">{{ $student->passing_year }}</td></tr>
-                            <tr><td class="l">Roll number</td><td class="v">{{ $student->roll_number }}</td></tr>
+                            <tr><td class="l">Door / Street</td><td class="v">{{ $student->street ?: 'N/A' }}</td></tr>
+                            <tr><td class="l">City / Mandal</td><td class="v">{{ $student->city ?: 'N/A' }}</td></tr>
+                            <tr><td class="l">District</td><td class="v">{{ $student->district ?: 'N/A' }}</td></tr>
+                            <tr><td class="l">State</td><td class="v">{{ $student->state ?: 'N/A' }}</td></tr>
+                            <tr><td class="l">Country</td><td class="v">{{ $student->country ?: 'India' }}</td></tr>
+                            <tr><td class="l">Pincode</td><td class="v">{{ $student->pincode ?: 'N/A' }}</td></tr>
+                            <tr><td class="l">Exam Slot</td><td class="v">{{ $student->exam_date ?: 'Stage 5' }} ({{ $student->exam_slot ?: 'Assigned' }})</td></tr>
+                            <tr><td class="l">Program</td><td class="v">{{ $student->program ?: 'Undergraduate' }}</td></tr>
                         </table>
                     </div>
                 </td>
             </tr>
-            <tr><td colspan="2" style="height:12px"></td></tr>
+        </table>
+
+        {{-- Educational Information (10th SSC & 12th Inter) --}}
+        <div class="card" style="margin-top:12px">
+            <h3>3. Qualifying Academic Records (10th SSC &amp; 12th Intermediate)</h3>
+            <table class="fields" style="width:100%; border-collapse:collapse;">
+                <tr style="background:#F8FAFC; font-weight:bold; color:#475569;">
+                    <td style="padding:4px 6px; width:18%;">Standard</td>
+                    <td style="padding:4px 6px; width:30%;">School / College</td>
+                    <td style="padding:4px 6px; width:22%;">Board</td>
+                    <td style="padding:4px 6px; width:10%;">Year</td>
+                    <td style="padding:4px 6px; width:10%;">Roll No</td>
+                    <td style="padding:4px 6px; width:10%; text-align:right;">% Marks</td>
+                </tr>
+                <tr>
+                    <td style="padding:4px 6px; font-weight:bold;">10th Standard (SSC)</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ssc_school ?: ($student->school_name ?: 'N/A') }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ssc_board ?: ($student->board ?: 'State Board') }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ssc_year ?: ($student->passing_year ?: 'N/A') }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ssc_roll ?: ($student->roll_number ?: 'N/A') }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->ssc_percentage !== 'N/A' ? $student->academic->ssc_percentage : (number_format((float) $student->percentage, 2) . ' %') }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:4px 6px; font-weight:bold;">12th / Inter (10+2)</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->inter_college ?: 'Junior College Records' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->inter_board ?: 'Board of Intermediate Education' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->inter_year ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->inter_roll ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->inter_percentage ?: 'N/A' }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <table class="grid" style="margin-top:12px;">
             <tr>
                 <td class="gap-r">
-                    <div class="card">
-                        <h3>3. Address Information</h3>
-                        <table class="fields">
-                            <tr><td class="l">Street</td><td class="v">{{ $student->street }}</td></tr>
-                            <tr><td class="l">City</td><td class="v">{{ $student->city }}</td></tr>
-                            <tr><td class="l">State</td><td class="v">{{ $student->state }}</td></tr>
-                            <tr><td class="l">Pincode</td><td class="v">{{ $student->pincode }}</td></tr>
-                            <tr><td class="l">Country</td><td class="v">{{ $student->country }}</td></tr>
-                        </table>
-                    </div>
-                </td>
-                <td class="gap-l">
                     <div class="card">
                         <h3>4. Payment Information</h3>
                         <table class="fields">
@@ -219,27 +249,27 @@
                         </table>
                     </div>
                 </td>
+                <td class="gap-l">
+                    <div class="card">
+                        <h3>5. Documents Verification</h3>
+                        <table class="docs">
+                            @foreach (array_chunk($docs, 2, true) as $row)
+                                <tr>
+                                    @foreach ($row as $key => $label)
+                                        @php
+                                            $mime = $uploaded[$key] ?? null;
+                                            $has  = !empty($mime);
+                                            $type = $has ? strtoupper(str_replace(['image/', 'application/'], '', $mime)) : 'Pending';
+                                        @endphp
+                                        <td><div class="chip {{ $has ? 'ok' : 'warn' }}">{{ $label }} <small>{{ $type }}</small></div></td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                </td>
             </tr>
         </table>
-
-        {{-- Documents --}}
-        <div class="card" style="margin-top:12px">
-            <h3>5. Documents Uploaded</h3>
-            <table class="docs">
-                @foreach (array_chunk($docs, 3, true) as $row)
-                    <tr>
-                        @foreach ($row as $key => $label)
-                            @php
-                                $mime = $uploaded[$key] ?? null;
-                                $has  = !empty($mime);
-                                $type = $has ? strtoupper(str_replace(['image/', 'application/'], '', $mime)) : 'Pending';
-                            @endphp
-                            <td><div class="chip {{ $has ? 'ok' : 'warn' }}">{{ $label }} <small>{{ $type }}</small></div></td>
-                        @endforeach
-                    </tr>
-                @endforeach
-            </table>
-        </div>
 
         {{-- Instructions --}}
         <div class="note">
@@ -273,6 +303,103 @@
 
     <div class="footer">Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;|&nbsp; https://admissions.vignan.ac.in</div>
 </div>
+
+{{-- ATTACHED APPLICATION DOCUMENTS (CONSECUTIVE PAGES IN DOSSIER) --}}
+@php
+    $attachedFiles = (array) ($student->uploaded_files ?? []);
+    $attachIdx = 0;
+    $totalAttached = count($attachedFiles);
+@endphp
+
+@if($totalAttached > 0)
+    @foreach($attachedFiles as $docKey => $doc)
+        @php
+            $attachIdx++;
+            $docExt = strtoupper($doc['ext'] ?? pathinfo($doc['filename'] ?? '', PATHINFO_EXTENSION) ?: 'DOC');
+            $cleanExt = strtolower($docExt);
+            $isImg = !empty($doc['is_image']) || in_array($cleanExt, ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg']);
+            $fPath = !empty($doc['path']) ? public_path($doc['path']) : null;
+            $fUrl = $doc['url'] ?? '';
+            $imgSrc = null;
+            if ($isImg) {
+                if ($fPath && is_file($fPath)) {
+                    $mime = $doc['mime'] ?? ('image/' . ($cleanExt === 'jpg' ? 'jpeg' : $cleanExt));
+                    $imgSrc = 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($fPath));
+                } else {
+                    $imgSrc = $fUrl;
+                }
+            }
+        @endphp
+
+        <div class="page-attachment">
+            {{-- Header --}}
+            <table class="header">
+                <tr>
+                    <td style="width:50%">
+                        <span class="logo-box"><img src="{{ $logo }}" alt="Vignan's"></span>
+                        <div class="meta">
+                            Application No: <b>{{ $student->id }}</b> &nbsp;|&nbsp; CRM ID: <b>{{ $student->student_id }}</b>
+                        </div>
+                    </td>
+                    <td style="width:50%">
+                        <div class="title" style="font-size:18px;">ATTACHED DOSSIER DOCUMENT</div>
+                        <div class="subtitle">
+                            Attachment {{ $attachIdx }} of {{ $totalAttached }} &bull; {{ $doc['title'] ?? ucwords(str_replace('_', ' ', $docKey)) }}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="wrap" style="padding:16px 12mm;">
+                {{-- Meta details card --}}
+                <div class="card" style="margin-top:10px;">
+                    <h3>Attachment Details &bull; {{ $docExt }}</h3>
+                    <table class="fields">
+                        <tr>
+                            <td class="l">Document Title</td>
+                            <td class="v">{{ $doc['title'] ?? 'Uploaded Document' }}</td>
+                            <td class="l" style="padding-left:16px;">File Name</td>
+                            <td class="v">{{ $doc['filename'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="l">Candidate Name</td>
+                            <td class="v">{{ $student->name }}</td>
+                            <td class="l" style="padding-left:16px;">Verification Status</td>
+                            <td class="v" style="color:#12875B;">VERIFIED &amp; ATTACHED</td>
+                        </tr>
+                    </table>
+                </div>
+
+                {{-- Document image / preview box --}}
+                <div style="margin-top:14px; background:#ffffff; border:1px solid #E3E8EF; border-radius:10px; padding:14px; text-align:center;">
+                    @if($isImg && $imgSrc)
+                        <img src="{{ $imgSrc }}" alt="{{ $doc['title'] }}" style="max-width:100%; max-height:200mm; object-fit:contain; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                    @else
+                        <div style="padding:48px 20px; color:#475569;">
+                            <div style="font-size:36px; margin-bottom:10px;">📄</div>
+                            <div style="font-size:14px; font-weight:bold; color:#0F2A4A;">{{ $doc['filename'] }}</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:6px;">
+                                Attached {{ $docExt }} Document &bull; Verified and filed in University Admissions Dossier
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Verification footer block --}}
+                <div class="office" style="margin-top:20px;">
+                    <b>ADMISSION VERIFICATION RECORD</b>
+                    <table><tr>
+                        <td>Document: {{ $doc['title'] }}</td>
+                        <td>Verified by: ____________</td>
+                        <td>Seal / Date: ____________</td>
+                    </tr></table>
+                </div>
+            </div>
+
+            <div class="footer">Vignan's Foundation for Science, Technology &amp; Research &nbsp;|&nbsp; Application Dossier Attachment &bull; Page {{ $attachIdx + 1 }}</div>
+        </div>
+    @endforeach
+@endif
 @if (!empty($autoPrint))
 <script>
     window.addEventListener('load', function() {
