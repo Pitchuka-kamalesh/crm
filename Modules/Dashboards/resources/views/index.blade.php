@@ -1564,10 +1564,10 @@
                             @endphp
                             <div style="margin-bottom: 0.65rem; text-align: left;">
                                 <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
-                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely via the official PayU gateway to lock your provisional registration.</p>
+                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely to lock your provisional registration and instantly receive your verified admission receipt.</p>
                             </div>
 
-                            <!-- PayU Fee Summary Box with Concessions -->
+                            <!-- Admission Fee Summary Box with Concessions -->
                             <div style="max-width: 480px; margin: 0 auto 0.75rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; text-align: left;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
                                     <span>Base Admission Fee:</span>
@@ -1594,8 +1594,8 @@
                                 </div>
 
                                 <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
-                                    <span>Payment Gateway:</span>
-                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'PayU Secure Hosted' }}</span>
+                                    <span>Payment Mode:</span>
+                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'Online Admission Settlement' }}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
                                     <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
@@ -1610,7 +1610,7 @@
                                     @if($feeBreakdown['net_payable'] <= 0)
                                         <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
                                     @else
-                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> via PayU Gateway</span>
+                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> & Issue Receipt</span>
                                     @endif
                                     <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </button>

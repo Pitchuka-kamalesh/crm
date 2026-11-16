@@ -18,11 +18,12 @@ use Modules\Auth\Models\Employee;
 use Modules\Auth\Models\Role;
 use Modules\Auth\Models\MenuAccessRole;
 use Modules\Sms\Models\CommunicationLog;
-use App\Common\Services\RoleService;
-use App\Common\Services\TelecallerService;
+use Modules\Auth\Services\RoleService;
+use Modules\Leads\Services\TelecallerService;
+use Modules\Crm\Services\CrmIdService;
+use Modules\Crm\Services\KpiAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CrmController extends Controller
@@ -30,7 +31,7 @@ class CrmController extends Controller
     /**
      * Display the CRM Landing Dashboard for CRM DEAN, CRM Incharge, and Staff.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
         $roleId = $user ? $user->getActiveRoleId() : RoleService::defaultStaffRoleId();
@@ -39,7 +40,7 @@ class CrmController extends Controller
         $currentRoute = $request->route() ? $request->route()->getName() : '';
         $activeTab = $request->query('tab');
         if (!$activeTab) {
-            if ($request->is('*coupoungenration*') || $request->is('*percoupongen*')) {
+            if ($request->is('*coupoungenration*') || $request->is('*percoupongen*') || $request->is('*discountcoupon*') || $request->is('*couponinfo*')) {
                 $activeTab = 'couponinfo';
             } elseif ($request->is('*crmdatatracking*') || $request->is('*datatracking*')) {
                 $activeTab = 'stdsearch';
@@ -53,7 +54,7 @@ class CrmController extends Controller
                 $activeTab = match ($currentRoute) {
                     'crm.stddata', 'crm.enquirylist' => 'stddata',
                     'crm.stdsearch', 'crm.registerlist', 'crm.crmdatatracking' => 'stdsearch',
-                    'crm.couponinfo', 'crm.coupoungenration', 'crm.percoupongen' => 'couponinfo',
+                    'crm.couponinfo', 'crm.coupoungenration', 'crm.percoupongen', 'crm.discountcoupon' => 'couponinfo',
                     'crm.employeelist' => 'employeelist',
                     'kpi.telecallerkpi' => 'telecallerkpi',
                     'kpi.leadskpi' => 'leadskpi',
@@ -62,8 +63,14 @@ class CrmController extends Controller
                 };
             }
         }
-        if ($activeTab === 'kpi') {
-            $activeTab = 'studentkpi';
+        if ($activeTab === 'kpi' || $activeTab === 'studentkpi') {
+            return redirect()->route('kpi.studentkpi', ['tab' => 'studentkpi']);
+        }
+        if ($activeTab === 'telecallerkpi') {
+            return redirect()->route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']);
+        }
+        if ($activeTab === 'leadskpi') {
+            return redirect()->route('kpi.leadskpi', ['tab' => 'leadskpi']);
         }
 
         // Summary counts from Eloquent Models (Read-Only)
@@ -123,7 +130,7 @@ class CrmController extends Controller
 
         // Ensure student CRM IDs are synchronized with branch-wise unique numbers
         try {
-            \App\Services\CrmIdService::syncAllStudentCrmIds();
+            CrmIdService::syncAllStudentCrmIds();
         } catch (\Throwable $e) {}
 
         $allStudents = collect();
@@ -208,7 +215,7 @@ class CrmController extends Controller
         // Available roles for UI role switcher (strictly user's assigned roles from DB)
         $availableRoles = collect();
         try {
-            $userAssigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+            $userAssigned = RoleService::getAssignedRoles($user->usercode);
             $availableRoles = !empty($userAssigned)
                 ? collect($userAssigned)->map(fn($r) => (object)['role_id' => (int)$r['role_id'], 'role_name' => $r['role_name']])
                 : Role::where('role_id', $roleId)->get();
@@ -262,7 +269,7 @@ class CrmController extends Controller
         $personalCoupons = CouponInfo::where('coupontype', 'PERSONAL')->get()->keyBy('applino');
         $payDetails = PayDetail::all()->keyBy('applino');
 
-        $kpiService = app(\App\Services\KpiAnalyticsService::class);
+        $kpiService = app(KpiAnalyticsService::class);
         $paidAppNos = $kpiService->getVerifiedPaidAppNumbers();
 
         // Eloquent KPI Metrics (Computed via KpiAnalyticsService)
@@ -320,27 +327,9 @@ class CrmController extends Controller
             'kpiStage4Done',
             'kpiStage5Done',
             'kpiBranchDistribution',
-            'selectedTelecaller',
             'totalTelecallerLeads',
-            'teleGaneshCount',
-            'teleUnassignedCount',
-            'teleTasksCount',
-            'teleDistinctContacted',
-            'telePendingCount',
-            'teleTaskStages',
-            'telecallerLeadsList',
             'telecallerStats',
-            'totalTelecallersCount',
-            'totalRawLeads',
-            'leadsNewCount',
-            'leadsRegCount',
-            'allocatedLeadsCount',
-            'unallocatedPoolCount',
-            'leadsByDate',
-            'availableYears',
-            'availableMonths',
-            'leadsBySource',
-            'rawLeadsList'
+            'totalRawLeads'
         ));
     }
 

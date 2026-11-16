@@ -17,6 +17,9 @@ use Modules\Dashboards\Models\StudentUpload;
 use Modules\Auth\Models\Menu;
 use Modules\Auth\Models\MenuAccessRole;
 use Modules\Auth\Models\User;
+use Modules\Auth\Services\RoleService;
+use Modules\Crm\Services\CrmIdService;
+use Modules\Finance\Services\CouponService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -62,15 +65,42 @@ class DashboardsController extends Controller
         // Resolve payment status: Check crm.student_registration.stage1, finance.paydetails, and finance.receiptdetails
         $hasPaidRecord = false;
         try {
-            if ($appNo) {
+            if ($appNo && $appNo !== '0') {
                 $hasPaidRecord = \App\Models\PayDetail::where('applino', $appNo)->where('txnstatus', 'success')->exists()
                     || \App\Models\ReceiptDetail::where('applino', $appNo)->exists();
+            }
+            if (!$hasPaidRecord && $cleanPhone) {
+                $phoneSuffix = substr($cleanPhone, -6);
+                $hasPaidRecord = \App\Models\PayDetail::where('applino', 'like', "%{$phoneSuffix}")->where('txnstatus', 'success')->exists()
+                    || \App\Models\ReceiptDetail::where('applino', 'like', "%{$phoneSuffix}")->exists();
             }
         } catch (\Throwable $e) {}
 
         if ($hasPaidRecord && $crmStudent && $crmStudent->stage1 !== 'paid') {
             try {
                 $crmStudent->update(['stage1' => 'paid']);
+            } catch (\Throwable $e) {}
+        }
+
+        if ($hasPaidRecord && !$crmStudent && $cleanPhone) {
+            try {
+                $crmStudent = CrmStudentRegistration::create([
+                    'applinano' => ($appNo && $appNo !== '0') ? $appNo : ('VU2026' . substr($cleanPhone, -6)),
+                    'name' => $displayName ?: 'Candidate',
+                    'phoneno' => $cleanPhone,
+                    'stage1' => 'paid',
+                    'stage2' => 'pending',
+                    'std_status' => 'Admitted',
+                    'campuscode' => 'VAD',
+                    'programlevel' => 'UG',
+                    'log_userid' => ($appNo && $appNo !== '0') ? $appNo : 'PORTAL',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp' => now(),
+                ]);
+                $appNo = $crmStudent->applinano;
+                if ($user && ($user->usercode === '0' || empty($user->usercode))) {
+                    $user->update(['usercode' => $appNo]);
+                }
             } catch (\Throwable $e) {}
         }
 
@@ -132,7 +162,7 @@ class DashboardsController extends Controller
         }
 
         // Always display Candidate / Student role
-        $roleName = (\App\Services\RoleService::isStudent($user?->role_id) || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
+        $roleName = (RoleService::isStudent($user?->role_id) || $user?->user_type === 1) ? 'Student Candidate' : ($user?->role_label ?: 'Student Candidate');
 
         // Resolve Program and Branch dynamically from DB (empty if not filled)
         $progId = $crmStudent?->programid;
@@ -490,7 +520,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $personalCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+                    $personalCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
                     $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
                         ?? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->first();
 
@@ -608,7 +638,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $academicCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+                    $academicCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
                     $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
@@ -768,7 +798,7 @@ class DashboardsController extends Controller
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
                     $destDir = public_path('uploads/documents/' . $appliFolder);
 
-                    $crmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+                    $crmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
 
                     $uploadPayload = [
                         'crmid' => $crmId,
@@ -873,7 +903,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $examCrmId = $crmStudent->crmid ?? \App\Services\CrmIdService::generateForStudent($crmStudent);
+                    $examCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
                     \App\Models\ExamSchedule::updateOrCreate(
                         ['applino' => $crmStudent->applinano],
                         [
@@ -1259,7 +1289,7 @@ class DashboardsController extends Controller
             $applino = $user?->usercode ?? (string) session('student_applino', '');
         }
 
-        $res = \App\Services\CouponService::validateAndApplyPersonalCoupon($code, $applino);
+        $res = CouponService::validateAndApplyPersonalCoupon($code, $applino);
         return response()->json($res);
     }
 
@@ -1268,7 +1298,7 @@ class DashboardsController extends Controller
      */
     public function removePersonalCoupon(): \Illuminate\Http\JsonResponse
     {
-        $res = \App\Services\CouponService::removeAppliedCoupon();
+        $res = CouponService::removeAppliedCoupon();
         return response()->json($res);
     }
 }

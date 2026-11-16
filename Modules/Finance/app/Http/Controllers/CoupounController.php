@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Modules\Finance\Models\Coupous;
-use App\Services\CouponService;
+use Modules\Finance\Services\CouponService;
 
 class CoupounController extends Controller
 {

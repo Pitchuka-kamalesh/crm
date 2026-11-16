@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\MenuSyncService as BaseMenuSyncService;
+use Modules\Auth\Services\MenuSyncService as BaseMenuSyncService;
 
 /**
- * Compatibility alias for App\Common\Services\MenuSyncService
+ * Compatibility alias for Modules\Auth\Services\MenuSyncService
  */
 class MenuSyncService extends BaseMenuSyncService
 {

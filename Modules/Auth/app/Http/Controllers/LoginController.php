@@ -15,9 +15,10 @@ use App\Models\StudentRegistration;
 use App\Models\User;
 use App\Models\Wapplog;
 
-use App\Services\ActivityLogger;
-use App\Services\SmsService;
-use App\Services\WhatsAppService;
+use Modules\Crm\Services\ActivityLogger;
+use Modules\Sms\Services\SmsService;
+use Modules\Sms\Services\WhatsAppService;
+use Modules\Auth\Services\RoleService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -406,7 +407,7 @@ class LoginController extends Controller
                         'usercode'      => $currentUsercode,
                         'phnno'         => $cleanPhone,
                         'user_type'     => 1,
-                        'role_id'       => $user->role_id ?: \App\Services\RoleService::studentRoleId(),
+                        'role_id'       => $user->role_id ?: RoleService::studentRoleId(),
                         'is_active'     => true,
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
@@ -612,7 +613,7 @@ class LoginController extends Controller
     {
         $user = Auth::user();
         // Students cannot switch roles
-        if ($user && ($user->user_type === 1 || \App\Services\RoleService::isStudent((int) $user->role_id) || \App\Services\RoleService::isStudent((int) $user->getActiveRoleId()))) {
+        if ($user && ($user->user_type === 1 || RoleService::isStudent((int) $user->role_id) || RoleService::isStudent((int) $user->getActiveRoleId()))) {
             return back()->withErrors(['role_id' => 'Students are not authorized to switch roles.']);
         }
 
@@ -623,12 +624,12 @@ class LoginController extends Controller
         $roleId = (int) $request->input('role_id');
 
         // Verify the user is actually assigned to this role in master.roles_assigned
-        $assigned = \App\Services\RoleService::getAssignedRoles($user->usercode);
+        $assigned = RoleService::getAssignedRoles($user->usercode);
         $allowedRoleIds = !empty($assigned)
             ? array_column($assigned, 'role_id')
             : [(int)$user->getActiveRoleId()];
 
-        if (!in_array($roleId, $allowedRoleIds, true) && (int)$user->role_id !== \App\Services\RoleService::employeeRoleId()) {
+        if (!in_array($roleId, $allowedRoleIds, true) && (int)$user->role_id !== RoleService::employeeRoleId()) {
             return back()->withErrors(['role_id' => 'You are not assigned to this role.']);
         }
 
@@ -678,7 +679,7 @@ class LoginController extends Controller
                         'personalmail' => $employee->personal_mailid,
                         'user_type' => 2,
                         'is_active' => (bool)$employee->is_active,
-                        'role_id' => $employee->role_id ?: \App\Services\RoleService::employeeRoleId(),
+                        'role_id' => $employee->role_id ?: RoleService::employeeRoleId(),
                         'campus_id' => (string)($employee->campus_id ?: '1'),
                     ]);
                 }

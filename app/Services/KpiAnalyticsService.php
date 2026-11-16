@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\KpiAnalyticsService as BaseKpiAnalyticsService;
+use Modules\Crm\Services\KpiAnalyticsService as BaseKpiAnalyticsService;
 
 /**
- * Compatibility alias for App\Common\Services\KpiAnalyticsService
+ * Compatibility alias for Modules\Crm\Services\KpiAnalyticsService
  */
 class KpiAnalyticsService extends BaseKpiAnalyticsService
 {

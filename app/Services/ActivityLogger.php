@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Common\Services\ActivityLogger as BaseActivityLogger;
+use Modules\Crm\Services\ActivityLogger as BaseActivityLogger;
 
 /**
- * Compatibility alias for App\Common\Services\ActivityLogger
+ * Compatibility alias for Modules\Crm\Services\ActivityLogger
  */
 class ActivityLogger extends BaseActivityLogger
 {

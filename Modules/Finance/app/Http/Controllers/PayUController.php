@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\CrmStudentRegistration;
 use App\Models\PayDetail;
 use App\Models\ReceiptDetail;
-use App\Services\CouponService;
-use App\Services\PayUService;
+use Modules\Finance\Services\CouponService;
+use Modules\Finance\Services\PayUService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -137,9 +137,12 @@ class PayUController extends Controller
             Log::warning('[PayU] Pre-record insert skipped: ' . $e->getMessage());
         }
 
+        $isProduction = $this->payuService->isProduction();
+
         return view('payments.payu_checkout', compact(
             'params',
             'gatewayUrl',
+            'isProduction',
             'applino',
             'name',
             'email',
@@ -176,9 +179,19 @@ class PayUController extends Controller
         }
 
         $isTestEnv = ((int) config('services.payu.env_prod', 0) === 0);
-        $userCancelled = ($errorMsg === 'Payment cancelled by candidate');
 
-        if ($status === 'success' || ($isTestEnv && !empty($applino) && !$userCancelled)) {
+        if ($status === 'success') {
+            // Verify hash if payload contains a response hash from PayU
+            if (!empty($payload['hash'])) {
+                $isHashValid = $this->payuService->verifyHash($payload);
+                if (!$isHashValid) {
+                    Log::warning('[PayU Response] Hash mismatch detected for txnid: ' . $txnid);
+                    if ($this->payuService->isProduction()) {
+                        return redirect()->route('dashboards.index', ['step' => 1])
+                            ->withErrors(['error' => 'Payment verification failed: Security signature mismatch from gateway.']);
+                    }
+                }
+            }
             $usedDefCoupon = $defCoupon ?: ($breakdown['def_coupon'] ?? '');
             $usedPerCoupon = $perCoupon ?: ($breakdown['per_coupon'] ?? '');
             $receiptNo = $this->recordSuccessfulPayment(
@@ -187,9 +200,9 @@ class PayUController extends Controller
                 txnid: $txnid ?: ('TXN' . date('ymdHis') . rand(1000, 9999)),
                 mihpayid: $mihpayid,
                 amount: $amount,
-                payType: 'PayU (' . ($mode ?: 'Online') . ')',
-                receiptPayType: 'PayU',
-                txnRemark: 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | PayU ID: ' . $mihpayid,
+                payType: 'Online (' . ($mode ?: 'Direct') . ')',
+                receiptPayType: 'Online',
+                txnRemark: 'Bank Ref: ' . ($bankRefNo ?: 'N/A') . ' | Ref ID: ' . $mihpayid,
                 breakdown: $breakdown,
                 defCoupon: $usedDefCoupon,
                 perCoupon: $usedPerCoupon
@@ -202,7 +215,7 @@ class PayUController extends Controller
                 : "";
 
             return redirect()->route('payu.receipt')
-                ->with('status', "✓ Payment Successful! Net Paid: ₹" . number_format($amount) . " confirmed via PayU (ID: {$mihpayid}){$discountMsg}. Receipt: {$receiptNo}.");
+                ->with('status', "✓ Payment Successful! Net Paid: ₹" . number_format($amount) . " confirmed{$discountMsg}. Receipt: {$receiptNo}.");
         } else {
             // Unsuccessful or cancelled payment
             try {
@@ -303,14 +316,53 @@ class PayUController extends Controller
             Log::error('[PayU] Error writing to finance.receiptdetails: ' . $e->getMessage());
         }
 
-        // 4. Mark stage1 as 'paid' in crm.student_registration and clear session coupon flags
+        // 4. Ensure record exists and mark stage1 as 'paid' in crm.student_registration
         try {
+            $user = Auth::user();
+            $cleanPhone = preg_replace('/\D/', '', (string) ($user?->phnno ?? ''));
+            if (strlen($cleanPhone) > 10) {
+                $cleanPhone = substr($cleanPhone, -10);
+            }
+
+            $studentReg = null;
             if ($applino) {
-                CrmStudentRegistration::where('applinano', $applino)->update([
+                $studentReg = CrmStudentRegistration::where('applinano', $applino)->first();
+            }
+            if (!$studentReg && $cleanPhone) {
+                $studentReg = CrmStudentRegistration::where('phoneno', $cleanPhone)
+                    ->orWhere('phoneno', 'like', "%{$cleanPhone}%")
+                    ->first();
+            }
+
+            if ($studentReg) {
+                $studentReg->update([
+                    'applinano' => $applino ?: $studentReg->applinano,
                     'stage1' => 'paid',
                     'log_ipaddress' => $request->ip() ?? '127.0.0.1',
                     'log_timestamp' => now(),
                 ]);
+            } else {
+                $studentName = trim((string) ($user?->name ?: ($request->input('firstname') ?: 'Candidate')));
+                $studentEmail = $user?->personalmail ?: ($request->input('email') ?: 'admissions@vignan.ac.in');
+                CrmStudentRegistration::create([
+                    'applinano' => $applino ?: ('VU2026' . ($cleanPhone ? substr($cleanPhone, -6) : rand(100000, 999999))),
+                    'name' => $studentName,
+                    'phoneno' => $cleanPhone ?: '9999999999',
+                    'emailid' => $studentEmail,
+                    'campuscode' => 'VAD',
+                    'programlevel' => 'UG',
+                    'std_status' => 'Admitted',
+                    'stage1' => 'paid',
+                    'stage2' => 'pending',
+                    'log_userid' => $applino ?: 'PORTAL',
+                    'log_ipaddress' => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp' => now(),
+                ]);
+            }
+
+            // Sync usercode in master.login if usercode was 0 or empty
+            if ($user && ($user->usercode === '0' || empty($user->usercode))) {
+                $user->update(['usercode' => $applino]);
             }
         } catch (\Throwable $e) {
             Log::error('[PayU] Error updating crm.student_registration: ' . $e->getMessage());
