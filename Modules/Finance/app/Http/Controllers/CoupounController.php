@@ -68,26 +68,18 @@ class CoupounController extends Controller
         $couponCode = trim($request->input('coupon_code', ''));
         $applino = trim($request->input('applino', ''));
 
-        $coupon = Coupous::forCode($couponCode)->active()->first();
-
-        if (!$coupon) {
+        $res = CouponService::validateAndApplyPersonalCoupon($couponCode, $applino);
+        if (!$res['valid']) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or inactive coupon code.',
-            ], 422);
-        }
-
-        if ($coupon->isPersonal() && $coupon->applino !== $applino) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This coupon is assigned to another applicant.',
+                'message' => $res['message'],
             ], 422);
         }
 
         return response()->json([
             'success' => true,
-            'discount' => (float) $coupon->discount,
-            'coupon_code' => $coupon->couponcode,
+            'discount' => (float) $res['discount'],
+            'coupon_code' => $couponCode,
         ]);
     }
 

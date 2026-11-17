@@ -187,7 +187,7 @@ class PayUController extends Controller
                 if (!$isHashValid) {
                     Log::warning('[PayU Response] Hash mismatch detected for txnid: ' . $txnid);
                     if ($this->payuService->isProduction()) {
-                        return redirect()->route('dashboards.index', ['step' => 1])
+                        return redirect()->route('dashboards.index', ['step' => 4])
                             ->withErrors(['error' => 'Payment verification failed: Security signature mismatch from gateway.']);
                     }
                 }
@@ -229,7 +229,7 @@ class PayUController extends Controller
                 }
             } catch (\Throwable $e) {}
 
-            return redirect()->route('dashboards.index', ['step' => 1])
+            return redirect()->route('dashboards.index', ['step' => 4])
                 ->withErrors(['error' => 'Payment was unsuccessful or cancelled at PayU gateway: ' . ($errorMsg ?: 'User cancelled')]);
         }
     }
@@ -338,6 +338,7 @@ class PayUController extends Controller
                 $studentReg->update([
                     'applinano' => $applino ?: $studentReg->applinano,
                     'stage1' => 'paid',
+                    'stage4' => 'paid',
                     'log_ipaddress' => $request->ip() ?? '127.0.0.1',
                     'log_timestamp' => now(),
                 ]);
@@ -353,6 +354,7 @@ class PayUController extends Controller
                     'programlevel' => 'UG',
                     'std_status' => 'Admitted',
                     'stage1' => 'paid',
+                    'stage4' => 'paid',
                     'stage2' => 'pending',
                     'log_userid' => $applino ?: 'PORTAL',
                     'log_ipaddress' => $request->ip() ?? '127.0.0.1',
@@ -402,8 +404,8 @@ class PayUController extends Controller
             ->orderBy('id', 'desc')
             ->first();
 
-        if ((!$student || $student->stage1 !== 'paid') && !$payDetail && !$receipt) {
-            return redirect()->route('dashboards.index', ['step' => 1]);
+        if ((!$student || ($student->stage1 !== 'paid' && $student->stage4 !== 'paid')) && !$payDetail && !$receipt) {
+            return redirect()->route('dashboards.index', ['step' => 4]);
         }
 
         $crmId = $student?->crmid ?: \App\Services\CrmIdService::getOrGenerateByAppli($applino);

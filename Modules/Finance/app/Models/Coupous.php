@@ -28,15 +28,6 @@ class Coupous extends Model
     ];
 
     // ==========================================
-    // RELATIONSHIPS
-    // ==========================================
-
-    public function student(): BelongsTo
-    {
-        return $this->belongsTo(CrmStudentRegistration::class, 'applino', 'applinano');
-    }
-
-    // ==========================================
     // ELOQUENT QUERY SCOPES
     // ==========================================
 

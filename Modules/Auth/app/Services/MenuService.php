@@ -110,21 +110,33 @@ class MenuService
             ) && !str_contains(strtolower($grp['main']->menu_name), 'sms');
 
             if ($isActualKpiMenu) {
+                $isTelecallerUser = RoleService::isTelecaller((int)$roleId);
+
                 $filteredSubmenus = [];
                 foreach ($grp['submenus'] as $subItem) {
                     $ref = strtolower(trim($subItem['menu']->controller_ref ?? ''));
                     $name = strtolower(trim($subItem['menu']->menu_name ?? ''));
-                    if (!str_contains($ref, 'counseller') && !str_contains($name, 'counseller') && !str_contains($ref, 'sms')) {
-                        $filteredSubmenus[] = $subItem;
+                    if (str_contains($ref, 'counseller') || str_contains($name, 'counseller') || str_contains($ref, 'sms')) {
+                        continue;
                     }
+                    // For Telecaller (Role 4), do not show Student KPI or Leads KPI
+                    if ($isTelecallerUser && (str_contains($ref, 'student') || str_contains($ref, 'lead') || str_contains($name, 'student') || str_contains($name, 'lead'))) {
+                        continue;
+                    }
+                    $filteredSubmenus[] = $subItem;
                 }
                 $grp['submenus'] = $filteredSubmenus;
 
-                $targetKpis = [
-                    ['code' => 'KPII0002', 'name' => 'Student KPI', 'ref' => 'kpi/studentkpi', 'id' => 108],
-                    ['code' => 'KPII0005', 'name' => 'Telecaller KPI', 'ref' => 'kpi/telecallerkpi', 'id' => 128],
-                    ['code' => 'KPII0006', 'name' => 'Leads KPI', 'ref' => 'kpi/leadskpi', 'id' => 129],
-                ];
+                // For telecaller (Role 4), keep ONLY Telecaller KPI
+                $targetKpis = $isTelecallerUser
+                    ? [
+                        ['code' => 'KPII0005', 'name' => 'Telecaller KPI', 'ref' => 'kpi/telecallerkpi', 'id' => 128],
+                      ]
+                    : [
+                        ['code' => 'KPII0002', 'name' => 'Student KPI', 'ref' => 'kpi/studentkpi', 'id' => 108],
+                        ['code' => 'KPII0005', 'name' => 'Telecaller KPI', 'ref' => 'kpi/telecallerkpi', 'id' => 128],
+                        ['code' => 'KPII0006', 'name' => 'Leads KPI', 'ref' => 'kpi/leadskpi', 'id' => 129],
+                      ];
 
                 foreach ($targetKpis as $kpiTarget) {
                     $found = false;

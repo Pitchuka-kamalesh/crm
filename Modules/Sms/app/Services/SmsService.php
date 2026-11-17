@@ -185,13 +185,25 @@ class SmsService
     }
 
     /**
-     * Send OTP for login verification.
+     * Send single SMS with DLT template ID.
+     * Approved DLT OTP template:
+     * "Dear Student,
+     * Welcome to Vignan University!
+     * Your OTP for admission onboarding is {#var#}
+     * Use it to continue your registration.
+     * -- Vignan University."
      */
-    public function sendOtp(string $phone, string $otp, ?string $user = null, ?string $registerNo = null): array
+    public function sendOtp(string $phone, string $otp, ?string $user = null, ?string $registerNo = null)
     {
         $templateId = config('services.jiocx_sms.template_otp') ?: env('JIOCX_TEMPLATE_ID_OTP');
-        
-        $msg = "Your Vignan LMS verification code is: {$otp}. Valid for 10 minutes. Do not share this OTP with anyone.\n\n-- Vignan University.";
+        error_log("template id : $templateId");
+
+        // Approved DLT OTP template - {#var#} replaced with the OTP
+        $msg = "Dear Student,\n"
+            . "Welcome to Vignan University!\n"
+            . "Your OTP for admission onboarding is {$otp}\n"
+            . "Use it to continue your registration.\n"
+            . "-- Vignan University.";
 
         if (!$templateId) {
             Log::info("[SmsService] DLT template for OTP not configured; logging OTP for '{$phone}': {$otp}");

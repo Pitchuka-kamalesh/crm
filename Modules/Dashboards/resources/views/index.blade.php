@@ -1248,6 +1248,25 @@
             box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
         }
 
+        fieldset[disabled] .mockup-input,
+        fieldset[disabled] .mockup-select,
+        fieldset[disabled] textarea,
+        .mockup-input:disabled,
+        .mockup-select:disabled {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+            border-color: #cbd5e1 !important;
+            cursor: not-allowed !important;
+            opacity: 0.92;
+        }
+        fieldset[disabled] input[type="radio"],
+        fieldset[disabled] input[type="checkbox"] {
+            cursor: not-allowed !important;
+        }
+        fieldset[disabled] label {
+            cursor: default !important;
+        }
+
         .mockup-subbox {
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
@@ -1412,7 +1431,7 @@
 
             <div class="meta-badges-cluster">
                 @php
-                    $isPaid = ($crmStudent?->stage1 === 'paid' || !empty($isStage1Paid));
+                    $isPaid = (!empty($isPaid) || $crmStudent?->stage4 === 'paid' || $crmStudent?->stage1 === 'paid' || !empty($isStage1Paid));
                 @endphp
                 @if($appNo)
                 <span class="meta-badge">
@@ -1514,197 +1533,34 @@
         <!-- STEP CONTENT PANEL -->
         <section class="step-panel-card">
 
-            <!-- ================= STAGE 1: FEE PAYMENT ================= -->
+            <!-- ================= STAGE 1: PERSONAL PROFILE ================= -->
             @if($activeStep === 1)
-                <div class="step-panel-header">
-                    <div>
-                        <div class="step-panel-kicker">Stage 1 of {{ count($stages) }} &bull; Seat Confirmation</div>
-                        <h3>
-                            <span>Seat Confirmation &amp; Admission Fee</span>
-                        </h3>
-                    </div>
-                    @if($isPaid)
-                        <span class="step-header-tag tag-success">✓ Fee Paid</span>
-                    @else
-                        <span class="step-header-tag tag-pending">Payment Pending</span>
-                    @endif
-                </div>
-
-                <div class="step-panel-body">
-                    <!-- FEE PAYMENT STATUS & ACTION -->
-                    <div class="section-box" style="text-align: center; padding: 1rem 1.25rem;">
-                        @if($isPaid)
-                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.5rem 1.75rem; max-width: 640px; margin: 0 auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12); text-align: center;">
-                                <div style="display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 0.75rem;">
-                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #16a34a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800;">
-                                        ✓
-                                    </div>
-                                    <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 38px; width: auto; object-fit: contain;">
-                                </div>
-                                <h3 style="font-size: 1.18rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem;">
-                                    Admission Registration Fee Paid &amp; Verified
-                                </h3>
-                                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
-                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to fill your personal profile.
-                                </p>
-                                <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
-                                        <span>📥 Download / View Official Receipt</span>
-                                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                    </a>
-                                    <a href="{{ route('dashboards.index', ['step' => 2]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                                        <span>Proceed to Step 2: Personal Profile &rarr;</span>
-                                    </a>
-                                </div>
-                            </div>
-                        @else
-                            @php
-                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? (string) session('student_applino', '');
-                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
-                            @endphp
-                            <div style="margin-bottom: 0.65rem; text-align: left;">
-                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
-                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely to lock your provisional registration and instantly receive your verified admission receipt.</p>
-                            </div>
-
-                            <!-- Admission Fee Summary Box with Concessions -->
-                            <div style="max-width: 480px; margin: 0 auto 0.75rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; text-align: left;">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
-                                    <span>Base Admission Fee:</span>
-                                    <strong style="color: #0f172a;">₹ {{ number_format($feeBreakdown['base_fee'], 2) }}</strong>
-                                </div>
-
-                                @if($feeBreakdown['def_discount'] > 0)
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
-                                        <span>Early Bird Concession ({{ $feeBreakdown['def_coupon'] }}):</span>
-                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['def_discount'], 2) }}</strong>
-                                    </div>
-                                @endif
-
-                                @if($feeBreakdown['per_discount'] > 0)
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
-                                        <span>Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
-                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
-                                    </div>
-                                @endif
-
-                                <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
-                                    <span style="font-weight: 600;">Total Concession Deducted:</span>
-                                    <strong style="color: #047857;">- ₹ <span id="dispTotalConcessionVal">{{ number_format($feeBreakdown['total_discount'], 2) }}</span></strong>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
-                                    <span>Payment Mode:</span>
-                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'Online Admission Settlement' }}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
-                                    <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
-                                    <span style="font-size: 1.15rem; font-weight: 800; color: #059669;">₹ <span id="dispTotalPayableVal">{{ number_format($feeBreakdown['net_payable'], 2) }}</span></span>
-                                </div>
-                            </div>
-
-                            <form id="payuSubmitForm" action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
-                                @csrf
-                                <input type="hidden" id="payuAmountInput" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
-                                <button type="submit" id="btnPayUGateway" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
-                                    @if($feeBreakdown['net_payable'] <= 0)
-                                        <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
-                                    @else
-                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> & Issue Receipt</span>
-                                    @endif
-                                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-
-                    <!-- DOWNLOAD CARDS -->
-                    <div class="section-box" style="padding: 1rem 1.25rem;">
-                        <div class="section-box-title" style="margin-bottom: 0.75rem;">
-                            <span>Admission Documents</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📜</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Provisional Allotment Order</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Dean Allotment Letter</p>
-                                </div>
-                                @if($isPaid)
-                                    <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-doc-download">
-                                        <span>Download PDF ↓</span>
-                                    </a>
-                                @else
-                                    <span class="doc-status-pill">Unlocks after fee payment</span>
-                                @endif
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🧾</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Official Fee Payment Receipt</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Accounts Verified Receipt</p>
-                                </div>
-                                @if($isPaid)
-                                    <a href="{{ route('payu.receipt') }}" class="btn-doc-download">
-                                        <span>Open Official Receipt &rarr;</span>
-                                    </a>
-                                @else
-                                    <span class="doc-status-pill">Unlocks after fee payment</span>
-                                @endif
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📅</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Campus Induction Schedule</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Orientation &amp; Move-in Guide</p>
-                                </div>
-                                <a href="javascript:alert('Downloading Orientation & Campus Induction Schedule (PDF)...')" class="btn-doc-download">
-                                    <span>Download Guide ↓</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
-                        <div style="display: flex; align-items: center; gap: 0.45rem;">
-                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Status:</span>
-                            @if($isPaid)
-                                <span class="step-header-tag tag-success">✓ Fee Paid</span>
-                            @else
-                                <span class="step-header-tag tag-pending">Payment Pending</span>
-                            @endif
-                        </div>
-                        @if($isPaid)
-                            <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
-                                <span>Proceed to Step 2: {{ $stages[2]['title'] }} &rarr;</span>
-                            </a>
-                        @else
-                            <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 2">
-                                <span>🔒 Step 2: {{ $stages[2]['title'] }} (Locked until Fee Payment)</span>
-                            </button>
-                        @endif
-                    </div>
-                </div>
-
-            <!-- ================= STAGE 2: PERSONAL INFO (SEPARATE STEP 2) ================= -->
-            @elseif($activeStep === 2)
                 <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
                     <!-- CARD 1: 2. PERSONAL DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <h3 class="mockup-card-title">2. Personal Details</h3>
-                            @if($stages[2]['status'] === 'completed')
+                            <h3 class="mockup-card-title">1. {{ $stages[1]['title'] ?? 'Personal Profile' }}</h3>
+                            @if(($stages[1]['status'] ?? '') === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
                                 <span class="step-header-tag tag-pending" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">In Progress</span>
                             @endif
                         </div>
 
+                        @if($isPaid)
+                            <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.25rem;">🔒</span>
+                                <div>
+                                    <div style="font-weight: 700; color: #1e40af; font-size: 0.88rem;">Personal Profile Fixed (Read-Only)</div>
+                                    <div style="color: #3b82f6; font-size: 0.78rem;">Your personal details are locked because admission fee payment has been completed. Details can only be viewed.</div>
+                                </div>
+                            </div>
+                        @endif
+
                         <form action="{{ route('dashboards.save-step') }}" method="POST">
                             @csrf
-                            <input type="hidden" name="step" value="2">
+                            <input type="hidden" name="step" value="1">
+                            <fieldset @if($isPaid) disabled @endif style="border: none; margin: 0; padding: 0;">
 
                             <!-- Row 1: Candidate Name & Parent Name (2 Columns) -->
                             <div class="mockup-field-row-2">
@@ -1722,11 +1578,11 @@
                             <div class="mockup-field-row-2" style="margin-top: 1rem;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Student Number: <span style="color:#ef4444;">*</span></label>
-                                    <input type="tel" name="student_number" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($crmStudent?->phoneno ?: ($personalInfo?->phoneno ?: ($user?->phnno ?: '')))), -10) }}" placeholder="Enter 10-digit Student Number" maxlength="10" pattern="[0-9]{10}" required>
+                                    <input type="tel" name="student_number" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($crmStudent?->phoneno ?: ($personalInfo?->phoneno ?: ($user?->phnno ?: '')))), -10) }}" placeholder="Enter 10-digit Student Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" required>
                                 </div>
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">Parent Phone Number:</label>
-                                    <input type="tel" name="parent_phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: '')), -10) }}" placeholder="Enter 10-digit Parent Phone Number" maxlength="10" pattern="[0-9]{10}">
+                                    <label class="mockup-label">Parent Phone Number: <span style="color:#ef4444;">*</span></label>
+                                    <input type="tel" name="parent_phone_no" class="mockup-input" value="{{ substr(preg_replace('/\D/', '', (string)($personalInfo?->parentphono ?: '')), -10) }}" placeholder="Enter 10-digit Parent Phone Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" required>
                                 </div>
                             </div>
 
@@ -1734,7 +1590,7 @@
                             <div class="mockup-field-row-3" style="margin-top: 1rem; align-items: start;">
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Date of Birth: <span style="color:#ef4444;">*</span></label>
-                                    <input type="date" name="dob" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" required>
+                                    <input type="date" name="dob" id="studentDobInput" class="mockup-input" value="{{ $personalInfo?->dob ? date('Y-m-d', strtotime($personalInfo->dob)) : '' }}" max="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" onchange="if(this.value > '{{ \Carbon\Carbon::now()->format('Y-m-d') }}') { this.value = ''; alert('Date of Birth cannot be a future date.'); }" required>
                                 </div>
                                 <div class="mockup-field-group">
                                     <label class="mockup-label">Gender: <span style="color:#ef4444;">*</span></label>
@@ -1780,8 +1636,8 @@
                                             <span>via advertisement</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="checkbox" name="referee_by[]" value="via @by own" {{ in_array('via @by own', $savedRefs) ? 'checked' : '' }}>
-                                            <span>via @by own</span>
+                                            <input type="checkbox" name="referee_by[]" value="via @google search(by own)" {{ (in_array('via @google search(by own)', $savedRefs) || in_array('via @by own', $savedRefs)) ? 'checked' : '' }}>
+                                            <span>via @google search(by own)</span>
                                         </label>
                                         <label class="mockup-radio-label">
                                             <input type="checkbox" name="referee_by[]" value="via Emp vtstr" {{ in_array('via Emp vtstr', $savedRefs) ? 'checked' : '' }} onchange="toggleEmpCode()">
@@ -1846,18 +1702,22 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Pincode: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pincode" class="mockup-input" value="{{ $personalInfo?->pincode }}" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}" required>
+                                        <input type="text" name="pincode" class="mockup-input" value="{{ $personalInfo?->pincode }}" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" required>
                                     </div>
                                 </div>
                             </div>
+                            </fieldset>
 
-                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
-                                <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
-                                    &larr; Stage 1: {{ $stages[1]['title'] }}
-                                </a>
-                                <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                    <span>Save Personal Info &amp; Proceed to Stage 3 &rarr;</span>
-                                </button>
+                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+                                @if($isPaid)
+                                    <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
+                                        <span>Next: Stage 2 - {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                    </a>
+                                @else
+                                    <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                        <span>Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                    </button>
+                                @endif
                             </div>
                         </form>
 
@@ -1922,25 +1782,36 @@
                     </div>
                 </div>
 
-            <!-- ================= STAGE 3: ACADEMIC DETAILS (SEPARATE STEP 3) ================= -->
-            @elseif($activeStep === 3)
+            <!-- ================= STAGE 2: ACADEMIC DETAILS ================= -->
+            @elseif($activeStep === 2)
                 <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
                     <!-- CARD 2: 3. EDUCATION DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <h3 class="mockup-card-title" id="step3-card-title" style="margin: 0;">3. Education Details</h3>
-                            @if($stages[3]['status'] === 'completed')
+                            <h3 class="mockup-card-title" id="step2-card-title" style="margin: 0;">2. {{ $stages[2]['title'] ?? 'Education Details' }}</h3>
+                            @if(($stages[2]['status'] ?? '') === 'completed')
                                 <span class="step-header-tag tag-success" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">✓ Completed</span>
                             @else
                                 <span class="step-header-tag tag-pending" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">In Progress</span>
                             @endif
                         </div>
 
-                        <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep3Form(this);">
+                        @if($isPaid)
+                            <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.25rem;">🔒</span>
+                                <div>
+                                    <div style="font-weight: 700; color: #1e40af; font-size: 0.88rem;">Academic Details Fixed (Read-Only)</div>
+                                    <div style="color: #3b82f6; font-size: 0.78rem;">Your academic details are locked because admission fee payment has been completed. Details can only be viewed.</div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <form id="step2AcademicForm" action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateStep2Form(this);">
                             @csrf
-                            <input type="hidden" name="step" value="3">
+                            <input type="hidden" name="step" value="2">
                             <input type="hidden" name="degree_level" id="degree_level_input" value="{{ $degreeLevel }}">
                             <input type="hidden" name="eval_type" id="eval_type" value="{{ $academicDetails?->tenth_marks_type ?? 'Marks' }}">
+                            <fieldset @if($isPaid) disabled @endif style="border: none; margin: 0; padding: 0;">
 
                             <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
                             <div class="mockup-subbox" id="sec-10th-details">
@@ -1948,112 +1819,114 @@
 
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">School / College Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / College Name" required>
+                                        <label class="mockup-label">School / College Name:</label>
+                                        <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / College Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Board of Study: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board of Study (e.g. BSEAP, CBSE, ICSE)" required>
+                                        <label class="mockup-label">Board of Study:</label>
+                                        <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board of Study (e.g. BSEAP, CBSE, ICSE)">
                                     </div>
                                 </div>
 
                                 <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Roll No / Hall Ticket No: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Roll / Hall Ticket No" required>
+                                        <label class="mockup-label">Roll No / Hall Ticket No:</label>
+                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Roll / Hall Ticket No">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030" required>
+                                        <label class="mockup-label">Passing Year:</label>
+                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
                                     </div>
                                 </div>
 
                                 <!-- EXACT DATABASE FIELDS: tenth_marks_type, tenth_marks_conducted, tenth_marks_earned, tenth_percentage -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Marks Type:</label>
                                         <select name="tenth_marks_type" id="tenth_marks_type" class="mockup-select" onchange="onTenthMarksTypeChange(this.value)">
                                             <option value="Marks" {{ ($academicDetails?->tenth_marks_type === 'Marks' || $academicDetails?->tenth_marks_type === 'marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
-                                            <option value=">= 60%" {{ ($academicDetails?->tenth_marks_type === '>= 60%') ? 'selected' : '' }}>Grade (>= 60%)</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Conducted: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()" required>
+                                        <label class="mockup-label">Marks Conducted:</label>
+                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()" required>
+                                        <label class="mockup-label">Marks Earned:</label>
+                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" required>
+                                        <label class="mockup-label">Percentage (%):</label>
+                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- ================= SUBBOX 2: 12th / INTERMEDIATE / DIPLOMA INFO ================= -->
+                            <!-- ================= SUBBOX 2: 12th / INTERMEDIATE INFO ================= -->
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
-                                <h4 class="mockup-subbox-title">12th / Intermediate / Diploma Details</h4>
+                                <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
+                                <input type="hidden" name="course_choice" value="Inter">
+                                <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
-                                <div class="mockup-field-row-3">
+                                <!-- Row 1: Jr. College Name / Institute Name (Full Width) -->
+                                <div class="mockup-field-group">
+                                    <label class="mockup-label">Jr. College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
+                                </div>
+
+                                <!-- Row 2: 3 Separate Distinct Columns for Jr. City, Jr. State, Jr. District (Text Inputs) -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Course Choice: <span style="color:#ef4444;">*</span></label>
-                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="course_choice" value="Inter" {{ ($academicDetails?->pu2_study_board !== 'Diploma') ? 'checked' : '' }}>
-                                                <span>Inter</span>
-                                            </label>
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="course_choice" value="Diploma" {{ ($academicDetails?->pu2_study_board === 'Diploma') ? 'checked' : '' }}>
-                                                <span>Diploma</span>
-                                            </label>
-                                        </div>
+                                        <label class="mockup-label">Jr. City: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter Jr. City" required>
                                     </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Jr. State: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="jr_state" class="mockup-input" value="{{ $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh' }}" placeholder="Enter Jr. State" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Jr. District: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="jr_district" class="mockup-input" value="{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur' }}" placeholder="Enter Jr. District" required>
+                                    </div>
+                                </div>
 
+                                <!-- Row 2: Status (First Year / Second Year), Year, Hall Tkt (3 Columns) -->
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
-                                        <div class="mockup-radio-row" style="margin-top: 0.35rem;">
+                                        <div class="mockup-radio-row" style="margin-top: 0.45rem;">
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year') ? 'checked' : '' }}>
+                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year' && $academicDetails?->pu2_current_status !== 'Second Year') ? 'checked' : '' }} required>
                                                 <span>First Year</span>
                                             </label>
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="Second year" {{ ($academicDetails?->pu2_current_status === 'Second year') ? 'checked' : '' }}>
+                                                <input type="radio" name="subset_choice" value="Second Year" {{ ($academicDetails?->pu2_current_status === 'Second year' || $academicDetails?->pu2_current_status === 'Second Year') ? 'checked' : '' }} required>
                                                 <span>Second Year</span>
                                             </label>
                                         </div>
                                     </div>
-
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="2026" min="2000" max="2030" required>
+                                        <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="e.g. 2026" min="2000" max="2030" required>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Hall Tkt:</label>
+                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket No (optional)">
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Junior College / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Junior College / Institute Name" required>
-                                    </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket / Roll No: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Inter / Diploma Roll No" required>
-                                    </div>
-                                </div>
-
-                                <!-- EXACT DATABASE FIELDS: pu2_marks_type, pu2_marks_conducted, pu2_marks_earned, pu2_percentage -->
+                                <!-- Row 3: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (4 Columns) -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
-                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)">
+                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)" required>
                                             <option value="Marks" {{ ($academicDetails?->pu2_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->pu2_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Conducted: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
                                         <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted ?? 1000 }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
@@ -2061,8 +1934,9 @@
                                         <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" required>
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span></label>
+                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
+                                        <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
                                 </div>
                             </div>
@@ -2148,17 +2022,85 @@
                                     </div>
                                 </div>
                             </div>
-
+                            </fieldset>
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
-                                <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev" style="text-decoration: none;">
-                                    &larr; Stage 2: {{ $stages[2]['title'] }}
+                                <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
+                                    &larr; Stage 1: {{ $stages[1]['title'] ?? 'Personal Profile' }}
                                 </a>
-                                <button type="submit" class="btn-step-next" style="background: #0f2744;">
-                                    <span>Save Academic Info &amp; Proceed to Stage 4 &rarr;</span>
-                                </button>
+                                @if($isPaid)
+                                    <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-next" style="background: #0f2744; text-decoration: none;">
+                                        <span>Next: Stage 3 - {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    </a>
+                                @else
+                                    <button type="submit" class="btn-step-next" style="background: #0f2744;">
+                                        <span>Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    </button>
+                                @endif
                             </div>
                         </form>
+
+                        <!-- First Year Under 60% Undertaking Modal -->
+                        <div id="firstYearUndertakingModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem;">
+                            <div style="background: #ffffff; border-radius: 16px; max-width: 480px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden;">
+                                <div style="background: #eff6ff; border-bottom: 1px solid #dbeafe; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                                        ℹ️
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #1e3a8a;">Academic Undertaking</h3>
+                                        <p style="margin: 0.1rem 0 0; font-size: 0.76rem; color: #3b82f6;">First Year Candidate Acknowledgment</p>
+                                    </div>
+                                </div>
+                                <div style="padding: 1.25rem 1.35rem;">
+                                    <p style="font-size: 0.86rem; color: #334155; line-height: 1.5; margin: 0 0 1rem;">
+                                        As per university norms, candidate must obtain minimum <strong>60% or above</strong> in 12th / Intermediate. Since you are currently in <strong>First Year</strong>, you can proceed by confirming your undertaking below:
+                                    </p>
+                                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
+                                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #0f172a;">
+                                            <input type="checkbox" id="undertakingModalCheckbox" style="width: 19px; height: 19px; accent-color: #2563eb; cursor: pointer;">
+                                            <span>i will get 60%</span>
+                                        </label>
+                                    </div>
+                                    <div id="undertakingModalError" style="display: none; color: #dc2626; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.85rem;">
+                                        ⚠️ Please tick "i will get 60%" to proceed.
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+                                        <button type="button" onclick="closeUndertakingModal()" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.84rem; cursor: pointer;">
+                                            Cancel
+                                        </button>
+                                        <button type="button" onclick="confirmUndertakingAndProceed()" style="padding: 0.5rem 1.25rem; border-radius: 8px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                                            Proceed &rarr;
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Second Year Under 60% Not Eligible Modal -->
+                        <div id="secondYearNotEligibleModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem;">
+                            <div style="background: #ffffff; border-radius: 16px; max-width: 480px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden;">
+                                <div style="background: #fef2f2; border-bottom: 1px solid #fee2e2; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                                        ⚠️
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #991b1b;">Not Eligible</h3>
+                                        <p style="margin: 0.1rem 0 0; font-size: 0.76rem; color: #dc2626;">Eligibility Notice</p>
+                                    </div>
+                                </div>
+                                <div style="padding: 1.25rem 1.35rem;">
+                                    <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin: 0 0 1.25rem;">
+                                        You are not eligible according to university norms. Minimum 60% is required in 12th / Intermediate.
+                                    </p>
+                                    <div style="display: flex; justify-content: flex-end;">
+                                        <button type="button" onclick="closeNotEligibleModal()" style="padding: 0.5rem 1.25rem; border-radius: 8px; border: none; background: #dc2626; color: #ffffff; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                                            OK
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <script>
                             function setDegreeLevel(level) {
@@ -2187,15 +2129,17 @@
                                 const pctInput = document.getElementById('tenth_percentage');
                                 if (!pctInput) return;
 
+                                let pct = 0;
                                 if (type === 'CGPA') {
                                     if (earned > 0) {
-                                        pctInput.value = (earned * 9.5).toFixed(2);
+                                        pct = earned * 9.5;
                                     }
                                 } else {
                                     if (conducted > 0 && earned > 0) {
-                                        pctInput.value = ((earned / conducted) * 100).toFixed(2);
+                                        pct = (earned / conducted) * 100;
                                     }
                                 }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
                             }
 
                             function onTenthMarksTypeChange(val) {
@@ -2215,16 +2159,22 @@
                                 const earned = parseFloat(document.getElementById('pu2_marks_earned')?.value || 0);
                                 const type = document.getElementById('pu2_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('pu2_percentage');
+                                const warning = document.getElementById('pu2_pct_warning');
                                 if (!pctInput) return;
 
+                                let pct = 0;
                                 if (type === 'CGPA') {
                                     if (earned > 0) {
-                                        pctInput.value = (earned * 9.5).toFixed(2);
+                                        pct = earned * 9.5;
                                     }
                                 } else {
                                     if (conducted > 0 && earned > 0) {
-                                        pctInput.value = ((earned / conducted) * 100).toFixed(2);
+                                        pct = (earned / conducted) * 100;
                                     }
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                                if (warning) {
+                                    warning.style.display = (pct > 0 && pct < 60) ? 'block' : 'none';
                                 }
                             }
 
@@ -2238,7 +2188,100 @@
                                 calculatePu2Pct();
                             }
 
-                            function validateStep3Form(form) {
+                            function onInterStateChange(stateId) {
+                                const distSelect = document.getElementById('geo-inter-district-select');
+                                if (!distSelect) return;
+                                const currentSelectedDist = distSelect.value;
+                                distSelect.innerHTML = '<option value="">-- Select District --</option>';
+                                let foundSelected = false;
+                                allDistrictsData.forEach(function(d) {
+                                    if (!stateId || d.STATE_ID == stateId) {
+                                        const opt = document.createElement('option');
+                                        opt.value = d.DISTRICT_ID;
+                                        opt.textContent = d.DISTRICT_NAME;
+                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                            opt.selected = true;
+                                            foundSelected = true;
+                                        }
+                                        distSelect.appendChild(opt);
+                                    }
+                                });
+                                if (!foundSelected && distSelect.options.length > 1) {
+                                    distSelect.options[1].selected = true;
+                                }
+                            }
+
+                            function getSelectedSubsetChoice() {
+                                const radios = document.getElementsByName('subset_choice');
+                                for (let i = 0; i < radios.length; i++) {
+                                    if (radios[i].checked) return radios[i].value;
+                                }
+                                return 'First Year';
+                            }
+
+                            function openUndertakingModal() {
+                                const modal = document.getElementById('firstYearUndertakingModal');
+                                if (modal) {
+                                    modal.style.display = 'flex';
+                                    const cb = document.getElementById('undertakingModalCheckbox');
+                                    if (cb) cb.checked = false;
+                                    const err = document.getElementById('undertakingModalError');
+                                    if (err) err.style.display = 'none';
+                                }
+                            }
+
+                            function closeUndertakingModal() {
+                                const modal = document.getElementById('firstYearUndertakingModal');
+                                if (modal) modal.style.display = 'none';
+                            }
+
+                            function openNotEligibleModal() {
+                                const modal = document.getElementById('secondYearNotEligibleModal');
+                                if (modal) modal.style.display = 'flex';
+                            }
+
+                            function closeNotEligibleModal() {
+                                const modal = document.getElementById('secondYearNotEligibleModal');
+                                if (modal) modal.style.display = 'none';
+                            }
+
+                            function confirmUndertakingAndProceed() {
+                                const cb = document.getElementById('undertakingModalCheckbox');
+                                const err = document.getElementById('undertakingModalError');
+                                if (!cb || !cb.checked) {
+                                    if (err) err.style.display = 'block';
+                                    return;
+                                }
+                                if (err) err.style.display = 'none';
+                                const hiddenIn = document.getElementById('undertaking_60_pct_input');
+                                if (hiddenIn) hiddenIn.value = 'yes';
+                                closeUndertakingModal();
+                                const form = document.getElementById('step2AcademicForm');
+                                if (form) form.submit();
+                            }
+
+                            function validateStep2Form(form) {
+                                calculatePu2Pct();
+                                const pu2Pct = parseFloat(document.getElementById('pu2_percentage')?.value || 0);
+                                const subsetChoice = getSelectedSubsetChoice();
+                                const isSecondYear = (subsetChoice.toLowerCase() === 'second year');
+
+                                if (isSecondYear) {
+                                    if (pu2Pct < 60) {
+                                        openNotEligibleModal();
+                                        document.getElementById('pu2_marks_earned')?.focus();
+                                        return false;
+                                    }
+                                } else {
+                                    // First Year
+                                    if (pu2Pct < 60) {
+                                        const undertakingVal = document.getElementById('undertaking_60_pct_input')?.value;
+                                        if (undertakingVal !== 'yes') {
+                                            openUndertakingModal();
+                                            return false;
+                                        }
+                                    }
+                                }
                                 return true;
                             }
 
@@ -2250,30 +2293,44 @@
                                 if (!document.getElementById('pu2_percentage')?.value) {
                                     calculatePu2Pct();
                                 }
+                                const interStateSelect = document.getElementById('geo-inter-state-select');
+                                if (interStateSelect && interStateSelect.value) {
+                                    onInterStateChange(interStateSelect.value);
+                                }
                             });
                         </script>
                     </div>
                 </div>
 
-            <!-- ================= STAGE 4: APPLICATION UPLOAD (master.menus: CRMM0006) ================= -->
-            @elseif($activeStep === 4)
+            <!-- ================= STAGE 3: APPLICATION UPLOAD (CRMM0006) ================= -->
+            @elseif($activeStep === 3)
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 4 of {{ count($stages) }} &bull; Document Verification</div>
-                        <h3>{{ $stages[4]['title'] }}</h3>
+                        <div class="step-panel-kicker">Stage 3 of {{ count($stages) }} &bull; Document Verification</div>
+                        <h3>{{ $stages[3]['title'] ?? 'Document upload' }}</h3>
                         <p>Upload and submit required academic certificates, identity documents, and photograph.</p>
                     </div>
-                    @if($stages[4]['status'] === 'completed')
+                    @if(($stages[3]['status'] ?? '') === 'completed')
                         <span class="step-header-tag tag-success">✓ Uploaded</span>
                     @else
                         <span class="step-header-tag tag-pending">In Progress</span>
                     @endif
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body" id="stage4-upload-form">
+                @if($isPaid)
+                    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem 1.15rem; margin: 1rem 1.5rem 0; display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.25rem;">🔒</span>
+                        <div>
+                            <div style="font-weight: 700; color: #1e40af; font-size: 0.88rem;">Documents Fixed (Read-Only)</div>
+                            <div style="color: #3b82f6; font-size: 0.78rem;">Your uploaded documents are locked because admission fee payment has been completed. Details can only be viewed.</div>
+                        </div>
+                    </div>
+                @endif
+
+                <form action="{{ route('dashboards.save-step') }}" method="POST" enctype="multipart/form-data" class="step-panel-body" id="stage3-upload-form">
                     @csrf
-                    <input type="hidden" name="step" value="4">
-                    <input type="hidden" name="degree_level" id="stage4_degree_level_input" value="{{ $degreeLevel ?? 'btech' }}">
+                    <input type="hidden" name="step" value="3">
+                    <input type="hidden" name="degree_level" id="stage3_degree_level_input" value="{{ $degreeLevel ?? 'btech' }}">
 
                     @php
                         $docDefinitions = [
@@ -2283,7 +2340,7 @@
                                 'sub' => 'Class X original certificate or DigiLocker attested copy',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'marksheet12' => [
                                 'icon' => '📑',
@@ -2291,7 +2348,7 @@
                                 'sub' => 'Short memo or internet copy with principal attestation',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'btech' => [
                                 'icon' => '🎓',
@@ -2299,7 +2356,7 @@
                                 'sub' => 'Consolidated Marks Memo (CMM) or Provisional Certificate',
                                 'levels' => 'mtech phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'mtech' => [
                                 'icon' => '📚',
@@ -2307,7 +2364,7 @@
                                 'sub' => 'Postgraduate Marks Memo or Degree Certificate',
                                 'levels' => 'phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'pg' => [
                                 'icon' => '🔬',
@@ -2315,7 +2372,7 @@
                                 'sub' => 'Doctoral coursework or post-master qualification certificate',
                                 'levels' => 'phd',
                                 'is_common' => false,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'aadhaar' => [
                                 'icon' => '🪪',
@@ -2323,7 +2380,7 @@
                                 'sub' => 'Government proof of identity & native address',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => true,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'photo' => [
                                 'icon' => '🖼️',
@@ -2331,7 +2388,7 @@
                                 'sub' => 'Recent studio color photo with white background',
                                 'levels' => 'btech mtech phd',
                                 'is_common' => true,
-                                'is_required' => true,
+                                'is_required' => false,
                             ],
                             'tc' => [
                                 'icon' => '🏛️',
@@ -2395,36 +2452,48 @@
                                         <p class="kyc-doc-sub">{{ $docMeta['sub'] }}</p>
                                     </div>
                                     @if($docFile)
-                                        <div style="font-size:0.78rem; color:#059669; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.4rem;">
-                                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">File: {{ $docFile['filename'] }}</span>
-                                            <a href="{{ $docFile['url'] }}" target="_blank" style="color:#1d4ed8; text-decoration:underline; flex-shrink:0;">View</a>
+                                        <div style="font-size:0.8rem; color:#059669; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.4rem; background: #ecfdf5; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #a7f3d0;">
+                                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 {{ $docFile['filename'] }}</span>
+                                            <a href="{{ $docFile['url'] }}" target="_blank" style="color:#1d4ed8; text-decoration:underline; flex-shrink:0;">View / Download</a>
                                         </div>
                                     @endif
-                                    <div id="file-feedback-{{ $docKey }}" style="display: none; font-size: 0.74rem; font-weight: 700; color: #15803d; margin-bottom: 0.35rem;"></div>
-                                    <input type="file"
-                                           name="docs[{{ $docKey }}]"
-                                           id="file-input-{{ $docKey }}"
-                                           accept=".pdf,.jpg,.jpeg,.png"
-                                           class="field-input doc-file-input"
-                                           style="padding:0.4rem; font-size:0.75rem;"
-                                           onchange="handleDocFileChange(this, '{{ $docKey }}')">
+                                    @if(!$isPaid)
+                                        <div id="file-feedback-{{ $docKey }}" style="display: none; font-size: 0.74rem; font-weight: 700; color: #15803d; margin-bottom: 0.35rem;"></div>
+                                        <input type="file"
+                                               name="docs[{{ $docKey }}]"
+                                               id="file-input-{{ $docKey }}"
+                                               accept=".pdf,.jpg,.jpeg,.png"
+                                               class="field-input doc-file-input"
+                                               style="padding:0.4rem; font-size:0.75rem;"
+                                               onchange="handleDocFileChange(this, '{{ $docKey }}')">
+                                    @elseif(!$docFile)
+                                        <div style="font-size: 0.76rem; color: #94a3b8; font-style: italic; margin-top: 0.25rem;">
+                                            No document uploaded
+                                        </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev">
-                            &larr; Stage 3: {{ $stages[3]['title'] }}
+                        <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-prev">
+                            &larr; Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }}
                         </a>
-                        <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Save Documents &amp; Proceed to Stage 5: {{ $stages[5]['title'] }} &rarr;</span>
-                        </button>
+                        @if($isPaid)
+                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
+                                <span>Next: Stage 4 - {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                            </a>
+                        @else
+                            <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                <span>Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                            </button>
+                        @endif
                     </div>
 
                     <script>
-                        function setStage4DegreeLevel(level) {
-                            const hiddenInput = document.getElementById('stage4_degree_level_input');
+                        function setStage3DegreeLevel(level) {
+                            const hiddenInput = document.getElementById('stage3_degree_level_input');
                             if (hiddenInput) hiddenInput.value = level;
 
                             // Filter cards: B.Tech shows only 10th, Inter, Aadhaar, Photo, TC, Conduct
@@ -2478,10 +2547,141 @@
                         }
 
                         document.addEventListener('DOMContentLoaded', function() {
-                            setStage4DegreeLevel('{{ $degreeLevel ?? 'btech' }}');
+                            setStage3DegreeLevel('{{ $degreeLevel ?? 'btech' }}');
                         });
                     </script>
                 </form>
+
+            <!-- ================= STAGE 4: FEE PAYMENT ================= -->
+            @elseif($activeStep === 4)
+                <div class="step-panel-header">
+                    <div>
+                        <div class="step-panel-kicker">Stage 4 of {{ count($stages) }} &bull; Seat Confirmation</div>
+                        <h3>
+                            <span>{{ $stages[4]['title'] ?? 'Fee Payment' }}</span>
+                        </h3>
+                    </div>
+                    @if($isPaid)
+                        <span class="step-header-tag tag-success">✓ Fee Paid</span>
+                    @else
+                        <span class="step-header-tag tag-pending">Payment Pending</span>
+                    @endif
+                </div>
+
+                <div class="step-panel-body">
+                    <!-- FEE PAYMENT STATUS & ACTION -->
+                    <div class="section-box" style="text-align: center; padding: 1rem 1.25rem;">
+                        @if($isPaid)
+                            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 1.5rem 1.75rem; max-width: 640px; margin: 0 auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12); text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 0.75rem;">
+                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #16a34a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800;">
+                                        ✓
+                                    </div>
+                                    <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 38px; width: auto; object-fit: contain;">
+                                </div>
+                                <h3 style="font-size: 1.18rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem;">
+                                    Admission Registration Fee Paid &amp; Verified
+                                </h3>
+                                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
+                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to exam slot booking.
+                                </p>
+                                <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
+                                        <span>📥 Download / View Official Receipt</span>
+                                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                    <a href="{{ route('dashboards.index', ['step' => 5]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                                        <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                                    </a>
+                                </div>
+                            </div>
+                        @else
+                            @php
+                                $studentAppliNo = $crmStudent?->applinano ?? $user?->usercode ?? (string) session('student_applino', '');
+                                $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
+                            @endphp
+                            <div style="margin-bottom: 0.65rem; text-align: left;">
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
+                                <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely to lock your provisional registration and instantly receive your verified admission receipt.</p>
+                            </div>
+
+                            <!-- Admission Fee Summary Box with Concessions -->
+                            <div style="max-width: 480px; margin: 0 auto 0.75rem auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; text-align: left;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 0.3rem;">
+                                    <span>Base Admission Fee:</span>
+                                    <strong style="color: #0f172a;">₹ {{ number_format($feeBreakdown['base_fee'], 2) }}</strong>
+                                </div>
+
+                                @if($feeBreakdown['def_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
+                                        <span>Early Bird Concession ({{ $feeBreakdown['def_coupon'] }}):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['def_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                @if($feeBreakdown['per_discount'] > 0)
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #059669; margin-bottom: 0.25rem;">
+                                        <span>Personal Concession ({{ $feeBreakdown['per_coupon'] }}):</span>
+                                        <strong style="color: #059669;">- ₹ {{ number_format($feeBreakdown['per_discount'], 2) }}</strong>
+                                    </div>
+                                @endif
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #047857; margin-bottom: 0.3rem; background: #ecfdf5; padding: 3px 6px; border-radius: 6px;">
+                                    <span style="font-weight: 600;">Total Concession Deducted:</span>
+                                    <strong style="color: #047857;">- ₹ <span id="dispTotalConcessionVal">{{ number_format($feeBreakdown['total_discount'], 2) }}</span></strong>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.25rem;">
+                                    <span>Payment Mode:</span>
+                                    <span style="font-weight: 600; color: #059669;">{{ $feeBreakdown['net_payable'] <= 0 ? 'Coupon 100% Concession' : 'Online Admission Settlement' }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1; align-items: center;">
+                                    <span style="font-weight: 700; font-size: 0.86rem; color: #0f172a;">Total Payable:</span>
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: #059669;">₹ <span id="dispTotalPayableVal">{{ number_format($feeBreakdown['net_payable'], 2) }}</span></span>
+                                </div>
+                            </div>
+
+                            <form id="payuSubmitForm" action="{{ route('payu.initiate') }}" method="POST" style="display: inline-block;">
+                                @csrf
+                                <input type="hidden" id="payuAmountInput" name="amount" value="{{ $feeBreakdown['net_payable'] }}">
+                                <button type="submit" id="btnPayUGateway" class="btn-step-next" style="display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 22px; font-size: 0.86rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
+                                    @if($feeBreakdown['net_payable'] <= 0)
+                                        <span>✓ Confirm ₹0 Fee (100% Coupon Applied)</span>
+                                    @else
+                                        <span>💳 Pay ₹<span id="btnPayAmountText">{{ number_format($feeBreakdown['net_payable']) }}</span> & Issue Receipt</span>
+                                    @endif
+                                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    <!-- DOWNLOAD CARDS -->
+                    
+
+                    <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
+                        <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-prev" style="text-decoration: none;">
+                            &larr; Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }}
+                        </a>
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Status:</span>
+                            @if($isPaid)
+                                <span class="step-header-tag tag-success">✓ Fee Paid</span>
+                            @else
+                                <span class="step-header-tag tag-pending">Payment Pending</span>
+                            @endif
+                        </div>
+                        @if($isPaid)
+                            <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
+                                <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                            </a>
+                        @else
+                            <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 5">
+                                <span>🔒 Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} (Locked until Fee Payment)</span>
+                            </button>
+                        @endif
+                    </div>
+                </div>
 
             <!-- ================= STAGE 5: EXAM SLOT BOOKING (master.menus: EXAM00002) ================= -->
             @elseif($activeStep === 5)
@@ -2508,6 +2708,15 @@
 
                     $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';
                     $hasBookedSlot = !empty($examSchedule?->examdate) && !empty($examSchedule?->exam_slot);
+
+                    // Cutoff: 2 days before booked exam date at 5:00 PM
+                    // (e.g. if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                    $editDeadline = $existingDate
+                        ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                        : null;
+
+                    $isSlotLocked = $hasBookedSlot && ($editDeadline ? $now->gt($editDeadline) : false);
+                    $canEditSlot = !$hasBookedSlot || !$isSlotLocked;
                 @endphp
 
                 <div class="step-panel-header">
@@ -2549,8 +2758,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #ffffff; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 8px;">
-                                To change slot, select date/slot below &amp; click Confirm
+                            <div style="font-size: 0.78rem; font-weight: 700; background: #ffffff; padding: 5px 12px; border-radius: 8px; {{ $isSlotLocked ? 'color: #b45309; border: 1px solid #fde68a;' : 'color: #15803d; border: 1px solid #bbf7d0;' }}">
+                                @if($isSlotLocked)
+                                    🔒 Exam slot is confirmed &amp; locked
+                                @else
+                                    ✏️ Rescheduling open until {{ $editDeadline ? $editDeadline->format('d M Y, 5:00 PM') : '' }}
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -2564,24 +2777,56 @@
                         <div class="form-grid-2">
                             <!-- Date Selection with 5 PM Cutoff Enforcement -->
                             <div class="field-group">
-                                <label class="field-label">Exam Date <span class="required-star">*</span></label>
+                                <label class="field-label">
+                                    Exam Date <span class="required-star">*</span>
+                                    @if($isSlotLocked)
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
+                                            🔒 Date Locked
+                                        </span>
+                                    @elseif($hasBookedSlot)
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
+                                            ✏️ Reschedule Allowed
+                                        </span>
+                                    @endif
+                                </label>
                                 <input type="date"
                                        id="stage5ExamDateInput"
                                        name="examdate"
                                        class="field-input"
                                        min="{{ $minExamDate }}"
                                        value="{{ $defaultDate }}"
+                                       {{ $isSlotLocked ? 'readonly style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }}
                                        required>
-                                <div style="margin-top: 6px; font-size: 0.76rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
-                                    <span>⏰</span>
-                                    <span><strong>5:00 PM Daily Cutoff:</strong> {{ $cutoffMessage }}</span>
-                                </div>
+                                @if($isSlotLocked)
+                                    <input type="hidden" name="examdate" value="{{ $defaultDate }}">
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                        <span>🔒</span>
+                                        <span>Your exam date is now locked. Cutoff deadline was {{ $editDeadline ? $editDeadline->format('d M Y, 5:00 PM') : '' }}.</span>
+                                    </div>
+                                @elseif($hasBookedSlot)
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #15803d; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                        <span>⏰</span>
+                                        <span>You can edit your exam date &amp; slot any number of times before <strong>{{ $editDeadline ? $editDeadline->format('d M Y, 5:00 PM') : '' }}</strong>.</span>
+                                    </div>
+                                @else
+                                    <div style="margin-top: 6px; font-size: 0.76rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
+                                        <span>⏰</span>
+                                        <span><strong>5:00 PM Daily Cutoff:</strong> {{ $cutoffMessage }}</span>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Slot Selection (S1 11 AM - 1 PM or S2 2 PM - 4 PM) -->
                             <div class="field-group">
-                                <label class="field-label">Select Slot <span class="required-star">*</span></label>
-                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" required>
+                                <label class="field-label">
+                                    Select Slot <span class="required-star">*</span>
+                                    @if($isSlotLocked)
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; margin-left: 6px;">
+                                            🔒 Slot Locked
+                                        </span>
+                                    @endif
+                                </label>
+                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
                                     <option value="S1 11:00 AM to 1:00 PM" {{ str_contains($currentSlot, 'S1') || str_contains($currentSlot, '11') ? 'selected' : '' }}>
                                         S1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
@@ -2589,9 +2834,18 @@
                                         S2 2:00 PM to 4:00 PM (Afternoon Session)
                                     </option>
                                 </select>
+                                @if($isSlotLocked)
+                                    <input type="hidden" name="exam_slot" value="{{ $currentSlot }}">
+                                @endif
                                 <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
                                     <span>✓</span>
-                                    <span id="slotLiveStatus">Standard 2-hour CBT entrance test session.</span>
+                                    <span id="slotLiveStatus">
+                                        @if($isSlotLocked)
+                                            Confirmed slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                        @else
+                                            Current slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session).
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -2599,10 +2853,16 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Document upload' }}
+                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                            <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                            @if($isSlotLocked)
+                                <span>Proceed to Stage 6: Application Download &rarr;</span>
+                            @elseif($hasBookedSlot)
+                                <span>Update Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                            @else
+                                <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                            @endif
                         </button>
                     </div>
 
@@ -3341,5 +3601,113 @@
             });
         });
     </script>
+
+    @if(!$hasAcceptedTerms)
+        <!-- ================= TERMS & CONDITIONS POPUP MODAL ================= -->
+        <div id="termsConditionsModalOverlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1.25rem;">
+            <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                
+                <!-- Modal Header -->
+                <div style="background: linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 0.85rem;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                        📜
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.12rem; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;">Terms &amp; Conditions Agreement</h3>
+                        <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #cbd5e1;">VFSTR Vignan University &bull; Admissions Onboarding</p>
+                    </div>
+                </div>
+
+                <!-- Modal Body with 3 Sample Lines -->
+                <div style="padding: 1.5rem 1.65rem; color: #334155; font-size: 0.88rem; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
+                    <p style="font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 0.85rem;">Please review and confirm your acceptance of the admission terms before proceeding:</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #3b82f6;">
+                            <span style="font-weight: 800; color: #2563eb; font-size: 0.85rem; line-height: 1.4;">1.</span>
+                            <span style="color: #334155; font-size: 0.84rem;">I confirm that all personal, contact, academic, and category details provided by me in this application are accurate and authentic to the best of my knowledge.</span>
+                        </div>
+
+                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #10b981;">
+                            <span style="font-weight: 800; color: #059669; font-size: 0.85rem; line-height: 1.4;">2.</span>
+                            <span style="color: #334155; font-size: 0.84rem;">I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.</span>
+                        </div>
+
+                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #f59e0b;">
+                            <span style="font-weight: 800; color: #d97706; font-size: 0.85rem; line-height: 1.4;">3.</span>
+                            <span style="color: #334155; font-size: 0.84rem;">I understand that providing any false, incomplete, or misleading information will result in immediate cancellation of my admission and forfeiture of fees.</span>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox (Ticked by default as requested) -->
+                    <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;">
+                        <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none; margin: 0;">
+                            <input type="checkbox" id="termsAgreementCheckbox" checked onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a;">I have read, understood, and accept all the terms and conditions stated above.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div style="padding: 1rem 1.65rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
+                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
+                        <span>I Agree &amp; Continue &rarr;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleTermsSubmitBtn(chk) {
+                const btn = document.getElementById('btnAcceptTermsModal');
+                if (!btn) return;
+                if (chk.checked) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                }
+            }
+
+            function submitTermsAgreement() {
+                const chk = document.getElementById('termsAgreementCheckbox');
+                if (chk && !chk.checked) {
+                    alert('Please tick the checkbox to agree to the terms and conditions.');
+                    return;
+                }
+                const btn = document.getElementById('btnAcceptTermsModal');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Saving agreement...';
+                }
+
+                fetch('{{ route("dashboards.accept-terms") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ terms: 'yes' })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const overlay = document.getElementById('termsConditionsModalOverlay');
+                    if (overlay) {
+                        overlay.style.transition = 'opacity 0.25s ease-out';
+                        overlay.style.opacity = '0';
+                        setTimeout(() => { overlay.style.display = 'none'; }, 250);
+                    }
+                })
+                .catch(err => {
+                    const overlay = document.getElementById('termsConditionsModalOverlay');
+                    if (overlay) overlay.style.display = 'none';
+                });
+            }
+        </script>
+    @endif
 </body>
 </html>

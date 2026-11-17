@@ -214,7 +214,7 @@
     @if(session('status'))
         <div class="status-banner">
             <span>{{ session('status') }}</span>
-            <a href="{{ route('dashboards.index', ['step' => 2]) }}" style="color: #065f46; font-weight: 800; text-decoration: underline; white-space: nowrap;">Continue Application &rarr;</a>
+            <a href="{{ route('dashboards.index', ['step' => 5]) }}" style="color: #065f46; font-weight: 800; text-decoration: underline; white-space: nowrap;">Continue Application &rarr;</a>
         </div>
     @endif
 
@@ -309,13 +309,13 @@
             <button type="button" onclick="window.print()" class="btn-secondary">
                 <span>🖨️ Print / Save PDF</span>
             </button>
-            <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-secondary">
+            <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-secondary">
                 <span>&larr; View Portal Steps</span>
             </a>
         </div>
         <div style="display: flex; gap: 0.65rem; align-items: center;">
-            <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-primary">
-                <span>Continue to Step 2: Personal Profile &rarr;</span>
+            <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-primary">
+                <span>Continue to Step 5: Exam Slot Booking &rarr;</span>
             </a>
         </div>
     </div>

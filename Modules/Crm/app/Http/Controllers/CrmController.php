@@ -64,12 +64,18 @@ class CrmController extends Controller
             }
         }
         if ($activeTab === 'kpi' || $activeTab === 'studentkpi') {
+            if (\Modules\Auth\Services\RoleService::isTelecaller($roleId)) {
+                return redirect()->route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']);
+            }
             return redirect()->route('kpi.studentkpi', ['tab' => 'studentkpi']);
         }
         if ($activeTab === 'telecallerkpi') {
             return redirect()->route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']);
         }
         if ($activeTab === 'leadskpi') {
+            if (\Modules\Auth\Services\RoleService::isTelecaller($roleId)) {
+                return redirect()->route('kpi.telecallerkpi', ['tab' => 'telecallerkpi']);
+            }
             return redirect()->route('kpi.leadskpi', ['tab' => 'leadskpi']);
         }
 

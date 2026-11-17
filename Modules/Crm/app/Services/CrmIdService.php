@@ -341,15 +341,7 @@ class CrmIdService
                   AND (tl.crmid IS NULL OR tl.crmid = '0' OR tl.crmid != sr.crmid);
             ");
 
-            // Fix finance.couponinfo
-            DB::statement("
-                UPDATE finance.couponinfo ci
-                SET crmid = sr.crmid
-                FROM crm.student_registration sr
-                WHERE ci.applino = sr.applinano
-                  AND sr.crmid IS NOT NULL
-                  AND (ci.crmid IS NULL OR ci.crmid != sr.crmid);
-            ");
+            // crm.telecaller_leads updated above.
         } catch (\Throwable $e) {
             Log::warning('[CrmIdService] fixAllLegacyCrmIds notice: ' . $e->getMessage());
         }

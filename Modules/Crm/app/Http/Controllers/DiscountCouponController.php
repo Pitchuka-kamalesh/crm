@@ -83,7 +83,8 @@ class DiscountCouponController extends Controller
         $startDate = trim($request->input('coupstartdate'));
         $name      = trim($request->input('couponname'));
         $amount    = (float)$request->input('discountamount');
-        $stdCount  = (int)($request->input('coupstdcount') ?: 500);
+        $hasCount  = $request->filled('coupstdcount') && (int)$request->input('coupstdcount') > 0;
+        $stdCount  = $hasCount ? (int)$request->input('coupstdcount') : null;
         $userCode  = Auth::user()?->usercode ?? '02598';
         $ip        = $request->ip() ?? '127.0.0.1';
 
@@ -95,6 +96,7 @@ class DiscountCouponController extends Controller
         }
 
         // 1. STOP previously active discount coupon(s) via Eloquent Model
+        // Closing date of previous coupon becomes the start date of this new coupon
         $previousActive = CouponInfo::where(function ($q) {
                 $q->where('coupontype', 'DEFAULT')
                   ->orWhere('coupontype', 'BATCH')
@@ -133,11 +135,13 @@ class DiscountCouponController extends Controller
         ]);
 
         $stoppedNote = $previousActive->isNotEmpty()
-            ? " Previous coupon ('{$previousActive->first()->couponname}') has been stopped."
+            ? " Previous coupon ('{$previousActive->first()->couponname}') closed on {$startDate}."
             : "";
 
+        $quotaMsg = $stdCount ? "for {$stdCount} students" : "for ALL students (works until stopped)";
+
         return redirect()->route('crm.discountcoupon', ['tab' => 'couponinfo'])
-            ->with('status', "✓ New discount coupon '{$name}' (₹" . number_format($amount, 2) . ") activated starting from {$startDate}!{$stoppedNote}");
+            ->with('status', "✓ New discount coupon '{$name}' (₹" . number_format($amount, 2) . ") activated {$quotaMsg} starting from {$startDate}!{$stoppedNote}");
     }
 
     /**
