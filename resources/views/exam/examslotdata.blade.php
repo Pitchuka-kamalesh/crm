@@ -283,7 +283,7 @@
                         
                         <!-- Filter Controls Left -->
                         <div style="display: flex; align-items: flex-end; gap: 0.55rem; flex-wrap: wrap;">
-                            <!-- Year Filter -->
+                            <!-- 1. Year Filter -->
                             <div class="filter-item">
                                 <label class="filter-field-label">Year</label>
                                 <select id="yearFilterSelect" class="filter-select" onchange="filterExamTable()">
@@ -294,7 +294,7 @@
                                 </select>
                             </div>
 
-                            <!-- Month Filter -->
+                            <!-- 2. Month Filter -->
                             <div class="filter-item">
                                 <label class="filter-field-label">Month</label>
                                 <select id="monthFilterSelect" class="filter-select" onchange="filterExamTable()">
@@ -305,39 +305,37 @@
                                 </select>
                             </div>
 
-                            <!-- From Date -->
+                            <!-- 3. Slot 1 & Slot 2 Checkboxes -->
                             <div class="filter-item">
-                                <label class="filter-field-label">From Date</label>
-                                <input type="date" id="fromDateInput" class="filter-select" onchange="filterExamTable()" title="Filter bookings from this date">
+                                <label class="filter-field-label">Slots</label>
+                                <div style="display: flex; align-items: center; gap: 0.65rem; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 0.65rem;">
+                                    <label style="display: flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 700; color: #1d4ed8; cursor: pointer; margin: 0;" title="11:00 AM - 1:00 PM">
+                                        <input type="checkbox" id="chkSlot1" checked onchange="filterExamTable()" style="accent-color: #2563eb; width: 15px; height: 15px; cursor: pointer;">
+                                        <span>Slot 1</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 700; color: #7e22ce; cursor: pointer; margin: 0;" title="2:00 PM - 4:00 PM">
+                                        <input type="checkbox" id="chkSlot2" checked onchange="filterExamTable()" style="accent-color: #7e22ce; width: 15px; height: 15px; cursor: pointer;">
+                                        <span>Slot 2</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <!-- To Date -->
+                            <!-- Some Gap / Visual Separator -->
+                            <div style="width: 1px; height: 26px; background: #cbd5e1; margin: 0 0.4rem; align-self: flex-end; margin-bottom: 3px;"></div>
+
+                            <!-- 4. Start Date -->
                             <div class="filter-item">
-                                <label class="filter-field-label">To Date</label>
-                                <input type="date" id="toDateInput" class="filter-select" onchange="filterExamTable()" title="Filter bookings up to this date">
+                                <label class="filter-field-label">Start Date</label>
+                                <input type="date" id="startDateInput" class="filter-select" onchange="filterExamTable()" title="Filter bookings from this date">
                             </div>
 
-                            <!-- From Slot -->
+                            <!-- 5. End Date -->
                             <div class="filter-item">
-                                <label class="filter-field-label">From Slot</label>
-                                <select id="fromSlotSelect" class="filter-select" onchange="filterExamTable()">
-                                    <option value="">All Slots</option>
-                                    <option value="S1">S1 (11:00 AM - 1:00 PM)</option>
-                                    <option value="S2">S2 (2:00 PM - 4:00 PM)</option>
-                                </select>
+                                <label class="filter-field-label">End Date</label>
+                                <input type="date" id="endDateInput" class="filter-select" onchange="filterExamTable()" title="Filter bookings up to this date">
                             </div>
 
-                            <!-- To Slot -->
-                            <div class="filter-item">
-                                <label class="filter-field-label">To Slot</label>
-                                <select id="toSlotSelect" class="filter-select" onchange="filterExamTable()">
-                                    <option value="">All Slots</option>
-                                    <option value="S1">S1 (11:00 AM - 1:00 PM)</option>
-                                    <option value="S2">S2 (2:00 PM - 4:00 PM)</option>
-                                </select>
-                            </div>
-
-                            <!-- Live Search Input -->
+                            <!-- 6. Live Search Input -->
                             <div class="filter-item">
                                 <label class="filter-field-label">Search</label>
                                 <input type="text"
@@ -348,7 +346,7 @@
                                        style="width: 190px;">
                             </div>
 
-                            <!-- Reset Button -->
+                            <!-- 7. Reset Button -->
                             <div class="filter-item">
                                 <button type="button" onclick="resetExamFilters()" class="btn-reset-action" title="Clear all filters">
                                     <span>↺ Reset</span>
@@ -532,10 +530,10 @@
         const query = (document.getElementById('examSearchInput')?.value || '').toLowerCase().trim();
         const year = document.getElementById('yearFilterSelect')?.value || '';
         const month = document.getElementById('monthFilterSelect')?.value || '';
-        const fromDate = document.getElementById('fromDateInput')?.value || '';
-        const toDate = document.getElementById('toDateInput')?.value || '';
-        const fromSlot = document.getElementById('fromSlotSelect')?.value || '';
-        const toSlot = document.getElementById('toSlotSelect')?.value || '';
+        const startDate = document.getElementById('startDateInput')?.value || '';
+        const endDate = document.getElementById('endDateInput')?.value || '';
+        const chkS1 = document.getElementById('chkSlot1')?.checked ?? false;
+        const chkS2 = document.getElementById('chkSlot2')?.checked ?? false;
 
         const table = document.getElementById('examScheduleTable');
         const rows = table.querySelectorAll('tbody tr');
@@ -569,29 +567,23 @@
             // Month match
             let matchesMonth = !month || rowMonth === month;
 
-            // Date Range Match (From Date & To Date)
-            let matchesFromDate = !fromDate || (rowDate && rowDate >= fromDate);
-            let matchesToDate = !toDate || (rowDate && rowDate <= toDate);
+            // Date Range Match (Start Date & End Date)
+            let matchesStartDate = !startDate || (rowDate && rowDate >= startDate);
+            let matchesEndDate = !endDate || (rowDate && rowDate <= endDate);
 
-            // Slot Filters (From Slot & To Slot)
-            let matchesFromSlot = true;
-            if (fromSlot) {
-                if (fromSlot === 'S1') matchesFromSlot = (rowSlot === 'S1' || rowSlot === 'S2');
-                if (fromSlot === 'S2') matchesFromSlot = (rowSlot === 'S2');
+            // Slot Checkboxes Match
+            let matchesSlot = true;
+            if (chkS1 && !chkS2) {
+                matchesSlot = (rowSlot === 'S1');
+            } else if (!chkS1 && chkS2) {
+                matchesSlot = (rowSlot === 'S2');
+            } else if (!chkS1 && !chkS2) {
+                matchesSlot = false; // Neither slot checked
+            } else {
+                matchesSlot = true; // Both checked -> all slots
             }
 
-            let matchesToSlot = true;
-            if (toSlot) {
-                if (toSlot === 'S1') matchesToSlot = (rowSlot === 'S1');
-                if (toSlot === 'S2') matchesToSlot = (rowSlot === 'S1' || rowSlot === 'S2');
-            }
-
-            if (fromSlot && toSlot && fromSlot === toSlot) {
-                matchesFromSlot = (rowSlot === fromSlot);
-                matchesToSlot = true;
-            }
-
-            if (matchesQuery && matchesYear && matchesMonth && matchesFromDate && matchesToDate && matchesFromSlot && matchesToSlot) {
+            if (matchesQuery && matchesYear && matchesMonth && matchesStartDate && matchesEndDate && matchesSlot) {
                 row.style.display = '';
                 visibleCount++;
             } else {
@@ -606,11 +598,15 @@
     }
 
     function resetExamFilters() {
-        const ids = ['examSearchInput', 'yearFilterSelect', 'monthFilterSelect', 'fromDateInput', 'toDateInput', 'fromSlotSelect', 'toSlotSelect'];
+        const ids = ['examSearchInput', 'yearFilterSelect', 'monthFilterSelect', 'startDateInput', 'endDateInput'];
         ids.forEach(function(id) {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
+        const chk1 = document.getElementById('chkSlot1');
+        const chk2 = document.getElementById('chkSlot2');
+        if (chk1) chk1.checked = true;
+        if (chk2) chk2.checked = true;
         filterExamTable();
     }
 </script>

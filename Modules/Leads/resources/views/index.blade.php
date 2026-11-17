@@ -1826,7 +1826,6 @@
                         <!-- Left Group: Title & Action Buttons -->
                         <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
                             <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-                                <span style="font-size: 1.25rem;">📥</span>
                                 <span>Leads Upload</span>
                             </div>
                             <button type="button" 
@@ -1991,7 +1990,6 @@
                         <!-- Modal Header -->
                         <div class="wizard-modal-header" style="padding: 1.15rem 1.5rem; background: #0f172a; display: flex; justify-content: space-between; align-items: center;">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 1.35rem;">📥</span>
                                 <div>
                                     <div class="candidate-header-name" style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">Leads Upload</div>
                                     <div class="candidate-header-sub" style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">Select or drop Excel/CSV file to ingest leads into system</div>
