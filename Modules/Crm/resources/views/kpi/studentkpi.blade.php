@@ -84,30 +84,30 @@
                                 <strong style="color: #0284c7;">100%</strong>
                                 <span style="color: #94a3b8; font-size: 0.7rem;">({{ $totalApplicants }})</span>
                             </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #047857;">Stage 1 Fee Paid:</span>
-                                <strong style="color: #059669;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage1Paid }})</span>
-                            </span>
                             <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #1e40af;">Stage 2 Personal Profile:</span>
-                                <strong style="color: #2563eb;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage2Done }})</span>
+                                <span style="font-weight: 700; color: #1e40af;">Stage 1 Personal Profile:</span>
+                                <strong style="color: #2563eb;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}%</strong>
+                                <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage1Profile }})</span>
                             </span>
                             <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #6d28d9;">Stage 3 Academic Records:</span>
-                                <strong style="color: #7c3aed;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage3Done }})</span>
+                                <span style="font-weight: 700; color: #6d28d9;">Stage 2 Academic Info:</span>
+                                <strong style="color: #7c3aed;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}%</strong>
+                                <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage2Academic }})</span>
                             </span>
                             <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #c2410c;">Stage 4 Documents:</span>
-                                <strong style="color: #ea580c;">{{ round(($kpiStage4Done / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage4Done }})</span>
+                                <span style="font-weight: 700; color: #c2410c;">Stage 3 Document Upload:</span>
+                                <strong style="color: #ea580c;">{{ round(($kpiStage3Docs / $kpiTotal) * 100, 1) }}%</strong>
+                                <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage3Docs }})</span>
                             </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #64748b;">Stage 5 Examination:</span>
-                                <strong style="color: #64748b;">{{ round(($kpiStage5Done / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #94a3b8; font-size: 0.7rem;">({{ $kpiStage5Done }})</span>
+                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
+                                <span style="font-weight: 700; color: #047857;">Stage 4 Fee Payment:</span>
+                                <strong style="color: #059669;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}%</strong>
+                                <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage4Fee }})</span>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f0fdfa; border: 1px solid #99f6e4; padding: 3px 9px; border-radius: 6px;">
+                                <span style="font-weight: 700; color: #0f766e;">Stage 5 Exam Slot Booking:</span>
+                                <strong style="color: #0d9488;">{{ round(($kpiStage5Slot / $kpiTotal) * 100, 1) }}%</strong>
+                                <span style="color: #14b8a6; font-size: 0.7rem;">({{ $kpiStage5Slot }})</span>
                             </span>
                         </div>
                     </div>
@@ -126,7 +126,7 @@
 
                 <div style="padding: 1.5rem;">
                     <!-- 1. TOP EXECUTIVE METRIC CARDS -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
                         <!-- Card 1: Total Registered -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div>
@@ -137,44 +137,54 @@
                             <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👥</div>
                         </div>
 
-                        <!-- Card 2: Stage 1 Fee Paid -->
+                        <!-- Card 2: Stage 1 Personal Profile -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 1 Fee Paid</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ $kpiStage1Paid }}</div>
-                                <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}% Conversion</div>
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 1 Personal Profile</div>
+                                <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ $kpiStage1Profile }}</div>
+                                <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}% Completed</div>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👤</div>
                         </div>
 
-                        <!-- Card 3: Stage 2 Personal Info -->
+                        <!-- Card 3: Stage 2 Academic Info -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 2 Personal Info</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ $kpiStage2Done }}</div>
-                                <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}% Completed</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📝</div>
-                        </div>
-
-                        <!-- Card 4: Stage 3 Academic Records -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 3 Academic</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ $kpiStage3Done }}</div>
-                                <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}% Verified</div>
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 2 Academic Info</div>
+                                <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ $kpiStage2Academic }}</div>
+                                <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}% Completed</div>
                             </div>
                             <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
                         </div>
 
-                        <!-- Card 5: Stage 4 & 5 Exam Ready -->
+                        <!-- Card 4: Stage 3 Document Upload -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 5 Exam Ready</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #ea580c; margin: 0.2rem 0;">{{ $kpiStage5Done }}</div>
-                                <div style="font-size: 0.75rem; color: #ea580c; font-weight: 600;">Qualified Applicants</div>
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 3 Document Upload</div>
+                                <div style="font-size: 1.65rem; font-weight: 800; color: #ea580c; margin: 0.2rem 0;">{{ $kpiStage3Docs }}</div>
+                                <div style="font-size: 0.75rem; color: #ea580c; font-weight: 600;">{{ round(($kpiStage3Docs / $kpiTotal) * 100, 1) }}% Uploaded</div>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fff7ed; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎯</div>
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fff7ed; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📤</div>
+                        </div>
+
+                        <!-- Card 5: Stage 4 Fee Payment -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div>
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 4 Fee Payment</div>
+                                <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ $kpiStage4Fee }}</div>
+                                <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}% Fee Paid</div>
+                            </div>
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                        </div>
+
+                        <!-- Card 6: Stage 5 Exam Slot Booking -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div>
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 5 Exam Slot Booking</div>
+                                <div style="font-size: 1.65rem; font-weight: 800; color: #0d9488; margin: 0.2rem 0;">{{ $kpiStage5Slot }}</div>
+                                <div style="font-size: 0.75rem; color: #0d9488; font-weight: 600;">{{ round(($kpiStage5Slot / $kpiTotal) * 100, 1) }}% Slots Booked</div>
+                            </div>
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #f0fdfa; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📅</div>
                         </div>
                     </div>
 
@@ -185,7 +195,7 @@
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
                                 <div>
                                     <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">5-Stage Student Conversion Funnel</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Progression from registration to examination readiness</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Progression from registration through exam slot booking</div>
                                 </div>
                                 <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #dbeafe;">Full Funnel</span>
                             </div>
@@ -224,11 +234,11 @@
                             <div style="min-width: 180px;">
                                 <select name="stage" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
                                     <option value="">All Funnel Stages</option>
-                                    <option value="stage1" {{ $filterStage === 'stage1' ? 'selected' : '' }}>Stage 1: Fee Paid</option>
-                                    <option value="stage2" {{ $filterStage === 'stage2' ? 'selected' : '' }}>Stage 2: Personal Profile</option>
-                                    <option value="stage3" {{ $filterStage === 'stage3' ? 'selected' : '' }}>Stage 3: Academic Details</option>
-                                    <option value="stage4" {{ $filterStage === 'stage4' ? 'selected' : '' }}>Stage 4: Documents</option>
-                                    <option value="stage5" {{ $filterStage === 'stage5' ? 'selected' : '' }}>Stage 5: Examination</option>
+                                    <option value="stage1" {{ $filterStage === 'stage1' ? 'selected' : '' }}>Stage 1: Personal Profile</option>
+                                    <option value="stage2" {{ $filterStage === 'stage2' ? 'selected' : '' }}>Stage 2: Academic Info</option>
+                                    <option value="stage3" {{ $filterStage === 'stage3' ? 'selected' : '' }}>Stage 3: Document Upload</option>
+                                    <option value="stage4" {{ $filterStage === 'stage4' ? 'selected' : '' }}>Stage 4: Fee Payment</option>
+                                    <option value="stage5" {{ $filterStage === 'stage5' ? 'selected' : '' }}>Stage 5: Exam Slot Booking</option>
                                 </select>
                             </div>
 
@@ -272,11 +282,11 @@
                                         <th>Application #</th>
                                         <th>Student Details</th>
                                         <th>Program &amp; Branch</th>
-                                        <th>Stage 1 (Fee)</th>
-                                        <th>Stage 2 (Personal)</th>
-                                        <th>Stage 3 (Academic)</th>
-                                        <th>Stage 4 (Docs)</th>
-                                        <th>Stage 5 (Exam)</th>
+                                        <th>Stage 1 (Profile)</th>
+                                        <th>Stage 2 (Academic)</th>
+                                        <th>Stage 3 (Docs)</th>
+                                        <th>Stage 4 (Fee)</th>
+                                        <th>Stage 5 (Slot Booking)</th>
                                         <th>Overall Progress</th>
                                     </tr>
                                 </thead>
@@ -284,14 +294,14 @@
                                     @forelse($students as $st)
                                         @php
                                             $appNo = (string)$st->applinano;
-                                            $isPaid = ($st->stage1 === 'paid') || ($st->payDetail && $st->payDetail->txnstatus === 'success') || $st->receipt || $verifiedPaidAppNos->contains($appNo);
-                                            $isStage2 = in_array(strtolower(trim((string)$st->stage2)), ['completed', 'approved', 'done']) || $st->personalInfo;
-                                            $isStage3 = in_array(strtolower(trim((string)$st->stage3)), ['completed', 'approved', 'done']) || $st->academicDetails;
-                                            $isStage4 = in_array(strtolower(trim((string)$st->stage4)), ['completed', 'approved', 'done']) || $st->uploads;
+                                            $isStage1 = in_array(strtolower(trim((string)$st->stage1)), ['completed', 'approved', 'done']) || $st->personalInfo;
+                                            $isStage2 = in_array(strtolower(trim((string)$st->stage2)), ['completed', 'approved', 'done']) || $st->academicDetails;
+                                            $isStage3 = in_array(strtolower(trim((string)$st->stage3)), ['completed', 'approved', 'done']) || $st->uploads;
+                                            $isStage4 = in_array(strtolower(trim((string)$st->stage4)), ['paid', 'completed']) || ($st->stage1 === 'paid') || ($st->payDetail && ($st->payDetail->txnstatus === 'success' || $st->payDetail->paidamount > 0)) || $st->receipt || $verifiedPaidAppNos->contains($appNo);
                                             $isStage5 = in_array(strtolower(trim((string)$st->stage5)), ['completed', 'approved', 'done']) || $st->examSchedule;
 
-                                            $completedCount = 1 + ($isPaid ? 1 : 0) + ($isStage2 ? 1 : 0) + ($isStage3 ? 1 : 0) + ($isStage4 ? 1 : 0) + ($isStage5 ? 1 : 0);
-                                            $progressPct = round(($completedCount / 6) * 100);
+                                            $completedCount = ($isStage1 ? 1 : 0) + ($isStage2 ? 1 : 0) + ($isStage3 ? 1 : 0) + ($isStage4 ? 1 : 0) + ($isStage5 ? 1 : 0);
+                                            $progressPct = round(($completedCount / 5) * 100);
                                         @endphp
                                         <tr>
                                             <td>
@@ -320,18 +330,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                @if($isPaid)
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Paid
-                                                    </span>
-                                                @else
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($isStage2)
+                                                @if($isStage1)
                                                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 6px;">
                                                         ✓ Done
                                                     </span>
@@ -342,9 +341,9 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($isStage3)
+                                                @if($isStage2)
                                                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #6d28d9; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Verified
+                                                        ✓ Done
                                                     </span>
                                                 @else
                                                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
@@ -353,7 +352,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($isStage4)
+                                                @if($isStage3)
                                                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #c2410c; background: #fff7ed; border: 1px solid #fed7aa; padding: 2px 8px; border-radius: 6px;">
                                                         ✓ Uploaded
                                                     </span>
@@ -364,9 +363,20 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($isStage5)
+                                                @if($isStage4)
                                                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Qualified
+                                                        ✓ Paid
+                                                    </span>
+                                                @else
+                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
+                                                        Pending
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($isStage5)
+                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #0f766e; background: #f0fdfa; border: 1px solid #99f6e4; padding: 2px 8px; border-radius: 6px;">
+                                                        ✓ Booked
                                                     </span>
                                                 @else
                                                     <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
@@ -421,24 +431,31 @@ document.addEventListener('DOMContentLoaded', function () {
         new Chart(funnelCtx, {
             type: 'bar',
             data: {
-                labels: ['Total Registered', 'Stage 1: Fee Paid', 'Stage 2: Personal Profile', 'Stage 3: Academic Details', 'Stage 4: Documents', 'Stage 5: Examination'],
+                labels: [
+                    'Total Registered',
+                    'Stage 1: Personal Profile',
+                    'Stage 2: Academic Info',
+                    'Stage 3: Document Upload',
+                    'Stage 4: Fee Payment',
+                    'Stage 5: Exam Slot Booking'
+                ],
                 datasets: [{
                     label: 'Candidates Completed',
                     data: [
                         {{ $totalApplicants }},
-                        {{ $kpiStage1Paid }},
-                        {{ $kpiStage2Done }},
-                        {{ $kpiStage3Done }},
-                        {{ $kpiStage4Done }},
-                        {{ $kpiStage5Done }}
+                        {{ $kpiStage1Profile }},
+                        {{ $kpiStage2Academic }},
+                        {{ $kpiStage3Docs }},
+                        {{ $kpiStage4Fee }},
+                        {{ $kpiStage5Slot }}
                     ],
                     backgroundColor: [
                         '#0284c7',
-                        '#059669',
                         '#2563eb',
                         '#7c3aed',
                         '#ea580c',
-                        '#10b981'
+                        '#059669',
+                        '#0d9488'
                     ],
                     borderRadius: 6,
                     borderWidth: 0,

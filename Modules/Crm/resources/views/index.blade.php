@@ -2381,34 +2381,34 @@
                                 <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👥</div>
                             </div>
 
-                            <!-- Card 2: Fee Payment (Stage 1) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
-                            </div>
-
-                            <!-- Card 3: Personal Profile (Stage 2) -->
+                            <!-- Card 2: Personal Profile (Stage 1) -->
                             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 <div>
                                     <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Submitted</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage1Profile }} Completed</div>
                                 </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👤</div>
                             </div>
 
-                            <!-- Card 4: Academic Records (Stage 3) -->
+                            <!-- Card 3: Academic Records (Stage 2) -->
                             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Completed</div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Records</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage2Academic }} Verified</div>
                                 </div>
                                 <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            </div>
+
+                            <!-- Card 4: Fee Payment (Stage 4) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Fee Payment</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage4Fee }} Fee Paid</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
                             </div>
                         </div>
 
@@ -2690,17 +2690,17 @@
 
                 function initKpiVisualCharts() {
                     const funnelLabels = [
-                        ['Registration'],
-                        ['Fee', 'Payment'],
-                        ['Personal', 'Details'],
-                        ['Academic', 'Records'],
-                        ['Application', 'Form'],
-                        ['Seat', 'Allotment']
+                        ['Total', 'Registered'],
+                        ['Stage 1:', 'Profile'],
+                        ['Stage 2:', 'Academic'],
+                        ['Stage 3:', 'Documents'],
+                        ['Stage 4:', 'Fee Paid'],
+                        ['Stage 5:', 'Slot Booking']
                     ];
-                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
+                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Profile }}, {{ (int)$kpiStage2Academic }}, {{ (int)$kpiStage3Docs }}, {{ (int)$kpiStage4Fee }}, {{ (int)$kpiStage5Slot }}];
                     const totalApplicants = {{ (int)$kpiTotal }};
-                    const paidCount = {{ (int)$kpiStage1Paid }};
-                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+                    const paidCount = {{ (int)$kpiStage4Fee }};
+                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage4Fee) }};
                     const branchLabels = {!! json_encode(array_keys($kpiBranchDistribution->toArray())) !!};
                     const branchCounts = {!! json_encode(array_values($kpiBranchDistribution->toArray())) !!};
 

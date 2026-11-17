@@ -26,11 +26,11 @@ class KpiDashboardsTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Student KPI &amp; Conversion Analytics', false);
-        $response->assertSee('Stage 1 Fee Paid');
-        $response->assertSee('Stage 2 Personal Profile');
-        $response->assertSee('Stage 3 Academic Records');
-        $response->assertSee('Stage 4 Documents');
-        $response->assertSee('Stage 5 Examination');
+        $response->assertSee('Stage 1 Personal Profile');
+        $response->assertSee('Stage 2 Academic Info');
+        $response->assertSee('Stage 3 Document Upload');
+        $response->assertSee('Stage 4 Fee Payment');
+        $response->assertSee('Stage 5 Exam Slot Booking');
         $response->assertSee('studentFunnelChart');
         $response->assertSee('branchDistributionChart');
         $response->assertSee('Verified Student Records');

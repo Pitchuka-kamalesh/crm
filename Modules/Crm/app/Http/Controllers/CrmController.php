@@ -281,6 +281,11 @@ class CrmController extends Controller
         // Eloquent KPI Metrics (Computed via KpiAnalyticsService)
         $studentKpi = $kpiService->getStudentKpiMetrics();
         $kpiTotal = $studentKpi['kpiTotal'];
+        $kpiStage1Profile = $studentKpi['kpiStage1Profile'];
+        $kpiStage2Academic = $studentKpi['kpiStage2Academic'];
+        $kpiStage3Docs = $studentKpi['kpiStage3Docs'];
+        $kpiStage4Fee = $studentKpi['kpiStage4Fee'];
+        $kpiStage5Slot = $studentKpi['kpiStage5Slot'];
         $kpiStage1Paid = $studentKpi['kpiStage1Paid'];
         $kpiStage2Done = $studentKpi['kpiStage2Done'];
         $kpiStage3Done = $studentKpi['kpiStage3Done'];
@@ -327,6 +332,11 @@ class CrmController extends Controller
             'payDetails',
             'paidAppNos',
             'kpiTotal',
+            'kpiStage1Profile',
+            'kpiStage2Academic',
+            'kpiStage3Docs',
+            'kpiStage4Fee',
+            'kpiStage5Slot',
             'kpiStage1Paid',
             'kpiStage2Done',
             'kpiStage3Done',
