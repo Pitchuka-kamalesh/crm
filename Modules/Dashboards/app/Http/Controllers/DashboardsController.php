@@ -742,13 +742,13 @@ class DashboardsController extends Controller
                 $districtInput = $request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district');
 
                 if ($stateInput && is_numeric($stateInput)) {
-                    $matchedState = State::find($stateInput);
+                    $matchedState = State::where('state_id', (int)$stateInput)->first();
                     if ($matchedState) {
                         $stateInput = $matchedState->state_name;
                     }
                 }
                 if ($districtInput && is_numeric($districtInput)) {
-                    $matchedDist = District::find($districtInput);
+                    $matchedDist = District::where('DISTRICT_ID', (int)$districtInput)->first();
                     if ($matchedDist) {
                         $districtInput = $matchedDist->DISTRICT_NAME;
                     }
@@ -758,6 +758,8 @@ class DashboardsController extends Controller
                     'city' => $cityInput,
                     'jr_state' => $stateInput,
                     'jr_district' => $districtInput,
+                    'pu2_college_state' => $stateInput,
+                    'pu2_college_district' => $districtInput,
                 ]);
 
                 $request->validate([
@@ -835,13 +837,13 @@ class DashboardsController extends Controller
 
                     $tenthConducted = is_numeric($request->input('tenth_marks_conducted'))
                         ? (float)$request->input('tenth_marks_conducted')
-                        : 600.0;
+                        : null;
                     $tenthEarned = is_numeric($request->input('tenth_marks_earned'))
                         ? (float)$request->input('tenth_marks_earned')
                         : ($tenthMarksNum ?? ($tenthCgpaNum ? round($tenthCgpaNum * 9.5, 2) : null));
                     $tenthPct = is_numeric($request->input('tenth_percentage'))
                         ? (float)$request->input('tenth_percentage')
-                        : ($tenthConducted > 0 && $tenthEarned ? round(($tenthEarned / $tenthConducted) * 100, 2) : null);
+                        : (($tenthConducted && $tenthConducted > 0 && $tenthEarned) ? round(($tenthEarned / $tenthConducted) * 100, 2) : null);
 
                     $pu2MarksRaw = is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : null;
                     $pu2Type = $request->input('pu2_marks_type') ?? $request->input('inter_marks_type') ?? 'Marks';

@@ -1850,7 +1850,7 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Conducted:</label>
-                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
+                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Earned:</label>
@@ -1888,9 +1888,9 @@
                                             @foreach($states as $s)
                                                 @php
                                                     $curState = $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh';
-                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id || (!$academicDetails && $s->state_name === 'Andhra Pradesh'));
                                                 @endphp
-                                                <option value="{{ $s->state_name }}" data-id="{{ $s->state_id }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
                                                 </option>
                                             @endforeach
@@ -1903,9 +1903,9 @@
                                             @foreach($districts as $d)
                                                 @php
                                                     $curDist = $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur';
-                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur'));
                                                 @endphp
-                                                <option value="{{ $d->DISTRICT_NAME }}" data-state="{{ $d->STATE_ID }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
                                                 </option>
                                             @endforeach
@@ -2181,7 +2181,7 @@
                                 if (val === 'CGPA') {
                                     if (conductedIn) conductedIn.value = '10';
                                 } else {
-                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '600';
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '';
                                 }
                                 calculateTenthPct();
                             }
@@ -2220,34 +2220,41 @@
                                 calculatePu2Pct();
                             }
 
-                            function onInterStateChange(stateVal) {
+                            const allStatesData = @json($states);
+                            const allDistrictsData = @json($districts);
+
+                            function onInterStateChange(stateId) {
                                 const distSelect = document.getElementById('geo-inter-district-select');
                                 if (!distSelect) return;
                                 const currentSelectedDist = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
 
-                                let numericStateId = null;
-                                const stateSelect = document.getElementById('geo-inter-state-select');
-                                if (stateSelect && stateSelect.selectedOptions && stateSelect.selectedOptions[0]) {
-                                    numericStateId = stateSelect.selectedOptions[0].getAttribute('data-id');
-                                }
-                                if (!numericStateId && !isNaN(stateVal)) {
-                                    numericStateId = stateVal;
+                                let numericStateId = stateId;
+                                if (isNaN(stateId) && typeof allStatesData !== 'undefined') {
+                                    const foundState = allStatesData.find(s => s.state_name === stateId);
+                                    if (foundState) numericStateId = foundState.state_id;
                                 }
 
                                 let foundSelected = false;
-                                allDistrictsData.forEach(function(d) {
-                                    if (!numericStateId || d.STATE_ID == numericStateId) {
-                                        const opt = document.createElement('option');
-                                        opt.value = d.DISTRICT_NAME;
-                                        opt.textContent = d.DISTRICT_NAME;
-                                        if (d.DISTRICT_NAME == currentSelectedDist || d.DISTRICT_NAME === '{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?: "Guntur" }}') {
-                                            opt.selected = true;
-                                            foundSelected = true;
+                                if (typeof allDistrictsData !== 'undefined' && Array.isArray(allDistrictsData)) {
+                                    allDistrictsData.forEach(function(d) {
+                                        const dStateId = d.STATE_ID ?? d.state_id;
+                                        const dDistId = d.DISTRICT_ID ?? d.district_id;
+                                        const dName = d.DISTRICT_NAME ?? d.district_name;
+
+                                        if (!numericStateId || dStateId == numericStateId) {
+                                            const opt = document.createElement('option');
+                                            opt.value = dDistId;
+                                            opt.textContent = dName;
+                                            opt.setAttribute('data-name', dName);
+                                            if (dDistId == currentSelectedDist || dName === '{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                                opt.selected = true;
+                                                foundSelected = true;
+                                            }
+                                            distSelect.appendChild(opt);
                                         }
-                                        distSelect.appendChild(opt);
-                                    }
-                                });
+                                    });
+                                }
                                 if (!foundSelected && distSelect.options.length > 1) {
                                     distSelect.options[1].selected = true;
                                 }
