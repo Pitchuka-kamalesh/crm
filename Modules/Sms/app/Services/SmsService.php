@@ -10,13 +10,6 @@ class SmsService
 {
     /**
      * Send an SMS via JioCX DLT Gateway.
-     *
-     * @param string $to 10-digit mobile number
-     * @param string $body Formatted message matching approved DLT template
-     * @param string $templateId DLT Template ID
-     * @param string|null $user User / Emp / Student identifier
-     * @param string|null $registerNo Register or application number
-     * @return array
      */
     public function send(
         string $to,
@@ -55,8 +48,7 @@ class SmsService
         $traceId = null;
         $data = [];
 
-        // Format recipient phone number: JioCX requires country code (91XXXXXXXXXX for India)
-        $destTo = (strlen($cleanTo) === 10) ? ('91' . $cleanTo) : $cleanTo;
+        $destTo = (strlen($cleanTo) === 10) ? ($cleanTo) : $cleanTo;
 
         try {
             $response = Http::timeout(10)
@@ -98,7 +90,6 @@ class SmsService
             Log::error('[SmsService] SMS send failed', ['to' => $destTo, 'error' => $e->getMessage()]);
         }
 
-        // Record in communication logs table (guarantees single record per phone number for sms channel)
         try {
             CommunicationLog::updateOrCreate(
                 [
@@ -130,7 +121,17 @@ class SmsService
     }
 
     /**
-     * Send Admission details SMS via Jio DLT template 1777179354065677511.
+     * Send Admission details SMS using the exact registered DLT template:
+     *
+     * Dear {#var#},
+     *
+     * In Admission process,
+     * You applied program details
+     * Program: {#var#}
+     * Branch: {#var#}
+     * Campus: {#var#}
+     * your application number: {#var#}, this your for future process identical number.
+     * -- Vignan University.
      */
     public function sendAdmissionSms(
         string $phone,
@@ -142,7 +143,9 @@ class SmsService
     ): array {
         $templateId = config('services.jiocx_sms.template_admission', '1777179354065677511');
 
+        // Must match the registered DLT template exactly (only {#var#} slots replaced)
         $msg = "Dear {$name},\n"
+             . "\n"
              . "In Admission process,\n"
              . "You applied program details\n"
              . "Program: {$program}\n"
@@ -174,24 +177,37 @@ class SmsService
         $username = trim($username);
         $password = trim($password);
 
-        $msg = "Dear Staff/Student,\n\n"
-             . "An LMS mail id has been created. Please login and change your password immediately once you receive credentials. Here are the credentials for your account.\n"
-             . "Username:{$username} and\n"
+        // Approved DLT credential template format
+        $msg = "Dear Student,\n"
+             . "Welcome to Vignan University!\n"
+             . "Your LMS account has been created.\n"
+             . "Username: {$username}\n"
              . "Password: {$password}\n"
-             . "Login through the link below.\n\n"
+             . "Please login and change your password immediately.\n"
              . "-- Vignan University.";
 
         return $this->send($phone, $msg, $templateId, $username, $username);
     }
 
     /**
-     * Send OTP for login verification.
+     * Send OTP for login verification using the approved DLT template:
+     *
+     * Dear Student,
+     * Welcome to Vignan University!
+     * Your OTP for admission onboarding is {#var#}
+     * Use it to continue your registration.
+     * -- Vignan University.
      */
     public function sendOtp(string $phone, string $otp, ?string $user = null, ?string $registerNo = null): array
     {
         $templateId = config('services.jiocx_sms.template_otp') ?: env('JIOCX_TEMPLATE_ID_OTP');
-        
-        $msg = "Your Vignan LMS verification code is: {$otp}. Valid for 10 minutes. Do not share this OTP with anyone.\n\n-- Vignan University.";
+        error_log("template id : $templateId");
+
+        $msg = "Dear Student,\n"
+             . "Welcome to Vignan University!\n"
+             . "Your OTP for admission onboarding is {$otp}\n"
+             . "Use it to continue your registration.\n"
+             . "-- Vignan University.";
 
         if (!$templateId) {
             Log::info("[SmsService] DLT template for OTP not configured; logging OTP for '{$phone}': {$otp}");

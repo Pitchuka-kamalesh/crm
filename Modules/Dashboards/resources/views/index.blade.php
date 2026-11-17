@@ -1619,53 +1619,7 @@
                     </div>
 
                     <!-- DOWNLOAD CARDS -->
-                    <div class="section-box" style="padding: 1rem 1.25rem;">
-                        <div class="section-box-title" style="margin-bottom: 0.75rem;">
-                            <span>Admission Documents</span>
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📜</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Provisional Allotment Order</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Dean Allotment Letter</p>
-                                </div>
-                                @if($isPaid)
-                                    <a href="javascript:alert('Downloading Provisional Allotment Order (PDF)...')" class="btn-doc-download">
-                                        <span>Download PDF ↓</span>
-                                    </a>
-                                @else
-                                    <span class="doc-status-pill">Unlocks after fee payment</span>
-                                @endif
-                            </div>
 
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🧾</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Official Fee Payment Receipt</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Accounts Verified Receipt</p>
-                                </div>
-                                @if($isPaid)
-                                    <a href="{{ route('payu.receipt') }}" class="btn-doc-download">
-                                        <span>Open Official Receipt &rarr;</span>
-                                    </a>
-                                @else
-                                    <span class="doc-status-pill">Unlocks after fee payment</span>
-                                @endif
-                            </div>
-
-                            <div class="download-doc-card">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.2rem;">
-                                    <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">📅</div>
-                                    <h4 class="kyc-doc-title" style="font-size: 0.86rem; margin: 0;">Campus Induction Schedule</h4>
-                                    <p class="kyc-doc-sub" style="font-size: 0.74rem; margin: 0.15rem 0 0 0;">Orientation &amp; Move-in Guide</p>
-                                </div>
-                                <a href="javascript:alert('Downloading Orientation & Campus Induction Schedule (PDF)...')" class="btn-doc-download">
-                                    <span>Download Guide ↓</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="step-footer-actions" style="padding-top: 1rem; margin-top: 0.25rem;">
                         <div style="display: flex; align-items: center; gap: 0.45rem;">
@@ -2492,8 +2446,8 @@
 
                     // If before 5 PM: earliest available is tomorrow (14th -> 15th).
                     // If after 5 PM cutoff: earliest available is day after tomorrow (16th).
-                    $minExamDate = $isBefore5PM 
-                        ? $now->copy()->addDay()->format('Y-m-d') 
+                    $minExamDate = $isBefore5PM
+                        ? $now->copy()->addDay()->format('Y-m-d')
                         : $now->copy()->addDays(2)->format('Y-m-d');
 
                     $minExamDateFormatted = \Carbon\Carbon::parse($minExamDate)->format('d M Y');
@@ -2502,8 +2456,8 @@
                         : 'Bookings after 5:00 PM cutoff are scheduled for day after tomorrow (' . $minExamDateFormatted . ').';
 
                     $existingDate = $examSchedule?->examdate ? \Carbon\Carbon::parse($examSchedule->examdate)->format('Y-m-d') : null;
-                    $defaultDate = ($existingDate && $existingDate >= $minExamDate) 
-                        ? $existingDate 
+                    $defaultDate = ($existingDate && $existingDate >= $minExamDate)
+                        ? $existingDate
                         : $minExamDate;
 
                     $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';

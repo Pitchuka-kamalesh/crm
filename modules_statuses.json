@@ -4,5 +4,6 @@
     "Dashboards": true,
     "Finance": true,
     "Auth": true,
-    "Sms": true
+    "Sms": true,
+    "Mail": true
 }
