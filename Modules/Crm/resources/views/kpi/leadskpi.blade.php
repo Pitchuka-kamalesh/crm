@@ -203,11 +203,13 @@
                                 <span>Updating...</span>
                             </div>
 
-                            <!-- Reset Button -->
+                            <!-- Reset Button (Always Visible) -->
                             <button type="button" 
                                     id="leadsResetBtn" 
                                     onclick="window.resetLeadsFilters()" 
-                                    style="padding: 0.55rem 1rem; font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; display: {{ ($search || $filterYear || $filterMonth || ($filterStatus && $filterStatus !== 'all')) ? 'inline-block' : 'none' }};">
+                                    style="padding: 0.55rem 1.15rem; font-size: 0.85rem; font-weight: 600; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#e2e8f0'"
+                                    onmouseout="this.style.background='#f1f5f9'">
                                 Reset
                             </button>
                         </form>
@@ -228,17 +230,15 @@
                                     <tr>
                                         <th>Phone Number</th>
                                         <th>Application #</th>
-                                        <th>Student / Lead Name</th>
                                         <th>Enquiry Date</th>
                                         <th>Source Channel (log_userid)</th>
                                         <th>Allocation Status</th>
                                         <th>Assigned Counselor</th>
-                                        <th>Logged Timestamp</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr id="leadsClientNoMatchesRow" style="display: none;">
-                                        <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                        <td colspan="6" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
                                             <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                             <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No raw inquiries matching the active live filter criteria</div>
                                         </td>
@@ -257,7 +257,7 @@
                                             data-status="{{ $isAllocated ? 'allocated' : 'unallocated' }}">
                                             <td>
                                                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #1e293b;">
-                                                    📞 {{ $lead->phoneno }}
+                                                    {{ $lead->phoneno }}
                                                 </span>
                                             </td>
                                             <td>
@@ -267,16 +267,6 @@
                                                     </span>
                                                 @else
                                                     <span style="color: #94a3b8; font-size: 0.75rem;">—</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <div style="font-weight: 700; color: #1e293b; font-size: 0.875rem;">
-                                                    {{ $lead->student?->name ?: 'Direct Applicant' }}
-                                                </div>
-                                                @if($lead->student?->branch)
-                                                    <div style="font-size: 0.72rem; color: #64748b;">
-                                                        {{ $lead->student->branch->branch_short_name ?: $lead->student->branch->branch_long_name }}
-                                                    </div>
                                                 @endif
                                             </td>
                                             <td>
@@ -320,15 +310,10 @@
                                                     <span style="color: #94a3b8; font-size: 0.78rem;">In Calling Pool</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <span style="font-size: 0.75rem; color: #64748b;">
-                                                    {{ $lead->log_timestamp ? date('d M Y, h:i A', strtotime($lead->log_timestamp)) : '—' }}
-                                                </span>
-                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                            <td colspan="6" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
                                                 <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                                 <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No raw inquiries matching the selected filter criteria</div>
                                             </td>
@@ -338,20 +323,7 @@
                             </table>
                         </div>
 
-                        <!-- Pagination Footer -->
-                        @if($leads->hasPages())
-                            <div class="table-pagination-area">
-                                <div style="font-size: 0.825rem; color: #64748b;">
-                                    Showing <strong style="color: #1e293b;">{{ $leads->firstItem() ?? 0 }}</strong> to <strong style="color: #1e293b;">{{ $leads->lastItem() ?? 0 }}</strong> of <strong style="color: #1e293b;">{{ number_format($leads->total()) }}</strong> records ({{ $leads->perPage() }} per page)
-                                </div>
-                                <div class="pagination-wrapper">
-                                    {{ $leads->links('pagination::bootstrap-4') }}
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                        <!-- Pagination Footer -->
+                        <!-- Pagination Footer (Single Instance) -->
                         @if($leads->hasPages())
                             <div class="table-pagination-area">
                                 <div style="font-size: 0.825rem; color: #64748b;">
@@ -525,7 +497,6 @@ window.handleLeadsLiveFilter = function (immediate) {
     const status = statusSelect ? statusSelect.value : 'all';
 
     if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
-    if (resetBtn) resetBtn.style.display = (q || year || month || (status && status !== 'all')) ? 'inline-block' : 'none';
 
     // 1. Instant client-side filtering on current rows
     const rows = document.querySelectorAll('#leadsRecordsTable tbody tr.lead-row');
