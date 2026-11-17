@@ -791,22 +791,44 @@ class DashboardsController extends Controller
                     $request->merge(['eval_type' => $request->input('tenth_marks_type')]);
                 }
 
-                $cityInput = $request->input('city') ?? $request->input('inter_city') ?? $request->input('pu2_college_city');
-                $stateInput = $request->input('jr_state') ?? $request->input('inter_state') ?? $request->input('pu2_college_state');
-                $districtInput = $request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district');
+                $degLvl = strtolower(trim((string)($request->input('degree_level') ?? $request->query('degree_level') ?? 'btech')));
+                $isPhd = ($degLvl === 'phd');
+                $isPg = ($degLvl === 'mtech');
+                $isUg = ($degLvl === 'btech' || (!$isPhd && !$isPg));
 
-                if ($stateInput && is_numeric($stateInput)) {
-                    $matchedState = State::where('state_id', (int)$stateInput)->first();
-                    if ($matchedState) {
-                        $stateInput = $matchedState->state_name;
+                $resolveState = function($input) {
+                    if (!$input) return null;
+                    if (is_numeric($input)) {
+                        $m = State::where('state_id', (int)$input)->first();
+                        return $m ? $m->state_name : (string)$input;
                     }
-                }
-                if ($districtInput && is_numeric($districtInput)) {
-                    $matchedDist = District::where('DISTRICT_ID', (int)$districtInput)->first();
-                    if ($matchedDist) {
-                        $districtInput = $matchedDist->DISTRICT_NAME;
+                    return (string)$input;
+                };
+
+                $resolveDistrict = function($input) {
+                    if (!$input) return null;
+                    if (is_numeric($input)) {
+                        $m = District::where('DISTRICT_ID', (int)$input)->first();
+                        return $m ? $m->DISTRICT_NAME : (string)$input;
                     }
-                }
+                    return (string)$input;
+                };
+
+                $tenthStateVal = $resolveState($request->input('tenth_school_state') ?? $request->input('tenth_state'));
+                $tenthDistrictVal = $resolveDistrict($request->input('tenth_school_district') ?? $request->input('tenth_district'));
+
+                $cityInput = $request->input('city') ?? $request->input('inter_city') ?? $request->input('pu2_college_city');
+                $stateInput = $resolveState($request->input('jr_state') ?? $request->input('inter_state') ?? $request->input('pu2_college_state'));
+                $districtInput = $resolveDistrict($request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district'));
+
+                $ugStateVal = $resolveState($request->input('ug_college_state') ?? $request->input('ug_state'));
+                $ugDistrictVal = $resolveDistrict($request->input('ug_college_district') ?? $request->input('ug_district'));
+
+                $pgStateVal = $resolveState($request->input('pg_college_state') ?? $request->input('pg_state'));
+                $pgDistrictVal = $resolveDistrict($request->input('pg_college_district') ?? $request->input('pg_district'));
+
+                $pg2StateVal = $resolveState($request->input('pg2_college_state') ?? $request->input('pg2_state'));
+                $pg2DistrictVal = $resolveDistrict($request->input('pg2_college_district') ?? $request->input('pg2_district'));
 
                 $request->merge([
                     'city' => $cityInput,
@@ -816,41 +838,71 @@ class DashboardsController extends Controller
                     'pu2_college_district' => $districtInput,
                 ]);
 
-                $request->validate([
-                    // 10th School / SSC Details are not mandatory
+                $validationRules = [
+                    // 10th School / SSC Details
                     'school_co_name' => ['nullable', 'string', 'max:255'],
                     'boad_of_study' => ['nullable', 'string', 'max:255'],
-                    'roll_no' => ['nullable', 'string', 'max:50'],
+                    'tenth_school_city' => ['nullable', 'string', 'max:100'],
+                    'tenth_school_state' => ['nullable', 'string', 'max:100'],
+                    'tenth_school_district' => ['nullable', 'string', 'max:100'],
                     'passing_year' => ['nullable', 'integer', 'min:2000', 'max:2030'],
-                    'eval_type' => ['nullable', 'string'],
+                    'roll_no' => ['nullable', 'string', 'max:50'],
                     'tenth_marks_type' => ['nullable', 'string'],
+                    'tenth_current_status' => ['nullable', 'string'],
                     'tenth_marks_conducted' => ['nullable', 'numeric'],
                     'tenth_marks_earned' => ['nullable', 'numeric'],
                     'tenth_percentage' => ['nullable', 'numeric'],
+                ];
 
-                    // 12th / Inter fields (all mandatory except hall ticket)
-                    'inter_college' => ['required', 'string', 'max:255'],
-                    'city' => ['required', 'string', 'max:100'],
-                    'jr_state' => ['required', 'string', 'max:100'],
-                    'jr_district' => ['required', 'string', 'max:100'],
-                    'subset_choice' => ['required', 'string'],
-                    'inter_year' => ['required', 'integer', 'min:2000', 'max:2030'],
-                    'inter_hallticket' => ['nullable', 'string', 'max:50'],
-                    'pu2_marks_type' => ['required', 'string'],
-                    'pu2_marks_conducted' => ['required', 'numeric', 'min:1'],
-                    'pu2_marks_earned' => ['required', 'numeric', 'min:0'],
-                    'pu2_percentage' => ['required', 'numeric'],
-                ], [
+                if (!$isPhd) {
+                    $validationRules['inter_college'] = ['required', 'string', 'max:255'];
+                    $validationRules['city'] = ['required', 'string', 'max:100'];
+                    $validationRules['jr_state'] = ['required', 'string', 'max:100'];
+                    $validationRules['jr_district'] = ['required', 'string', 'max:100'];
+                    $validationRules['subset_choice'] = ['required', 'string'];
+                    $validationRules['inter_year'] = ['required', 'integer', 'min:2000', 'max:2030'];
+                    $validationRules['pu2_marks_type'] = ['required', 'string'];
+                    $validationRules['pu2_marks_conducted'] = ['required', 'numeric', 'min:1'];
+                    $validationRules['pu2_marks_earned'] = ['required', 'numeric', 'min:0'];
+                    $validationRules['pu2_percentage'] = ['required', 'numeric'];
+                } else {
+                    $validationRules['inter_college'] = ['nullable', 'string', 'max:255'];
+                    $validationRules['city'] = ['nullable', 'string', 'max:100'];
+                    $validationRules['jr_state'] = ['nullable', 'string', 'max:100'];
+                    $validationRules['jr_district'] = ['nullable', 'string', 'max:100'];
+                    $validationRules['subset_choice'] = ['nullable', 'string'];
+                    $validationRules['inter_year'] = ['nullable', 'integer', 'min:2000', 'max:2030'];
+                    $validationRules['pu2_marks_type'] = ['nullable', 'string'];
+                    $validationRules['pu2_marks_conducted'] = ['nullable', 'numeric'];
+                    $validationRules['pu2_marks_earned'] = ['nullable', 'numeric'];
+                    $validationRules['pu2_percentage'] = ['nullable', 'numeric'];
+                }
+
+                if ($isPg) {
+                    $validationRules['ug_college_name'] = ['required', 'string', 'max:255'];
+                    $validationRules['ug_university_board'] = ['required', 'string', 'max:255'];
+                }
+
+                if ($isPhd) {
+                    $validationRules['pg_college_name'] = ['required', 'string', 'max:255'];
+                    $validationRules['pg_university_board'] = ['required', 'string', 'max:255'];
+                }
+
+                $request->validate($validationRules, [
                     'inter_college.required' => 'College Name / Institute Name is required.',
                     'city.required' => 'College City is required.',
                     'jr_state.required' => 'College State is required.',
                     'jr_district.required' => 'College District is required.',
-                    'subset_choice.required' => 'Please select First Year or Second Year.',
+                    'subset_choice.required' => 'Please select 1st Year or 2nd Year.',
                     'inter_year.required' => 'Year is required.',
                     'pu2_marks_type.required' => 'Marks Type is required.',
                     'pu2_marks_conducted.required' => 'Total Marks (Conducted) is required.',
                     'pu2_marks_earned.required' => 'Marks Earned is required.',
                     'pu2_percentage.required' => 'Percentage is required.',
+                    'ug_college_name.required' => 'UG College Name / Institute Name is required.',
+                    'ug_university_board.required' => 'UG Board is required.',
+                    'pg_college_name.required' => 'PG 1 College Name / Institute Name is required.',
+                    'pg_university_board.required' => 'PG 1 Board is required.',
                 ]);
 
                 if ($crmStudent) {
@@ -966,10 +1018,12 @@ class DashboardsController extends Controller
                         'tenth_school_name' => $tenthSchool ?: null,
                         'tenth_study_board' => $tenthBoard ?: null,
                         'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location'),
-                        'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location'),
+                        'tenth_school_state' => $tenthStateVal,
+                        'tenth_school_district' => $tenthDistrictVal ?: ($request->input('tenth_school_district') ?? $request->input('ssc_location')),
                         'tenth_roll_no' => $tenthRoll ?: null,
                         'tenth_passed_year' => $tenthYear ?: null,
                         'tenth_marks_type' => $request->input('tenth_marks_type') ?? $evalType,
+                        'tenth_current_status' => $request->input('tenth_current_status') ?? 'Completed',
                         'tenth_marks_conducted' => $tenthConducted,
                         'tenth_marks_earned' => $tenthEarned,
                         'tenth_percentage' => $tenthPct,
@@ -994,42 +1048,52 @@ class DashboardsController extends Controller
                     ];
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
-                    if ($request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd' || $isPg || $isPhd) {
                         $ugMarksRaw = is_numeric($request->input('ug_marks')) ? (float) $request->input('ug_marks') : (is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : null);
                         $ugPct = ($ugMarksRaw && $ugMarksRaw <= 10) ? round($ugMarksRaw * 9.5, 2) : (($ugMarksRaw && $ugMarksRaw > 100) ? round(($ugMarksRaw / 1000) * 100, 2) : $ugMarksRaw);
+
+                        $ugMarksConducted = is_numeric($request->input('ug_marks_conducted')) ? (float)$request->input('ug_marks_conducted') : 100.0;
+                        $ugMarksEarned = is_numeric($request->input('ug_marks_earned')) ? (float)$request->input('ug_marks_earned') : $ugMarksRaw;
+                        $ugPctInput = is_numeric($request->input('ug_percentage')) ? (float)$request->input('ug_percentage') : $ugPct;
 
                         $academicPayload['ug_college_name'] = $request->input('ug_college_name') ?: null;
                         $academicPayload['ug_university_board'] = $request->input('ug_university_board') ?: null;
                         $academicPayload['ug_college_city'] = $request->input('ug_college_city') ?: null;
-                        $academicPayload['ug_college_district'] = $request->input('ug_college_district') ?: null;
+                        $academicPayload['ug_college_state'] = $ugStateVal;
+                        $academicPayload['ug_college_district'] = $ugDistrictVal;
                         $academicPayload['ug_roll_no'] = $request->input('ug_roll_no') ?: null;
                         $academicPayload['ug_passed_year'] = $request->filled('ug_passed_year') ? (int) $request->input('ug_passed_year') : null;
-                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: null;
-                        $academicPayload['ug_marks'] = $ugMarksRaw;
-                        $academicPayload['ug_marks_conducted'] = 100.0;
-                        $academicPayload['ug_marks_earned'] = $ugMarksRaw;
-                        $academicPayload['ug_percentage'] = $ugPct;
-                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: null;
+                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: 'Marks';
+                        $academicPayload['ug_marks'] = $ugMarksEarned;
+                        $academicPayload['ug_marks_conducted'] = $ugMarksConducted;
+                        $academicPayload['ug_marks_earned'] = $ugMarksEarned;
+                        $academicPayload['ug_percentage'] = $ugPctInput;
+                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: ($isPhd ? 'Completed' : 'Final Year Appeared');
                     }
 
                     // If Degree level is PhD, save PG 1 and PG 2 details
-                    if ($request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'phd' || $isPhd) {
                         // Postgraduate 1
                         $pgMarksRaw = is_numeric($request->input('pg_marks')) ? (float) $request->input('pg_marks') : (is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : null);
                         $pgPct = ($pgMarksRaw && $pgMarksRaw <= 10) ? round($pgMarksRaw * 9.5, 2) : (($pgMarksRaw && $pgMarksRaw > 100) ? round(($pgMarksRaw / 1000) * 100, 2) : $pgMarksRaw);
 
+                        $pgMarksConducted = is_numeric($request->input('pg_marks_conducted')) ? (float)$request->input('pg_marks_conducted') : 100.0;
+                        $pgMarksEarned = is_numeric($request->input('pg_marks_earned')) ? (float)$request->input('pg_marks_earned') : $pgMarksRaw;
+                        $pgPctInput = is_numeric($request->input('pg_percentage')) ? (float)$request->input('pg_percentage') : $pgPct;
+
                         $academicPayload['pg_college_name'] = $request->input('pg_college_name') ?: null;
                         $academicPayload['pg_university_board'] = $request->input('pg_university_board') ?: null;
                         $academicPayload['pg_college_city'] = $request->input('pg_college_city') ?: null;
-                        $academicPayload['pg_college_district'] = $request->input('pg_college_district') ?: null;
+                        $academicPayload['pg_college_state'] = $pgStateVal;
+                        $academicPayload['pg_college_district'] = $pgDistrictVal;
                         $academicPayload['pg_roll_no'] = $request->input('pg_roll_no') ?: null;
                         $academicPayload['pg_passed_year'] = $request->filled('pg_passed_year') ? (int) $request->input('pg_passed_year') : null;
-                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: null;
-                        $academicPayload['pg_marks'] = $pgMarksRaw;
-                        $academicPayload['pg_marks_conducted'] = 100.0;
-                        $academicPayload['pg_marks_earned'] = $pgMarksRaw;
-                        $academicPayload['pg_percentage'] = $pgPct;
-                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: null;
+                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: 'Marks';
+                        $academicPayload['pg_marks'] = $pgMarksEarned;
+                        $academicPayload['pg_marks_conducted'] = $pgMarksConducted;
+                        $academicPayload['pg_marks_earned'] = $pgMarksEarned;
+                        $academicPayload['pg_percentage'] = $pgPctInput;
+                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
 
                         // PG 1 CMM & PC/OD Details (At least one mandatory for PhD)
                         $pg1DocType = $request->input('pg1_doc_type') ?: 'BOTH';
@@ -1045,18 +1109,23 @@ class DashboardsController extends Controller
                         $pg2MarksRaw = is_numeric($request->input('pg2_marks')) ? (float) $request->input('pg2_marks') : (is_numeric($request->input('pg2_cgpa')) ? (float)$request->input('pg2_cgpa') : null);
                         $pg2Pct = ($pg2MarksRaw && $pg2MarksRaw <= 10) ? round($pg2MarksRaw * 9.5, 2) : (($pg2MarksRaw && $pg2MarksRaw > 100) ? round(($pg2MarksRaw / 1000) * 100, 2) : $pg2MarksRaw);
 
+                        $pg2MarksConducted = is_numeric($request->input('pg2_marks_conducted')) ? (float)$request->input('pg2_marks_conducted') : 100.0;
+                        $pg2MarksEarned = is_numeric($request->input('pg2_marks_earned')) ? (float)$request->input('pg2_marks_earned') : $pg2MarksRaw;
+                        $pg2PctInput = is_numeric($request->input('pg2_percentage')) ? (float)$request->input('pg2_percentage') : $pg2Pct;
+
                         $academicPayload['pg2_college_name'] = $request->input('pg2_college_name') ?: null;
                         $academicPayload['pg2_university_board'] = $request->input('pg2_university_board') ?: null;
                         $academicPayload['pg2_college_city'] = $request->input('pg2_college_city') ?: null;
-                        $academicPayload['pg2_college_district'] = $request->input('pg2_college_district') ?: null;
+                        $academicPayload['pg2_college_state'] = $pg2StateVal;
+                        $academicPayload['pg2_college_district'] = $pg2DistrictVal;
                         $academicPayload['pg2_roll_no'] = $request->input('pg2_roll_no') ?: null;
                         $academicPayload['pg2_passed_year'] = $request->filled('pg2_passed_year') ? (int) $request->input('pg2_passed_year') : null;
-                        $academicPayload['pg2_marks_type'] = $request->input('pg2_marks_type') ?: null;
-                        $academicPayload['pg2_marks'] = $pg2MarksRaw;
-                        $academicPayload['pg2_marks_conducted'] = 100.0;
-                        $academicPayload['pg2_marks_earned'] = $pg2MarksRaw;
-                        $academicPayload['pg2_percentage'] = $pg2Pct;
-                        $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: null;
+                        $academicPayload['pg2_marks_type'] = $request->input('pg2_marks_type') ?: 'Marks';
+                        $academicPayload['pg2_marks'] = $pg2MarksEarned;
+                        $academicPayload['pg2_marks_conducted'] = $pg2MarksConducted;
+                        $academicPayload['pg2_marks_earned'] = $pg2MarksEarned;
+                        $academicPayload['pg2_percentage'] = $pg2PctInput;
+                        $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: 'Completed';
 
                         // PG 2 CMM & PC/OD Details (Optional for PhD)
                         $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'NONE';
@@ -1422,7 +1491,12 @@ class DashboardsController extends Controller
         try {
             DB::unprepared("
                 ALTER TABLE crm.student_academic_details
+                ADD COLUMN IF NOT EXISTS tenth_school_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS tenth_current_status VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS pu2_board_of_study VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS ug_college_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg_college_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg2_college_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg1_doc_type VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS pg1_cmm_memo_no VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg1_cmm_cgpa NUMERIC(10,2),
@@ -1439,7 +1513,6 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_status VARCHAR(50);
 
                 ALTER TABLE crm.student_academic_details
-                ALTER COLUMN tenth_marks TYPE NUMERIC(12,2),
                 ALTER COLUMN tenth_marks_conducted TYPE NUMERIC(12,2),
                 ALTER COLUMN tenth_marks_earned TYPE NUMERIC(12,2),
                 ALTER COLUMN pu2_marks TYPE NUMERIC(12,2),
