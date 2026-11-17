@@ -960,8 +960,9 @@ class DashboardsController extends Controller
                         $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: null;
                     }
 
-                    // If Degree level is PhD, save PG (M.Tech) details
+                    // If Degree level is PhD, save PG 1 and PG 2 details
                     if ($request->input('degree_level') === 'phd') {
+                        // Postgraduate 1
                         $pgMarksRaw = is_numeric($request->input('pg_marks')) ? (float) $request->input('pg_marks') : (is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : null);
                         $pgPct = ($pgMarksRaw && $pgMarksRaw <= 10) ? round($pgMarksRaw * 9.5, 2) : (($pgMarksRaw && $pgMarksRaw > 100) ? round(($pgMarksRaw / 1000) * 100, 2) : $pgMarksRaw);
 
@@ -977,6 +978,23 @@ class DashboardsController extends Controller
                         $academicPayload['pg_marks_earned'] = $pgMarksRaw;
                         $academicPayload['pg_percentage'] = $pgPct;
                         $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: null;
+
+                        // Postgraduate 2
+                        $pg2MarksRaw = is_numeric($request->input('pg2_marks')) ? (float) $request->input('pg2_marks') : (is_numeric($request->input('pg2_cgpa')) ? (float)$request->input('pg2_cgpa') : null);
+                        $pg2Pct = ($pg2MarksRaw && $pg2MarksRaw <= 10) ? round($pg2MarksRaw * 9.5, 2) : (($pg2MarksRaw && $pg2MarksRaw > 100) ? round(($pg2MarksRaw / 1000) * 100, 2) : $pg2MarksRaw);
+
+                        $academicPayload['pg2_college_name'] = $request->input('pg2_college_name') ?: null;
+                        $academicPayload['pg2_university_board'] = $request->input('pg2_university_board') ?: null;
+                        $academicPayload['pg2_college_city'] = $request->input('pg2_college_city') ?: null;
+                        $academicPayload['pg2_college_district'] = $request->input('pg2_college_district') ?: null;
+                        $academicPayload['pg2_roll_no'] = $request->input('pg2_roll_no') ?: null;
+                        $academicPayload['pg2_passed_year'] = $request->filled('pg2_passed_year') ? (int) $request->input('pg2_passed_year') : null;
+                        $academicPayload['pg2_marks_type'] = $request->input('pg2_marks_type') ?: null;
+                        $academicPayload['pg2_marks'] = $pg2MarksRaw;
+                        $academicPayload['pg2_marks_conducted'] = 100.0;
+                        $academicPayload['pg2_marks_earned'] = $pg2MarksRaw;
+                        $academicPayload['pg2_percentage'] = $pg2Pct;
+                        $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: null;
                     }
 
                     StudentAcademicDetail::updateOrCreate(
