@@ -926,8 +926,6 @@ class DashboardsController extends Controller
                         'log_datetime' => now(),
                         'log_ipaddress' => $request->ip(),
                     ];
-                        $academicPayload['undertaking_60_pct'] = $undertakingAgreed ? 'yes' : null;
-                    }
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
                     if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
