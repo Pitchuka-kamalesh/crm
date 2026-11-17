@@ -259,8 +259,8 @@
                             </div>
                             <div style="position: relative; flex-grow: 1; min-height: 250px; max-height: 290px; display: flex; align-items: center; justify-content: center;">
                                 <canvas id="callStagesChart"></canvas>
-                                <div id="callStagesEmpty" style="display: none; text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">
-                                    No call stages recorded in database for this selection.
+                                <div id="callStagesEmpty" style="display: none; text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                    <div style="font-size: 0.95rem; font-weight: 600; color: #64748b;">No records found</div>
                                 </div>
                             </div>
                         </div>
@@ -339,11 +339,11 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">No telecaller allocated leads found.</td>
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No records found</td>
                                         </tr>
                                     @endforelse
                                     <tr id="telecallerNoRowsFound" style="display: none;">
-                                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No leads allocated to this telecaller yet.</td>
+                                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No records found</td>
                                     </tr>
                                 </tbody>
                             </table>
