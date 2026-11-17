@@ -1928,12 +1928,12 @@
                                                     $isSecondYr = $isPgOrDoc;
                                                 }
                                             @endphp
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="First Year" {{ !$isSecondYr ? 'checked' : '' }} required>
+                                            <label class="mockup-radio-label" id="radio-wrapper-first-year" style="{{ $isPgOrDoc ? 'display: none !important;' : '' }}">
+                                                <input type="radio" name="subset_choice" id="radio-subset-first-year" value="First Year" {{ (!$isPgOrDoc && !$isSecondYr) ? 'checked' : '' }} {{ $isPgOrDoc ? 'disabled' : '' }} required>
                                                 <span>First Year</span>
                                             </label>
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="Second Year" {{ $isSecondYr ? 'checked' : '' }} required>
+                                            <label class="mockup-radio-label" id="radio-wrapper-second-year">
+                                                <input type="radio" name="subset_choice" id="radio-subset-second-year" value="Second Year" {{ ($isPgOrDoc || $isSecondYr) ? 'checked' : '' }} required>
                                                 <span>Second Year</span>
                                             </label>
                                         </div>
@@ -2155,20 +2155,46 @@
                                 const pgSec = document.getElementById('sec-pg-details');
                                 const toggleBtn = document.getElementById('btn-toggle-ug-pg');
                                 const toggleDiv = toggleBtn ? toggleBtn.parentElement : null;
+                                const firstYearRadioWrapper = document.getElementById('radio-wrapper-first-year');
+                                const firstYearRadio = document.getElementById('radio-subset-first-year');
+                                const secondYearRadio = document.getElementById('radio-subset-second-year');
 
                                 if (level === 'mtech') {
                                     if (toggleDiv) toggleDiv.style.display = 'block';
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'none';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = true;
+                                        firstYearRadio.checked = false;
+                                        firstYearRadio.removeAttribute('required');
+                                    }
+                                    if (secondYearRadio) {
+                                        secondYearRadio.checked = true;
+                                    }
                                 } else if (level === 'phd') {
                                     if (toggleDiv) toggleDiv.style.display = 'block';
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'block';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = true;
+                                        firstYearRadio.checked = false;
+                                        firstYearRadio.removeAttribute('required');
+                                    }
+                                    if (secondYearRadio) {
+                                        secondYearRadio.checked = true;
+                                    }
                                 } else {
-                                    // UG / btech: higher academic details must never appear
+                                    // UG / btech: higher academic details must never appear, both 1st and 2nd year radio buttons available
                                     if (toggleDiv) toggleDiv.style.display = 'none';
                                     if (ugSec) ugSec.style.display = 'none';
                                     if (pgSec) pgSec.style.display = 'none';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.removeProperty('display');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = false;
+                                        firstYearRadio.setAttribute('required', 'required');
+                                    }
                                 }
                             }
 
@@ -2294,7 +2320,11 @@
                             function getSelectedSubsetChoice() {
                                 const radios = document.getElementsByName('subset_choice');
                                 for (let i = 0; i < radios.length; i++) {
-                                    if (radios[i].checked) return radios[i].value;
+                                    if (radios[i].checked && !radios[i].disabled) return radios[i].value;
+                                }
+                                const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                if (degreeLevel === 'mtech' || degreeLevel === 'phd') {
+                                    return 'Second Year';
                                 }
                                 return 'First Year';
                             }

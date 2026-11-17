@@ -838,8 +838,25 @@ class DashboardsController extends Controller
                         $evalType = 'marks';
                     }
 
+                    $isPgOrDoc = in_array($request->input('degree_level'), ['mtech', 'phd']);
+                    if (!$isPgOrDoc && $crmStudent && $crmStudent->progmid) {
+                        $prog = Program::where('program_id', $crmStudent->progmid)->first();
+                        if ($prog) {
+                            $pLevel = strtoupper($prog->program_level ?? '');
+                            $pShort = strtoupper($prog->program_short_name ?? '');
+                            $pName = strtoupper($prog->program_name ?? '');
+                            if ($pLevel === 'PG' || $pLevel === 'POST GRADUATE' || str_contains($pShort, 'M.TECH') || str_contains($pName, 'MASTER') || in_array($pShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A']) || $pLevel === 'PHD' || $pLevel === 'DOCTORAL' || str_contains($pShort, 'PH.D') || str_contains($pName, 'DOCTOR')) {
+                                $isPgOrDoc = true;
+                            }
+                        }
+                    }
+
+
                     $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board');
-                    $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? 'First Year';
+                    $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? ($isPgOrDoc ? 'Second Year' : 'First Year');
+                    if ($isPgOrDoc) {
+                        $subsetChoice = 'Second Year';
+                    }
 
                     $tenthConducted = is_numeric($request->input('tenth_marks_conducted'))
                         ? (float)$request->input('tenth_marks_conducted')
@@ -866,18 +883,6 @@ class DashboardsController extends Controller
                     $isSecondYear = (strcasecmp((string)$subsetChoice, 'Second Year') === 0 || strcasecmp((string)$subsetChoice, 'Second year') === 0);
                     $undertakingAgreed = ($request->input('undertaking_60_pct') === 'yes' || $request->input('undertaking_60_pct') === '1' || ($existingAcademic && $existingAcademic->undertaking_60_pct === 'yes'));
 
-                    $isPgOrDoc = in_array($request->input('degree_level'), ['mtech', 'phd']);
-                    if (!$isPgOrDoc && $crmStudent && $crmStudent->progmid) {
-                        $prog = Program::where('program_id', $crmStudent->progmid)->first();
-                        if ($prog) {
-                            $pLevel = strtoupper($prog->program_level ?? '');
-                            $pShort = strtoupper($prog->program_short_name ?? '');
-                            $pName = strtoupper($prog->program_name ?? '');
-                            if ($pLevel === 'PG' || $pLevel === 'POST GRADUATE' || str_contains($pShort, 'M.TECH') || str_contains($pName, 'MASTER') || in_array($pShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A']) || $pLevel === 'PHD' || $pLevel === 'DOCTORAL' || str_contains($pShort, 'PH.D') || str_contains($pName, 'DOCTOR')) {
-                                $isPgOrDoc = true;
-                            }
-                        }
-                    }
 
                     // For UG programs: enforce 60% threshold. For PG / Doctorate: no 60% requirement for intermediate.
                     if (!$isPgOrDoc) {
