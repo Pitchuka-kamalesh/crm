@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CrmStudentRegistration extends Model
 {
@@ -210,18 +212,34 @@ class CrmStudentRegistration extends Model
 
     /**
      * Generate the next 10-digit application number starting from 2027000001.
+     * Guarantees absolute uniqueness across both crm.student_registration and master.login.
      */
     public static function generateNextApplicationNumber(): string
     {
         try {
-            $maxApp = self::where('applinano', 'like', '2027%')
+            $maxAppInCrm = (int) self::where('applinano', 'like', '2027%')
                 ->whereRaw('length(applinano) = 10')
                 ->max('applinano');
 
-            if ($maxApp && is_numeric($maxApp)) {
-                return (string) ((int) $maxApp + 1);
+            $maxUserInLogin = (int) DB::table('master.login')
+                ->where('usercode', 'like', '2027%')
+                ->whereRaw('length(usercode) = 10')
+                ->max('usercode');
+
+            $next = max($maxAppInCrm, $maxUserInLogin, 2027000000) + 1;
+
+            // Ensure strictly unique against both master.login and crm.student_registration
+            while (
+                self::where('applinano', (string) $next)->exists() ||
+                DB::table('master.login')->where('usercode', (string) $next)->exists()
+            ) {
+                $next++;
             }
-        } catch (\Throwable $e) {}
+
+            return (string) $next;
+        } catch (\Throwable $e) {
+            Log::error('[CrmStudentRegistration] generateNextApplicationNumber error: ' . $e->getMessage());
+        }
 
         return '2027000001';
     }
