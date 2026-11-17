@@ -1887,7 +1887,7 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh';
+                                                    $curState = $academicDetails?->pu2_college_state ?? 'Andhra Pradesh';
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id || (!$academicDetails && $s->state_name === 'Andhra Pradesh'));
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
@@ -1902,7 +1902,7 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur';
+                                                    $curDist = $academicDetails?->pu2_college_district ?? 'Guntur';
                                                     $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur'));
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
@@ -2247,7 +2247,7 @@
                                             opt.value = dDistId;
                                             opt.textContent = dName;
                                             opt.setAttribute('data-name', dName);
-                                            if (dDistId == currentSelectedDist || dName === '{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                            if (dDistId == currentSelectedDist || dName === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
                                                 opt.selected = true;
                                                 foundSelected = true;
                                             }

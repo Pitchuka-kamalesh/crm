@@ -898,6 +898,7 @@ class DashboardsController extends Controller
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
                         'pu2_study_board' => $courseChoice,
                         'pu2_college_city' => $cityVal,
+                        'pu2_college_state' => $jrStateVal,
                         'pu2_college_district' => $jrDistrictVal,
                         'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
                         'pu2_passed_year' => $request->filled('inter_year') ? (int) $request->input('inter_year') : ($request->filled('pu2_passed_year') ? (int) $request->input('pu2_passed_year') : null),
@@ -907,27 +908,11 @@ class DashboardsController extends Controller
                         'pu2_marks_earned' => $pu2Earned,
                         'pu2_percentage' => $pu2Pct,
                         'pu2_current_status' => $subsetChoice,
+                        'undertaking_60_pct' => $undertakingAgreed ? 'yes' : ($existingAcademic?->undertaking_60_pct ?? null),
                         'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
                         'log_datetime' => now(),
                         'log_ipaddress' => $request->ip(),
                     ];
-
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'city')) {
-                        $academicPayload['city'] = $cityVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_city')) {
-                        $academicPayload['jr_city'] = $cityVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_state')) {
-                        $academicPayload['jr_state'] = $jrStateVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_district')) {
-                        $academicPayload['jr_district'] = $jrDistrictVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'pu2_college_state')) {
-                        $academicPayload['pu2_college_state'] = $jrStateVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'undertaking_60_pct')) {
                         $academicPayload['undertaking_60_pct'] = $undertakingAgreed ? 'yes' : null;
                     }
 
