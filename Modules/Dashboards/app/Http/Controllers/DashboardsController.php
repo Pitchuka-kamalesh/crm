@@ -448,7 +448,7 @@ class DashboardsController extends Controller
                     'log_timestamp' => now(),
                 ]);
             } else {
-                $crmid = $crmStudent?->crmid ?? ($crmStudent ? CrmIdService::generateForStudent($crmStudent) : 'CRM' . $cleanPhone);
+                $crmid = $crmStudent ? CrmIdService::generateForStudent($crmStudent) : 'CRM' . $cleanPhone;
                 StudentPersonalInfo::create([
                     'crmid' => $crmid,
                     'applino' => $appNo,
@@ -630,9 +630,18 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $personalCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
                     $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
-                        ?? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->first();
+                        ?? (!empty($cleanStudentPhone) ? StudentPersonalInfo::where('phoneno', $cleanStudentPhone)->where('applino', $crmStudent->applinano)->first() : null);
+
+                    if ($existingInfo && !empty($existingInfo->crmid) && !CrmIdService::isCrmIdInUse($existingInfo->crmid, $crmStudent->applinano)) {
+                        $personalCrmId = $existingInfo->crmid;
+                        if ($crmStudent->crmid !== $personalCrmId) {
+                            $crmStudent->update(['crmid' => $personalCrmId]);
+                            $crmStudent->crmid = $personalCrmId;
+                        }
+                    } else {
+                        $personalCrmId = CrmIdService::generateForStudent($crmStudent);
+                    }
 
                     $dobVal = $request->input('dob') ?? $request->input('DOB');
 
@@ -797,7 +806,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $academicCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $academicCrmId = CrmIdService::generateForStudent($crmStudent);
                     $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
@@ -999,7 +1008,7 @@ class DashboardsController extends Controller
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
                     $destDir = public_path('uploads/documents/' . $appliFolder);
 
-                    $crmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $crmId = CrmIdService::generateForStudent($crmStudent);
 
                     $uploadPayload = [
                         'crmid' => $crmId,
@@ -1138,7 +1147,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $examCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $examCrmId = CrmIdService::generateForStudent($crmStudent);
 
                     \App\Models\ExamSchedule::updateOrCreate(
                         ['applino' => $crmStudent->applinano],

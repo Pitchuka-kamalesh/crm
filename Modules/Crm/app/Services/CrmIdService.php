@@ -204,6 +204,34 @@ class CrmIdService
     }
 
     /**
+     * Check if a CRM ID is already in use by any other student across any database tables.
+     */
+    public static function isCrmIdInUse(string $crmId, ?string $excludeAppli = null): bool
+    {
+        $tables = [
+            ['crm.student_personal_info', 'applino'],
+            ['crm.student_registration', 'applinano'],
+            ['crm.student_academic_details', 'applino'],
+            ['crm.telecaller_leads', 'applino'],
+            ['crm.telecaller_leads_tasks', 'applino'],
+        ];
+
+        foreach ($tables as [$table, $appliCol]) {
+            try {
+                $q = DB::table($table)->where('crmid', $crmId);
+                if (!empty($excludeAppli)) {
+                    $q->where($appliCol, '!=', $excludeAppli);
+                }
+                if ($q->exists()) {
+                    return true;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        return false;
+    }
+
+    /**
      * Generate or retrieve the sequential CRM ID for a student registration.
      * E.g. V-SAT-0001, MTECH-0001, PHD-0001.
      */
@@ -220,37 +248,48 @@ class CrmIdService
             $branch?->branch_short_name ?? $branch?->branch_long_name
         );
 
-        // If student already has a valid format crmid matching prefix and not duplicate
+        // If student already has a valid format crmid matching prefix and not in use by any other student
         if (!empty($student->crmid) && str_starts_with($student->crmid, "{$prefix}-")) {
-            try {
-                $duplicateCount = CrmStudentRegistration::where('crmid', $student->crmid)
-                    ->where('applinano', '!=', $student->applinano)
-                    ->count();
+            if (!self::isCrmIdInUse($student->crmid, $student->applinano)) {
+                return $student->crmid;
+            }
+        }
 
-                if ($duplicateCount === 0) {
-                    return $student->crmid;
+        // Find the maximum existing sequence number for this prefix across ALL related tables
+        $maxNum = 0;
+        $tables = [
+            'crm.student_registration',
+            'crm.student_personal_info',
+            'crm.student_academic_details',
+            'crm.telecaller_leads',
+            'crm.telecaller_leads_tasks',
+        ];
+
+        foreach ($tables as $t) {
+            try {
+                $existingCrmIds = DB::table($t)
+                    ->whereNotNull('crmid')
+                    ->where('crmid', 'like', "{$prefix}-%")
+                    ->pluck('crmid');
+
+                foreach ($existingCrmIds as $cid) {
+                    $parts = explode('-', (string)$cid);
+                    $num = (int) end($parts);
+                    if ($num > $maxNum) {
+                        $maxNum = $num;
+                    }
                 }
             } catch (\Throwable $e) {}
         }
 
-        // Find the maximum existing sequence number for this prefix
-        $maxNum = 0;
-        try {
-            $existingCrmIds = CrmStudentRegistration::whereNotNull('crmid')
-                ->where('crmid', 'like', "{$prefix}-%")
-                ->pluck('crmid');
-
-            foreach ($existingCrmIds as $cid) {
-                $parts = explode('-', $cid);
-                $num = (int) end($parts);
-                if ($num > $maxNum) {
-                    $maxNum = $num;
-                }
-            }
-        } catch (\Throwable $e) {}
-
         $nextNum = $maxNum + 1;
-        $crmId = sprintf('%s-%04d', $prefix, $nextNum);
+        do {
+            $crmId = sprintf('%s-%04d', $prefix, $nextNum);
+            $inUse = self::isCrmIdInUse($crmId, $student->applinano);
+            if ($inUse) {
+                $nextNum++;
+            }
+        } while ($inUse);
 
         // Save in student registration record via Eloquent update
         try {

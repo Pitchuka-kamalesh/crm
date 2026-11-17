@@ -42,8 +42,14 @@ class ApplicationDownloadTest extends TestCase
 
     public function test_step1_date_of_birth_rejects_future_dates(): void
     {
-        $user = User::where('role_id', 5)->first() ?? User::first();
-        $this->assertNotNull($user);
+        $user = User::firstOrCreate(
+            ['phnno' => '9999900001'],
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+        );
+        CrmStudentRegistration::updateOrCreate(
+            ['phoneno' => '9999900001'],
+            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+        );
 
         // Date of birth in the future
         $invalidDob = now()->addDay()->format('Y-m-d');
@@ -53,7 +59,7 @@ class ApplicationDownloadTest extends TestCase
             'step' => 1,
             'candidate_name' => 'Candidate Test',
             'parent_name' => 'Parent Test',
-            'student_number' => '9888877771',
+            'student_number' => '9999900001',
             'parent_phone_no' => '9876543211',
             'dob' => $invalidDob,
             'gender' => 'Male',
@@ -78,8 +84,14 @@ class ApplicationDownloadTest extends TestCase
 
     public function test_step2_academic_details_view(): void
     {
-        $user = User::where('role_id', 5)->first() ?? User::first();
-        $this->assertNotNull($user);
+        $user = User::firstOrCreate(
+            ['phnno' => '9999900001'],
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+        );
+        CrmStudentRegistration::updateOrCreate(
+            ['phoneno' => '9999900001'],
+            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+        );
 
         // Make sure user's student record allows step 2
         CrmStudentRegistration::where('phoneno', $user->phnno)->update([
@@ -93,8 +105,14 @@ class ApplicationDownloadTest extends TestCase
 
     public function test_exam_slot_booking_blocks_date_selection_when_in_exam_schedule(): void
     {
-        $user = User::where('role_id', 5)->first() ?? User::first();
-        $this->assertNotNull($user);
+        $user = User::firstOrCreate(
+            ['phnno' => '9999900001'],
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+        );
+        CrmStudentRegistration::updateOrCreate(
+            ['phoneno' => '9999900001'],
+            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+        );
 
         $student = CrmStudentRegistration::where('phoneno', $user->phnno)->first()
             ?? CrmStudentRegistration::first();
@@ -142,7 +160,7 @@ class ApplicationDownloadTest extends TestCase
             [
                 'crmid' => $student->crmid ?? 'V-SAT-0001',
                 'phoneno' => $student->phoneno,
-                'examdate' => now()->addDay()->format('Y-m-d'),
+                'examdate' => now()->subDay()->format('Y-m-d'),
                 'exam_slot' => 'S1 11:00 AM to 1:00 PM',
                 'exam_status' => 1,
             ]
@@ -170,5 +188,20 @@ class ApplicationDownloadTest extends TestCase
         $response2 = $this->actingAs($user)->get('/dashboards?step=5');
         $response2->assertStatus(200);
         $response2->assertSee('Reschedule Allowed');
+    }
+
+    public function test_crm_id_service_never_collides_with_existing_personal_info(): void
+    {
+        $existingId = \Modules\Dashboards\Models\StudentPersonalInfo::whereNotNull('crmid')->value('crmid');
+        $this->assertNotEmpty($existingId);
+
+        $dummyStudent = new \Modules\Crm\Models\CrmStudentRegistration();
+        $dummyStudent->applinano = '9999999999';
+        $dummyStudent->programlevel = 'UG';
+        $dummyStudent->crmid = $existingId; // deliberately set to existing ID
+
+        $generatedId = \Modules\Crm\Services\CrmIdService::generateForStudent($dummyStudent);
+        $this->assertNotEquals($existingId, $generatedId);
+        $this->assertFalse(\Modules\Crm\Services\CrmIdService::isCrmIdInUse($generatedId, '9999999999'));
     }
 }
