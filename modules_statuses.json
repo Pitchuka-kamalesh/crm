@@ -5,5 +5,5 @@
     "Finance": true,
     "Auth": true,
     "Sms": true,
-    "Mail": true
+    "Mail": false
 }
