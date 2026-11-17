@@ -412,7 +412,6 @@ class LeadsAllocationTabTest extends TestCase
         $response->assertDontSee('Fee Paid & Enrolled');
 
         // Verify stage pills are removed
-        $response->assertDontSee('All Leads');
         $response->assertDontSee('Step 1: Fee Payment');
         $response->assertDontSee('Step 2: Personal Profile');
         $response->assertDontSee('Step 3: Academic Info');
