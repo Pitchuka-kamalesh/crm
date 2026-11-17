@@ -3639,10 +3639,10 @@
                         </div>
                     </div>
 
-                    <!-- Checkbox (Ticked by default as requested) -->
+                    <!-- Checkbox (Unticked by default) -->
                     <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;">
                         <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none; margin: 0;">
-                            <input type="checkbox" id="termsAgreementCheckbox" checked onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                            <input type="checkbox" id="termsAgreementCheckbox" onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                             <span style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a;">I have read, understood, and accept all the terms and conditions stated above.</span>
                         </label>
                     </div>
@@ -3650,7 +3650,7 @@
 
                 <!-- Footer Actions -->
                 <div style="padding: 1rem 1.65rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
-                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
+                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" disabled style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: not-allowed; opacity: 0.5; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
                         <span>I Agree &amp; Continue &rarr;</span>
                     </button>
                 </div>
