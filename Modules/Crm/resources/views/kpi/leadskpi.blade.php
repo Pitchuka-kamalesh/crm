@@ -84,29 +84,25 @@
                         <!-- Card 1: Total Raw Lead Volume -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Lead Volume</div>
-                            <div style="font-size: 1.45rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalRawLeads) }}</div>
-                            <div style="font-size: 0.72rem; color: #0284c7; font-weight: 600;">100% Inflow Captured</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 0.25rem;">{{ number_format($totalRawLeads) }}</div>
                         </div>
 
                         <!-- Card 2: Allocated Leads -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Allocated Leads</div>
-                            <div style="font-size: 1.45rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ number_format($allocatedCount) }}</div>
-                            <div style="font-size: 0.72rem; color: #059669; font-weight: 600;">{{ $allocationRate }}% Allocation Rate</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #059669; margin-top: 0.25rem;">{{ number_format($allocatedCount) }}</div>
                         </div>
 
                         <!-- Card 3: Unallocated Pool -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Unallocated Pool</div>
-                            <div style="font-size: 1.45rem; font-weight: 800; color: #ea580c; margin: 0.2rem 0;">{{ number_format($unallocatedCount) }}</div>
-                            <div style="font-size: 0.72rem; color: #ea580c; font-weight: 600;">empcode is null or '0'</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #ea580c; margin-top: 0.25rem;">{{ number_format($unallocatedCount) }}</div>
                         </div>
 
                         <!-- Card 4: Source Breakdown Overview -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Bulk Uploads (Bulk Excel (02598))</div>
-                            <div style="font-size: 1.45rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ number_format($bulkUploadCount) }}</div>
-                            <div style="font-size: 0.72rem; color: #7c3aed; font-weight: 600;">{{ number_format($normalLeadsCount) }} Normal Leads</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #7c3aed; margin-top: 0.25rem;">{{ number_format($bulkUploadCount) }}</div>
                         </div>
                     </div>
 
@@ -374,14 +370,26 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+let leadInflowChartInstance = null;
+let sourceDistributionChartInstance = null;
+
+function renderLeadsCharts() {
+    if (typeof Chart === 'undefined') {
+        setTimeout(renderLeadsCharts, 60);
+        return;
+    }
+
     // 1. Chart.js Chronological Lead Inflow Velocity (Area Graph)
-    const inflowCtx = document.getElementById('leadInflowChart');
-    if (inflowCtx) {
+    const inflowCanvas = document.getElementById('leadInflowChart');
+    if (inflowCanvas) {
+        if (leadInflowChartInstance) {
+            leadInflowChartInstance.destroy();
+            leadInflowChartInstance = null;
+        }
         const labels = {!! json_encode($trendLabels) !!};
         const counts = {!! json_encode($trendCounts) !!};
 
-        new Chart(inflowCtx, {
+        leadInflowChartInstance = new Chart(inflowCanvas, {
             type: 'line',
             data: {
                 labels: labels,
@@ -431,8 +439,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 2. Chart.js Inflow Channel Distribution (Bulk Upload vs Normal Registrations)
-    const sourceCtx = document.getElementById('sourceDistributionChart');
-    if (sourceCtx) {
+    const sourceCanvas = document.getElementById('sourceDistributionChart');
+    if (sourceCanvas) {
+        if (sourceDistributionChartInstance) {
+            sourceDistributionChartInstance.destroy();
+            sourceDistributionChartInstance = null;
+        }
         const bulkCount = {{ (int)$bulkUploadCount }};
         const normalCount = {{ (int)$normalLeadsCount }};
         const total = {{ (int)$totalRawLeads }};
@@ -440,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const bulkPct = total > 0 ? ((bulkCount / total) * 100).toFixed(2) : '0';
         const normalPct = total > 0 ? ((normalCount / total) * 100).toFixed(2) : '0';
 
-        new Chart(sourceCtx, {
+        sourceDistributionChartInstance = new Chart(sourceCanvas, {
             type: 'doughnut',
             data: {
                 labels: [
@@ -484,10 +496,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+}
 
-    // Attach AJAX pagination listener on page load
+document.addEventListener('DOMContentLoaded', function () {
+    renderLeadsCharts();
     attachLeadsPaginationAjax();
 });
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    renderLeadsCharts();
+    attachLeadsPaginationAjax();
+}
 
 let leadsLiveTimer = null;
 window.handleLeadsLiveFilter = function (immediate) {
@@ -625,7 +644,6 @@ function attachLeadsPaginationAjax() {
         });
     });
 }
-});
 
 function toggleSidebarMenu() {
     const sidebar = document.querySelector('.app-sidebar');
