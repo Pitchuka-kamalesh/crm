@@ -72,119 +72,55 @@
 
             <!-- TAB: STUDENT KPI & CONVERSION ANALYTICS -->
             <div class="content-card">
-                <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
-                    <div>
-                        <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                            <span>🎓 Student KPI &amp; Conversion Analytics</span>
-                        </div>
-                        <!-- Executive Stage Progress Tracker with Genuine Percentages & Authentic Counts -->
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.65rem;">
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #475569;">Total Enquiries:</span>
-                                <strong style="color: #0284c7;">100%</strong>
-                                <span style="color: #94a3b8; font-size: 0.7rem;">({{ $totalApplicants }})</span>
-                            </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #1e40af;">Stage 1 Personal Profile:</span>
-                                <strong style="color: #2563eb;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #3b82f6; font-size: 0.7rem;">({{ $kpiStage1Profile }})</span>
-                            </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #6d28d9;">Stage 2 Academic Info:</span>
-                                <strong style="color: #7c3aed;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #8b5cf6; font-size: 0.7rem;">({{ $kpiStage2Academic }})</span>
-                            </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #fff7ed; border: 1px solid #fed7aa; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #c2410c;">Stage 3 Document Upload:</span>
-                                <strong style="color: #ea580c;">{{ round(($kpiStage3Docs / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #f97316; font-size: 0.7rem;">({{ $kpiStage3Docs }})</span>
-                            </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #047857;">Stage 4 Fee Payment:</span>
-                                <strong style="color: #059669;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #059669; font-size: 0.7rem;">({{ $kpiStage4Fee }})</span>
-                            </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; background: #f0fdfa; border: 1px solid #99f6e4; padding: 3px 9px; border-radius: 6px;">
-                                <span style="font-weight: 700; color: #0f766e;">Stage 5 Exam Slot Booking:</span>
-                                <strong style="color: #0d9488;">{{ round(($kpiStage5Slot / $kpiTotal) * 100, 1) }}%</strong>
-                                <span style="color: #14b8a6; font-size: 0.7rem;">({{ $kpiStage5Slot }})</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Header Metadata Badges -->
-                    <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                        <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span>📅</span> Intake Cycle 2026–27
-                        </span>
-                        <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
-                            {{ $totalApplicants }} Total Applicants
-                        </span>
-                    </div>
+                <div class="card-header-bar" style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                    <h2 class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🎓 Student KPI &amp; Conversion Analytics</span>
+                    </h2>
                 </div>
 
                 <div style="padding: 1.5rem;">
-                    <!-- 1. TOP EXECUTIVE METRIC CARDS -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                    <!-- 1. TOP EXECUTIVE METRIC CARDS (COMPACT SINGLE ROW, NO ICONS) -->
+                    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
                         <!-- Card 1: Total Registered -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Applicants</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ $totalApplicants }}</div>
-                                <div style="font-size: 0.75rem; color: #0284c7; font-weight: 600;">100% Pipeline Inflow</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👥</div>
+                        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Total Applicants</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #1e293b; margin: 0.15rem 0 0.1rem 0;">{{ $totalApplicants }}</div>
+                            <div style="font-size: 0.68rem; color: #0284c7; font-weight: 600; white-space: nowrap;">100% Pipeline Inflow</div>
                         </div>
 
                         <!-- Card 2: Stage 1 Personal Profile -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 1 Personal Profile</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ $kpiStage1Profile }}</div>
-                                <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}% Completed</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👤</div>
+                        <div style="border: 1px solid #bfdbfe; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stage 1 Personal Profile</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #2563eb; margin: 0.15rem 0 0.1rem 0;">{{ $kpiStage1Profile }}</div>
+                            <div style="font-size: 0.68rem; color: #2563eb; font-weight: 600; white-space: nowrap;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}% Completed</div>
                         </div>
 
                         <!-- Card 3: Stage 2 Academic Info -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 2 Academic Info</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ $kpiStage2Academic }}</div>
-                                <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}% Completed</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                        <div style="border: 1px solid #ddd6fe; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stage 2 Academic Info</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #7c3aed; margin: 0.15rem 0 0.1rem 0;">{{ $kpiStage2Academic }}</div>
+                            <div style="font-size: 0.68rem; color: #7c3aed; font-weight: 600; white-space: nowrap;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}% Completed</div>
                         </div>
 
                         <!-- Card 4: Stage 3 Document Upload -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 3 Document Upload</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #ea580c; margin: 0.2rem 0;">{{ $kpiStage3Docs }}</div>
-                                <div style="font-size: 0.75rem; color: #ea580c; font-weight: 600;">{{ round(($kpiStage3Docs / $kpiTotal) * 100, 1) }}% Uploaded</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fff7ed; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📤</div>
+                        <div style="border: 1px solid #fed7aa; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stage 3 Document Upload</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #ea580c; margin: 0.15rem 0 0.1rem 0;">{{ $kpiStage3Docs }}</div>
+                            <div style="font-size: 0.68rem; color: #ea580c; font-weight: 600; white-space: nowrap;">{{ round(($kpiStage3Docs / $kpiTotal) * 100, 1) }}% Uploaded</div>
                         </div>
 
                         <!-- Card 5: Stage 4 Fee Payment -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 4 Fee Payment</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ $kpiStage4Fee }}</div>
-                                <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}% Fee Paid</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
+                        <div style="border: 1px solid #a7f3d0; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stage 4 Fee Payment</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #059669; margin: 0.15rem 0 0.1rem 0;">{{ $kpiStage4Fee }}</div>
+                            <div style="font-size: 0.68rem; color: #059669; font-weight: 600; white-space: nowrap;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}% Fee Paid</div>
                         </div>
 
                         <!-- Card 6: Stage 5 Exam Slot Booking -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Stage 5 Exam Slot Booking</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #0d9488; margin: 0.2rem 0;">{{ $kpiStage5Slot }}</div>
-                                <div style="font-size: 0.75rem; color: #0d9488; font-weight: 600;">{{ round(($kpiStage5Slot / $kpiTotal) * 100, 1) }}% Slots Booked</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #f0fdfa; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📅</div>
+                        <div style="border: 1px solid #99f6e4; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Stage 5 Slot Booking</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #0d9488; margin: 0.15rem 0 0.1rem 0;">{{ $kpiStage5Slot }}</div>
+                            <div style="font-size: 0.68rem; color: #0d9488; font-weight: 600; white-space: nowrap;">{{ round(($kpiStage5Slot / $kpiTotal) * 100, 1) }}% Slots Booked</div>
                         </div>
                     </div>
 
@@ -219,20 +155,34 @@
                         </div>
                     </div>
 
-                    <!-- 3. INTERACTIVE SEARCH & FILTER BAR -->
-                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.5rem; padding: 1.15rem 1.5rem;">
-                        <form method="GET" action="{{ route('kpi.studentkpi') }}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                    <!-- 3. LIVE SEARCH & STAGE FILTER BAR (NO BRANCH DROPDOWN, REAL-TIME FILTERING) -->
+                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+                        <form id="kpiFilterForm" method="GET" action="{{ route('kpi.studentkpi') }}" onsubmit="event.preventDefault(); window.handleKpiLiveFilter(true);" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                             <input type="hidden" name="tab" value="studentkpi">
                             
-                            <!-- Search query -->
-                            <div style="flex: 1; min-width: 240px; position: relative;">
-                                <input type="text" name="q" value="{{ $search }}" placeholder="Search by name, application #, phone, email..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #f8fafc;">
+                            <!-- Search query (Live debounced) -->
+                            <div style="flex: 1; min-width: 260px; position: relative;">
+                                <input type="text" 
+                                       id="kpiLiveSearch" 
+                                       name="q" 
+                                       value="{{ $search }}" 
+                                       placeholder="Search by name, application #, phone, email..." 
+                                       autocomplete="off"
+                                       oninput="window.handleKpiLiveFilter()"
+                                       style="width: 100%; padding: 0.55rem 2rem 0.55rem 2.25rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #f8fafc; transition: all 0.2s;">
                                 <svg style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <button type="button" 
+                                        id="kpiClearSearchBtn" 
+                                        onclick="window.clearKpiSearch()" 
+                                        style="display: {{ $search ? 'block' : 'none' }}; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1.15rem; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
                             </div>
 
-                            <!-- Stage Filter -->
-                            <div style="min-width: 180px;">
-                                <select name="stage" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
+                            <!-- Stage Filter (Live onchange) -->
+                            <div style="min-width: 220px;">
+                                <select id="kpiStageSelect" 
+                                        name="stage" 
+                                        onchange="window.handleKpiLiveFilter(true)"
+                                        style="width: 100%; padding: 0.55rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; cursor: pointer; outline: none;">
                                     <option value="">All Funnel Stages</option>
                                     <option value="stage1" {{ $filterStage === 'stage1' ? 'selected' : '' }}>Stage 1: Personal Profile</option>
                                     <option value="stage2" {{ $filterStage === 'stage2' ? 'selected' : '' }}>Stage 2: Academic Info</option>
@@ -242,41 +192,33 @@
                                 </select>
                             </div>
 
-                            <!-- Branch Filter -->
-                            <div style="min-width: 180px;">
-                                <select name="branch_id" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
-                                    <option value="">All Branches</option>
-                                    @foreach($allBranches as $br)
-                                        <option value="{{ $br->branch_id }}" {{ (string)$filterBranch === (string)$br->branch_id ? 'selected' : '' }}>
-                                            {{ $br->branch_short_name ?: $br->branch_long_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <!-- Live Filter Active Spinner / Indicator -->
+                            <div id="kpiLiveIndicator" style="display: none; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: #0284c7; font-weight: 600;">
+                                <span style="display: inline-block; width: 7px; height: 7px; background: #0284c7; border-radius: 50%;"></span>
+                                <span>Updating...</span>
                             </div>
 
-                            <button type="submit" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 700; color: #ffffff; background: #0284c7; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                Filter Records
+                            <!-- Reset Button -->
+                            <button type="button" 
+                                    id="kpiResetBtn" 
+                                    onclick="window.resetKpiFilters()" 
+                                    style="padding: 0.55rem 1rem; font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; display: {{ ($search || $filterStage) ? 'inline-block' : 'none' }};">
+                                Reset
                             </button>
-
-                            @if($search || $filterStage || $filterBranch)
-                                <a href="{{ route('kpi.studentkpi', ['tab' => 'studentkpi']) }}" style="padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; border-radius: 8px; text-decoration: none;">
-                                    Reset
-                                </a>
-                            @endif
                         </form>
                     </div>
 
-                    <!-- 4. EAGER-LOADED STUDENT REGISTRATIONS TABLE -->
-                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                    <!-- 4. EAGER-LOADED STUDENT REGISTRATIONS TABLE (LIVE-REPLACED VIA AJAX) -->
+                    <div id="studentTableContainer" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
                         <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Verified Student Records</span>
-                                <span style="font-size: 0.75rem; color: #64748b; margin-left: 0.5rem;">(Showing {{ $students->firstItem() ?? 0 }} to {{ $students->lastItem() ?? 0 }} of {{ $students->total() }} records)</span>
+                                <span id="studentTableCountText" style="font-size: 0.75rem; color: #64748b; margin-left: 0.5rem;">(Showing {{ $students->firstItem() ?? 0 }} to {{ $students->lastItem() ?? 0 }} of {{ $students->total() }} records)</span>
                             </div>
                         </div>
 
                         <div class="table-responsive">
-                            <table class="crm-table">
+                            <table class="crm-table" id="studentRecordsTable">
                                 <thead>
                                     <tr>
                                         <th>Application #</th>
@@ -303,7 +245,12 @@
                                             $completedCount = ($isStage1 ? 1 : 0) + ($isStage2 ? 1 : 0) + ($isStage3 ? 1 : 0) + ($isStage4 ? 1 : 0) + ($isStage5 ? 1 : 0);
                                             $progressPct = round(($completedCount / 5) * 100);
                                         @endphp
-                                        <tr>
+                                        <tr class="student-row"
+                                            data-stage1="{{ $isStage1 ? '1' : '0' }}"
+                                            data-stage2="{{ $isStage2 ? '1' : '0' }}"
+                                            data-stage3="{{ $isStage3 ? '1' : '0' }}"
+                                            data-stage4="{{ $isStage4 ? '1' : '0' }}"
+                                            data-stage5="{{ $isStage5 ? '1' : '0' }}">
                                             <td>
                                                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 700; color: #0284c7;">
                                                     {{ $st->applinano }}
@@ -401,6 +348,12 @@
                                             </td>
                                         </tr>
                                     @endforelse
+                                    <tr id="kpiClientNoMatchesRow" style="display: none;">
+                                        <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                            <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+                                            <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student registrations found</div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -530,7 +483,130 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Initialize AJAX pagination listener
+    attachPaginationAjax();
 });
+
+let kpiLiveTimer = null;
+window.handleKpiLiveFilter = function (immediate) {
+    const searchInput = document.getElementById('kpiLiveSearch');
+    const stageSelect = document.getElementById('kpiStageSelect');
+    const resetBtn = document.getElementById('kpiResetBtn');
+    const clearBtn = document.getElementById('kpiClearSearchBtn');
+    const indicator = document.getElementById('kpiLiveIndicator');
+    const tableContainer = document.getElementById('studentTableContainer');
+
+    const q = searchInput ? searchInput.value.trim() : '';
+    const stage = stageSelect ? stageSelect.value : '';
+
+    if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+    if (resetBtn) resetBtn.style.display = (q || stage) ? 'inline-block' : 'none';
+
+    // 1. Instant client-side filtering on current rows
+    const rows = document.querySelectorAll('#studentRecordsTable tbody tr.student-row');
+    const noMatchesRow = document.getElementById('kpiClientNoMatchesRow');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const text = (row.textContent || '').toLowerCase();
+        const matchesQ = !q || text.includes(q.toLowerCase());
+        const matchesStage = !stage || (row.getAttribute('data-' + stage) === '1');
+        if (matchesQ && matchesStage) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    if (noMatchesRow) {
+        noMatchesRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+    }
+
+    // 2. Debounced background fetch across all database pages
+    if (indicator) indicator.style.display = 'inline-flex';
+    clearTimeout(kpiLiveTimer);
+
+    const delay = immediate ? 0 : 250;
+    kpiLiveTimer = setTimeout(() => {
+        const url = new URL(window.location.origin + window.location.pathname);
+        url.searchParams.set('tab', 'studentkpi');
+        if (q) url.searchParams.set('q', q);
+        if (stage) url.searchParams.set('stage', stage);
+
+        window.history.replaceState({}, '', url.toString());
+
+        fetch(url.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('studentTableContainer');
+            if (newTable && tableContainer) {
+                tableContainer.innerHTML = newTable.innerHTML;
+                attachPaginationAjax();
+            }
+        })
+        .catch(err => console.error('Live filter fetch error:', err))
+        .finally(() => {
+            if (indicator) indicator.style.display = 'none';
+        });
+    }, delay);
+};
+
+window.clearKpiSearch = function () {
+    const searchInput = document.getElementById('kpiLiveSearch');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+        window.handleKpiLiveFilter(true);
+    }
+};
+
+window.resetKpiFilters = function () {
+    const searchInput = document.getElementById('kpiLiveSearch');
+    const stageSelect = document.getElementById('kpiStageSelect');
+    if (searchInput) searchInput.value = '';
+    if (stageSelect) stageSelect.value = '';
+    window.handleKpiLiveFilter(true);
+};
+
+function attachPaginationAjax() {
+    const paginationLinks = document.querySelectorAll('#studentTableContainer .pagination a');
+    const indicator = document.getElementById('kpiLiveIndicator');
+    const tableContainer = document.getElementById('studentTableContainer');
+
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (!href) return;
+
+            if (indicator) indicator.style.display = 'inline-flex';
+            window.history.replaceState({}, '', href);
+
+            fetch(href, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTable = doc.getElementById('studentTableContainer');
+                if (newTable && tableContainer) {
+                    tableContainer.innerHTML = newTable.innerHTML;
+                    attachPaginationAjax();
+                    tableContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            })
+            .catch(err => console.error('Pagination fetch error:', err))
+            .finally(() => {
+                if (indicator) indicator.style.display = 'none';
+            });
+        });
+    });
+}
 
 function toggleSidebarMenu() {
     const sidebar = document.querySelector('.app-sidebar');
