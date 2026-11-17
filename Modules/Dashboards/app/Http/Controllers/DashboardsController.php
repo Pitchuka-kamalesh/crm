@@ -860,19 +860,35 @@ class DashboardsController extends Controller
                     $isSecondYear = (strcasecmp((string)$subsetChoice, 'Second Year') === 0 || strcasecmp((string)$subsetChoice, 'Second year') === 0);
                     $undertakingAgreed = ($request->input('undertaking_60_pct') === 'yes' || $request->input('undertaking_60_pct') === '1' || ($existingAcademic && $existingAcademic->undertaking_60_pct === 'yes'));
 
-                    // If 2nd year student, only proceed if percentage is >= 60%
-                    if ($isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
-                        throw \Illuminate\Validation\ValidationException::withMessages([
-                            'pu2_percentage' => 'You are not eligible according to university norms.',
-                        ]);
+                    $isPgOrDoc = in_array($request->input('degree_level'), ['mtech', 'phd']);
+                    if (!$isPgOrDoc && $crmStudent && $crmStudent->progmid) {
+                        $prog = Program::where('program_id', $crmStudent->progmid)->first();
+                        if ($prog) {
+                            $pLevel = strtoupper($prog->program_level ?? '');
+                            $pShort = strtoupper($prog->program_short_name ?? '');
+                            $pName = strtoupper($prog->program_name ?? '');
+                            if ($pLevel === 'PG' || $pLevel === 'POST GRADUATE' || str_contains($pShort, 'M.TECH') || str_contains($pName, 'MASTER') || in_array($pShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A']) || $pLevel === 'PHD' || $pLevel === 'DOCTORAL' || str_contains($pShort, 'PH.D') || str_contains($pName, 'DOCTOR')) {
+                                $isPgOrDoc = true;
+                            }
+                        }
                     }
 
-                    // If 1st year student and < 60%, require undertaking confirmation
-                    if (!$isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
-                        if (!$undertakingAgreed) {
+                    // For UG programs: enforce 60% threshold. For PG / Doctorate: no 60% requirement for intermediate.
+                    if (!$isPgOrDoc) {
+                        // If 2nd year student, only proceed if percentage is >= 60%
+                        if ($isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
                             throw \Illuminate\Validation\ValidationException::withMessages([
-                                'undertaking_60_pct' => 'Please confirm your undertaking (i will get 60%) to proceed.',
+                                'pu2_percentage' => 'You are not eligible according to university norms.',
                             ]);
+                        }
+
+                        // If 1st year student and < 60%, require undertaking confirmation
+                        if (!$isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
+                            if (!$undertakingAgreed) {
+                                throw \Illuminate\Validation\ValidationException::withMessages([
+                                    'undertaking_60_pct' => 'Please confirm your undertaking (i will get 60%) to proceed.',
+                                ]);
+                            }
                         }
                     }
 

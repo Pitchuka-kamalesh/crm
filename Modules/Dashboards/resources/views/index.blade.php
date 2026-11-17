@@ -1966,7 +1966,7 @@
                                         <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span></label>
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> @if(!in_array($degreeLevel ?? '', ['mtech', 'phd']))<span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span>@endif</label>
                                         <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
                                         <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
@@ -2206,7 +2206,9 @@
                                 }
                                 pctInput.value = pct > 0 ? pct.toFixed(2) : '';
                                 if (warning) {
-                                    warning.style.display = (pct > 0 && pct < 60) ? 'block' : 'none';
+                                    const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                    const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
+                                    warning.style.display = (!isPgOrDoc && pct > 0 && pct < 60) ? 'block' : 'none';
                                 }
                             }
 
@@ -2311,6 +2313,12 @@
 
                             function validateStep2Form(form) {
                                 calculatePu2Pct();
+                                const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
+                                if (isPgOrDoc) {
+                                    return true;
+                                }
+
                                 const pu2Pct = parseFloat(document.getElementById('pu2_percentage')?.value || 0);
                                 const subsetChoice = getSelectedSubsetChoice();
                                 const isSecondYear = (subsetChoice.toLowerCase() === 'second year');
