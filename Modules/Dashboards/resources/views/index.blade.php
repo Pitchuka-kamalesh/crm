@@ -1869,39 +1869,71 @@
                                 <input type="hidden" name="course_choice" value="Inter">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
-                                <!-- Row 1: Jr. College Name / Institute Name (Full Width) -->
+                                <!-- Row 1: College Name / Institute Name (Full Width) -->
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">Jr. College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
+                                    <label class="mockup-label">College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name" required>
                                 </div>
 
-                                <!-- Row 2: 3 Separate Distinct Columns for Jr. City, Jr. State, Jr. District (Text Inputs) -->
+                                <!-- Row 2: 3 Separate Distinct Columns for College City, College State, College District -->
                                 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter Jr. City" required>
+                                        <label class="mockup-label">College City: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. State: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="jr_state" class="mockup-input" value="{{ $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh' }}" placeholder="Enter Jr. State" required>
+                                        <label class="mockup-label">College State: <span style="color:#ef4444;">*</span></label>
+                                        <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                @php
+                                                    $curState = $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh';
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
+                                                @endphp
+                                                <option value="{{ $s->state_name }}" data-id="{{ $s->state_id }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. District: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="jr_district" class="mockup-input" value="{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur' }}" placeholder="Enter Jr. District" required>
+                                        <label class="mockup-label">College District: <span style="color:#ef4444;">*</span></label>
+                                        <select name="jr_district" id="geo-inter-district-select" class="mockup-select" required>
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                @php
+                                                    $curDist = $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur';
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_NAME }}" data-state="{{ $d->STATE_ID }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- Row 2: Status (First Year / Second Year), Year, Hall Tkt (3 Columns) -->
+                                <!-- Row 3: Status (First Year / Second Year), Year, Hall Ticket Number (3 Columns) -->
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
                                         <div class="mockup-radio-row" style="margin-top: 0.45rem;">
+                                            @php
+                                                $isPgOrDoc = in_array($degreeLevel ?? '', ['mtech', 'phd']);
+                                                $savedStatus = $academicDetails?->pu2_current_status;
+                                                if (!empty($savedStatus)) {
+                                                    $isSecondYr = in_array(strtolower(trim($savedStatus)), ['second year', 'second']);
+                                                } else {
+                                                    // Default: Second Year for PG/Doctorate, First Year for UG
+                                                    $isSecondYr = $isPgOrDoc;
+                                                }
+                                            @endphp
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year' && $academicDetails?->pu2_current_status !== 'Second Year') ? 'checked' : '' }} required>
+                                                <input type="radio" name="subset_choice" value="First Year" {{ !$isSecondYr ? 'checked' : '' }} required>
                                                 <span>First Year</span>
                                             </label>
                                             <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="Second Year" {{ ($academicDetails?->pu2_current_status === 'Second year' || $academicDetails?->pu2_current_status === 'Second Year') ? 'checked' : '' }} required>
+                                                <input type="radio" name="subset_choice" value="Second Year" {{ $isSecondYr ? 'checked' : '' }} required>
                                                 <span>Second Year</span>
                                             </label>
                                         </div>
@@ -1911,8 +1943,8 @@
                                         <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="e.g. 2026" min="2000" max="2030" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Tkt:</label>
-                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket No (optional)">
+                                        <label class="mockup-label">Hall Ticket number:</label>
+                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket Number">
                                     </div>
                                 </div>
 
@@ -2188,18 +2220,28 @@
                                 calculatePu2Pct();
                             }
 
-                            function onInterStateChange(stateId) {
+                            function onInterStateChange(stateVal) {
                                 const distSelect = document.getElementById('geo-inter-district-select');
                                 if (!distSelect) return;
                                 const currentSelectedDist = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
+
+                                let numericStateId = null;
+                                const stateSelect = document.getElementById('geo-inter-state-select');
+                                if (stateSelect && stateSelect.selectedOptions && stateSelect.selectedOptions[0]) {
+                                    numericStateId = stateSelect.selectedOptions[0].getAttribute('data-id');
+                                }
+                                if (!numericStateId && !isNaN(stateVal)) {
+                                    numericStateId = stateVal;
+                                }
+
                                 let foundSelected = false;
                                 allDistrictsData.forEach(function(d) {
-                                    if (!stateId || d.STATE_ID == stateId) {
+                                    if (!numericStateId || d.STATE_ID == numericStateId) {
                                         const opt = document.createElement('option');
-                                        opt.value = d.DISTRICT_ID;
+                                        opt.value = d.DISTRICT_NAME;
                                         opt.textContent = d.DISTRICT_NAME;
-                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                        if (d.DISTRICT_NAME == currentSelectedDist || d.DISTRICT_NAME === '{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?: "Guntur" }}') {
                                             opt.selected = true;
                                             foundSelected = true;
                                         }

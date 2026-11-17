@@ -741,6 +741,19 @@ class DashboardsController extends Controller
                 $stateInput = $request->input('jr_state') ?? $request->input('inter_state') ?? $request->input('pu2_college_state');
                 $districtInput = $request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district');
 
+                if ($stateInput && is_numeric($stateInput)) {
+                    $matchedState = State::find($stateInput);
+                    if ($matchedState) {
+                        $stateInput = $matchedState->state_name;
+                    }
+                }
+                if ($districtInput && is_numeric($districtInput)) {
+                    $matchedDist = District::find($districtInput);
+                    if ($matchedDist) {
+                        $districtInput = $matchedDist->DISTRICT_NAME;
+                    }
+                }
+
                 $request->merge([
                     'city' => $cityInput,
                     'jr_state' => $stateInput,
@@ -772,10 +785,10 @@ class DashboardsController extends Controller
                     'pu2_marks_earned' => ['required', 'numeric', 'min:0'],
                     'pu2_percentage' => ['required', 'numeric'],
                 ], [
-                    'inter_college.required' => 'Jr. College Name / Institute Name is required.',
-                    'city.required' => 'Jr. City is required.',
-                    'jr_state.required' => 'Jr. State is required.',
-                    'jr_district.required' => 'Jr. District is required.',
+                    'inter_college.required' => 'College Name / Institute Name is required.',
+                    'city.required' => 'College City is required.',
+                    'jr_state.required' => 'College State is required.',
+                    'jr_district.required' => 'College District is required.',
                     'subset_choice.required' => 'Please select First Year or Second Year.',
                     'inter_year.required' => 'Year is required.',
                     'pu2_marks_type.required' => 'Marks Type is required.',
@@ -843,7 +856,7 @@ class DashboardsController extends Controller
                         : (($pu2Conducted > 0 && $pu2Earned) ? round(($pu2Earned / $pu2Conducted) * 100, 2) : $pu2MarksRaw);
 
                     $isSecondYear = (strcasecmp((string)$subsetChoice, 'Second Year') === 0 || strcasecmp((string)$subsetChoice, 'Second year') === 0);
-                    $undertakingAgreed = ($request->input('undertaking_60_pct') === 'yes' || $request->input('undertaking_60_pct') === '1');
+                    $undertakingAgreed = ($request->input('undertaking_60_pct') === 'yes' || $request->input('undertaking_60_pct') === '1' || ($existingAcademic && $existingAcademic->undertaking_60_pct === 'yes'));
 
                     // If 2nd year student, only proceed if percentage is >= 60%
                     if ($isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
