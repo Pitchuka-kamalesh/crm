@@ -72,73 +72,45 @@
 
             <!-- TAB: LEADS KPI & ACQUISITION ANALYTICS -->
             <div class="content-card">
-                <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
-                    <div>
-                        <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                            <span>🎯 Leads KPI &amp; Acquisition Analytics</span>
-                        </div>
-                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem;">
-                            Raw inquiry intake, chronological inflow velocity, bulk uploads vs portal registrations, and allocation pipeline
-                        </div>
-                    </div>
-
-                    <!-- Header Metadata Badges -->
-                    <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                        <span style="font-size: 0.825rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span>📅</span> Intake Cycle 2026–27
-                        </span>
-                        <span style="font-size: 0.825rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.35rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span style="display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
-                            {{ number_format($totalRawLeads) }} Raw Enquiries
-                        </span>
+                <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                    <div class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0;">
+                        Leads KPI &amp; Acquisition Analytics
                     </div>
                 </div>
 
                 <div style="padding: 1.5rem;">
-                    <!-- 1. TOP EXECUTIVE METRIC CARDS -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                    <!-- 1. TOP EXECUTIVE METRIC CARDS (NO ICONS, COMPACT SINGLE LINE ROW) -->
+                    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem;">
                         <!-- Card 1: Total Raw Lead Volume -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Lead Volume</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalRawLeads) }}</div>
-                                <div style="font-size: 0.75rem; color: #0284c7; font-weight: 600;">100% Inflow Captured</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📥</div>
+                        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Lead Volume</div>
+                            <div style="font-size: 1.45rem; font-weight: 800; color: #1e293b; margin: 0.2rem 0;">{{ number_format($totalRawLeads) }}</div>
+                            <div style="font-size: 0.72rem; color: #0284c7; font-weight: 600;">100% Inflow Captured</div>
                         </div>
 
                         <!-- Card 2: Allocated Leads -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Allocated Leads</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ number_format($allocatedCount) }}</div>
-                                <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $allocationRate }}% Allocation Rate</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👤</div>
+                        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Allocated Leads</div>
+                            <div style="font-size: 1.45rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ number_format($allocatedCount) }}</div>
+                            <div style="font-size: 0.72rem; color: #059669; font-weight: 600;">{{ $allocationRate }}% Allocation Rate</div>
                         </div>
 
                         <!-- Card 3: Unallocated Pool -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Unallocated Pool</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #ea580c; margin: 0.2rem 0;">{{ number_format($unallocatedCount) }}</div>
-                                <div style="font-size: 0.75rem; color: #ea580c; font-weight: 600;">empcode is null or '0'</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fff7ed; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">⏳</div>
+                        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Unallocated Pool</div>
+                            <div style="font-size: 1.45rem; font-weight: 800; color: #ea580c; margin: 0.2rem 0;">{{ number_format($unallocatedCount) }}</div>
+                            <div style="font-size: 0.72rem; color: #ea580c; font-weight: 600;">empcode is null or '0'</div>
                         </div>
 
                         <!-- Card 4: Source Breakdown Overview -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Bulk Uploads (02598)</div>
-                                <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ number_format($bulkUploadCount) }}</div>
-                                <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ number_format($directPortalCount) }} Direct Portal Leads</div>
-                            </div>
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📊</div>
+                        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Bulk Uploads (Bulk Excel (02598))</div>
+                            <div style="font-size: 1.45rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ number_format($bulkUploadCount) }}</div>
+                            <div style="font-size: 0.72rem; color: #7c3aed; font-weight: 600;">{{ number_format($normalLeadsCount) }} Normal Leads</div>
                         </div>
                     </div>
 
-                    <!-- 2. VISUAL CHARTS (CHRONOLOGICAL INFLOW TRENDS & SOURCE BREAKDOWN) -->
+                    <!-- 2. VISUAL CHARTS (CHRONOLOGICAL INFLOW TRENDS & BULK VS NORMAL BREAKDOWN) -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
                         <!-- Chart 1: Chronological Lead Inflow Trends (Chart.js Area Graph) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
@@ -154,14 +126,14 @@
                             </div>
                         </div>
 
-                        <!-- Chart 2: Source Breakdown (Bulk Excel 02598 vs Direct Portal) -->
+                        <!-- Chart 2: Source Breakdown (Bulk Upload vs Normal Registrations) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
                                 <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Inflow Channel Distribution</div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Grouped by log_userid (Bulk Upload 02598 vs Direct Registrations)</div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Lead Acquisition Channels</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Bulk Upload vs Normal Registrations</div>
                                 </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #7c3aed; background: #f5f3ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #ddd6fe;">Channel Share</span>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid #bfdbfe;">Bulk vs Normal</span>
                             </div>
                             <div style="position: relative; flex-grow: 1; min-height: 280px; max-height: 320px;">
                                 <canvas id="sourceDistributionChart"></canvas>
@@ -169,20 +141,34 @@
                         </div>
                     </div>
 
-                    <!-- 3. INTERACTIVE FILTERING TOOLBAR -->
-                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.5rem; padding: 1.15rem 1.5rem;">
-                        <form method="GET" action="{{ route('kpi.leadskpi') }}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                    <!-- 3. LIVE INTERACTIVE FILTERING TOOLBAR (NO ALL SOURCES DROPDOWN, LIVE DEBOUNCED) -->
+                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+                        <form id="leadsFilterForm" method="GET" action="{{ route('kpi.leadskpi') }}" onsubmit="event.preventDefault(); window.handleLeadsLiveFilter(true);" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                             <input type="hidden" name="tab" value="leadskpi">
 
-                            <!-- Search query -->
-                            <div style="flex: 1; min-width: 220px; position: relative;">
-                                <input type="text" name="q" value="{{ $search }}" placeholder="Search by phone, application #, staff ID..." style="width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.2rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #f8fafc;">
+                            <!-- Search query (Live debounced) -->
+                            <div style="flex: 1; min-width: 240px; position: relative;">
+                                <input type="text" 
+                                       id="leadsLiveSearch" 
+                                       name="q" 
+                                       value="{{ $search }}" 
+                                       placeholder="Search by phone, application #, staff ID, student..." 
+                                       autocomplete="off"
+                                       oninput="window.handleLeadsLiveFilter()"
+                                       style="width: 100%; padding: 0.55rem 2rem 0.55rem 2.25rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #f8fafc; transition: all 0.2s;">
                                 <svg style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <button type="button" 
+                                        id="leadsClearSearchBtn" 
+                                        onclick="window.clearLeadsSearch()" 
+                                        style="display: {{ $search ? 'block' : 'none' }}; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1.15rem; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
                             </div>
 
-                            <!-- Year Filter Dropdown -->
-                            <div style="min-width: 140px;">
-                                <select name="year" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
+                            <!-- Year Filter Dropdown (Live onchange) -->
+                            <div style="min-width: 130px;">
+                                <select id="leadsYearSelect" 
+                                        name="year" 
+                                        onchange="window.handleLeadsLiveFilter(true)"
+                                        style="width: 100%; padding: 0.55rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; cursor: pointer; outline: none;">
                                     <option value="">All Years</option>
                                     @foreach($availableYears as $y)
                                         <option value="{{ $y }}" {{ (string)$filterYear === (string)$y ? 'selected' : '' }}>Year {{ $y }}</option>
@@ -190,9 +176,12 @@
                                 </select>
                             </div>
 
-                            <!-- Month Filter Dropdown -->
-                            <div style="min-width: 150px;">
-                                <select name="month" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
+                            <!-- Month Filter Dropdown (Live onchange) -->
+                            <div style="min-width: 140px;">
+                                <select id="leadsMonthSelect" 
+                                        name="month" 
+                                        onchange="window.handleLeadsLiveFilter(true)"
+                                        style="width: 100%; padding: 0.55rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; cursor: pointer; outline: none;">
                                     <option value="">All Months</option>
                                     @foreach($availableMonths as $num => $name)
                                         <option value="{{ $num }}" {{ (string)$filterMonth === (string)$num ? 'selected' : '' }}>{{ $name }}</option>
@@ -200,47 +189,45 @@
                                 </select>
                             </div>
 
-                            <!-- Allocation Status Dropdown -->
-                            <div style="min-width: 160px;">
-                                <select name="status" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
+                            <!-- Allocation Status Dropdown (Live onchange) -->
+                            <div style="min-width: 150px;">
+                                <select id="leadsStatusSelect" 
+                                        name="status" 
+                                        onchange="window.handleLeadsLiveFilter(true)"
+                                        style="width: 100%; padding: 0.55rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; cursor: pointer; outline: none;">
                                     <option value="all" {{ $filterStatus === 'all' ? 'selected' : '' }}>All Statuses</option>
                                     <option value="allocated" {{ $filterStatus === 'allocated' ? 'selected' : '' }}>Allocated</option>
                                     <option value="unallocated" {{ $filterStatus === 'unallocated' ? 'selected' : '' }}>Unallocated</option>
                                 </select>
                             </div>
 
-                            <!-- Source Dropdown -->
-                            <div style="min-width: 170px;">
-                                <select name="source" style="width: 100%; padding: 0.5rem 0.85rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;">
-                                    <option value="">All Sources</option>
-                                    <option value="bulk" {{ $filterSource === 'bulk' ? 'selected' : '' }}>Bulk Excel (02598)</option>
-                                    <option value="portal" {{ $filterSource === 'portal' ? 'selected' : '' }}>Direct Portal</option>
-                                </select>
+                            <!-- Live Filter Active Spinner / Indicator -->
+                            <div id="leadsLiveIndicator" style="display: none; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: #0284c7; font-weight: 600;">
+                                <span style="display: inline-block; width: 7px; height: 7px; background: #0284c7; border-radius: 50%;"></span>
+                                <span>Updating...</span>
                             </div>
 
-                            <button type="submit" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 700; color: #ffffff; background: #0284c7; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                Apply Filter
+                            <!-- Reset Button -->
+                            <button type="button" 
+                                    id="leadsResetBtn" 
+                                    onclick="window.resetLeadsFilters()" 
+                                    style="padding: 0.55rem 1rem; font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; display: {{ ($search || $filterYear || $filterMonth || ($filterStatus && $filterStatus !== 'all')) ? 'inline-block' : 'none' }};">
+                                Reset
                             </button>
-
-                            @if($search || $filterYear || $filterMonth || ($filterStatus && $filterStatus !== 'all') || $filterSource)
-                                <a href="{{ route('kpi.leadskpi', ['tab' => 'leadskpi']) }}" style="padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; border-radius: 8px; text-decoration: none;">
-                                    Reset
-                                </a>
-                            @endif
                         </form>
                     </div>
 
-                    <!-- 4. PAGINATED LEADS PREVIEW TABLE -->
-                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+                    <!-- 4. PAGINATED LEADS PREVIEW TABLE (CONTAINER REPLACED VIA LIVE AJAX) -->
+                    <div id="leadsTableContainer" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
                         <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Raw Inquiries Preview Directory</span>
-                                <span style="font-size: 0.75rem; color: #64748b; margin-left: 0.5rem;">(Showing {{ $leads->firstItem() ?? 0 }} to {{ $leads->lastItem() ?? 0 }} of {{ number_format($leads->total()) }} leads)</span>
+                                <span id="leadsTableCountText" style="font-size: 0.75rem; color: #64748b; margin-left: 0.5rem;">(Showing {{ $leads->firstItem() ?? 0 }} to {{ $leads->lastItem() ?? 0 }} of {{ number_format($leads->total()) }} leads)</span>
                             </div>
                         </div>
 
                         <div class="table-responsive">
-                            <table class="crm-table">
+                            <table class="crm-table" id="leadsRecordsTable">
                                 <thead>
                                     <tr>
                                         <th>Phone Number</th>
@@ -254,13 +241,24 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr id="leadsClientNoMatchesRow" style="display: none;">
+                                        <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                            <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+                                            <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No raw inquiries matching the active live filter criteria</div>
+                                        </td>
+                                    </tr>
                                     @forelse($leads as $lead)
                                         @php
                                             $isAllocated = !empty($lead->empcode) && $lead->empcode !== '0';
                                             $isBulk = trim((string)$lead->log_userid) === '02598';
                                             $isPortal = in_array(strtoupper(trim((string)$lead->log_userid)), ['PORTAL', 'SELF_REGISTER']);
+                                            $leadYear = $lead->enquirydate ? date('Y', strtotime($lead->enquirydate)) : '';
+                                            $leadMonth = $lead->enquirydate ? (int)date('n', strtotime($lead->enquirydate)) : '';
                                         @endphp
-                                        <tr>
+                                        <tr class="lead-row" 
+                                            data-year="{{ $leadYear }}" 
+                                            data-month="{{ $leadMonth }}" 
+                                            data-status="{{ $isAllocated ? 'allocated' : 'unallocated' }}">
                                             <td>
                                                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #1e293b;">
                                                     📞 {{ $lead->phoneno }}
@@ -356,6 +354,19 @@
                             </div>
                         @endif
                     </div>
+
+                        <!-- Pagination Footer -->
+                        @if($leads->hasPages())
+                            <div class="table-pagination-area">
+                                <div style="font-size: 0.825rem; color: #64748b;">
+                                    Showing <strong style="color: #1e293b;">{{ $leads->firstItem() ?? 0 }}</strong> to <strong style="color: #1e293b;">{{ $leads->lastItem() ?? 0 }}</strong> of <strong style="color: #1e293b;">{{ number_format($leads->total()) }}</strong> records ({{ $leads->perPage() }} per page)
+                                </div>
+                                <div class="pagination-wrapper">
+                                    {{ $leads->links('pagination::bootstrap-4') }}
+                                </div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </main>
@@ -419,19 +430,27 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 2. Chart.js Inflow Channel Distribution Doughnut Chart
+    // 2. Chart.js Inflow Channel Distribution (Bulk Upload vs Normal Registrations)
     const sourceCtx = document.getElementById('sourceDistributionChart');
     if (sourceCtx) {
-        const sourceLabels = {!! json_encode($sourceBreakdown->pluck('label')) !!};
-        const sourceData = {!! json_encode($sourceBreakdown->pluck('count')) !!};
+        const bulkCount = {{ (int)$bulkUploadCount }};
+        const normalCount = {{ (int)$normalLeadsCount }};
+        const total = {{ (int)$totalRawLeads }};
+
+        const bulkPct = total > 0 ? ((bulkCount / total) * 100).toFixed(2) : '0';
+        const normalPct = total > 0 ? ((normalCount / total) * 100).toFixed(2) : '0';
 
         new Chart(sourceCtx, {
             type: 'doughnut',
             data: {
-                labels: sourceLabels,
+                labels: [
+                    `Bulk Upload (${bulkCount.toLocaleString()} • ${bulkPct}%)`,
+                    `Normal Registration (${normalCount.toLocaleString()} • ${normalPct}%)`
+                ],
                 datasets: [{
-                    data: sourceData,
-                    backgroundColor: ['#0284c7', '#10b981', '#7c3aed', '#f59e0b', '#ec4899'],
+                    data: [bulkCount, normalCount],
+                    backgroundColor: ['#0284c7', '#10b981'],
+                    hoverBackgroundColor: ['#0369a1', '#059669'],
                     borderWidth: 2,
                     borderColor: '#ffffff'
                 }]
@@ -443,18 +462,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     legend: {
                         position: 'right',
                         labels: {
-                            boxWidth: 12,
-                            font: { size: 11, family: 'Plus Jakarta Sans' },
-                            padding: 12
+                            boxWidth: 14,
+                            boxHeight: 14,
+                            font: { size: 12, family: 'Plus Jakarta Sans', weight: '600' },
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
                         }
                     },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
-                                const total = {{ $totalRawLeads }};
                                 const val = context.parsed;
-                                const pct = ((val / total) * 100).toFixed(1);
-                                return ` ${val.toLocaleString()} (${pct}%)`;
+                                const pct = total > 0 ? ((val / total) * 100).toFixed(2) : 0;
+                                return ` ${context.label.split(' (')[0]}: ${val.toLocaleString()} leads (${pct}%)`;
                             }
                         }
                     }
@@ -463,6 +484,147 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Attach AJAX pagination listener on page load
+    attachLeadsPaginationAjax();
+});
+
+let leadsLiveTimer = null;
+window.handleLeadsLiveFilter = function (immediate) {
+    const searchInput = document.getElementById('leadsLiveSearch');
+    const yearSelect = document.getElementById('leadsYearSelect');
+    const monthSelect = document.getElementById('leadsMonthSelect');
+    const statusSelect = document.getElementById('leadsStatusSelect');
+    const resetBtn = document.getElementById('leadsResetBtn');
+    const clearBtn = document.getElementById('leadsClearSearchBtn');
+    const indicator = document.getElementById('leadsLiveIndicator');
+    const tableContainer = document.getElementById('leadsTableContainer');
+
+    const q = searchInput ? searchInput.value.trim() : '';
+    const year = yearSelect ? yearSelect.value : '';
+    const month = monthSelect ? monthSelect.value : '';
+    const status = statusSelect ? statusSelect.value : 'all';
+
+    if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+    if (resetBtn) resetBtn.style.display = (q || year || month || (status && status !== 'all')) ? 'inline-block' : 'none';
+
+    // 1. Instant client-side filtering on current rows
+    const rows = document.querySelectorAll('#leadsRecordsTable tbody tr.lead-row');
+    const noMatchesRow = document.getElementById('leadsClientNoMatchesRow');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const text = (row.textContent || '').toLowerCase();
+        const matchesQ = !q || text.includes(q.toLowerCase());
+        const rowYear = row.getAttribute('data-year') || '';
+        const rowMonth = row.getAttribute('data-month') || '';
+        const rowStatus = row.getAttribute('data-status') || '';
+
+        const matchesYear = !year || (rowYear === year);
+        const matchesMonth = !month || (rowMonth === month);
+        const matchesStatus = (!status || status === 'all') || (rowStatus === status);
+
+        if (matchesQ && matchesYear && matchesMonth && matchesStatus) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    if (noMatchesRow) {
+        noMatchesRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+    }
+
+    // 2. Debounced background fetch across all database pages
+    if (indicator) indicator.style.display = 'inline-flex';
+    clearTimeout(leadsLiveTimer);
+
+    const delay = immediate ? 0 : 250;
+    leadsLiveTimer = setTimeout(() => {
+        const url = new URL(window.location.origin + window.location.pathname);
+        url.searchParams.set('tab', 'leadskpi');
+        if (q) url.searchParams.set('q', q);
+        if (year) url.searchParams.set('year', year);
+        if (month) url.searchParams.set('month', month);
+        if (status && status !== 'all') url.searchParams.set('status', status);
+
+        window.history.replaceState({}, '', url.toString());
+
+        fetch(url.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('leadsTableContainer');
+            if (newTable && tableContainer) {
+                tableContainer.innerHTML = newTable.innerHTML;
+                attachLeadsPaginationAjax();
+            }
+        })
+        .catch(err => console.error('Leads live filter fetch error:', err))
+        .finally(() => {
+            if (indicator) indicator.style.display = 'none';
+        });
+    }, delay);
+};
+
+window.clearLeadsSearch = function () {
+    const searchInput = document.getElementById('leadsLiveSearch');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+        window.handleLeadsLiveFilter(true);
+    }
+};
+
+window.resetLeadsFilters = function () {
+    const searchInput = document.getElementById('leadsLiveSearch');
+    const yearSelect = document.getElementById('leadsYearSelect');
+    const monthSelect = document.getElementById('leadsMonthSelect');
+    const statusSelect = document.getElementById('leadsStatusSelect');
+    if (searchInput) searchInput.value = '';
+    if (yearSelect) yearSelect.value = '';
+    if (monthSelect) monthSelect.value = '';
+    if (statusSelect) statusSelect.value = 'all';
+    window.handleLeadsLiveFilter(true);
+};
+
+function attachLeadsPaginationAjax() {
+    const paginationLinks = document.querySelectorAll('#leadsTableContainer .pagination a');
+    const indicator = document.getElementById('leadsLiveIndicator');
+    const tableContainer = document.getElementById('leadsTableContainer');
+
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (!href) return;
+
+            if (indicator) indicator.style.display = 'inline-flex';
+            window.history.replaceState({}, '', href);
+
+            fetch(href, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTable = doc.getElementById('leadsTableContainer');
+                if (newTable && tableContainer) {
+                    tableContainer.innerHTML = newTable.innerHTML;
+                    attachLeadsPaginationAjax();
+                    tableContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            })
+            .catch(err => console.error('Leads pagination fetch error:', err))
+            .finally(() => {
+                if (indicator) indicator.style.display = 'none';
+            });
+        });
+    });
+}
 });
 
 function toggleSidebarMenu() {
