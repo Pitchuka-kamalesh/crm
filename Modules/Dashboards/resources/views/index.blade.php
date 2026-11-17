@@ -1866,7 +1866,7 @@
                             <!-- ================= SUBBOX 2: 12th / INTERMEDIATE INFO ================= -->
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
                                 <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
-                                <input type="hidden" name="course_choice" value="Inter">
+                                <input type="hidden" name="course_choice" value="{{ $academicDetails?->pu2_study_board ?? '' }}">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
                                 <!-- Row 1: College Name / Institute Name (Full Width) -->
@@ -1887,8 +1887,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pu2_college_state ?? 'Andhra Pradesh';
-                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id || (!$academicDetails && $s->state_name === 'Andhra Pradesh'));
+                                                    $curState = $academicDetails?->pu2_college_state;
+                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -1902,8 +1902,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pu2_college_district ?? 'Guntur';
-                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID || (!$academicDetails && $d->DISTRICT_NAME === 'Guntur'));
+                                                    $curDist = $academicDetails?->pu2_college_district;
+                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -1940,7 +1940,7 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="e.g. 2026" min="2000" max="2030" required>
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Hall Ticket number:</label>
@@ -3176,73 +3176,73 @@
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ $appStudent->academic->ssc_school ?: ($appStudent->school_name ?: 'Not Provided') }}
+                                                {{ (!empty($appStudent->academic->ssc_school) && $appStudent->academic->ssc_school !== '-') ? $appStudent->academic->ssc_school : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; color: #475569;">
-                                                {{ $appStudent->academic->ssc_board ?: ($appStudent->board ?: 'State Board') }}
+                                                {{ (!empty($appStudent->academic->ssc_board) && $appStudent->academic->ssc_board !== '-') ? $appStudent->academic->ssc_board : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->ssc_year ?: ($appStudent->passing_year ?: 'N/A') }}
+                                                {{ (!empty($appStudent->academic->ssc_year) && $appStudent->academic->ssc_year !== '-') ? $appStudent->academic->ssc_year : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->ssc_roll ?: ($appStudent->roll_number ?: 'N/A') }}
+                                                {{ (!empty($appStudent->academic->ssc_roll) && $appStudent->academic->ssc_roll !== '-') ? $appStudent->academic->ssc_roll : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ $appStudent->academic->ssc_percentage !== 'N/A' ? $appStudent->academic->ssc_percentage : ((float)$appStudent->percentage > 0 ? number_format((float)$appStudent->percentage, 2) . ' %' : 'N/A') }}
+                                                {{ (!empty($appStudent->academic->ssc_percentage) && $appStudent->academic->ssc_percentage !== 'N/A' && $appStudent->academic->ssc_percentage !== '-') ? $appStudent->academic->ssc_percentage : '-' }}
                                             </td>
                                         </tr>
                                         <!-- 12th / Intermediate -->
-                                        <tr style="{{ (!empty($appStudent->academic->ug_college) || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                        <tr style="{{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-' || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
                                                 <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
                                                     12th / Inter (10+2)
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ $appStudent->academic->inter_college ?: 'Junior College Records' }}
+                                                {{ (!empty($appStudent->academic->inter_college) && $appStudent->academic->inter_college !== '-') ? $appStudent->academic->inter_college : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; color: #475569;">
-                                                {{ $appStudent->academic->inter_board ?: 'Board of Intermediate Education' }}
+                                                {{ (!empty($appStudent->academic->inter_board) && $appStudent->academic->inter_board !== '-') ? $appStudent->academic->inter_board : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->inter_year ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->inter_year) && $appStudent->academic->inter_year !== '-') ? $appStudent->academic->inter_year : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->inter_roll ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->inter_roll) && $appStudent->academic->inter_roll !== '-') ? $appStudent->academic->inter_roll : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ $appStudent->academic->inter_percentage ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->inter_percentage) && $appStudent->academic->inter_percentage !== 'N/A' && $appStudent->academic->inter_percentage !== '-') ? $appStudent->academic->inter_percentage : '-' }}
                                             </td>
                                         </tr>
 
                                         <!-- Undergraduate (UG / Degree / B.Tech) -->
-                                        @if(!empty($appStudent->academic->ug_college) || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd')
-                                        <tr style="{{ (!empty($appStudent->academic->pg_college) || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                        @if((!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr style="{{ ((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
                                                 <span style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
                                                     Undergraduate (UG)
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ $appStudent->academic->ug_college ?: 'Degree / B.Tech Institute' }}
+                                                {{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') ? $appStudent->academic->ug_college : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; color: #475569;">
-                                                {{ $appStudent->academic->ug_board ?: 'University / Autonomous Board' }}
+                                                {{ (!empty($appStudent->academic->ug_board) && $appStudent->academic->ug_board !== '-') ? $appStudent->academic->ug_board : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->ug_year ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->ug_year) && $appStudent->academic->ug_year !== '-') ? $appStudent->academic->ug_year : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->ug_roll ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->ug_roll) && $appStudent->academic->ug_roll !== '-') ? $appStudent->academic->ug_roll : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ $appStudent->academic->ug_percentage ?: ($appStudent->academic->ug_status ?: 'Completed') }}
+                                                {{ (!empty($appStudent->academic->ug_percentage) && $appStudent->academic->ug_percentage !== 'N/A' && $appStudent->academic->ug_percentage !== '-') ? $appStudent->academic->ug_percentage : '-' }}
                                             </td>
                                         </tr>
                                         @endif
 
                                         <!-- Postgraduate (PG / Master's / M.Tech) -->
-                                        @if(!empty($appStudent->academic->pg_college) || ($appStudent->degree_level ?? '') === 'phd')
+                                        @if((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
                                         <tr>
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
                                                 <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
@@ -3250,19 +3250,19 @@
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ $appStudent->academic->pg_college ?: 'Master / PG Institute' }}
+                                                {{ (!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') ? $appStudent->academic->pg_college : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; color: #475569;">
-                                                {{ $appStudent->academic->pg_board ?: 'University / Board' }}
+                                                {{ (!empty($appStudent->academic->pg_board) && $appStudent->academic->pg_board !== '-') ? $appStudent->academic->pg_board : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->pg_year ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->pg_year) && $appStudent->academic->pg_year !== '-') ? $appStudent->academic->pg_year : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->pg_roll ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->pg_roll) && $appStudent->academic->pg_roll !== '-') ? $appStudent->academic->pg_roll : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ $appStudent->academic->pg_percentage ?: ($appStudent->academic->pg_status ?: 'Completed') }}
+                                                {{ (!empty($appStudent->academic->pg_percentage) && $appStudent->academic->pg_percentage !== 'N/A' && $appStudent->academic->pg_percentage !== '-') ? $appStudent->academic->pg_percentage : '-' }}
                                             </td>
                                         </tr>
                                         @endif

@@ -813,7 +813,8 @@ class DashboardsController extends Controller
                     $tenthSchool = $request->input('tenth_school_name') ?? $request->input('school_co_name') ?? $request->input('ssc_school');
                     $tenthBoard = $request->input('tenth_study_board') ?? $request->input('boad_of_study') ?? $request->input('ssc_board');
                     $tenthRoll = $request->input('tenth_roll_no') ?? $request->input('roll_no') ?? $request->input('ssc_hallticket');
-                    $tenthYear = (int) ($request->input('tenth_passed_year') ?? $request->input('passing_year') ?? $request->input('ssc_year') ?? 2024);
+                    $tenthYearInput = $request->input('tenth_passed_year') ?? $request->input('passing_year') ?? $request->input('ssc_year');
+                    $tenthYear = (is_numeric($tenthYearInput) && (int)$tenthYearInput > 0) ? (int)$tenthYearInput : null;
 
                     $evalType = $request->input('eval_type') ?? $request->input('tenth_marks_type') ?? 'marks';
                     $sscMarks = $request->input('tenth_marks') ?? $request->input('tenth_marks_earned') ?? $request->input('marks_value') ?? $request->input('ssc_marks');
@@ -837,7 +838,7 @@ class DashboardsController extends Controller
                         $evalType = 'marks';
                     }
 
-                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board') ?? 'Inter';
+                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board');
                     $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? 'First Year';
 
                     $tenthConducted = is_numeric($request->input('tenth_marks_conducted'))
