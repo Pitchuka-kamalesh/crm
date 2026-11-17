@@ -1710,21 +1710,21 @@
             <!-- LEADS INCHARGE ALLOCATION CONTROL PANEL (Shown on Leads Allocation tab) -->
             @if($activeTab === 'allocation')
                 <div class="allocation-command-card" style="padding: 0.65rem 0.95rem; margin-bottom: 0.65rem;">
-                    <!-- Single-line form: Select Telecaller, Allocation Target, Allocate button -->
-                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); submitInchargeAllocation();" style="margin: 0; padding: 0;">
-                        <div style="display: flex; align-items: flex-end; gap: 0.85rem; flex-wrap: wrap;">
+                    <!-- Single-line form: Select Telecaller, Allocation Target, Allocate, Auto Allocate, Download -->
+                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); openAllocateConfirmModal();" style="margin: 0; padding: 0;">
+                        <div style="display: flex; align-items: flex-end; gap: 0.65rem; flex-wrap: wrap;">
                             <!-- 1. Select Telecaller -->
-                            <div style="flex: 1; min-width: 250px;">
-                                <label for="inchargeTelecallerSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
+                            <div style="flex: 1; min-width: 175px; max-width: 230px;">
+                                <label for="inchargeTelecallerSelect" class="incharge-label" style="font-size: 0.76rem; font-weight: 700; color: #334155; margin-bottom: 0.2rem; display: block;">
                                     <span>Select Telecaller<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
-                                <div class="incharge-control-shell">
+                                <div class="incharge-control-shell" style="height: 38px;">
                                     <span class="input-icon-left">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                                         </svg>
                                     </span>
-                                    <select id="inchargeTelecallerSelect" class="incharge-select" required>
+                                    <select id="inchargeTelecallerSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem;" required>
                                         <option value="">-- Choose Telecaller --</option>
                                         @foreach($telecallers as $tc)
                                             <option value="{{ $tc->emp_code }}">
@@ -1736,20 +1736,20 @@
                             </div>
 
                             <!-- 2. Allocation Target with bucket sizes 100, 300, 500, 1000 -->
-                            <div style="flex: 1; min-width: 250px;">
-                                <label for="inchargeTargetSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
+                            <div style="flex: 1; min-width: 175px; max-width: 220px;">
+                                <label for="inchargeTargetSelect" class="incharge-label" style="font-size: 0.76rem; font-weight: 700; color: #334155; margin-bottom: 0.2rem; display: block;">
                                     <span>Allocation Target<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
-                                <div class="incharge-control-shell">
+                                <div class="incharge-control-shell" style="height: 38px;">
                                     <span class="input-icon-left">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                                             <circle cx="9" cy="7" r="4"/>
                                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                                             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                         </svg>
                                     </span>
-                                    <select id="inchargeTargetSelect" class="incharge-select" required>
+                                    <select id="inchargeTargetSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem;" required>
                                         <option value="selected">Selected Checked Leads</option>
                                         <option value="100">Bucket: 100 Leads</option>
                                         <option value="300">Bucket: 300 Leads</option>
@@ -1760,21 +1760,29 @@
                                 </div>
                             </div>
 
-                            <!-- 3. Allocate Buttons: Manual (Half Size) & Auto Allocate -->
-                            <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
-                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 42px; margin: 0; padding: 0 0.85rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" title="Allocate selected or bucket leads to chosen telecaller">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- 3. Action Buttons: Allocate, Auto Allocate, Download -->
+                            <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;">
+                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 38px; margin: 0; padding: 0 0.8rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap;" title="Allocate selected or bucket leads to chosen telecaller">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
                                         <polyline points="16 11 18 13 22 9"/>
                                     </svg>
                                     <span>Allocate</span>
                                 </button>
-                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 42px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: 1px solid #4338ca; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(79, 70, 229, 0.28); transition: all 0.2s ease;" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 38px; margin: 0; padding: 0 0.8rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: 1px solid #4338ca; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.25); transition: all 0.2s ease;" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                                     </svg>
                                     <span>Auto Allocate</span>
+                                </button>
+                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" style="height: 38px; margin: 0; padding: 0 0.85rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; background: #0f172a; color: #ffffff; border: 1px solid #1e293b; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2); transition: all 0.2s ease;" title="Download Leads in PDF or Excel format">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    <span>Download</span>
                                 </button>
                             </div>
                         </div>
@@ -2898,6 +2906,145 @@
     </div>
 </div>
 
+<!-- ================= DOWNLOAD LEADS MODAL ================= -->
+<div class="wizard-overlay" id="leadDownloadModal" onclick="if(event.target.id==='leadDownloadModal') closeLeadDownloadModal()">
+    <div class="wizard-modal-box" style="max-width: 490px; border-radius: 14px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);">
+        <div class="wizard-modal-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 1.1rem 1.4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 9px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #fff;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="color: #ffffff; font-size: 1rem; font-weight: 700;">Download Leads Report</div>
+                    <div style="color: #94a3b8; font-size: 0.74rem;">Export leads into Excel or PDF document</div>
+                </div>
+            </div>
+            <button type="button" class="btn-close-modal" onclick="closeLeadDownloadModal()" title="Close" style="color: #ffffff; opacity: 0.8; font-size: 1.25rem;">✕</button>
+        </div>
+
+        <form id="leadDownloadForm" onsubmit="event.preventDefault(); submitLeadDownload();" style="padding: 1.35rem 1.5rem; background: #ffffff;">
+            <!-- Format Choice: Excel (.csv) vs PDF -->
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.45rem;">
+                    1. Select Format <span style="color: #ef4444;">*</span>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <label id="formatCardExcel" style="border: 2px solid #10b981; background: #f0fdf4; border-radius: 10px; padding: 0.75rem 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="download_format" value="excel" checked onchange="onDownloadFormatChange('excel')" style="accent-color: #059669; width: 16px; height: 16px;">
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 700; color: #065f46;">📊 Excel (.csv)</div>
+                            <div style="font-size: 0.7rem; color: #047857;">Spreadsheet Data</div>
+                        </div>
+                    </label>
+                    <label id="formatCardPdf" style="border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 10px; padding: 0.75rem 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="download_format" value="pdf" onchange="onDownloadFormatChange('pdf')" style="accent-color: #dc2626; width: 16px; height: 16px;">
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 700; color: #991b1b;">📄 PDF Document</div>
+                            <div style="font-size: 0.7rem; color: #7f1d1d;">Formatted PDF</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 3 Checkboxes: All Leads, Allocated, Not Allocated -->
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.45rem;">
+                    2. Select Category (Checkboxes) <span style="color: #ef4444;">*</span>
+                </label>
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.7rem;">
+                    <!-- Checkbox 1: All Leads -->
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #1e293b;">
+                        <input type="checkbox" id="dl_chk_all" name="dl_status[]" value="all" checked onchange="toggleDownloadAllCheckboxes(this)" style="width: 17px; height: 17px; accent-color: #0f172a; cursor: pointer;">
+                        <span>All Leads <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">(Complete lead directory)</span></span>
+                    </label>
+
+                    <div style="height: 1px; background: #e2e8f0; margin: 1px 0;"></div>
+
+                    <!-- Checkbox 2: Allocated -->
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #1e293b;">
+                        <input type="checkbox" id="dl_chk_allocated" name="dl_status[]" value="allocated" checked onchange="onDownloadChildCheckboxChange()" style="width: 17px; height: 17px; accent-color: #10b981; cursor: pointer;">
+                        <span>Allocated <span style="font-size: 0.72rem; color: #059669; font-weight: 500;">(Assigned to telecaller)</span></span>
+                    </label>
+
+                    <!-- Checkbox 3: Not Allocated -->
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #1e293b;">
+                        <input type="checkbox" id="dl_chk_unallocated" name="dl_status[]" value="unallocated" checked onchange="onDownloadChildCheckboxChange()" style="width: 17px; height: 17px; accent-color: #f59e0b; cursor: pointer;">
+                        <span>Not Allocated <span style="font-size: 0.72rem; color: #d97706; font-weight: 500;">(Unassigned pool)</span></span>
+                    </label>
+                </div>
+                <div id="dlValidationMsg" style="display: none; font-size: 0.74rem; color: #ef4444; font-weight: 600; margin-top: 5px;">
+                    Please select at least one checkbox to download.
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                <button type="button" onclick="closeLeadDownloadModal()" class="tele-btn-action" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 0.55rem 1.15rem; font-size: 0.82rem; font-weight: 600; border-radius: 7px; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" id="btnExecuteDownload" style="height: 38px; padding: 0 1.35rem; font-size: 0.82rem; font-weight: 600; background: #0f172a; border: none; border-radius: 7px; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 3px 8px rgba(15, 23, 42, 0.25);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Download File</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= ALLOCATE CONFIRMATION MODAL ================= -->
+<div class="wizard-overlay" id="allocateConfirmModal" onclick="if(event.target.id==='allocateConfirmModal') closeAllocateConfirmModal()">
+    <div class="wizard-modal-box" style="max-width: 480px; border-radius: 14px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);">
+        <div class="wizard-modal-header" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); padding: 1.1rem 1.4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 9px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: #fff;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <polyline points="16 11 18 13 22 9"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="color: #ffffff; font-size: 1rem; font-weight: 700;">Confirm Leads Allocation</div>
+                    <div style="color: #a7f3d0; font-size: 0.74rem;">Review and confirm allocation details</div>
+                </div>
+            </div>
+            <button type="button" class="btn-close-modal" onclick="closeAllocateConfirmModal()" title="Close" style="color: #ffffff; opacity: 0.8; font-size: 1.25rem;">✕</button>
+        </div>
+
+        <div style="padding: 1.35rem 1.5rem; background: #ffffff;">
+            <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.95rem 1.1rem; margin-bottom: 1.15rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.82rem;">
+                    <span style="color: #64748b; font-weight: 600;">Selected Telecaller:</span>
+                    <strong style="color: #065f46; font-size: 0.86rem;" id="allocConfirmTelecallerName">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;">
+                    <span style="color: #64748b; font-weight: 600;">Allocation Target:</span>
+                    <strong style="color: #065f46; font-size: 0.86rem;" id="allocConfirmTargetName">-</strong>
+                </div>
+            </div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0 0 1.25rem 0; line-height: 1.45;">
+                Click <strong>Confirm & Allocate</strong> below to assign these leads to the selected telecaller.
+            </p>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                <button type="button" onclick="closeAllocateConfirmModal()" class="tele-btn-action" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 0.55rem 1.15rem; font-size: 0.82rem; font-weight: 600; border-radius: 7px; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="button" id="btnConfirmExecuteAllocate" onclick="executeInchargeAllocationConfirmed()" style="height: 38px; padding: 0 1.35rem; font-size: 0.82rem; font-weight: 600; background: #059669; border: none; border-radius: 7px; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 3px 8px rgba(5, 150, 105, 0.3);">
+                    <span>Confirm & Allocate</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast -->
 <!-- Call Duration 3-Column Roller Popover -->
 <div id="durationRollerPopover" class="duration-roller-popover" role="dialog" aria-label="Call Duration Picker">
@@ -3707,6 +3854,151 @@
             console.error('Allocation error:', err);
             showToast('Server error while allocating leads.', true);
         });
+    }
+
+    // ===== LEADS DOWNLOAD MODAL FUNCTIONS =====
+    function openLeadDownloadModal() {
+        const modal = document.getElementById('leadDownloadModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            const valMsg = document.getElementById('dlValidationMsg');
+            if (valMsg) valMsg.style.display = 'none';
+        }
+    }
+
+    function closeLeadDownloadModal() {
+        const modal = document.getElementById('leadDownloadModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function onDownloadFormatChange(fmt) {
+        const cardExcel = document.getElementById('formatCardExcel');
+        const cardPdf = document.getElementById('formatCardPdf');
+        if (fmt === 'excel') {
+            if (cardExcel) {
+                cardExcel.style.borderColor = '#10b981';
+                cardExcel.style.background = '#f0fdf4';
+            }
+            if (cardPdf) {
+                cardPdf.style.borderColor = '#e2e8f0';
+                cardPdf.style.background = '#f8fafc';
+            }
+        } else {
+            if (cardPdf) {
+                cardPdf.style.borderColor = '#ef4444';
+                cardPdf.style.background = '#fef2f2';
+            }
+            if (cardExcel) {
+                cardExcel.style.borderColor = '#e2e8f0';
+                cardExcel.style.background = '#f8fafc';
+            }
+        }
+    }
+
+    function toggleDownloadAllCheckboxes(allCheckbox) {
+        const chkAlloc = document.getElementById('dl_chk_allocated');
+        const chkUnalloc = document.getElementById('dl_chk_unallocated');
+        if (chkAlloc) chkAlloc.checked = allCheckbox.checked;
+        if (chkUnalloc) chkUnalloc.checked = allCheckbox.checked;
+        const valMsg = document.getElementById('dlValidationMsg');
+        if (valMsg) valMsg.style.display = 'none';
+    }
+
+    function onDownloadChildCheckboxChange() {
+        const chkAll = document.getElementById('dl_chk_all');
+        const chkAlloc = document.getElementById('dl_chk_allocated');
+        const chkUnalloc = document.getElementById('dl_chk_unallocated');
+        if (chkAlloc && chkUnalloc && chkAll) {
+            if (chkAlloc.checked && chkUnalloc.checked) {
+                chkAll.checked = true;
+            } else {
+                chkAll.checked = false;
+            }
+        }
+        const valMsg = document.getElementById('dlValidationMsg');
+        if (valMsg) valMsg.style.display = 'none';
+    }
+
+    function submitLeadDownload() {
+        const formatInput = document.querySelector('input[name="download_format"]:checked');
+        const format = formatInput ? formatInput.value : 'excel';
+
+        const chkAll = document.getElementById('dl_chk_all');
+        const chkAlloc = document.getElementById('dl_chk_allocated');
+        const chkUnalloc = document.getElementById('dl_chk_unallocated');
+
+        let statuses = [];
+        if (chkAll && chkAll.checked) {
+            statuses = ['all'];
+        } else {
+            if (chkAlloc && chkAlloc.checked) statuses.push('allocated');
+            if (chkUnalloc && chkUnalloc.checked) statuses.push('unallocated');
+        }
+
+        if (statuses.length === 0) {
+            const valMsg = document.getElementById('dlValidationMsg');
+            if (valMsg) valMsg.style.display = 'block';
+            return;
+        }
+
+        const url = `/leads/download?format=${encodeURIComponent(format)}&status=${encodeURIComponent(statuses.join(','))}`;
+        closeLeadDownloadModal();
+        window.location.href = url;
+    }
+
+    // ===== ALLOCATE CONFIRMATION MODAL FUNCTIONS =====
+    function openAllocateConfirmModal() {
+        const empSelect = document.getElementById('inchargeTelecallerSelect');
+        const empCode = empSelect?.value;
+        if (!empCode) {
+            alert('Please choose a telecaller from the dropdown.');
+            empSelect?.focus();
+            return;
+        }
+
+        const targetSelect = document.getElementById('inchargeTargetSelect');
+        const targetMode = targetSelect?.value || 'selected';
+
+        let targetLabel = '';
+        if (targetMode === 'selected') {
+            const checkedBoxes = Array.from(document.querySelectorAll('.lead-select-chk:checked'));
+            if (checkedBoxes.length === 0) {
+                alert('Please select at least one lead from the table using checkboxes, or choose a bucket size (100, 300, 500, 1000).');
+                return;
+            }
+            targetLabel = `${checkedBoxes.length} Selected Checked Lead(s)`;
+        } else {
+            targetLabel = targetSelect.options[targetSelect.selectedIndex]?.text || targetMode;
+        }
+
+        const telecallerText = empSelect.options[empSelect.selectedIndex]?.text || empCode;
+        const nameEl = document.getElementById('allocConfirmTelecallerName');
+        const targetEl = document.getElementById('allocConfirmTargetName');
+        if (nameEl) nameEl.textContent = telecallerText;
+        if (targetEl) targetEl.textContent = targetLabel;
+
+        const modal = document.getElementById('allocateConfirmModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeAllocateConfirmModal() {
+        const modal = document.getElementById('allocateConfirmModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function executeInchargeAllocationConfirmed() {
+        closeAllocateConfirmModal();
+        submitInchargeAllocation();
     }
 
     // Attach listeners on initial document load

@@ -1181,5 +1181,125 @@ class LeadsController extends Controller
         return null;
     }
 
+    /**
+     * Download Leads Directory Report as Excel (CSV) or PDF.
+     * Supports filtering by: all, allocated, unallocated.
+     */
+    public function downloadReport(Request $request)
+    {
+        $format = strtolower((string) $request->input('format', 'excel'));
+        $statuses = (array) $request->input('status', ['all']);
+
+        // Flatten any array or comma-separated status strings
+        $selectedStatuses = [];
+        foreach ($statuses as $s) {
+            foreach (explode(',', (string) $s) as $sub) {
+                $sub = trim(strtolower($sub));
+                if ($sub !== '') {
+                    $selectedStatuses[] = $sub;
+                }
+            }
+        }
+
+        $isAll = empty($selectedStatuses) 
+            || in_array('all', $selectedStatuses, true) 
+            || (in_array('allocated', $selectedStatuses, true) && in_array('unallocated', $selectedStatuses, true));
+        $onlyAllocated = !$isAll && in_array('allocated', $selectedStatuses, true);
+        $onlyUnallocated = !$isAll && in_array('unallocated', $selectedStatuses, true);
+
+        $query = Lead::query();
+
+        if ($onlyAllocated) {
+            $query->whereNotNull('empcode')->where('empcode', '<>', '0');
+        } elseif ($onlyUnallocated) {
+            $query->where(function ($q) {
+                $q->whereNull('empcode')->orWhere('empcode', '0');
+            });
+        }
+
+        $leads = $query->orderBy('log_timestamp', 'desc')->get();
+
+        // Fetch telecaller names from employees table
+        $empCodes = $leads->pluck('empcode')->filter()->unique()->all();
+        $employeeMap = [];
+        if (!empty($empCodes)) {
+            try {
+                $employeeMap = \App\Models\Employee::whereIn('emp_code', $empCodes)
+                    ->pluck('full_name', 'emp_code')
+                    ->all();
+            } catch (\Throwable $e) {}
+        }
+
+        $statusSlug = $onlyAllocated ? 'allocated' : ($onlyUnallocated ? 'unallocated' : 'all');
+        $statusLabel = $onlyAllocated ? 'Allocated Leads' : ($onlyUnallocated ? 'Not Allocated Leads' : 'All Leads');
+        $dateStr = date('Y-m-d_His');
+
+        if ($format === 'pdf') {
+            $pdfLeads = $leads->take(2000);
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('leads::reports.leads_pdf', [
+                'leads' => $pdfLeads,
+                'employeeMap' => $employeeMap,
+                'statusLabel' => $statusLabel,
+                'totalCount' => $leads->count(),
+                'generatedAt' => date('d-M-Y H:i:s'),
+            ])->setPaper('a4', 'landscape');
+
+            return $pdf->download("leads_{$statusSlug}_{$dateStr}.pdf");
+        }
+
+        // Default: Excel (.csv stream with UTF-8 BOM for Microsoft Excel)
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"leads_{$statusSlug}_{$dateStr}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($leads, $employeeMap) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Excel opens it with proper encoding
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'S.No',
+                'Phone Number',
+                'Upload / Enquiry Timestamp',
+                'Emp Code',
+                'Telecaller Name',
+                'Allocated Timestamp',
+                'Status',
+            ]);
+
+            $sno = 1;
+            foreach ($leads as $lead) {
+                $isAlloc = !empty($lead->empcode) && (string) $lead->empcode !== '0';
+                $empCodeStr = $isAlloc ? (string) $lead->empcode : '0';
+                $telecallerName = $isAlloc ? ($employeeMap[$lead->empcode] ?? $lead->empcode) : 'Unallocated';
+                $ts = !empty($lead->log_timestamp)
+                    ? ($lead->log_timestamp instanceof \DateTimeInterface ? $lead->log_timestamp->format('Y-m-d H:i:s') : (string) $lead->log_timestamp)
+                    : (!empty($lead->enquirydate) ? (string) $lead->enquirydate : '-');
+                $allocTs = $isAlloc && !empty($lead->allocated_at)
+                    ? ($lead->allocated_at instanceof \DateTimeInterface ? $lead->allocated_at->format('Y-m-d H:i:s') : (string) $lead->allocated_at)
+                    : ($isAlloc ? '-' : '0');
+                $statusStr = $isAlloc ? 'Allocated' : 'Not Allocated';
+
+                fputcsv($handle, [
+                    $sno++,
+                    (string) $lead->phoneno,
+                    $ts,
+                    $empCodeStr,
+                    $telecallerName,
+                    $allocTs,
+                    $statusStr,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function destroy($id) { return response()->json(['success' => true]); }
 }
