@@ -38,10 +38,6 @@ class AppServiceProvider extends ServiceProvider
             \Modules\Auth\Services\MenuSyncService::ensureKpiAndSmsMenus();
             try {
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS discount NUMERIC(10,2) DEFAULT 0.00;");
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS crmid VARCHAR(50);");
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS usercode VARCHAR(50);");
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS user_ip VARCHAR(45);");
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS applino VARCHAR(50);");
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS couponsno VARCHAR(50);");
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS coupcount INT DEFAULT 1;");
                 \Illuminate\Support\Facades\DB::statement("ALTER TABLE finance.couponinfo ADD COLUMN IF NOT EXISTS coupcurrcount INT DEFAULT 0;");

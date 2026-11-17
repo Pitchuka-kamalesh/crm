@@ -149,7 +149,7 @@
             <tr>
                 <td style="width:70px">
                     @if (!empty($student->photo_path))
-                        <div class="photo-filled"><img src="{{ $student->photo_path }}" width="58" height="72" style="display:block; width:58px; height:72px;" alt="Photo"></div>
+                        <div class="photo-filled"><img src="{{ $student->photo_path }}" width="58" height="72" style="display:block; width:58px; height:72px; object-fit:cover;" alt=""></div>
                     @else
                         <div class="photo">AFFIX<br>PASSPORT<br>PHOTO</div>
                     @endif

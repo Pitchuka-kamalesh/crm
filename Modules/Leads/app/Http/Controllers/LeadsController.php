@@ -98,17 +98,35 @@ class LeadsController extends Controller
                 $leadsQuery->where('empcode', $callerFilter);
             }
 
+            $examExistsSql = "EXISTS (
+                SELECT 1 FROM finance.exam_schedule es 
+                WHERE (es.phoneno IS NOT NULL AND CAST(es.phoneno AS TEXT) <> '' AND CAST(es.phoneno AS TEXT) = CAST(crm.leads.phoneno AS TEXT))
+                   OR (crm.leads.applino IS NOT NULL AND CAST(crm.leads.applino AS TEXT) <> '' AND CAST(crm.leads.applino AS TEXT) <> '0' AND CAST(es.applino AS TEXT) = CAST(crm.leads.applino AS TEXT))
+            )";
+
             if ($allocStatusFilter === 'allocated') {
-                $leadsQuery->whereNotNull('empcode')->where('empcode', '<>', '0');
+                $leadsQuery->whereNotNull('empcode')
+                    ->where('empcode', '<>', '0')
+                    ->whereRaw("NOT ({$examExistsSql})");
             } elseif ($allocStatusFilter === 'unallocated') {
                 $leadsQuery->where(function ($q) {
                     $q->whereNull('empcode')->orWhere('empcode', '0');
-                });
+                })->whereRaw("NOT ({$examExistsSql})");
+            } elseif ($allocStatusFilter === 'completed') {
+                $leadsQuery->whereRaw($examExistsSql);
             }
 
-            // Till allotment employee code, emp time stamp be 0; newly uploaded leads appear first
+            // Ordering: 0 = unallocated, 1 = allocated, 2 = completed (in exam_schedule moved to last)
             $leads = $leadsQuery
-                ->orderByRaw("(CASE WHEN empcode IS NULL OR empcode = '0' THEN 0 ELSE 1 END) ASC, log_timestamp DESC NULLS LAST, enquirydate DESC NULLS LAST")
+                ->orderByRaw("
+                    (CASE
+                        WHEN {$examExistsSql} THEN 2
+                        WHEN empcode IS NULL OR empcode = '0' THEN 0
+                        ELSE 1
+                    END) ASC,
+                    log_timestamp DESC NULLS LAST,
+                    enquirydate DESC NULLS LAST
+                ")
                 ->paginate($perPage)
                 ->withQueryString();
         } elseif ($activeTab === 'allotted') {
@@ -283,6 +301,22 @@ class LeadsController extends Controller
         $latestTasks = collect();
         $latestStageTasksByPhone = collect();
         $latestStageTasksByAppli = collect();
+        $examScheduledPhones = collect();
+        $examScheduledApplis = collect();
+        try {
+            $examScheduledPhones = \App\Models\ExamSchedule::pluck('phoneno')
+                ->filter()
+                ->map(fn($p) => (string) preg_replace('/\D/', '', $p))
+                ->filter()
+                ->unique()
+                ->values();
+            $examScheduledApplis = \App\Models\ExamSchedule::pluck('applino')
+                ->filter()
+                ->map(fn($a) => (string) trim($a))
+                ->filter()
+                ->unique()
+                ->values();
+        } catch (\Throwable $e) {}
         try {
             $dbAllocations = TelecallerLead::with('employee')
                 ->get()
@@ -356,7 +390,9 @@ class LeadsController extends Controller
                 'latestStageTasksByPhone',
                 'latestStageTasksByAppli',
                 'activeTab',
-                'stageEligibilityMap'
+                'stageEligibilityMap',
+                'examScheduledPhones',
+                'examScheduledApplis'
             ));
         }
 
@@ -372,6 +408,8 @@ class LeadsController extends Controller
 
         // Role-based assigned menus from master.menu_access_roles (with crm fallback)
         $roleMenus = MenuAccessRole::forRole($roleId);
+
+        $nextTelecallerInfo = TelecallerService::getNextTelecallerInfo();
 
         return view('leads::index', compact(
             'user',
@@ -407,7 +445,10 @@ class LeadsController extends Controller
             'studentMap',
             'phoneStudentMap',
             'leadModelMap',
-            'recentUploadedFiles'
+            'recentUploadedFiles',
+            'examScheduledPhones',
+            'examScheduledApplis',
+            'nextTelecallerInfo'
         ));
     }
 
@@ -692,6 +733,25 @@ class LeadsController extends Controller
             'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
             'log_ipaddress' => $request->ip() ?: '127.0.0.1',
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json($res, $res['success'] ? 200 : 422);
+        }
+
+        return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
+    }
+
+    /**
+     * Auto-allocate leads sequentially across active telecallers in round-robin order.
+     */
+    public function autoAllocate(Request $request)
+    {
+        $count = (int) $request->input('count', 0);
+        $res = TelecallerService::autoAllocateRoundRobin(
+            $count,
+            auth()->user()?->usercode ?? 'SYSTEM',
+            $request->ip() ?: '127.0.0.1'
+        );
 
         if ($request->wantsJson()) {
             return response()->json($res, $res['success'] ? 200 : 422);

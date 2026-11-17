@@ -6,15 +6,18 @@ use Modules\Dashboards\Http\Controllers\RegistrationController;
 use Modules\Dashboards\Http\Controllers\ApplicationController;
 use Modules\Dashboards\Http\Controllers\ExamController;
 
-// Public Registration Routes
+// Public Registration & Application Form Routes
 Route::get('/register', [RegistrationController::class, 'show'])->name('register');
 Route::post('/register', [RegistrationController::class, 'store'])->name('register.post');
 Route::post('/register/autosave', [RegistrationController::class, 'autosave'])->name('register.autosave');
 Route::get('/api/programs/{id}/branches', [RegistrationController::class, 'getBranches'])->name('api.programs.branches');
 Route::get('/api/districts/{stateId}', [RegistrationController::class, 'getDistricts'])->name('api.districts.by-state');
+Route::get('/application/{id}', [ApplicationController::class, 'show'])->name('application.show');
+Route::get('/application/{id}/download', [ApplicationController::class, 'download'])->name('application.download');
 
 Route::middleware(['auth'])->group(function () {
     // Multi-step Student Onboarding
+    Route::post('dashboards/accept-terms', [DashboardsController::class, 'acceptTerms'])->name('dashboards.accept-terms');
     Route::post('dashboards/save-step', [DashboardsController::class, 'saveStep'])->name('dashboards.save-step');
     Route::post('dashboards/save-education', [DashboardsController::class, 'saveEducation'])->name('dashboards.save-education');
     Route::post('dashboards/autosave', [DashboardsController::class, 'autosave'])->name('dashboards.autosave');
@@ -39,8 +42,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/exam', [ExamController::class, 'slotData']);
     Route::get('/exams', [ExamController::class, 'slotData']);
     Route::get('/examslotdata', [ExamController::class, 'slotData']);
-
-    // Official A4 Application Form Preview & PDF Download
-    Route::get('/application/{id}', [ApplicationController::class, 'show'])->name('application.show');
-    Route::get('/application/{id}/download', [ApplicationController::class, 'download'])->name('application.download');
 });

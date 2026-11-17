@@ -3,6 +3,7 @@
 namespace Modules\Finance\Services;
 
 use Modules\Finance\Models\Coupous as CouponInfo;
+use Modules\Crm\Services\CrmIdService;
 use Illuminate\Support\Facades\Log;
 
 class CouponService
@@ -30,6 +31,7 @@ class CouponService
                 ->where('coupstatus', 'ACTIVE')
                 ->where(function ($q) {
                     $q->whereNull('coupcount')
+                      ->orWhereNull('coupstdcount')
                       ->orWhereColumn('coupcurrcount', '<', 'coupcount');
                 })
                 ->orderBy('id', 'desc')
@@ -99,10 +101,8 @@ class CouponService
 
         try {
             return CouponInfo::where('coupontype', 'PERSONAL')
-                ->where(function ($q) use ($applino, $formattedCode, $clean, $last7, $last8, $eightDigits) {
-                    $q->where('applino', $applino)
-                      ->orWhere('applino', $clean)
-                      ->orWhere('couponsno', $formattedCode)
+                ->where(function ($q) use ($formattedCode, $clean, $last7, $last8, $eightDigits, $applino) {
+                    $q->where('couponsno', $formattedCode)
                       ->orWhere('couponsno', $eightDigits . 'P1')
                       ->orWhere('couponsno', $eightDigits)
                       ->orWhere('couponsno', $last8)
@@ -155,10 +155,8 @@ class CouponService
 
         // Check if personal coupon already exists for this candidate via Eloquent
         $existing = CouponInfo::where('coupontype', 'PERSONAL')
-            ->where(function ($q) use ($applino, $couponCode, $clean, $last7, $last8, $eightDigits) {
-                $q->where('applino', $applino)
-                  ->orWhere('applino', $clean)
-                  ->orWhere('couponsno', $couponCode)
+            ->where(function ($q) use ($couponCode, $clean, $last7, $last8, $eightDigits) {
+                $q->where('couponsno', $couponCode)
                   ->orWhere('couponsno', $eightDigits . 'P1')
                   ->orWhere('couponsno', $eightDigits)
                   ->orWhere('couponsno', $last8)
@@ -177,7 +175,6 @@ class CouponService
                 'currentcouponcode' => $couponCode,
                 'discountamount' => $discountAmount,
                 'coupstatus' => 'ACTIVE',
-                'applino' => $applino,
                 'log_userid' => $userId,
                 'log_ipaddress' => $ip,
                 'log_timestamp' => now(),
@@ -198,18 +195,19 @@ class CouponService
         CouponInfo::create([
             'id' => $newId,
             'couponsno' => $couponCode,
-            'admyear' => '2026-27',
+            'couponyear' => '2026-27',
             'campuscode' => 'VAD',
             'coupontype' => 'PERSONAL',
             'couponname' => "Personal Concession for {$crmId} (App #{$applino} - {$couponCode})",
             'coupcount' => 1,
+            'coupstdcount' => 1,
             'coucharcount' => strlen($couponCode),
             'coupcurrcount' => 0,
             'discountamount' => $discountAmount,
+            'discount' => 0.00,
             'couponcodestart' => $couponCode,
             'currentcouponcode' => $couponCode,
             'coupstatus' => 'ACTIVE',
-            'applino' => $applino,
             'log_userid' => $userId,
             'log_ipaddress' => $ip,
             'log_timestamp' => now(),
@@ -283,18 +281,18 @@ class CouponService
             ];
         }
 
-        // If coupon is strictly registered to a specific application number, verify ownership
-        if (!empty($coupon->applino) && !empty($applino)) {
+        // Verify ownership for personal coupon: personal coupon is only for that particular student
+        if ($coupon->coupontype === 'PERSONAL' && !empty($applino)) {
+            $expectedCode = self::formatPersonalCouponCode($applino);
             $cleanApp = preg_replace('/\D/', '', $applino);
-            $couponApp = preg_replace('/\D/', '', (string)$coupon->applino);
-            $matches = ($cleanApp === $couponApp)
-                || (strlen($cleanApp) >= 8 && strlen($couponApp) >= 8 && substr($cleanApp, -8) === substr($couponApp, -8))
-                || (strlen($cleanApp) >= 7 && strlen($couponApp) >= 7 && substr($cleanApp, -7) === substr($couponApp, -7));
+            $cleanCode = preg_replace('/\D/', '', (string)$coupon->couponsno);
+            $matches = (strtoupper($coupon->couponsno) === strtoupper($expectedCode))
+                || (!empty($cleanApp) && !empty($cleanCode) && (str_contains($cleanApp, $cleanCode) || str_contains($cleanCode, substr($cleanApp, -7)) || str_contains($cleanCode, substr($cleanApp, -8))));
 
             if (!$matches) {
                 return [
                     'success' => false,
-                    'message' => "Personal coupon [{$coupon->couponsno}] is allocated to Application #{$coupon->applino}.",
+                    'message' => "Personal coupon [{$coupon->couponsno}] is only valid for its designated candidate.",
                 ];
             }
         }

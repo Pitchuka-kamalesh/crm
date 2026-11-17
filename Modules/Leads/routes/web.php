@@ -18,6 +18,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/leads/store-input', [LeadsController::class, 'storeLeadInput'])->name('leads.storeInput');
 
     Route::post('/leads/allocate', [LeadsController::class, 'allocate'])->name('leads.allocate');
+    Route::post('/leads/auto-allocate', [LeadsController::class, 'autoAllocate'])->name('leads.autoAllocate');
     Route::post('/leads/log-task', [LeadsController::class, 'logTask'])->name('leads.logTask');
     Route::post('/leads/{applinano}/update-stage', [LeadsController::class, 'updateStage'])->name('leads.updateStage');
     Route::post('/leads/{applinano}/update-status', [LeadsController::class, 'updateStatus'])->name('leads.updateStatus');

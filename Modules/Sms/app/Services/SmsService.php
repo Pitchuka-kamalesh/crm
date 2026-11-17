@@ -198,7 +198,7 @@ class SmsService
      * Use it to continue your registration.
      * -- Vignan University.
      */
-    public function sendOtp(string $phone, string $otp, ?string $user = null, ?string $registerNo = null): array
+    public function sendOtp(string $phone, string $otp, ?string $user = null, ?string $registerNo = null)
     {
         $templateId = config('services.jiocx_sms.template_otp') ?: env('JIOCX_TEMPLATE_ID_OTP');
         error_log("template id : $templateId");

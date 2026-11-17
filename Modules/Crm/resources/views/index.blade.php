@@ -1914,13 +1914,13 @@
                                 <div style="margin-bottom: 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">Personal Coupon Code:</span>
-                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: V-SAT-0002</span>
+                                        <span id="modalCrmIdTag" style="font-size: 0.72rem; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; border: 1px solid #bfdbfe;">CRM ID: —</span>
                                     </div>
                                     <div id="modalCouponPreview" style="font-size: 1.18rem; font-weight: 800; color: #2563eb; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
-                                        27000005P1
+                                        — Enter Application No —
                                     </div>
                                     <div style="font-size: 0.70rem; color: #60a5fa; margin-top: 2px;">
-                                        Generated dynamically with branch-wise CRM ID (B.Tech &rarr; V-SAT, M.Tech &rarr; MTECH, PhD &rarr; PHD).
+                                        Personal coupon is specific to this student only (no start or end dates).
                                     </div>
                                 </div>
 
@@ -2018,6 +2018,13 @@
                         const crmTag = document.getElementById('modalCrmIdTag');
                         const candBadge = document.getElementById('modalCandidateBadge');
 
+                        if (!val) {
+                            if (preview) preview.textContent = '— Enter Application No —';
+                            if (crmTag) crmTag.textContent = 'CRM ID: —';
+                            if (candBadge) candBadge.style.display = 'none';
+                            return;
+                        }
+
                         let derivedCode = formatPersonalCouponPreview(val);
                         if (preview) preview.textContent = derivedCode;
 
@@ -2034,7 +2041,7 @@
                         }
                     }
 
-                    @if(request()->is('*percoupongen*') || request()->has('generate') || request()->has('openModal'))
+                    @if(request()->has('openModal') && request('applino'))
                     document.addEventListener('DOMContentLoaded', function() {
                         openPersonalCouponModal('{{ request('applino', '') }}');
                     });
@@ -2925,6 +2932,7 @@
                                 <span>Telecaller KPI &amp; Outreach Performance</span>
                             </div>
 
+                            @if(empty($isTelecaller))
                             <!-- Telecaller Selection Dropdown Filter -->
                             <div class="telecaller-filter-wrapper" style="position: relative; display: inline-flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 9px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
                                 <div style="display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; height: 38px; background: #f8fafc; border-right: 1.5px solid #cbd5e1; font-size: 0.74rem; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.4px; user-select: none; white-space: nowrap;">
@@ -2936,7 +2944,7 @@
                                     </svg>
                                     <span>Telecallers:</span>
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px; padding: 0 6px; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 0.72rem; border-radius: 999px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);">
-                                        {{ count($telecallerStats) }}
+                                        {{ count($telecallerStats ?? []) }}
                                     </span>
                                 </div>
                                 <div style="position: relative; display: inline-flex; align-items: center;">
@@ -2944,7 +2952,7 @@
                                         <option value="all" {{ ($selectedTelecaller ?? 'all') === 'all' ? 'selected' : '' }}>
                                             All Telecallers
                                         </option>
-                                        @foreach($telecallerStats as $tOpt)
+                                        @foreach(($telecallerStats ?? []) as $tOpt)
                                             <option value="{{ $tOpt->emp_code }}" {{ ($selectedTelecaller ?? '') === $tOpt->emp_code ? 'selected' : '' }}>
                                                 {{ $tOpt->name }} (Emp: {{ $tOpt->emp_code }})
                                             </option>
@@ -2955,6 +2963,7 @@
                                     </svg>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                         <!-- Right Side: Clean Metric Pills & Export Button -->
@@ -2990,30 +2999,30 @@
                     </div>
 
                     <div style="padding: 1.5rem;">
-                        <!-- 1. TOP EXECUTIVE METRIC CARDS (100% GENUINE DATABASE DATA) -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                        <!-- 1. TOP EXECUTIVE METRIC CARDS (COMPACT SINGLE-ROW BOXES) -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem;">
                             <!-- Card 1: Allotted Leads -->
-                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Total Allotted Leads</div>
-                                <div id="kpiCardAllottedValue" style="font-size: 1.95rem; font-weight: 800; color: #0f172a; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalTelecallerLeads) }}</div>
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Total Allotted Leads</span>
+                                <strong id="kpiCardAllottedValue" style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalTelecallerLeads) }}</strong>
                             </div>
 
                             <!-- Card 2: Calls Logged -->
-                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Call Tasks Logged</div>
-                                <div id="kpiCardTasksValue" style="font-size: 1.95rem; font-weight: 800; color: #2563eb; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</div>
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Call Tasks Logged</span>
+                                <strong id="kpiCardTasksValue" style="font-size: 1.35rem; font-weight: 800; color: #2563eb; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</strong>
                             </div>
 
                             <!-- Card 3: Leads Contacted -->
-                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Leads Contacted</div>
-                                <div id="kpiCardContactedValue" style="font-size: 1.95rem; font-weight: 800; color: #059669; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleDistinctContacted) }}</div>
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Leads Contacted</span>
+                                <strong id="kpiCardContactedValue" style="font-size: 1.35rem; font-weight: 800; color: #059669; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleDistinctContacted) }}</strong>
                             </div>
 
                             <!-- Card 4: Pending Outreach -->
-                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
-                                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">Pending Outreach</div>
-                                <div id="kpiCardPendingValue" style="font-size: 1.95rem; font-weight: 800; color: #d97706; line-height: 1.1; font-family: 'JetBrains Mono', monospace;">{{ number_format($telePendingCount) }}</div>
+                            <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Pending Outreach</span>
+                                <strong id="kpiCardPendingValue" style="font-size: 1.35rem; font-weight: 800; color: #d97706; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($telePendingCount) }}</strong>
                             </div>
                         </div>
 

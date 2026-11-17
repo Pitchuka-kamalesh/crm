@@ -33,6 +33,7 @@ class StudentPersonalInfo extends Model
         'city_mandal',
         'village',
         'pincode',
+        'terms_accepted',
         'log_userid',
         'log_ipaddress',
         'log_timestamp',

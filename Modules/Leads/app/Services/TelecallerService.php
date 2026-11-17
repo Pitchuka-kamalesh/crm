@@ -13,6 +13,7 @@ use Modules\Dashboards\Models\StudentPersonalInfo;
 use Modules\Leads\Models\TelecallerLead;
 use Modules\Leads\Models\TelecallerLeadTask;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -291,6 +292,229 @@ class TelecallerService
                 'success' => false,
                 'message' => 'Failed to allocate leads: ' . $e->getMessage(),
                 'count' => 0
+            ];
+        }
+    }
+
+    /**
+     * Get the next telecaller in sequence for auto-allocation.
+     */
+    public static function getNextTelecallerInfo(): array
+    {
+        $telecallers = self::getTelecallers()->values();
+        $numTelecallers = $telecallers->count();
+
+        if ($numTelecallers === 0) {
+            return [
+                'next_telecaller' => null,
+                'next_index' => 0,
+                'total_telecallers' => 0,
+            ];
+        }
+
+        $lastEmpCode = Cache::get('auto_allocate_last_empcode');
+
+        if (!$lastEmpCode) {
+            try {
+                $lastLeadEmp = Lead::whereNotNull('empcode')
+                    ->where('empcode', '<>', '0')
+                    ->orderBy('allocated_at', 'desc')
+                    ->orderBy('log_timestamp', 'desc')
+                    ->value('empcode');
+                if ($lastLeadEmp) {
+                    $lastEmpCode = (string) $lastLeadEmp;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        $nextIndex = 0;
+        if ($lastEmpCode) {
+            $foundIndex = $telecallers->search(function ($tc) use ($lastEmpCode) {
+                return (string) $tc->emp_code === (string) $lastEmpCode;
+            });
+            if ($foundIndex !== false) {
+                $nextIndex = ($foundIndex + 1) % $numTelecallers;
+            }
+        }
+
+        $nextTelecaller = $telecallers[$nextIndex] ?? null;
+
+        return [
+            'next_telecaller' => $nextTelecaller,
+            'next_index' => $nextIndex,
+            'total_telecallers' => $numTelecallers,
+        ];
+    }
+
+    /**
+     * Auto-allocate leads across active telecallers in sequential round-robin order.
+     * Resumes from where the previous allocation stopped.
+     */
+    public static function autoAllocateRoundRobin(int $count, ?string $logUser = null, ?string $ipAddress = null): array
+    {
+        $logUser = trim($logUser ?? auth()->user()?->usercode ?? 'SYSTEM');
+        $ipAddress = trim($ipAddress ?? request()->ip() ?? '127.0.0.1');
+
+        if ($count <= 0) {
+            return [
+                'success' => false,
+                'message' => 'Please enter a valid number of leads to allocate (at least 1).',
+                'count' => 0,
+            ];
+        }
+
+        $telecallers = self::getTelecallers()->values();
+        $numTelecallers = $telecallers->count();
+
+        if ($numTelecallers === 0) {
+            return [
+                'success' => false,
+                'message' => 'No active telecallers found in the system to allocate leads.',
+                'count' => 0,
+            ];
+        }
+
+        // Fetch candidate unallocated leads
+        $candidates = Lead::where(function ($q) {
+                $q->whereNull('empcode')->orWhere('empcode', '0');
+            })
+            ->orderBy('log_timestamp', 'desc')
+            ->take($count)
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            $allocatedApplis = TelecallerLead::pluck('applino');
+            $candidates = CrmStudentRegistration::whereNotIn('applinano', $allocatedApplis)
+                ->orderBy('log_timestamp', 'desc')
+                ->take($count)
+                ->get();
+        }
+
+        if ($candidates->isEmpty()) {
+            return [
+                'success' => false,
+                'message' => 'No unallocated leads remaining in queue to allocate.',
+                'count' => 0,
+            ];
+        }
+
+        // Determine start index based on last allocated telecaller
+        $nextInfo = self::getNextTelecallerInfo();
+        $startIndex = $nextInfo['next_index'];
+
+        $now = now();
+        $allocatedCount = 0;
+        $allocatedApplis = [];
+        $perTelecallerSummary = [];
+        $lastAllocatedEmpCode = null;
+
+        // Preload current max leadcount for each telecaller
+        $telecallerMaxCounts = [];
+        foreach ($telecallers as $tc) {
+            $emp = (string) $tc->emp_code;
+            $telecallerMaxCounts[$emp] = (int) TelecallerLead::where('empcode', $emp)->max('leadcount');
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($candidates as $idx => $lead) {
+                $tcIndex = ($startIndex + $idx) % $numTelecallers;
+                $targetTelecaller = $telecallers[$tcIndex];
+                $targetEmpCode = (string) $targetTelecaller->emp_code;
+                $targetName = $targetTelecaller->full_name ?? $targetEmpCode;
+
+                $rawAppli = '0';
+                $rawPhone = '0';
+                $candidateName = '0';
+                $studentCrmId = '0';
+
+                if ($lead instanceof Lead) {
+                    $rawPhone = (string) ($lead->phoneno ?? '0');
+                    $rawAppli = !empty($lead->applino) ? (string) $lead->applino : '0';
+                } elseif ($lead instanceof CrmStudentRegistration) {
+                    $rawAppli = !empty($lead->applinano) ? (string) $lead->applinano : '0';
+                    $rawPhone = (string) ($lead->phoneno ?? '0');
+                    $candidateName = $lead->name ?: '0';
+                    $studentCrmId = $lead->crmid ?: '0';
+                }
+
+                $tApplino = !empty($rawAppli) ? (string) $rawAppli : '0';
+                $tPhoneno = !empty($rawPhone) ? (string) $rawPhone : '0';
+                $tCrmid = !empty($studentCrmId) ? (string) $studentCrmId : '0';
+                $tStageName = 'Stage 1: Calling & Verification';
+                $tStageRemark = 'Auto-allocated via Incharge Round-Robin algorithm';
+
+                // Increment lead count for this telecaller
+                $telecallerMaxCounts[$targetEmpCode]++;
+                $newLeadCount = $telecallerMaxCounts[$targetEmpCode];
+
+                // Check existing assignment in crm.telecaller_leads
+                $existing = TelecallerLead::where('applino', $tApplino)
+                    ->where('phoneno', $tPhoneno)
+                    ->first();
+
+                if ($existing) {
+                    TelecallerLead::where('applino', $tApplino)
+                        ->where('phoneno', $tPhoneno)
+                        ->update([
+                            'crmid' => $tCrmid,
+                            'empcode' => $targetEmpCode,
+                            'leadcount' => $newLeadCount,
+                            'assigndatetime' => $now,
+                            'log_userid' => $logUser,
+                            'log_ipaddress' => $ipAddress,
+                            'log_timestamp' => $now,
+                        ]);
+                } else {
+                    TelecallerLead::create([
+                        'applino' => $tApplino,
+                        'phoneno' => $tPhoneno,
+                        'crmid' => $tCrmid,
+                        'empcode' => $targetEmpCode,
+                        'leadcount' => $newLeadCount,
+                        'assigndatetime' => $now,
+                        'log_userid' => $logUser,
+                        'log_ipaddress' => $ipAddress,
+                        'log_timestamp' => $now,
+                    ]);
+                }
+
+                // Update crm.leads with empcode and allocated timestamp
+                Lead::where('phoneno', $tPhoneno)->update([
+                    'empcode' => $targetEmpCode,
+                    'allocated_at' => $now,
+                    'log_userid' => $logUser,
+                ]);
+
+                $allocatedCount++;
+                $allocatedApplis[] = $tApplino !== '0' ? $tApplino : $tPhoneno;
+                $lastAllocatedEmpCode = $targetEmpCode;
+                $perTelecallerSummary[$targetName] = ($perTelecallerSummary[$targetName] ?? 0) + 1;
+            }
+
+            // Persist the pointer to continue from next time
+            if ($lastAllocatedEmpCode) {
+                Cache::forever('auto_allocate_last_empcode', $lastAllocatedEmpCode);
+            }
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => "Successfully auto-allocated {$allocatedCount} leads across {$numTelecallers} telecallers.",
+                'count' => $allocatedCount,
+                'allocated_applis' => $allocatedApplis,
+                'summary' => $perTelecallerSummary,
+                'last_empcode' => $lastAllocatedEmpCode,
+                'metrics' => self::getMetrics(),
+            ];
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('TelecallerService autoAllocateRoundRobin error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to auto-allocate leads: ' . $e->getMessage(),
+                'count' => 0,
             ];
         }
     }

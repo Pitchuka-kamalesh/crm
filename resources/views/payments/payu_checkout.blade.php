@@ -371,7 +371,7 @@
 
         <!-- Footer Actions -->
         <div class="card-footer">
-            <a href="{{ route('dashboards.index', ['step' => 1]) }}" style="color: #64748b; text-decoration: none; font-weight: 600;">
+            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="color: #64748b; text-decoration: none; font-weight: 600;">
                 &larr; Back to Fee Summary
             </a>
             <button type="button" class="btn-cancel-link" onclick="if(confirm('Are you sure you want to cancel payment?')){ document.getElementById('payuCancelForm').submit(); }">

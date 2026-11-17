@@ -20,6 +20,12 @@
                         $hasEmpCode = !empty($lead->empcode) && $lead->empcode !== '0';
                         $empCodeVal = $hasEmpCode ? $lead->empcode : '0';
 
+                        $cleanPhone = preg_replace('/\D/', '', $leadPhone);
+                        $isCompleted = (
+                            (!empty($cleanPhone) && isset($examScheduledPhones) && $examScheduledPhones->contains($cleanPhone)) ||
+                            (!empty($leadAppNo) && $leadAppNo !== '0' && isset($examScheduledApplis) && $examScheduledApplis->contains($leadAppNo))
+                        );
+
                         $leadTimestamp = '0';
                         if (!empty($lead->log_timestamp)) {
                             $leadTimestamp = $lead->log_timestamp instanceof \DateTimeInterface 
@@ -38,7 +44,7 @@
                                 : (string) $lead->allocated_at;
                         }
                     @endphp
-                    <tr id="row-lead-{{ $leadPhone }}" style="{{ $hasEmpCode ? 'background-color: #f8fafc;' : '' }}">
+                    <tr id="row-lead-{{ $leadPhone }}" style="{{ $isCompleted ? 'background-color: #f0fdf4;' : ($hasEmpCode ? 'background-color: #f8fafc;' : '') }}">
                         <td style="text-align: center; vertical-align: middle;">
                             <input type="checkbox" 
                                    class="lead-select-chk" 
@@ -59,7 +65,11 @@
                             </div>
                         </td>
                         <td>
-                            @if($hasEmpCode)
+                            @if($isCompleted)
+                                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; border-radius: 4px; padding: 2px 8px; font-weight: 800; font-family: 'JetBrains Mono', monospace;" title="Student in exam schedule (Completed)">
+                                    ✓ Done
+                                </span>
+                            @elseif($hasEmpCode)
                                 <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 4px; padding: 2px 8px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">
                                     👤 {{ $empCodeVal }}
                                 </span>
@@ -314,7 +324,20 @@
                                 <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;" title="Branch CRM ID">{{ $leadCrmId }}</span>
                                 @if(!empty($lead->state?->state_name)) • {{ $lead->state->state_name }}@endif
                             </div>
-                            @if($alloc)
+                            @php
+                                $cleanLeadPhone = preg_replace('/\D/', '', (string) $leadPhone);
+                                $isRowCompleted = (
+                                    (!empty($cleanLeadPhone) && isset($examScheduledPhones) && $examScheduledPhones->contains($cleanLeadPhone)) ||
+                                    (!empty($leadAppNo) && $leadAppNo !== '0' && isset($examScheduledApplis) && $examScheduledApplis->contains($leadAppNo))
+                                );
+                            @endphp
+                            @if($isRowCompleted)
+                                <div style="margin-top: 3px;">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; border-radius: 4px; padding: 1.5px 6px; font-weight: 800;" title="Student present in exam schedule (Completed)">
+                                        ✓ Done
+                                    </span>
+                                </div>
+                            @elseif($alloc)
                                 <div style="margin-top: 3px;">
                                     <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 4px; padding: 1.5px 6px; font-weight: 700;">
                                         <span>👤</span> {{ $alloc->emp_name ?? $alloc->empcode }} (#{{ $alloc->leadcount ?? 1 }})
