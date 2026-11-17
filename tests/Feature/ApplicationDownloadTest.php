@@ -98,9 +98,20 @@ class ApplicationDownloadTest extends TestCase
             'stage1' => 'completed',
         ]);
 
-        // Check step 2 view
+        // Check step 2 view for UG: Higher Academic details must NOT appear
         $response = $this->actingAs($user)->get('/dashboards?step=2');
         $response->assertStatus(200);
+        $response->assertDontSee('id="btn-toggle-ug-pg"', false);
+        $response->assertDontSee('Undergraduate (B.Tech / Degree) Details');
+
+        // Check step 2 view for PG: Higher Academic details MUST appear
+        CrmStudentRegistration::where('phoneno', $user->phnno)->update(['programlevel' => 'PG', 'programid' => null]);
+        $responsePg = $this->actingAs($user)->get('/dashboards?step=2');
+        $responsePg->assertStatus(200);
+        $responsePg->assertSee('Undergraduate (B.Tech / Degree) Details');
+
+        // Restore to UG
+        CrmStudentRegistration::where('phoneno', $user->phnno)->update(['programlevel' => 'UG', 'programid' => 1]);
     }
 
     public function test_exam_slot_booking_blocks_date_selection_when_in_exam_schedule(): void

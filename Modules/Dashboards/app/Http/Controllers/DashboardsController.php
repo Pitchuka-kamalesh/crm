@@ -158,23 +158,22 @@ class DashboardsController extends Controller
         $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
 
         if (
+            $progLevel === 'PHD' ||
+            $progLevel === 'DOCTORAL' ||
+            str_contains($progShort, 'PHD') ||
+            str_contains($progShort, 'PH.D') ||
+            str_contains($progName, 'DOCTOR') ||
+            str_contains($progName, 'PH.D') ||
+            str_contains($progName, 'PHD')
+        ) {
+            $degreeLevel = 'phd';
+        } elseif (
             $progLevel === 'PG' ||
             str_contains($progShort, 'M.TECH') ||
             str_contains($progShort, 'MTECH') ||
             str_contains($progName, 'MASTER') ||
             in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])
         ) {
-            $degreeLevel = 'mtech';
-        } elseif (
-            $progLevel === 'PHD' ||
-            $progLevel === 'DOCTORAL' ||
-            str_contains($progShort, 'PHD') ||
-            str_contains($progShort, 'PH.D') ||
-            str_contains($progName, 'DOCTOR') ||
-            !empty($academicDetails?->pg_college_name)
-        ) {
-            $degreeLevel = 'phd';
-        } elseif (!empty($academicDetails?->ug_college_name)) {
             $degreeLevel = 'mtech';
         } else {
             $degreeLevel = 'btech';
@@ -937,7 +936,7 @@ class DashboardsController extends Controller
                     ];
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
-                    if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
                         $ugMarksRaw = is_numeric($request->input('ug_marks')) ? (float) $request->input('ug_marks') : (is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : null);
                         $ugPct = ($ugMarksRaw && $ugMarksRaw <= 10) ? round($ugMarksRaw * 9.5, 2) : (($ugMarksRaw && $ugMarksRaw > 100) ? round(($ugMarksRaw / 1000) * 100, 2) : $ugMarksRaw);
 
@@ -956,7 +955,7 @@ class DashboardsController extends Controller
                     }
 
                     // If Degree level is PhD, save PG (M.Tech) details
-                    if ($request->filled('pg_college_name') || $request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'phd') {
                         $pgMarksRaw = is_numeric($request->input('pg_marks')) ? (float) $request->input('pg_marks') : (is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : null);
                         $pgPct = ($pgMarksRaw && $pgMarksRaw <= 10) ? round($pgMarksRaw * 9.5, 2) : (($pgMarksRaw && $pgMarksRaw > 100) ? round(($pgMarksRaw / 1000) * 100, 2) : $pgMarksRaw);
 

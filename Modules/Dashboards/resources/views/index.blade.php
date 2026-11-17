@@ -1973,16 +1973,17 @@
                                 </div>
                             </div>
 
-                            <!-- Higher Academic (UG / PG) Option Toggle -->
+                            @if(in_array($degreeLevel ?? '', ['mtech', 'phd']))
+                            <!-- Higher Academic (UG / PG) Option Toggle (Only for PG / Ph.D) -->
                             <div style="margin-top: 1rem; margin-bottom: 0.5rem; text-align: right;">
                                 <button type="button" id="btn-toggle-ug-pg" onclick="toggleUgPgFields()" style="background: #eff6ff; border: 1.5px dashed #3b82f6; color: #1d4ed8; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
                                     <span>🎓</span>
-                                    <span>{{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd' || !empty($academicDetails?->ug_college_name)) ? '− Toggle Higher Academic (UG / PG) Details' : '+ Add / View Higher Academic (UG / PG) Details' }}</span>
+                                    <span>− Toggle Higher Academic Details</span>
                                 </button>
                             </div>
 
                             <!-- ================= SUBBOX 3: UNDERGRADUATE (B.TECH / DEGREE) (M.TECH & PHD) ================= -->
-                            <div class="mockup-subbox" id="sec-ug-details" style="display: {{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd' || !empty($academicDetails?->ug_college_name)) ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
+                            <div class="mockup-subbox" id="sec-ug-details" style="display: block; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                                     <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (B.Tech / Degree) Details</h4>
                                     <span class="mockup-pill-badge" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Required for M.Tech &amp; Ph.D</span>
@@ -2022,8 +2023,9 @@
                                 </div>
                             </div>
 
+                            @if(($degreeLevel ?? '') === 'phd')
                             <!-- ================= SUBBOX 4: POSTGRADUATE (M.TECH / PG) (PHD ONLY) ================= -->
-                            <div class="mockup-subbox" id="sec-pg-details" style="display: {{ ($degreeLevel === 'phd' || !empty($academicDetails?->pg_college_name)) ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
+                            <div class="mockup-subbox" id="sec-pg-details" style="display: block; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                                     <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate (M.Tech / PG) Details</h4>
                                     <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
@@ -2062,6 +2064,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @endif
                             </fieldset>
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
@@ -2149,18 +2153,22 @@
 
                                 const ugSec = document.getElementById('sec-ug-details');
                                 const pgSec = document.getElementById('sec-pg-details');
-                                const hasUgValue = !!document.querySelector('input[name="ug_college_name"]')?.value?.trim();
-                                const hasPgValue = !!document.querySelector('input[name="pg_college_name"]')?.value?.trim();
+                                const toggleBtn = document.getElementById('btn-toggle-ug-pg');
+                                const toggleDiv = toggleBtn ? toggleBtn.parentElement : null;
 
-                                if (level === 'btech') {
-                                    if (ugSec) ugSec.style.display = hasUgValue ? 'block' : 'none';
-                                    if (pgSec) pgSec.style.display = hasPgValue ? 'block' : 'none';
-                                } else if (level === 'mtech') {
+                                if (level === 'mtech') {
+                                    if (toggleDiv) toggleDiv.style.display = 'block';
                                     if (ugSec) ugSec.style.display = 'block';
-                                    if (pgSec) pgSec.style.display = hasPgValue ? 'block' : 'none';
+                                    if (pgSec) pgSec.style.display = 'none';
                                 } else if (level === 'phd') {
+                                    if (toggleDiv) toggleDiv.style.display = 'block';
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'block';
+                                } else {
+                                    // UG / btech: higher academic details must never appear
+                                    if (toggleDiv) toggleDiv.style.display = 'none';
+                                    if (ugSec) ugSec.style.display = 'none';
+                                    if (pgSec) pgSec.style.display = 'none';
                                 }
                             }
 
