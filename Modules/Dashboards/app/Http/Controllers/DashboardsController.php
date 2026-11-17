@@ -1110,10 +1110,10 @@ class DashboardsController extends Controller
                 $existingExamSchedule = $crmStudent ? \App\Models\ExamSchedule::where('applino', $crmStudent->applinano)->first() : null;
                 $existingDate = $existingExamSchedule?->examdate ? \Carbon\Carbon::parse($existingExamSchedule->examdate)->format('Y-m-d') : null;
 
-                // Reschedule cutoff: 2 days before exam date at 5:00 PM
-                // (e.g., if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                // Reschedule cutoff: 1 day before exam date at 5:00 PM
+                // (e.g., if student has exam tomorrow, they can edit up to today evening 5:00 PM; afterwards locked)
                 $editDeadline = $existingDate
-                    ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                    ? \Carbon\Carbon::parse($existingDate)->subDay()->setTime(17, 0, 0)
                     : null;
 
                 $isSlotLocked = $existingExamSchedule && $editDeadline && $now->gt($editDeadline);

@@ -42,12 +42,12 @@ class ExamController extends Controller
         $totalBookings = $schedules->count();
         $slot1Count = $schedules->filter(function ($s) {
             $slot = strtoupper((string) $s->exam_slot);
-            return str_contains($slot, 'S1') || str_contains($slot, '11');
+            return str_contains($slot, 'SLOT 1') || str_contains($slot, 'S1') || str_contains($slot, '11');
         })->count();
 
         $slot2Count = $schedules->filter(function ($s) {
             $slot = strtoupper((string) $s->exam_slot);
-            return str_contains($slot, 'S2') || str_contains($slot, '2:00') || str_contains($slot, '2 PM');
+            return str_contains($slot, 'SLOT 2') || str_contains($slot, 'S2') || str_contains($slot, '2:00') || str_contains($slot, '2 PM');
         })->count();
 
         $confirmedCount = $schedules->filter(function ($s) {

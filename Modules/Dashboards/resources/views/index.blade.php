@@ -1959,7 +1959,7 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted ?? 1000 }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
+                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
@@ -2215,7 +2215,7 @@
                                 if (val === 'CGPA') {
                                     if (conductedIn) conductedIn.value = '10';
                                 } else {
-                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '1000';
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '';
                                 }
                                 calculatePu2Pct();
                             }
@@ -2755,13 +2755,13 @@
                         ? $existingDate
                         : $minExamDate;
 
-                    $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';
+                    $currentSlot = $examSchedule?->exam_slot ?? 'Slot 1 11:00 AM to 1:00 PM';
                     $hasBookedSlot = !empty($examSchedule?->examdate) && !empty($examSchedule?->exam_slot);
 
-                    // Cutoff: 2 days before booked exam date at 5:00 PM
-                    // (e.g. if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                    // Cutoff: 1 day before booked exam date at 5:00 PM
+                    // (e.g. if student has exam tomorrow, they can edit up to today evening 5:00 PM; afterwards locked)
                     $editDeadline = $existingDate
-                        ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                        ? \Carbon\Carbon::parse($existingDate)->subDay()->setTime(17, 0, 0)
                         : null;
 
                     $isSlotLocked = $hasBookedSlot && ($editDeadline ? $now->gt($editDeadline) : false);
@@ -2800,7 +2800,7 @@
                                         </span>
                                     </div>
                                     <div style="font-size: 0.84rem; color: #334155; margin-top: 3px;">
-                                        📅 Booked Date: <strong>{{ \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') }}</strong> &bull; Selected Slot: <strong>{{ $examSchedule->exam_slot }}</strong>
+                                        📅 Booked Date: <strong>{{ \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') }}</strong> &bull; Selected Slot: <strong>{{ str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $examSchedule->exam_slot) }}</strong>
                                     </div>
                                     <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
                                         Examination Center: <strong>{{ $campusName ?: 'Vignan Main Campus (Vadlamudi)' }}</strong> &bull; Status: Confirmed
@@ -2876,11 +2876,11 @@
                                     @endif
                                 </label>
                                 <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
-                                    <option value="S1 11:00 AM to 1:00 PM" {{ str_contains($currentSlot, 'S1') || str_contains($currentSlot, '11') ? 'selected' : '' }}>
-                                        S1 11:00 AM to 1:00 PM (Morning Session)
+                                    <option value="Slot 1 11:00 AM to 1:00 PM" {{ (str_contains($currentSlot, '11') || str_contains($currentSlot, 'Slot 1') || str_contains($currentSlot, 'S1')) && !str_contains($currentSlot, 'Slot 2') && !str_contains($currentSlot, 'S2') ? 'selected' : '' }}>
+                                        Slot 1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
-                                    <option value="S2 2:00 PM to 4:00 PM" {{ str_contains($currentSlot, 'S2') || str_contains($currentSlot, '2') ? 'selected' : '' }}>
-                                        S2 2:00 PM to 4:00 PM (Afternoon Session)
+                                    <option value="Slot 2 2:00 PM to 4:00 PM" {{ (str_contains($currentSlot, '2:00') || str_contains($currentSlot, 'Slot 2') || str_contains($currentSlot, 'S2')) ? 'selected' : '' }}>
+                                        Slot 2 2:00 PM to 4:00 PM (Afternoon Session)
                                     </option>
                                 </select>
                                 @if($isSlotLocked)
@@ -2889,10 +2889,13 @@
                                 <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
                                     <span>✓</span>
                                     <span id="slotLiveStatus">
+                                        @php
+                                            $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
+                                        @endphp
                                         @if($isSlotLocked)
-                                            Confirmed slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                            Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
                                         @else
-                                            Current slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session).
+                                            Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
                                         @endif
                                     </span>
                                 </div>
@@ -2935,7 +2938,7 @@
 
                             if (slotSelect && liveStatus) {
                                 slotSelect.addEventListener('change', function() {
-                                    if (this.value.includes('S1')) {
+                                    if (this.value.includes('Slot 1') || this.value.includes('S1')) {
                                         liveStatus.textContent = 'Morning session selected: 11:00 AM to 1:00 PM. Please report 30 minutes prior.';
                                     } else {
                                         liveStatus.textContent = 'Afternoon session selected: 2:00 PM to 4:00 PM. Please report 30 minutes prior.';
