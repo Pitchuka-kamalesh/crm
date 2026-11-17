@@ -173,7 +173,7 @@
                             <!-- Unified Search Filter -->
                             <div class="filter-control-group filter-control-search">
                                 <label for="liveFilterSearch" class="filter-label">
-                                    <span class="filter-icon">🔍</span> Search Enquiries
+                                    Search Enquiries
                                 </label>
                                 <div class="input-with-icon">
                                     <input type="text" 
@@ -274,7 +274,6 @@
                                 <!-- LIVE FILTER NO RESULTS PLACEHOLDER -->
                                 <tr id="noFilterMatchesRow" style="display: none;">
                                     <td colspan="6" style="text-align: center; padding: 2.5rem 1rem; background: #fafafa;">
-                                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔍</div>
                                         <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">No enquiries match the selected filters</div>
                                         <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;" id="noMatchesDetailText">No records match search.</div>
                                         <button type="button" onclick="window.clearFilterInput('liveFilterSearch')" class="btn-action-sm btn-verify" style="margin: 0 auto; display: inline-flex;">
@@ -411,7 +410,7 @@
                                    placeholder="Search by Application No, Student Name, or Mobile..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="submit" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem; border-radius: 8px;">
-                                🔍 Search
+                                Search
                             </button>
                         </form>
 
@@ -1722,7 +1721,7 @@
                                    placeholder="Search by Application Number, Candidate Name, or Coupon Code..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="button" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
-                                🔍 Search
+                                Search
                             </button>
                         </div>
 
@@ -2182,7 +2181,7 @@
                                    placeholder="Search by Employee Name, Code, Email, Phone, or Designation..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="button" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
-                                🔍 Search
+                                Search
                             </button>
                         </div>
 
@@ -2594,7 +2593,6 @@
                                         <!-- Empty match state when search yields zero rows -->
                                         <tr id="kpiNoResultsRow" style="display: none;">
                                             <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                                 <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">No matching student records found</div>
                                             </td>
                                         </tr>

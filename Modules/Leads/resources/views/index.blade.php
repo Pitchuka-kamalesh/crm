@@ -1762,7 +1762,7 @@
 
                             <!-- 3. Action Buttons: Allocate, Auto Allocate, Download -->
                             <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
-                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 38px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" title="Allocate selected or bucket leads to chosen telecaller">
+                                <button type="submit" id="btnInchargeAllot" style="height: 38px; margin: 0; padding: 0 1rem; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #7b1113; color: #ffffff; border: 1px solid #640a0b; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(123, 17, 19, 0.28); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#640a0b'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(123, 17, 19, 0.35)';" onmouseout="this.style.background='#7b1113'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(123, 17, 19, 0.28)';" onmousedown="this.style.transform='translateY(0)';" title="Allocate selected or bucket leads to chosen telecaller">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
@@ -1770,13 +1770,13 @@
                                     </svg>
                                     <span>Allocate</span>
                                 </button>
-                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 38px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: 1px solid #4338ca; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.25); transition: all 0.2s ease;" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
+                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 38px; margin: 0; padding: 0 1rem; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #991b1b; color: #ffffff; border: 1px solid #7f1d1d; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(153, 27, 27, 0.28); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#7f1d1d'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(153, 27, 27, 0.35)';" onmouseout="this.style.background='#991b1b'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(153, 27, 27, 0.28)';" onmousedown="this.style.transform='translateY(0)';" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                                     </svg>
                                     <span>Auto Allocate</span>
                                 </button>
-                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" style="height: 38px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #0f172a; color: #ffffff; border: 1px solid #1e293b; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2); transition: all 0.2s ease;" title="Download Leads in PDF or Excel format">
+                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" style="height: 38px; margin: 0; padding: 0 1rem; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #580b0d; color: #ffffff; border: 1px solid #420607; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(88, 11, 13, 0.28); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#420607'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(88, 11, 13, 0.35)';" onmouseout="this.style.background='#580b0d'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(88, 11, 13, 0.28)';" onmousedown="this.style.transform='translateY(0)';" title="Download Leads in PDF or Excel format">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                         <polyline points="7 10 12 15 17 10"/>
@@ -2038,7 +2038,6 @@
                                     <div id="fileSelectedBox" style="display: none; background: #ffffff; border: 1.5px solid #2563eb; border-radius: 10px; padding: 0.85rem 1.15rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(37,99,235,0.08);">
                                         <div style="display: flex; align-items: center; justify-content: space-between;">
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <span style="font-size: 1.6rem;">📄</span>
                                                 <div style="text-align: left;">
                                                     <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem;" id="previewFileName">filename.xlsx</div>
                                                     <div style="font-size: 0.74rem; color: #64748b;" id="previewFileSize">128 KB &bull; Ready to upload</div>
@@ -2078,7 +2077,7 @@
                 <div class="portal-card-shell" style="margin-top: 1.5rem;">
                     <div class="portal-card-topbar" style="padding: 0.85rem 1.25rem;">
                         <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                            <span>📁</span> Recently Uploaded Files
+                            Recently Uploaded Files
                         </div>
                     </div>
 
@@ -2101,7 +2100,6 @@
                                     <tr>
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 8px;">
-                                                <span style="font-size: 1.25rem;">📄</span>
                                                 <strong style="font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: #0f172a;">
                                                     {{ $file['filename'] ?? 'uploaded_leads.xlsx' }}
                                                 </strong>
@@ -2202,7 +2200,7 @@
                         const previewSize = document.getElementById('previewFileSize');
 
                         if (file) {
-                            mainTxt.innerHTML = '📄 Selected: <strong style="color: #2563eb;">' + escapeHtmlLead(file.name) + '</strong>';
+                            mainTxt.innerHTML = 'Selected: <strong style="color: #2563eb;">' + escapeHtmlLead(file.name) + '</strong>';
                             subTxt.textContent = 'Click to change file';
                             if (previewName) previewName.textContent = file.name;
                             if (previewSize) previewSize.textContent = (file.size / 1024).toFixed(1) + ' KB • Ready for upload';
@@ -2345,7 +2343,6 @@
                                                 tr.innerHTML = `
                                                     <td>
                                                         <div style="display: flex; align-items: center; gap: 8px;">
-                                                            <span style="font-size: 1.25rem;">📄</span>
                                                             <strong style="font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: #0f172a;">
                                                                 ${escapeHtmlLead(d.file_record.filename)}
                                                             </strong>
@@ -2551,11 +2548,11 @@
                                 <button type="button" onclick="applyStatusFilter('academic', this)" class="filter-nav-pill {{ in_array(($statusFilter ?? ''), ['academic', 'stage3']) ? 'is-active' : '' }}" style="background: none; cursor: pointer;">Academic Details</button>
                             @elseif($activeTab === 'allotted')
                                 <div style="font-size: 0.84rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                                    <span>📋</span> My Allotted Leads
+                                    My Allotted Leads
                                 </div>
                             @else
                                 <div style="font-size: 0.84rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                                    <span>📋</span> Leads Table Directory
+                                    Leads Table Directory
                                 </div>
                             @endif
                         </div>
@@ -2941,7 +2938,7 @@
                     <label id="formatCardPdf" style="border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 10px; padding: 0.75rem 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;">
                         <input type="radio" name="download_format" value="pdf" onchange="onDownloadFormatChange('pdf')" style="accent-color: #dc2626; width: 16px; height: 16px;">
                         <div>
-                            <div style="font-size: 0.85rem; font-weight: 700; color: #991b1b;">📄 PDF Document</div>
+                            <div style="font-size: 0.85rem; font-weight: 700; color: #991b1b;">PDF Document</div>
                             <div style="font-size: 0.7rem; color: #7f1d1d;">Formatted PDF</div>
                         </div>
                     </label>
