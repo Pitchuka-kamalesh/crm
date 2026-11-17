@@ -1973,8 +1973,16 @@
                                 </div>
                             </div>
 
+                            <!-- Higher Academic (UG / PG) Option Toggle -->
+                            <div style="margin-top: 1rem; margin-bottom: 0.5rem; text-align: right;">
+                                <button type="button" id="btn-toggle-ug-pg" onclick="toggleUgPgFields()" style="background: #eff6ff; border: 1.5px dashed #3b82f6; color: #1d4ed8; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                    <span>🎓</span>
+                                    <span>{{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd' || !empty($academicDetails?->ug_college_name)) ? '− Toggle Higher Academic (UG / PG) Details' : '+ Add / View Higher Academic (UG / PG) Details' }}</span>
+                                </button>
+                            </div>
+
                             <!-- ================= SUBBOX 3: UNDERGRADUATE (B.TECH / DEGREE) (M.TECH & PHD) ================= -->
-                            <div class="mockup-subbox" id="sec-ug-details" style="display: {{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd') ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
+                            <div class="mockup-subbox" id="sec-ug-details" style="display: {{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd' || !empty($academicDetails?->ug_college_name)) ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                                     <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (B.Tech / Degree) Details</h4>
                                     <span class="mockup-pill-badge" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Required for M.Tech &amp; Ph.D</span>
@@ -2015,7 +2023,7 @@
                             </div>
 
                             <!-- ================= SUBBOX 4: POSTGRADUATE (M.TECH / PG) (PHD ONLY) ================= -->
-                            <div class="mockup-subbox" id="sec-pg-details" style="display: {{ $degreeLevel === 'phd' ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
+                            <div class="mockup-subbox" id="sec-pg-details" style="display: {{ ($degreeLevel === 'phd' || !empty($academicDetails?->pg_college_name)) ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                                     <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate (M.Tech / PG) Details</h4>
                                     <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
@@ -2141,16 +2149,29 @@
 
                                 const ugSec = document.getElementById('sec-ug-details');
                                 const pgSec = document.getElementById('sec-pg-details');
+                                const hasUgValue = !!document.querySelector('input[name="ug_college_name"]')?.value?.trim();
+                                const hasPgValue = !!document.querySelector('input[name="pg_college_name"]')?.value?.trim();
 
                                 if (level === 'btech') {
-                                    if (ugSec) ugSec.style.display = 'none';
-                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (ugSec) ugSec.style.display = hasUgValue ? 'block' : 'none';
+                                    if (pgSec) pgSec.style.display = hasPgValue ? 'block' : 'none';
                                 } else if (level === 'mtech') {
                                     if (ugSec) ugSec.style.display = 'block';
-                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (pgSec) pgSec.style.display = hasPgValue ? 'block' : 'none';
                                 } else if (level === 'phd') {
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'block';
+                                }
+                            }
+
+                            function toggleUgPgFields() {
+                                const ugSec = document.getElementById('sec-ug-details');
+                                const pgSec = document.getElementById('sec-pg-details');
+                                const btn = document.getElementById('btn-toggle-ug-pg');
+                                if (ugSec) {
+                                    const isHidden = ugSec.style.display === 'none';
+                                    ugSec.style.display = isHidden ? 'block' : 'none';
+                                    if (btn) btn.innerHTML = isHidden ? '<span>🎓</span><span>− Hide Higher Academic (UG / PG) Details</span>' : '<span>🎓</span><span>+ Add / View Higher Academic (UG / PG) Details</span>';
                                 }
                             }
 
@@ -2982,7 +3003,7 @@
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
                     <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span>🖨️ Print Form</span>
                         </a>
                         <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
@@ -3125,7 +3146,7 @@
                             <!-- 3. QUALIFYING ACADEMIC RECORDS (FULL WIDTH TABLE) -->
                             <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; margin-top: 10px;">
                                 <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate)
+                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate{{ !empty($appStudent->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($appStudent->academic->pg_college) ? ' &amp; Postgraduate' : '' }})
                                 </h4>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
                                     <thead>
@@ -3163,7 +3184,7 @@
                                             </td>
                                         </tr>
                                         <!-- 12th / Intermediate -->
-                                        <tr>
+                                        <tr style="{{ (!empty($appStudent->academic->ug_college) || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
                                                 <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
                                                     12th / Inter (10+2)
@@ -3185,6 +3206,58 @@
                                                 {{ $appStudent->academic->inter_percentage ?: 'N/A' }}
                                             </td>
                                         </tr>
+
+                                        <!-- Undergraduate (UG / Degree / B.Tech) -->
+                                        @if(!empty($appStudent->academic->ug_college) || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr style="{{ (!empty($appStudent->academic->pg_college) || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Undergraduate (UG)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ $appStudent->academic->ug_college ?: 'Degree / B.Tech Institute' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ $appStudent->academic->ug_board ?: 'University / Autonomous Board' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->ug_year ?: 'N/A' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->ug_roll ?: 'N/A' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ $appStudent->academic->ug_percentage ?: ($appStudent->academic->ug_status ?: 'Completed') }}
+                                            </td>
+                                        </tr>
+                                        @endif
+
+                                        <!-- Postgraduate (PG / Master's / M.Tech) -->
+                                        @if(!empty($appStudent->academic->pg_college) || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr>
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Postgraduate (PG)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ $appStudent->academic->pg_college ?: 'Master / PG Institute' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ $appStudent->academic->pg_board ?: 'University / Board' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->pg_year ?: 'N/A' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ $appStudent->academic->pg_roll ?: 'N/A' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ $appStudent->academic->pg_percentage ?: ($appStudent->academic->pg_status ?: 'Completed') }}
+                                            </td>
+                                        </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
