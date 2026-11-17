@@ -218,19 +218,19 @@
                 </tr>
                 <tr>
                     <td style="padding:4px 6px; font-weight:bold;">10th Standard (SSC)</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->ssc_school ?: ($student->school_name ?: 'N/A') }}</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->ssc_board ?: ($student->board ?: 'State Board') }}</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->ssc_year ?: ($student->passing_year ?: 'N/A') }}</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->ssc_roll ?: ($student->roll_number ?: 'N/A') }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->ssc_percentage !== 'N/A' ? $student->academic->ssc_percentage : (number_format((float) $student->percentage, 2) . ' %') }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_school) && $student->academic->ssc_school !== '-') ? $student->academic->ssc_school : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_board) && $student->academic->ssc_board !== '-') ? $student->academic->ssc_board : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_year) && $student->academic->ssc_year !== '-') ? $student->academic->ssc_year : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_roll) && $student->academic->ssc_roll !== '-') ? $student->academic->ssc_roll : '-' }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->ssc_percentage) && $student->academic->ssc_percentage !== 'N/A' && $student->academic->ssc_percentage !== '-') ? $student->academic->ssc_percentage : '-' }}</td>
                 </tr>
                 <tr>
                     <td style="padding:4px 6px; font-weight:bold;">12th / Inter (10+2)</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->inter_college ?: 'Junior College Records' }}</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->inter_board ?: 'Board of Intermediate Education' }}</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->inter_year ?: 'N/A' }}</td>
-                    <td style="padding:4px 6px;">{{ $student->academic->inter_roll ?: 'N/A' }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->inter_percentage ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_college) && $student->academic->inter_college !== '-') ? $student->academic->inter_college : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_board) && $student->academic->inter_board !== '-') ? $student->academic->inter_board : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_year) && $student->academic->inter_year !== '-') ? $student->academic->inter_year : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_roll) && $student->academic->inter_roll !== '-') ? $student->academic->inter_roll : '-' }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->inter_percentage) && $student->academic->inter_percentage !== 'N/A' && $student->academic->inter_percentage !== '-') ? $student->academic->inter_percentage : '-' }}</td>
                 </tr>
             </table>
         </div>

@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
     <!-- Shared Enterprise CRM Styles -->
-    <link rel="stylesheet" href="/css/crm-dashboard.css">
+    <link rel="stylesheet" href="/css/crm-dashboard.css?v={{ file_exists(public_path('css/crm-dashboard.css')) ? filemtime(public_path('css/crm-dashboard.css')) : time() }}">
 
     <!-- Chart.js for High-Impact Analytics -->
     <script src="/js/chart.min.js"></script>
@@ -1978,7 +1978,7 @@
 
                     function formatPersonalCouponPreview(val) {
                         val = (val || '').trim();
-                        if (!val) return '--------';
+                        if (!val) return 'Enter Application Number or CRM ID';
                         if (candidateCrmMap[val]) {
                             return candidateCrmMap[val].code;
                         }
@@ -2026,7 +2026,10 @@
                         }
 
                         let derivedCode = formatPersonalCouponPreview(val);
-                        if (preview) preview.textContent = derivedCode;
+                        if (preview) {
+                            preview.textContent = derivedCode;
+                            preview.style.color = (val && derivedCode !== 'Enter Application Number or CRM ID') ? '#2563eb' : '#94a3b8';
+                        }
 
                         const matched = candidateCrmMap[val];
                         if (matched) {
@@ -2036,7 +2039,7 @@
                                 candBadge.innerHTML = `👤 <strong>${matched.name}</strong> • ${matched.prog} • App: <code>${matched.applino}</code>`;
                             }
                         } else {
-                            if (crmTag) crmTag.textContent = val.includes('-') ? `CRM ID: ${val}` : 'CRM ID: V-SAT-XXXX';
+                            if (crmTag) crmTag.textContent = val.includes('-') ? `CRM ID: ${val}` : 'CRM ID: Dynamic';
                             if (candBadge) candBadge.style.display = 'none';
                         }
                     }

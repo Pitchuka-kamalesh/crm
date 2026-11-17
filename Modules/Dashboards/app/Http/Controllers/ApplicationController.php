@@ -96,22 +96,51 @@ class ApplicationController extends Controller
         $applino = $crmStudent?->applinano ?? (!empty($id) && $id !== '0' ? $id : ($usercode ?: ''));
         $phone = $crmStudent?->phoneno ?? ($cleanPhone ?: '');
 
-        $personalInfo = StudentPersonalInfo::where('applino', $applino)
-            ->when(!empty($phone) && $phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))
-            ->first();
+        // Fetch real-time Personal Info with exact applino priority (avoids picking up duplicate phone records)
+        $personalInfo = null;
+        if (!empty($applino)) {
+            $personalInfo = StudentPersonalInfo::where('applino', $applino)->first();
+        }
+        if (!$personalInfo && !empty($phone) && $phone !== 'N/A') {
+            $personalInfo = StudentPersonalInfo::where('phoneno', $phone)->orderBy('applino', 'desc')->first();
+        }
 
-        $academicDetails = StudentAcademicDetail::where('applino', $applino)
-            ->when(!empty($phone) && $phone !== 'N/A', fn($q) => $q->orWhere('phoneno', $phone))
-            ->first();
+        // Fetch real-time Academic Details with exact applino priority
+        $academicDetails = null;
+        if (!empty($applino)) {
+            $academicDetails = StudentAcademicDetail::where('applino', $applino)->first();
+        }
+        if (!$academicDetails && !empty($phone) && $phone !== 'N/A') {
+            $academicDetails = StudentAcademicDetail::where('phoneno', $phone)->orderBy('applino', 'desc')->first();
+        }
 
-        $payDetail = PayDetail::where('applino', $applino)
-            ->where('txnstatus', 'success')
-            ->orderBy('feeid', 'desc')
-            ->first();
+        // Fetch real-time Payment details
+        $payDetail = null;
+        if (!empty($applino)) {
+            $payDetail = PayDetail::where('applino', $applino)
+                ->where('txnstatus', 'success')
+                ->orderBy('feeid', 'desc')
+                ->first();
+        }
+        if (!$payDetail && !empty($phone) && $phone !== 'N/A') {
+            $payDetail = PayDetail::where('applino', 'like', "%{$phone}%")
+                ->where('txnstatus', 'success')
+                ->orderBy('feeid', 'desc')
+                ->first();
+        }
 
-        $receipt = ReceiptDetail::where('applino', $applino)
-            ->orderBy('id', 'desc')
-            ->first();
+        // Fetch real-time Receipt details
+        $receipt = null;
+        if (!empty($applino)) {
+            $receipt = ReceiptDetail::where('applino', $applino)
+                ->orderBy('id', 'desc')
+                ->first();
+        }
+        if (!$receipt && !empty($phone) && $phone !== 'N/A') {
+            $receipt = ReceiptDetail::where('applino', 'like', "%{$phone}%")
+                ->orderBy('id', 'desc')
+                ->first();
+        }
 
         $percentage = 0.0;
         if ($academicDetails) {
@@ -159,10 +188,12 @@ class ApplicationController extends Controller
 
         $examSchedule = null;
         try {
-            $examSchedule = \App\Models\ExamSchedule::query()
-                ->where('applino', $applino)
-                ->orWhere('phoneno', $phone)
-                ->first();
+            if (!empty($applino)) {
+                $examSchedule = \App\Models\ExamSchedule::where('applino', $applino)->first();
+            }
+            if (!$examSchedule && !empty($phone) && $phone !== 'N/A') {
+                $examSchedule = \App\Models\ExamSchedule::where('phoneno', $phone)->first();
+            }
         } catch (\Throwable $e) {}
 
         $tenthPercentage = (float)($academicDetails?->tenth_percentage ?? 0);
@@ -185,7 +216,55 @@ class ApplicationController extends Controller
             }
         }
 
-        $isPaid = ($crmStudent?->stage1 === 'paid') || ($payDetail !== null) || ($receipt !== null);
+        $ugPercentage = (float)($academicDetails?->ug_percentage ?? 0);
+        if ($ugPercentage <= 0) {
+            if ((float) $academicDetails?->ug_marks_earned > 0 && (float) $academicDetails?->ug_marks_conducted > 0) {
+                $ugPercentage = ((float) $academicDetails->ug_marks_earned / (float) $academicDetails->ug_marks_conducted) * 100;
+            } elseif ((float) $academicDetails?->ug_marks > 0) {
+                $rawUg = (float) $academicDetails->ug_marks;
+                $ugPercentage = $rawUg <= 10 ? ($rawUg * 9.5) : ($rawUg > 100 ? ($rawUg / 1000) * 100 : $rawUg);
+            }
+        }
+
+        $pgPercentage = (float)($academicDetails?->pg_percentage ?? 0);
+        if ($pgPercentage <= 0) {
+            if ((float) $academicDetails?->pg_marks_earned > 0 && (float) $academicDetails?->pg_marks_conducted > 0) {
+                $pgPercentage = ((float) $academicDetails->pg_marks_earned / (float) $academicDetails->pg_marks_conducted) * 100;
+            } elseif ((float) $academicDetails?->pg_marks > 0) {
+                $rawPg = (float) $academicDetails->pg_marks;
+                $pgPercentage = $rawPg <= 10 ? ($rawPg * 9.5) : ($rawPg > 100 ? ($rawPg / 1000) * 100 : $rawPg);
+            }
+        }
+
+        // Determine Degree Level (UG / M.Tech / PhD)
+        $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
+        $progShort = strtoupper($programObj?->program_short_name ?? '');
+        $progLong = strtoupper($programObj?->program_long_name ?? '');
+
+        if (
+            $progLevel === 'PG' ||
+            str_contains($progShort, 'M.TECH') ||
+            str_contains($progShort, 'MTECH') ||
+            str_contains($progLong, 'MASTER') ||
+            in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])
+        ) {
+            $degreeLevel = 'mtech';
+        } elseif (
+            $progLevel === 'PHD' ||
+            $progLevel === 'DOCTORAL' ||
+            str_contains($progShort, 'PHD') ||
+            str_contains($progShort, 'PH.D') ||
+            str_contains($progLong, 'DOCTOR') ||
+            !empty($academicDetails?->pg_college_name)
+        ) {
+            $degreeLevel = 'phd';
+        } elseif (!empty($academicDetails?->ug_college_name)) {
+            $degreeLevel = 'mtech';
+        } else {
+            $degreeLevel = 'btech';
+        }
+
+        $isPaid = ($crmStudent?->stage4 === 'paid') || ($crmStudent?->stage1 === 'paid') || ($payDetail !== null) || ($receipt !== null);
         $uploadedDocs = \Modules\Dashboards\Http\Controllers\DashboardsController::getUploadedDocuments((string) $applino);
         $photoInfo = $uploadedDocs['photo'] ?? null;
         $photoPath = null;
@@ -236,7 +315,16 @@ class ApplicationController extends Controller
             }
         }
 
-        $studentCrmId = $personalInfo?->crmid ?: ($crmStudent?->crmid ?: (!empty($applino) ? ('V-SAT-' . substr($applino, -4)) : ''));
+        $studentCrmId = $crmStudent?->crmid ?: ($personalInfo?->crmid ?: (!empty($applino) ? ('V-SAT-' . substr($applino, -4)) : ''));
+
+        $paidAmountVal = 0.00;
+        if ($payDetail !== null) {
+            $paidAmountVal = (float) $payDetail->paidamount;
+        } elseif ($receipt !== null) {
+            $paidAmountVal = (float) $receipt->feepayable;
+        } elseif ($isPaid) {
+            $paidAmountVal = 0.00;
+        }
 
         return (object) [
             'id' => $applino,
@@ -260,27 +348,48 @@ class ApplicationController extends Controller
             'program' => $programName,
             'branch' => $branchName,
             'campus' => $campusName,
-            'school_name' => $academicDetails?->tenth_school_name ?: ($academicDetails?->pu2_college_name ?: ''),
-            'board' => $academicDetails?->tenth_study_board ?: ($academicDetails?->pu2_study_board ?: ''),
+            'school_name' => $academicDetails?->tenth_school_name ?: '-',
+            'board' => $academicDetails?->tenth_study_board ?: '-',
             'percentage' => $tenthPercentage ?: $percentage,
-            'passing_year' => $academicDetails?->tenth_passed_year ?: ($academicDetails?->pu2_passed_year ?: ''),
-            'roll_number' => $academicDetails?->tenth_roll_no ?: ($academicDetails?->pu2_roll_no ?: ''),
+            'passing_year' => $academicDetails?->tenth_passed_year ?: '-',
+            'roll_number' => $academicDetails?->tenth_roll_no ?: '-',
             'academic' => (object) [
-                'ssc_board' => $academicDetails?->tenth_study_board ?: 'State Board',
-                'ssc_school' => $academicDetails?->tenth_school_name ?: '',
-                'ssc_year' => $academicDetails?->tenth_passed_year ?: '',
-                'ssc_roll' => $academicDetails?->tenth_roll_no ?: '',
-                'ssc_marks_conducted' => $academicDetails?->tenth_marks_conducted ?: '',
-                'ssc_marks_earned' => $academicDetails?->tenth_marks_earned ?: '',
-                'ssc_percentage' => $tenthPercentage > 0 ? number_format($tenthPercentage, 2) . ' %' : 'N/A',
-                'inter_college' => $academicDetails?->pu2_college_name ?: '',
-                'inter_board' => $academicDetails?->pu2_study_board ?: 'Board of Intermediate',
-                'inter_year' => $academicDetails?->pu2_passed_year ?: '',
-                'inter_roll' => $academicDetails?->pu2_roll_no ?: '',
-                'inter_marks_conducted' => $academicDetails?->pu2_marks_conducted ?: '',
-                'inter_marks_earned' => $academicDetails?->pu2_marks_earned ?: '',
-                'inter_percentage' => $interPercentage > 0 ? number_format($interPercentage, 2) . ' %' : 'N/A',
+                'ssc_board' => !empty($academicDetails?->tenth_study_board) ? $academicDetails->tenth_study_board : '-',
+                'ssc_school' => !empty($academicDetails?->tenth_school_name) ? $academicDetails->tenth_school_name : '-',
+                'ssc_year' => !empty($academicDetails?->tenth_passed_year) ? $academicDetails->tenth_passed_year : '-',
+                'ssc_roll' => !empty($academicDetails?->tenth_roll_no) ? $academicDetails->tenth_roll_no : '-',
+                'ssc_marks_conducted' => !empty($academicDetails?->tenth_marks_conducted) ? $academicDetails->tenth_marks_conducted : '-',
+                'ssc_marks_earned' => !empty($academicDetails?->tenth_marks_earned) ? $academicDetails->tenth_marks_earned : '-',
+                'ssc_percentage' => ($tenthPercentage && $tenthPercentage > 0) ? number_format($tenthPercentage, 2) . ' %' : '-',
+                'inter_college' => !empty($academicDetails?->pu2_college_name) ? $academicDetails->pu2_college_name : '-',
+                'inter_board' => !empty($academicDetails?->pu2_study_board) ? $academicDetails->pu2_study_board : '-',
+                'inter_year' => !empty($academicDetails?->pu2_passed_year) ? $academicDetails->pu2_passed_year : '-',
+                'inter_roll' => !empty($academicDetails?->pu2_roll_no) ? $academicDetails->pu2_roll_no : '-',
+                'inter_marks_conducted' => !empty($academicDetails?->pu2_marks_conducted) ? $academicDetails->pu2_marks_conducted : '-',
+                'inter_marks_earned' => !empty($academicDetails?->pu2_marks_earned) ? $academicDetails->pu2_marks_earned : '-',
+                'inter_percentage' => ($interPercentage && $interPercentage > 0) ? number_format($interPercentage, 2) . ' %' : '-',
+
+                // Undergraduate (UG / Degree / B.Tech)
+                'ug_college' => !empty($academicDetails?->ug_college_name) ? $academicDetails->ug_college_name : '-',
+                'ug_board' => !empty($academicDetails?->ug_university_board) ? $academicDetails->ug_university_board : '-',
+                'ug_year' => !empty($academicDetails?->ug_passed_year) ? $academicDetails->ug_passed_year : '-',
+                'ug_roll' => !empty($academicDetails?->ug_roll_no) ? $academicDetails->ug_roll_no : '-',
+                'ug_marks_conducted' => !empty($academicDetails?->ug_marks_conducted) ? $academicDetails->ug_marks_conducted : '-',
+                'ug_marks_earned' => !empty($academicDetails?->ug_marks_earned) ? $academicDetails->ug_marks_earned : '-',
+                'ug_percentage' => ($ugPercentage && $ugPercentage > 0) ? number_format($ugPercentage, 2) . ' %' : ($academicDetails?->ug_cgpa ? $academicDetails->ug_cgpa . ' CGPA' : '-'),
+                'ug_status' => !empty($academicDetails?->ug_current_status) ? $academicDetails->ug_current_status : '-',
+
+                // Postgraduate (PG / Master's / M.Tech)
+                'pg_college' => !empty($academicDetails?->pg_college_name) ? $academicDetails->pg_college_name : '-',
+                'pg_board' => !empty($academicDetails?->pg_university_board) ? $academicDetails->pg_university_board : '-',
+                'pg_year' => !empty($academicDetails?->pg_passed_year) ? $academicDetails->pg_passed_year : '-',
+                'pg_roll' => !empty($academicDetails?->pg_roll_no) ? $academicDetails->pg_roll_no : '-',
+                'pg_marks_conducted' => !empty($academicDetails?->pg_marks_conducted) ? $academicDetails->pg_marks_conducted : '-',
+                'pg_marks_earned' => !empty($academicDetails?->pg_marks_earned) ? $academicDetails->pg_marks_earned : '-',
+                'pg_percentage' => ($pgPercentage && $pgPercentage > 0) ? number_format($pgPercentage, 2) . ' %' : ($academicDetails?->pg_cgpa ? $academicDetails->pg_cgpa . ' CGPA' : '-'),
+                'pg_status' => !empty($academicDetails?->pg_current_status) ? $academicDetails->pg_current_status : '-',
             ],
+            'degree_level' => $degreeLevel,
             'street' => $villageVal ?: ($personalInfo?->village ?: ''),
             'address' => $villageVal ?: ($personalInfo?->village ?: ''),
             'city' => $cityVal ?: ($personalInfo?->city_mandal ?: ''),
@@ -290,8 +399,8 @@ class ApplicationController extends Controller
             'country' => $countryVal ?: '',
             'exam_date' => $examSchedule?->examdate ? \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') : 'Booked in Stage 5',
             'exam_slot' => $examSchedule?->exam_slot ?? 'Session Scheduled',
-            'payment_amount' => (float) ($payDetail?->paidamount ?? $receipt?->feepayable ?? ($isPaid ? 200.00 : 700.00)),
-            'payment_method' => $payDetail?->paytype ?? $receipt?->paytype ?? 'PayU (Online)',
+            'payment_amount' => $paidAmountVal,
+            'payment_method' => $payDetail?->paytype ?? $receipt?->paytype ?? ($isPaid ? 'Online Settlement' : 'Unpaid'),
             'transaction_id' => $payDetail?->txnpayuid ?? $payDetail?->txncrmid ?? $receipt?->receiptno ?? ($isPaid ? ('TXN_' . $applino) : 'PENDING'),
             'payment_status' => $isPaid ? 'Completed' : 'Pending',
             'photo_path' => $photoPath,

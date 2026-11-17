@@ -155,9 +155,19 @@ class DashboardsController extends Controller
         // Determine Degree Level for Step 3 based on registration (UG -> B.Tech, PG -> M.Tech, Doctoral -> PhD)
         $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
         $progShort = strtoupper($program?->program_short_name ?? '');
-        $progName = strtoupper($program?->program_name ?? '');
+        $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
 
         if (
+            $progLevel === 'PHD' ||
+            $progLevel === 'DOCTORAL' ||
+            str_contains($progShort, 'PHD') ||
+            str_contains($progShort, 'PH.D') ||
+            str_contains($progName, 'DOCTOR') ||
+            str_contains($progName, 'PH.D') ||
+            str_contains($progName, 'PHD')
+        ) {
+            $degreeLevel = 'phd';
+        } elseif (
             $progLevel === 'PG' ||
             str_contains($progShort, 'M.TECH') ||
             str_contains($progShort, 'MTECH') ||
@@ -165,14 +175,6 @@ class DashboardsController extends Controller
             in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])
         ) {
             $degreeLevel = 'mtech';
-        } elseif (
-            $progLevel === 'PHD' ||
-            $progLevel === 'DOCTORAL' ||
-            str_contains($progShort, 'PHD') ||
-            str_contains($progShort, 'PH.D') ||
-            str_contains($progName, 'DOCTOR')
-        ) {
-            $degreeLevel = 'phd';
         } else {
             $degreeLevel = 'btech';
         }
@@ -185,16 +187,10 @@ class DashboardsController extends Controller
         $academicDetails = null;
         if ($crmStudent) {
             try {
-                $personalInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
-                    ->where('phoneno', $crmStudent->phoneno)
-                    ->first()
-                    ?? StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
-                    ?? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->first();
-                $academicDetails = StudentAcademicDetail::where('applino', $crmStudent->applinano)
-                    ->where('phoneno', $crmStudent->phoneno)
-                    ->first()
-                    ?? StudentAcademicDetail::where('applino', $crmStudent->applinano)->first()
-                    ?? StudentAcademicDetail::where('phoneno', $crmStudent->phoneno)->first();
+                $personalInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
+                    ?? (!empty($crmStudent->phoneno) ? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->where('applino', $crmStudent->applinano)->first() : null);
+                $academicDetails = StudentAcademicDetail::where('applino', $crmStudent->applinano)->first()
+                    ?? (!empty($crmStudent->phoneno) ? StudentAcademicDetail::where('phoneno', $crmStudent->phoneno)->where('applino', $crmStudent->applinano)->first() : null);
             } catch (\Throwable $e) {
                 Log::warning('Could not load student personal/academic details: ' . $e->getMessage());
             }
@@ -451,7 +447,7 @@ class DashboardsController extends Controller
                     'log_timestamp' => now(),
                 ]);
             } else {
-                $crmid = $crmStudent?->crmid ?? ($crmStudent ? CrmIdService::generateForStudent($crmStudent) : 'CRM' . $cleanPhone);
+                $crmid = $crmStudent ? CrmIdService::generateForStudent($crmStudent) : 'CRM' . $cleanPhone;
                 StudentPersonalInfo::create([
                     'crmid' => $crmid,
                     'applino' => $appNo,
@@ -633,9 +629,18 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $personalCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
                     $existingInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
-                        ?? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->first();
+                        ?? (!empty($cleanStudentPhone) ? StudentPersonalInfo::where('phoneno', $cleanStudentPhone)->where('applino', $crmStudent->applinano)->first() : null);
+
+                    if ($existingInfo && !empty($existingInfo->crmid) && !CrmIdService::isCrmIdInUse($existingInfo->crmid, $crmStudent->applinano)) {
+                        $personalCrmId = $existingInfo->crmid;
+                        if ($crmStudent->crmid !== $personalCrmId) {
+                            $crmStudent->update(['crmid' => $personalCrmId]);
+                            $crmStudent->crmid = $personalCrmId;
+                        }
+                    } else {
+                        $personalCrmId = CrmIdService::generateForStudent($crmStudent);
+                    }
 
                     $dobVal = $request->input('dob') ?? $request->input('DOB');
 
@@ -741,10 +746,25 @@ class DashboardsController extends Controller
                 $stateInput = $request->input('jr_state') ?? $request->input('inter_state') ?? $request->input('pu2_college_state');
                 $districtInput = $request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district');
 
+                if ($stateInput && is_numeric($stateInput)) {
+                    $matchedState = State::where('state_id', (int)$stateInput)->first();
+                    if ($matchedState) {
+                        $stateInput = $matchedState->state_name;
+                    }
+                }
+                if ($districtInput && is_numeric($districtInput)) {
+                    $matchedDist = District::where('DISTRICT_ID', (int)$districtInput)->first();
+                    if ($matchedDist) {
+                        $districtInput = $matchedDist->DISTRICT_NAME;
+                    }
+                }
+
                 $request->merge([
                     'city' => $cityInput,
                     'jr_state' => $stateInput,
                     'jr_district' => $districtInput,
+                    'pu2_college_state' => $stateInput,
+                    'pu2_college_district' => $districtInput,
                 ]);
 
                 $request->validate([
@@ -772,10 +792,10 @@ class DashboardsController extends Controller
                     'pu2_marks_earned' => ['required', 'numeric', 'min:0'],
                     'pu2_percentage' => ['required', 'numeric'],
                 ], [
-                    'inter_college.required' => 'Jr. College Name / Institute Name is required.',
-                    'city.required' => 'Jr. City is required.',
-                    'jr_state.required' => 'Jr. State is required.',
-                    'jr_district.required' => 'Jr. District is required.',
+                    'inter_college.required' => 'College Name / Institute Name is required.',
+                    'city.required' => 'College City is required.',
+                    'jr_state.required' => 'College State is required.',
+                    'jr_district.required' => 'College District is required.',
                     'subset_choice.required' => 'Please select First Year or Second Year.',
                     'inter_year.required' => 'Year is required.',
                     'pu2_marks_type.required' => 'Marks Type is required.',
@@ -785,7 +805,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $academicCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $academicCrmId = CrmIdService::generateForStudent($crmStudent);
                     $existingAcademic = StudentAcademicDetail::where('applino', $crmStudent->applinano)
                         ->where('phoneno', $crmStudent->phoneno)
                         ->first();
@@ -793,7 +813,8 @@ class DashboardsController extends Controller
                     $tenthSchool = $request->input('tenth_school_name') ?? $request->input('school_co_name') ?? $request->input('ssc_school');
                     $tenthBoard = $request->input('tenth_study_board') ?? $request->input('boad_of_study') ?? $request->input('ssc_board');
                     $tenthRoll = $request->input('tenth_roll_no') ?? $request->input('roll_no') ?? $request->input('ssc_hallticket');
-                    $tenthYear = (int) ($request->input('tenth_passed_year') ?? $request->input('passing_year') ?? $request->input('ssc_year') ?? 2024);
+                    $tenthYearInput = $request->input('tenth_passed_year') ?? $request->input('passing_year') ?? $request->input('ssc_year');
+                    $tenthYear = (is_numeric($tenthYearInput) && (int)$tenthYearInput > 0) ? (int)$tenthYearInput : null;
 
                     $evalType = $request->input('eval_type') ?? $request->input('tenth_marks_type') ?? 'marks';
                     $sscMarks = $request->input('tenth_marks') ?? $request->input('tenth_marks_earned') ?? $request->input('marks_value') ?? $request->input('ssc_marks');
@@ -817,18 +838,35 @@ class DashboardsController extends Controller
                         $evalType = 'marks';
                     }
 
-                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board') ?? 'Inter';
-                    $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? 'First Year';
+                    $isPgOrDoc = in_array($request->input('degree_level'), ['mtech', 'phd']);
+                    if (!$isPgOrDoc && $crmStudent && $crmStudent->progmid) {
+                        $prog = Program::where('program_id', $crmStudent->progmid)->first();
+                        if ($prog) {
+                            $pLevel = strtoupper($prog->program_level ?? '');
+                            $pShort = strtoupper($prog->program_short_name ?? '');
+                            $pName = strtoupper($prog->program_name ?? '');
+                            if ($pLevel === 'PG' || $pLevel === 'POST GRADUATE' || str_contains($pShort, 'M.TECH') || str_contains($pName, 'MASTER') || in_array($pShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A']) || $pLevel === 'PHD' || $pLevel === 'DOCTORAL' || str_contains($pShort, 'PH.D') || str_contains($pName, 'DOCTOR')) {
+                                $isPgOrDoc = true;
+                            }
+                        }
+                    }
+
+
+                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board');
+                    $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? ($isPgOrDoc ? 'Second Year' : 'First Year');
+                    if ($isPgOrDoc) {
+                        $subsetChoice = 'Second Year';
+                    }
 
                     $tenthConducted = is_numeric($request->input('tenth_marks_conducted'))
                         ? (float)$request->input('tenth_marks_conducted')
-                        : 600.0;
+                        : null;
                     $tenthEarned = is_numeric($request->input('tenth_marks_earned'))
                         ? (float)$request->input('tenth_marks_earned')
                         : ($tenthMarksNum ?? ($tenthCgpaNum ? round($tenthCgpaNum * 9.5, 2) : null));
                     $tenthPct = is_numeric($request->input('tenth_percentage'))
                         ? (float)$request->input('tenth_percentage')
-                        : ($tenthConducted > 0 && $tenthEarned ? round(($tenthEarned / $tenthConducted) * 100, 2) : null);
+                        : (($tenthConducted && $tenthConducted > 0 && $tenthEarned) ? round(($tenthEarned / $tenthConducted) * 100, 2) : null);
 
                     $pu2MarksRaw = is_numeric($request->input('inter_marks')) ? (float)$request->input('inter_marks') : null;
                     $pu2Type = $request->input('pu2_marks_type') ?? $request->input('inter_marks_type') ?? 'Marks';
@@ -843,21 +881,25 @@ class DashboardsController extends Controller
                         : (($pu2Conducted > 0 && $pu2Earned) ? round(($pu2Earned / $pu2Conducted) * 100, 2) : $pu2MarksRaw);
 
                     $isSecondYear = (strcasecmp((string)$subsetChoice, 'Second Year') === 0 || strcasecmp((string)$subsetChoice, 'Second year') === 0);
-                    $undertakingAgreed = ($request->input('undertaking_60_pct') === 'yes' || $request->input('undertaking_60_pct') === '1');
+                    $undertakingAgreed = ($request->input('undertaking_60_pct') === 'yes' || $request->input('undertaking_60_pct') === '1' || ($existingAcademic && $existingAcademic->undertaking_60_pct === 'yes'));
 
-                    // If 2nd year student, only proceed if percentage is >= 60%
-                    if ($isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
-                        throw \Illuminate\Validation\ValidationException::withMessages([
-                            'pu2_percentage' => 'You are not eligible according to university norms.',
-                        ]);
-                    }
 
-                    // If 1st year student and < 60%, require undertaking confirmation
-                    if (!$isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
-                        if (!$undertakingAgreed) {
+                    // For UG programs: enforce 60% threshold. For PG / Doctorate: no 60% requirement for intermediate.
+                    if (!$isPgOrDoc) {
+                        // If 2nd year student, only proceed if percentage is >= 60%
+                        if ($isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
                             throw \Illuminate\Validation\ValidationException::withMessages([
-                                'undertaking_60_pct' => 'Please confirm your undertaking (i will get 60%) to proceed.',
+                                'pu2_percentage' => 'You are not eligible according to university norms.',
                             ]);
+                        }
+
+                        // If 1st year student and < 60%, require undertaking confirmation
+                        if (!$isSecondYear && $pu2Pct !== null && $pu2Pct < 60.0) {
+                            if (!$undertakingAgreed) {
+                                throw \Illuminate\Validation\ValidationException::withMessages([
+                                    'undertaking_60_pct' => 'Please confirm your undertaking (i will get 60%) to proceed.',
+                                ]);
+                            }
                         }
                     }
 
@@ -883,6 +925,7 @@ class DashboardsController extends Controller
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
                         'pu2_study_board' => $courseChoice,
                         'pu2_college_city' => $cityVal,
+                        'pu2_college_state' => $jrStateVal,
                         'pu2_college_district' => $jrDistrictVal,
                         'pu2_roll_no' => $request->input('inter_hallticket') ?? $request->input('pu2_roll_no'),
                         'pu2_passed_year' => $request->filled('inter_year') ? (int) $request->input('inter_year') : ($request->filled('pu2_passed_year') ? (int) $request->input('pu2_passed_year') : null),
@@ -892,32 +935,14 @@ class DashboardsController extends Controller
                         'pu2_marks_earned' => $pu2Earned,
                         'pu2_percentage' => $pu2Pct,
                         'pu2_current_status' => $subsetChoice,
+                        'undertaking_60_pct' => $undertakingAgreed ? 'yes' : ($existingAcademic?->undertaking_60_pct ?? null),
                         'log_userid' => $user?->usercode ?? $user?->name ?? 'STUDENT',
                         'log_datetime' => now(),
                         'log_ipaddress' => $request->ip(),
                     ];
 
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'city')) {
-                        $academicPayload['city'] = $cityVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_city')) {
-                        $academicPayload['jr_city'] = $cityVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_state')) {
-                        $academicPayload['jr_state'] = $jrStateVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'jr_district')) {
-                        $academicPayload['jr_district'] = $jrDistrictVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'pu2_college_state')) {
-                        $academicPayload['pu2_college_state'] = $jrStateVal;
-                    }
-                    if (\Illuminate\Support\Facades\Schema::hasColumn('crm.student_academic_details', 'undertaking_60_pct')) {
-                        $academicPayload['undertaking_60_pct'] = $undertakingAgreed ? 'yes' : null;
-                    }
-
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
-                    if ($request->filled('ug_college_name') || $request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
                         $ugMarksRaw = is_numeric($request->input('ug_marks')) ? (float) $request->input('ug_marks') : (is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : null);
                         $ugPct = ($ugMarksRaw && $ugMarksRaw <= 10) ? round($ugMarksRaw * 9.5, 2) : (($ugMarksRaw && $ugMarksRaw > 100) ? round(($ugMarksRaw / 1000) * 100, 2) : $ugMarksRaw);
 
@@ -936,7 +961,7 @@ class DashboardsController extends Controller
                     }
 
                     // If Degree level is PhD, save PG (M.Tech) details
-                    if ($request->filled('pg_college_name') || $request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'phd') {
                         $pgMarksRaw = is_numeric($request->input('pg_marks')) ? (float) $request->input('pg_marks') : (is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : null);
                         $pgPct = ($pgMarksRaw && $pgMarksRaw <= 10) ? round($pgMarksRaw * 9.5, 2) : (($pgMarksRaw && $pgMarksRaw > 100) ? round(($pgMarksRaw / 1000) * 100, 2) : $pgMarksRaw);
 
@@ -988,7 +1013,7 @@ class DashboardsController extends Controller
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
                     $destDir = public_path('uploads/documents/' . $appliFolder);
 
-                    $crmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $crmId = CrmIdService::generateForStudent($crmStudent);
 
                     $uploadPayload = [
                         'crmid' => $crmId,
@@ -1095,10 +1120,10 @@ class DashboardsController extends Controller
                 $existingExamSchedule = $crmStudent ? \App\Models\ExamSchedule::where('applino', $crmStudent->applinano)->first() : null;
                 $existingDate = $existingExamSchedule?->examdate ? \Carbon\Carbon::parse($existingExamSchedule->examdate)->format('Y-m-d') : null;
 
-                // Reschedule cutoff: 2 days before exam date at 5:00 PM
-                // (e.g., if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                // Reschedule cutoff: 1 day before exam date at 5:00 PM
+                // (e.g., if student has exam tomorrow, they can edit up to today evening 5:00 PM; afterwards locked)
                 $editDeadline = $existingDate
-                    ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                    ? \Carbon\Carbon::parse($existingDate)->subDay()->setTime(17, 0, 0)
                     : null;
 
                 $isSlotLocked = $existingExamSchedule && $editDeadline && $now->gt($editDeadline);
@@ -1127,7 +1152,7 @@ class DashboardsController extends Controller
                 ]);
 
                 if ($crmStudent) {
-                    $examCrmId = $crmStudent->crmid ?? CrmIdService::generateForStudent($crmStudent);
+                    $examCrmId = CrmIdService::generateForStudent($crmStudent);
 
                     \App\Models\ExamSchedule::updateOrCreate(
                         ['applino' => $crmStudent->applinano],

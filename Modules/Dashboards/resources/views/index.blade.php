@@ -1850,7 +1850,7 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Conducted:</label>
-                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted ?? 600 }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
+                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Earned:</label>
@@ -1866,53 +1866,85 @@
                             <!-- ================= SUBBOX 2: 12th / INTERMEDIATE INFO ================= -->
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
                                 <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
-                                <input type="hidden" name="course_choice" value="Inter">
+                                <input type="hidden" name="course_choice" value="{{ $academicDetails?->pu2_study_board ?? '' }}">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
-                                <!-- Row 1: Jr. College Name / Institute Name (Full Width) -->
+                                <!-- Row 1: College Name / Institute Name (Full Width) -->
                                 <div class="mockup-field-group">
-                                    <label class="mockup-label">Jr. College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter Jr. College / Institute Name" required>
+                                    <label class="mockup-label">College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name" required>
                                 </div>
 
-                                <!-- Row 2: 3 Separate Distinct Columns for Jr. City, Jr. State, Jr. District (Text Inputs) -->
+                                <!-- Row 2: 3 Separate Distinct Columns for College City, College State, College District -->
                                 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter Jr. City" required>
+                                        <label class="mockup-label">College City: <span style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. State: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="jr_state" class="mockup-input" value="{{ $academicDetails?->jr_state ?? $academicDetails?->pu2_college_state ?? 'Andhra Pradesh' }}" placeholder="Enter Jr. State" required>
+                                        <label class="mockup-label">College State: <span style="color:#ef4444;">*</span></label>
+                                        <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                @php
+                                                    $curState = $academicDetails?->pu2_college_state;
+                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Jr. District: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="jr_district" class="mockup-input" value="{{ $academicDetails?->jr_district ?? $academicDetails?->pu2_college_district ?? 'Guntur' }}" placeholder="Enter Jr. District" required>
+                                        <label class="mockup-label">College District: <span style="color:#ef4444;">*</span></label>
+                                        <select name="jr_district" id="geo-inter-district-select" class="mockup-select" required>
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                @php
+                                                    $curDist = $academicDetails?->pu2_college_district;
+                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- Row 2: Status (First Year / Second Year), Year, Hall Tkt (3 Columns) -->
+                                <!-- Row 3: Status (First Year / Second Year), Year, Hall Ticket Number (3 Columns) -->
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
                                         <div class="mockup-radio-row" style="margin-top: 0.45rem;">
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="First Year" {{ ($academicDetails?->pu2_current_status !== 'Second year' && $academicDetails?->pu2_current_status !== 'Second Year') ? 'checked' : '' }} required>
+                                            @php
+                                                $isPgOrDoc = in_array($degreeLevel ?? '', ['mtech', 'phd']);
+                                                $savedStatus = $academicDetails?->pu2_current_status;
+                                                if (!empty($savedStatus)) {
+                                                    $isSecondYr = in_array(strtolower(trim($savedStatus)), ['second year', 'second']);
+                                                } else {
+                                                    // Default: Second Year for PG/Doctorate, First Year for UG
+                                                    $isSecondYr = $isPgOrDoc;
+                                                }
+                                            @endphp
+                                            <label class="mockup-radio-label" id="radio-wrapper-first-year" style="{{ $isPgOrDoc ? 'display: none !important;' : '' }}">
+                                                <input type="radio" name="subset_choice" id="radio-subset-first-year" value="First Year" {{ (!$isPgOrDoc && !$isSecondYr) ? 'checked' : '' }} {{ $isPgOrDoc ? 'disabled' : '' }} required>
                                                 <span>First Year</span>
                                             </label>
-                                            <label class="mockup-radio-label">
-                                                <input type="radio" name="subset_choice" value="Second Year" {{ ($academicDetails?->pu2_current_status === 'Second year' || $academicDetails?->pu2_current_status === 'Second Year') ? 'checked' : '' }} required>
+                                            <label class="mockup-radio-label" id="radio-wrapper-second-year">
+                                                <input type="radio" name="subset_choice" id="radio-subset-second-year" value="Second Year" {{ ($isPgOrDoc || $isSecondYr) ? 'checked' : '' }} required>
                                                 <span>Second Year</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year ?? 2026 }}" placeholder="e.g. 2026" min="2000" max="2030" required>
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Tkt:</label>
-                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket No (optional)">
+                                        <label class="mockup-label">Hall Ticket number:</label>
+                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket Number">
                                     </div>
                                 </div>
 
@@ -1927,22 +1959,31 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted ?? 1000 }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
+                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
                                         <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> <span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span></label>
+                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> @if(!in_array($degreeLevel ?? '', ['mtech', 'phd']))<span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span>@endif</label>
                                         <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
                                         <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
                                 </div>
                             </div>
 
+                            @if(in_array($degreeLevel ?? '', ['mtech', 'phd']))
+                            <!-- Higher Academic (UG / PG) Option Toggle (Only for PG / Ph.D) -->
+                            <div style="margin-top: 1rem; margin-bottom: 0.5rem; text-align: right;">
+                                <button type="button" id="btn-toggle-ug-pg" onclick="toggleUgPgFields()" style="background: #eff6ff; border: 1.5px dashed #3b82f6; color: #1d4ed8; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                    <span>🎓</span>
+                                    <span>− Toggle Higher Academic Details</span>
+                                </button>
+                            </div>
+
                             <!-- ================= SUBBOX 3: UNDERGRADUATE (B.TECH / DEGREE) (M.TECH & PHD) ================= -->
-                            <div class="mockup-subbox" id="sec-ug-details" style="display: {{ ($degreeLevel === 'mtech' || $degreeLevel === 'phd') ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
+                            <div class="mockup-subbox" id="sec-ug-details" style="display: block; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                                     <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (B.Tech / Degree) Details</h4>
                                     <span class="mockup-pill-badge" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Required for M.Tech &amp; Ph.D</span>
@@ -1982,8 +2023,9 @@
                                 </div>
                             </div>
 
+                            @if(($degreeLevel ?? '') === 'phd')
                             <!-- ================= SUBBOX 4: POSTGRADUATE (M.TECH / PG) (PHD ONLY) ================= -->
-                            <div class="mockup-subbox" id="sec-pg-details" style="display: {{ $degreeLevel === 'phd' ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
+                            <div class="mockup-subbox" id="sec-pg-details" style="display: block; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                                     <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate (M.Tech / PG) Details</h4>
                                     <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
@@ -2022,6 +2064,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @endif
                             </fieldset>
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
@@ -2109,16 +2153,59 @@
 
                                 const ugSec = document.getElementById('sec-ug-details');
                                 const pgSec = document.getElementById('sec-pg-details');
+                                const toggleBtn = document.getElementById('btn-toggle-ug-pg');
+                                const toggleDiv = toggleBtn ? toggleBtn.parentElement : null;
+                                const firstYearRadioWrapper = document.getElementById('radio-wrapper-first-year');
+                                const firstYearRadio = document.getElementById('radio-subset-first-year');
+                                const secondYearRadio = document.getElementById('radio-subset-second-year');
 
-                                if (level === 'btech') {
-                                    if (ugSec) ugSec.style.display = 'none';
-                                    if (pgSec) pgSec.style.display = 'none';
-                                } else if (level === 'mtech') {
+                                if (level === 'mtech') {
+                                    if (toggleDiv) toggleDiv.style.display = 'block';
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'none';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = true;
+                                        firstYearRadio.checked = false;
+                                        firstYearRadio.removeAttribute('required');
+                                    }
+                                    if (secondYearRadio) {
+                                        secondYearRadio.checked = true;
+                                    }
                                 } else if (level === 'phd') {
+                                    if (toggleDiv) toggleDiv.style.display = 'block';
                                     if (ugSec) ugSec.style.display = 'block';
                                     if (pgSec) pgSec.style.display = 'block';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = true;
+                                        firstYearRadio.checked = false;
+                                        firstYearRadio.removeAttribute('required');
+                                    }
+                                    if (secondYearRadio) {
+                                        secondYearRadio.checked = true;
+                                    }
+                                } else {
+                                    // UG / btech: higher academic details must never appear, both 1st and 2nd year radio buttons available
+                                    if (toggleDiv) toggleDiv.style.display = 'none';
+                                    if (ugSec) ugSec.style.display = 'none';
+                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.removeProperty('display');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = false;
+                                        firstYearRadio.setAttribute('required', 'required');
+                                    }
+                                }
+                            }
+
+                            function toggleUgPgFields() {
+                                const ugSec = document.getElementById('sec-ug-details');
+                                const pgSec = document.getElementById('sec-pg-details');
+                                const btn = document.getElementById('btn-toggle-ug-pg');
+                                if (ugSec) {
+                                    const isHidden = ugSec.style.display === 'none';
+                                    ugSec.style.display = isHidden ? 'block' : 'none';
+                                    if (btn) btn.innerHTML = isHidden ? '<span>🎓</span><span>− Hide Higher Academic (UG / PG) Details</span>' : '<span>🎓</span><span>+ Add / View Higher Academic (UG / PG) Details</span>';
                                 }
                             }
 
@@ -2149,7 +2236,7 @@
                                 if (val === 'CGPA') {
                                     if (conductedIn) conductedIn.value = '10';
                                 } else {
-                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '600';
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '';
                                 }
                                 calculateTenthPct();
                             }
@@ -2174,7 +2261,9 @@
                                 }
                                 pctInput.value = pct > 0 ? pct.toFixed(2) : '';
                                 if (warning) {
-                                    warning.style.display = (pct > 0 && pct < 60) ? 'block' : 'none';
+                                    const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                    const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
+                                    warning.style.display = (!isPgOrDoc && pct > 0 && pct < 60) ? 'block' : 'none';
                                 }
                             }
 
@@ -2183,29 +2272,46 @@
                                 if (val === 'CGPA') {
                                     if (conductedIn) conductedIn.value = '10';
                                 } else {
-                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '1000';
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '';
                                 }
                                 calculatePu2Pct();
                             }
+
+                            const allStatesData = @json($states);
+                            const allDistrictsData = @json($districts);
 
                             function onInterStateChange(stateId) {
                                 const distSelect = document.getElementById('geo-inter-district-select');
                                 if (!distSelect) return;
                                 const currentSelectedDist = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
+
+                                let numericStateId = stateId;
+                                if (isNaN(stateId) && typeof allStatesData !== 'undefined') {
+                                    const foundState = allStatesData.find(s => s.state_name === stateId);
+                                    if (foundState) numericStateId = foundState.state_id;
+                                }
+
                                 let foundSelected = false;
-                                allDistrictsData.forEach(function(d) {
-                                    if (!stateId || d.STATE_ID == stateId) {
-                                        const opt = document.createElement('option');
-                                        opt.value = d.DISTRICT_ID;
-                                        opt.textContent = d.DISTRICT_NAME;
-                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
-                                            opt.selected = true;
-                                            foundSelected = true;
+                                if (typeof allDistrictsData !== 'undefined' && Array.isArray(allDistrictsData)) {
+                                    allDistrictsData.forEach(function(d) {
+                                        const dStateId = d.STATE_ID ?? d.state_id;
+                                        const dDistId = d.DISTRICT_ID ?? d.district_id;
+                                        const dName = d.DISTRICT_NAME ?? d.district_name;
+
+                                        if (!numericStateId || dStateId == numericStateId) {
+                                            const opt = document.createElement('option');
+                                            opt.value = dDistId;
+                                            opt.textContent = dName;
+                                            opt.setAttribute('data-name', dName);
+                                            if (dDistId == currentSelectedDist || dName === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                                opt.selected = true;
+                                                foundSelected = true;
+                                            }
+                                            distSelect.appendChild(opt);
                                         }
-                                        distSelect.appendChild(opt);
-                                    }
-                                });
+                                    });
+                                }
                                 if (!foundSelected && distSelect.options.length > 1) {
                                     distSelect.options[1].selected = true;
                                 }
@@ -2214,7 +2320,11 @@
                             function getSelectedSubsetChoice() {
                                 const radios = document.getElementsByName('subset_choice');
                                 for (let i = 0; i < radios.length; i++) {
-                                    if (radios[i].checked) return radios[i].value;
+                                    if (radios[i].checked && !radios[i].disabled) return radios[i].value;
+                                }
+                                const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                if (degreeLevel === 'mtech' || degreeLevel === 'phd') {
+                                    return 'Second Year';
                                 }
                                 return 'First Year';
                             }
@@ -2262,6 +2372,12 @@
 
                             function validateStep2Form(form) {
                                 calculatePu2Pct();
+                                const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
+                                if (isPgOrDoc) {
+                                    return true;
+                                }
+
                                 const pu2Pct = parseFloat(document.getElementById('pu2_percentage')?.value || 0);
                                 const subsetChoice = getSelectedSubsetChoice();
                                 const isSecondYear = (subsetChoice.toLowerCase() === 'second year');
@@ -2706,13 +2822,13 @@
                         ? $existingDate
                         : $minExamDate;
 
-                    $currentSlot = $examSchedule?->exam_slot ?? 'S1 11:00 AM to 1:00 PM';
+                    $currentSlot = $examSchedule?->exam_slot ?? 'Slot 1 11:00 AM to 1:00 PM';
                     $hasBookedSlot = !empty($examSchedule?->examdate) && !empty($examSchedule?->exam_slot);
 
-                    // Cutoff: 2 days before booked exam date at 5:00 PM
-                    // (e.g. if exam is day after tomorrow, student can edit up to today 5:00 PM; afterwards locked)
+                    // Cutoff: 1 day before booked exam date at 5:00 PM
+                    // (e.g. if student has exam tomorrow, they can edit up to today evening 5:00 PM; afterwards locked)
                     $editDeadline = $existingDate
-                        ? \Carbon\Carbon::parse($existingDate)->subDays(2)->setTime(17, 0, 0)
+                        ? \Carbon\Carbon::parse($existingDate)->subDay()->setTime(17, 0, 0)
                         : null;
 
                     $isSlotLocked = $hasBookedSlot && ($editDeadline ? $now->gt($editDeadline) : false);
@@ -2751,7 +2867,7 @@
                                         </span>
                                     </div>
                                     <div style="font-size: 0.84rem; color: #334155; margin-top: 3px;">
-                                        📅 Booked Date: <strong>{{ \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') }}</strong> &bull; Selected Slot: <strong>{{ $examSchedule->exam_slot }}</strong>
+                                        📅 Booked Date: <strong>{{ \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') }}</strong> &bull; Selected Slot: <strong>{{ str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $examSchedule->exam_slot) }}</strong>
                                     </div>
                                     <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
                                         Examination Center: <strong>{{ $campusName ?: 'Vignan Main Campus (Vadlamudi)' }}</strong> &bull; Status: Confirmed
@@ -2827,11 +2943,11 @@
                                     @endif
                                 </label>
                                 <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
-                                    <option value="S1 11:00 AM to 1:00 PM" {{ str_contains($currentSlot, 'S1') || str_contains($currentSlot, '11') ? 'selected' : '' }}>
-                                        S1 11:00 AM to 1:00 PM (Morning Session)
+                                    <option value="Slot 1 11:00 AM to 1:00 PM" {{ (str_contains($currentSlot, '11') || str_contains($currentSlot, 'Slot 1') || str_contains($currentSlot, 'S1')) && !str_contains($currentSlot, 'Slot 2') && !str_contains($currentSlot, 'S2') ? 'selected' : '' }}>
+                                        Slot 1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
-                                    <option value="S2 2:00 PM to 4:00 PM" {{ str_contains($currentSlot, 'S2') || str_contains($currentSlot, '2') ? 'selected' : '' }}>
-                                        S2 2:00 PM to 4:00 PM (Afternoon Session)
+                                    <option value="Slot 2 2:00 PM to 4:00 PM" {{ (str_contains($currentSlot, '2:00') || str_contains($currentSlot, 'Slot 2') || str_contains($currentSlot, 'S2')) ? 'selected' : '' }}>
+                                        Slot 2 2:00 PM to 4:00 PM (Afternoon Session)
                                     </option>
                                 </select>
                                 @if($isSlotLocked)
@@ -2840,10 +2956,13 @@
                                 <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
                                     <span>✓</span>
                                     <span id="slotLiveStatus">
+                                        @php
+                                            $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
+                                        @endphp
                                         @if($isSlotLocked)
-                                            Confirmed slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                            Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
                                         @else
-                                            Current slot: <strong>{{ $currentSlot }}</strong> (Standard 2-hour CBT entrance test session).
+                                            Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
                                         @endif
                                     </span>
                                 </div>
@@ -2886,7 +3005,7 @@
 
                             if (slotSelect && liveStatus) {
                                 slotSelect.addEventListener('change', function() {
-                                    if (this.value.includes('S1')) {
+                                    if (this.value.includes('Slot 1') || this.value.includes('S1')) {
                                         liveStatus.textContent = 'Morning session selected: 11:00 AM to 1:00 PM. Please report 30 minutes prior.';
                                     } else {
                                         liveStatus.textContent = 'Afternoon session selected: 2:00 PM to 4:00 PM. Please report 30 minutes prior.';
@@ -2922,7 +3041,7 @@
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
                     <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span>🖨️ Print Form</span>
                         </a>
                         <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
@@ -3065,7 +3184,7 @@
                             <!-- 3. QUALIFYING ACADEMIC RECORDS (FULL WIDTH TABLE) -->
                             <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; margin-top: 10px;">
                                 <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate)
+                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate{{ !empty($appStudent->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($appStudent->academic->pg_college) ? ' &amp; Postgraduate' : '' }})
                                 </h4>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
                                     <thead>
@@ -3087,44 +3206,96 @@
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ $appStudent->academic->ssc_school ?: ($appStudent->school_name ?: 'Not Provided') }}
+                                                {{ (!empty($appStudent->academic->ssc_school) && $appStudent->academic->ssc_school !== '-') ? $appStudent->academic->ssc_school : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; color: #475569;">
-                                                {{ $appStudent->academic->ssc_board ?: ($appStudent->board ?: 'State Board') }}
+                                                {{ (!empty($appStudent->academic->ssc_board) && $appStudent->academic->ssc_board !== '-') ? $appStudent->academic->ssc_board : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->ssc_year ?: ($appStudent->passing_year ?: 'N/A') }}
+                                                {{ (!empty($appStudent->academic->ssc_year) && $appStudent->academic->ssc_year !== '-') ? $appStudent->academic->ssc_year : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->ssc_roll ?: ($appStudent->roll_number ?: 'N/A') }}
+                                                {{ (!empty($appStudent->academic->ssc_roll) && $appStudent->academic->ssc_roll !== '-') ? $appStudent->academic->ssc_roll : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ $appStudent->academic->ssc_percentage !== 'N/A' ? $appStudent->academic->ssc_percentage : ((float)$appStudent->percentage > 0 ? number_format((float)$appStudent->percentage, 2) . ' %' : 'N/A') }}
+                                                {{ (!empty($appStudent->academic->ssc_percentage) && $appStudent->academic->ssc_percentage !== 'N/A' && $appStudent->academic->ssc_percentage !== '-') ? $appStudent->academic->ssc_percentage : '-' }}
                                             </td>
                                         </tr>
                                         <!-- 12th / Intermediate -->
-                                        <tr>
+                                        <tr style="{{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-' || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
                                                 <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
                                                     12th / Inter (10+2)
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ $appStudent->academic->inter_college ?: 'Junior College Records' }}
+                                                {{ (!empty($appStudent->academic->inter_college) && $appStudent->academic->inter_college !== '-') ? $appStudent->academic->inter_college : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; color: #475569;">
-                                                {{ $appStudent->academic->inter_board ?: 'Board of Intermediate Education' }}
+                                                {{ (!empty($appStudent->academic->inter_board) && $appStudent->academic->inter_board !== '-') ? $appStudent->academic->inter_board : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->inter_year ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->inter_year) && $appStudent->academic->inter_year !== '-') ? $appStudent->academic->inter_year : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ $appStudent->academic->inter_roll ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->inter_roll) && $appStudent->academic->inter_roll !== '-') ? $appStudent->academic->inter_roll : '-' }}
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ $appStudent->academic->inter_percentage ?: 'N/A' }}
+                                                {{ (!empty($appStudent->academic->inter_percentage) && $appStudent->academic->inter_percentage !== 'N/A' && $appStudent->academic->inter_percentage !== '-') ? $appStudent->academic->inter_percentage : '-' }}
                                             </td>
                                         </tr>
+
+                                        <!-- Undergraduate (UG / Degree / B.Tech) -->
+                                        @if((!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr style="{{ ((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Undergraduate (UG)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') ? $appStudent->academic->ug_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->ug_board) && $appStudent->academic->ug_board !== '-') ? $appStudent->academic->ug_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->ug_year) && $appStudent->academic->ug_year !== '-') ? $appStudent->academic->ug_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->ug_roll) && $appStudent->academic->ug_roll !== '-') ? $appStudent->academic->ug_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->ug_percentage) && $appStudent->academic->ug_percentage !== 'N/A' && $appStudent->academic->ug_percentage !== '-') ? $appStudent->academic->ug_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endif
+
+                                        <!-- Postgraduate (PG / Master's / M.Tech) -->
+                                        @if((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr>
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Postgraduate (PG)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') ? $appStudent->academic->pg_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->pg_board) && $appStudent->academic->pg_board !== '-') ? $appStudent->academic->pg_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg_year) && $appStudent->academic->pg_year !== '-') ? $appStudent->academic->pg_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg_roll) && $appStudent->academic->pg_roll !== '-') ? $appStudent->academic->pg_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->pg_percentage) && $appStudent->academic->pg_percentage !== 'N/A' && $appStudent->academic->pg_percentage !== '-') ? $appStudent->academic->pg_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
@@ -3639,10 +3810,10 @@
                         </div>
                     </div>
 
-                    <!-- Checkbox (Ticked by default as requested) -->
+                    <!-- Checkbox (Unticked by default) -->
                     <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;">
                         <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none; margin: 0;">
-                            <input type="checkbox" id="termsAgreementCheckbox" checked onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                            <input type="checkbox" id="termsAgreementCheckbox" onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                             <span style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a;">I have read, understood, and accept all the terms and conditions stated above.</span>
                         </label>
                     </div>
@@ -3650,7 +3821,7 @@
 
                 <!-- Footer Actions -->
                 <div style="padding: 1rem 1.65rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
-                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
+                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" disabled style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: not-allowed; opacity: 0.5; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
                         <span>I Agree &amp; Continue &rarr;</span>
                     </button>
                 </div>
