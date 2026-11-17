@@ -38,6 +38,7 @@ class StudentAcademicDetail extends Model
         // 12th / PUC / Diploma
         'pu2_college_name',
         'pu2_study_board',
+        'pu2_board_of_study',
         'pu2_college_city',
         'pu2_college_state',
         'pu2_college_district',
@@ -78,6 +79,13 @@ class StudentAcademicDetail extends Model
         'pg_marks_earned',
         'pg_percentage',
         'pg_current_status',
+        'pg1_doc_type',
+        'pg1_cmm_memo_no',
+        'pg1_cmm_cgpa',
+        'pg1_cmm_year',
+        'pg1_pc_od_no',
+        'pg1_pc_od_year',
+        'pg1_pc_od_status',
 
         // PG 2 (for Ph.D / Doctoral)
         'pg2_college_name',
@@ -92,6 +100,13 @@ class StudentAcademicDetail extends Model
         'pg2_marks_earned',
         'pg2_percentage',
         'pg2_current_status',
+        'pg2_doc_type',
+        'pg2_cmm_memo_no',
+        'pg2_cmm_cgpa',
+        'pg2_cmm_year',
+        'pg2_pc_od_no',
+        'pg2_pc_od_year',
+        'pg2_pc_od_status',
 
         // Audit
         'log_userid',

@@ -1772,6 +1772,41 @@
                                 }
                             }
 
+                            function togglePg1DocFields(val) {
+                                const cmm = document.getElementById('pg1_cmm_container');
+                                const pc = document.getElementById('pg1_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                }
+                            }
+
+                            function togglePg2DocFields(val) {
+                                const cmm = document.getElementById('pg2_cmm_container');
+                                const pc = document.getElementById('pg2_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else if (val === 'BOTH') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'none';
+                                }
+                            }
+
                             document.addEventListener('DOMContentLoaded', function() {
                                 const stateSelect = document.getElementById('geo-state-select');
                                 if (stateSelect && stateSelect.value) {
@@ -1865,25 +1900,34 @@
 
                             <!-- ================= SUBBOX 2: 12th / INTERMEDIATE INFO ================= -->
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
-                                <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                    <h4 class="mockup-subbox-title">12th / Intermediate Details <span style="font-size: 0.76rem; font-weight: 700; color: #2563eb; margin-left: 0.35rem;">(for UG*)</span></h4>
+                                    <span class="mockup-pill-badge" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Mandatory for UG*</span>
+                                </div>
                                 <input type="hidden" name="course_choice" value="{{ $academicDetails?->pu2_study_board ?? '' }}">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
-                                <!-- Row 1: College Name / Institute Name (Full Width) -->
-                                <div class="mockup-field-group">
-                                    <label class="mockup-label">College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name" required>
+                                <!-- Row 1: College Name / Institute Name & Board of Study (2 Columns) -->
+                                <div class="mockup-field-row-2">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">College Name / Institute Name: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Board of Study: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <input type="text" name="inter_board_of_study" class="mockup-input" value="{{ $academicDetails?->pu2_study_board ?? $academicDetails?->pu2_board_of_study }}" placeholder="Enter Board of Study (e.g. BIEAP, CBSE, TSBIE)" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
+                                    </div>
                                 </div>
 
                                 <!-- Row 2: 3 Separate Distinct Columns for College City, College State, College District -->
                                 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City" required>
+                                        <label class="mockup-label">College City: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College State: <span style="color:#ef4444;">*</span></label>
-                                        <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
+                                        <label class="mockup-label">College State: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
@@ -1897,8 +1941,8 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College District: <span style="color:#ef4444;">*</span></label>
-                                        <select name="jr_district" id="geo-inter-district-select" class="mockup-select" required>
+                                        <label class="mockup-label">College District: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <select name="jr_district" id="geo-inter-district-select" class="mockup-select" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
@@ -1916,7 +1960,7 @@
                                 <!-- Row 3: Status (First Year / Second Year), Year, Hall Ticket Number (3 Columns) -->
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Current Status: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
                                         <div class="mockup-radio-row" style="margin-top: 0.45rem;">
                                             @php
                                                 $isPgOrDoc = in_array($degreeLevel ?? '', ['mtech', 'phd']);
@@ -1929,18 +1973,18 @@
                                                 }
                                             @endphp
                                             <label class="mockup-radio-label" id="radio-wrapper-first-year" style="{{ $isPgOrDoc ? 'display: none !important;' : '' }}">
-                                                <input type="radio" name="subset_choice" id="radio-subset-first-year" value="First Year" {{ (!$isPgOrDoc && !$isSecondYr) ? 'checked' : '' }} {{ $isPgOrDoc ? 'disabled' : '' }} required>
+                                                <input type="radio" name="subset_choice" id="radio-subset-first-year" value="First Year" {{ (!$isPgOrDoc && !$isSecondYr) ? 'checked' : '' }} {{ $isPgOrDoc ? 'disabled' : '' }} {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                                 <span>First Year</span>
                                             </label>
                                             <label class="mockup-radio-label" id="radio-wrapper-second-year">
-                                                <input type="radio" name="subset_choice" id="radio-subset-second-year" value="Second Year" {{ ($isPgOrDoc || $isSecondYr) ? 'checked' : '' }} required>
+                                                <input type="radio" name="subset_choice" id="radio-subset-second-year" value="Second Year" {{ ($isPgOrDoc || $isSecondYr) ? 'checked' : '' }} {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                                 <span>Second Year</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030" required>
+                                        <label class="mockup-label">Year: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Hall Ticket number:</label>
@@ -1951,23 +1995,23 @@
                                 <!-- Row 3: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (4 Columns) -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
-                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)" required>
+                                        <label class="mockup-label">Marks Type: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                             <option value="Marks" {{ ($academicDetails?->pu2_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->pu2_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
+                                        <label class="mockup-label">Total Marks (Conducted): @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
+                                        <label class="mockup-label">Marks Earned: @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif</label>
+                                        <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> @if(!in_array($degreeLevel ?? '', ['mtech', 'phd']))<span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span>@endif</label>
-                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
+                                        <label class="mockup-label">Percentage (%): @if(($degreeLevel ?? '') !== 'phd')<span style="color:#ef4444;">*</span>@endif @if(!in_array($degreeLevel ?? '', ['mtech', 'phd']))<span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span>@endif</label>
+                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" {{ ($degreeLevel ?? '') === 'phd' ? '' : 'required' }}>
                                         <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
                                 </div>
@@ -2017,9 +2061,13 @@
                             @if(($degreeLevel ?? '') === 'phd')
                             <!-- ================= SUBBOX 4: POSTGRADUATE 1 (PHD ONLY) ================= -->
                             <div class="mockup-subbox" id="sec-pg-details" style="display: block; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-                                    <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate 1 Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <h4 class="mockup-subbox-title" style="color: #6b21a8;">
+                                        Postgraduate 1 Details <span style="color:#ef4444;">*</span>
+                                    </h4>
+                                    <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">
+                                        (pg1(cmm), pg1 (pc/od))* &bull; (any one only mandatory)
+                                    </span>
                                 </div>
 
                                 <div class="mockup-field-row-3">
@@ -2054,45 +2102,177 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- PG 1 Certificate / Memo Type: (pg1(cmm), pg1 (pc/od))* (any one only mandatory) -->
+                                @php
+                                    $pg1Doc = $academicDetails?->pg1_doc_type ?? 'BOTH';
+                                @endphp
+                                <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                                        <label class="mockup-label" style="font-weight: 800; color: #581c87; margin-bottom: 0;">
+                                            Proof of PG 1 Degree / Certificate: <span style="color:#ef4444;">*</span>
+                                            <span style="font-size: 0.75rem; font-weight: 700; color: #7e22ce;">(pg1(cmm), pg1 (pc/od))* &bull; (any one only mandatory)</span>
+                                        </label>
+                                        <span class="mockup-pill-badge" style="background: #f3e8ff; color: #6b21a8; font-size: 0.72rem; border: 1px solid #d8b4fe;">
+                                            Any one mandatory *
+                                        </span>
+                                    </div>
+
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg1_doc_type" value="CMM" {{ $pg1Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <span>PG 1 Consolidated Marks Memo (CMM)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg1_doc_type" value="PC_OD" {{ $pg1Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <span>PG 1 Provisional Certificate / Original Degree (PC/OD)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg1_doc_type" value="BOTH" {{ ($pg1Doc === 'BOTH' || !$academicDetails?->pg1_doc_type) ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <span>Both (CMM &amp; PC/OD)</span>
+                                        </label>
+                                    </div>
+
+                                    <div id="pg1_cmm_container" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 CMM Memo / Serial No:</label>
+                                            <input type="text" name="pg1_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 CMM Marks / CGPA:</label>
+                                            <input type="text" name="pg1_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_cgpa }}" placeholder="e.g. 8.95">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 CMM Issue Year:</label>
+                                            <input type="number" name="pg1_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_year }}" placeholder="e.g. 2024" min="2000" max="2030">
+                                        </div>
+                                    </div>
+
+                                    <div id="pg1_pc_container" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 PC / OD Certificate No:</label>
+                                            <input type="text" name="pg1_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_no }}" placeholder="Enter PC / OD Number">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 PC / OD Issue Year:</label>
+                                            <input type="number" name="pg1_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_year }}" placeholder="e.g. 2024" min="2000" max="2030">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 PC / OD Certificate Status:</label>
+                                            <select name="pg1_pc_od_status" class="mockup-select">
+                                                <option value="Provisional" {{ ($academicDetails?->pg1_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
+                                                <option value="Original Degree" {{ ($academicDetails?->pg1_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- ================= SUBBOX 5: POSTGRADUATE 2 (PHD ONLY) ================= -->
                             <div class="mockup-subbox" id="sec-pg2-details" style="display: block; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
                                     <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate 2 Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
+                                    <span class="mockup-pill-badge" style="background: #7c3aed; color: #fff; font-size: 0.72rem;">(pg2(cmm), pg2(pc/od))</span>
                                 </div>
 
                                 <div class="mockup-field-row-3">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG 2 College / University Name: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">PG 2 College / University Name:</label>
                                         <input type="text" name="pg2_college_name" class="mockup-input" value="{{ $academicDetails?->pg2_college_name }}" placeholder="PG 2 College / University Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">University / Board: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">University / Board:</label>
                                         <input type="text" name="pg2_university_board" class="mockup-input" value="{{ $academicDetails?->pg2_university_board }}" placeholder="University / Board Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG 2 Roll NO / Reg No: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">PG 2 Roll NO / Reg No:</label>
                                         <input type="text" name="pg2_roll_no" class="mockup-input" value="{{ $academicDetails?->pg2_roll_no }}" placeholder="PG 2 Roll Number / Reg No">
                                     </div>
                                 </div>
 
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Passing Year:</label>
                                         <input type="number" name="pg2_passed_year" class="mockup-input" value="{{ $academicDetails?->pg2_passed_year }}" placeholder="Passing Year (e.g. 2026)" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG 2 CGPA / %: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">PG 2 CGPA / %:</label>
                                         <input type="text" name="pg2_cgpa" class="mockup-input" value="{{ $academicDetails?->pg2_cgpa }}" placeholder="e.g. 9.10 CGPA or %">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG 2 Status: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">PG 2 Status:</label>
                                         <select name="pg2_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->pg2_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
                                             <option value="Pursuing" {{ ($academicDetails?->pg2_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing / Final Semester</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <!-- PG 2 Certificate / Memo Type: (pg2(cmm), pg2(pc/od)) (Optional) -->
+                                @php
+                                    $pg2Doc = $academicDetails?->pg2_doc_type ?? 'NONE';
+                                @endphp
+                                <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                                        <label class="mockup-label" style="font-weight: 800; color: #581c87; margin-bottom: 0;">
+                                            Proof of PG 2 Degree / Certificate (Optional):
+                                            <span style="font-size: 0.75rem; font-weight: 600; color: #7e22ce;">(pg2(cmm), pg2(pc/od))</span>
+                                        </label>
+                                        <span class="mockup-pill-badge" style="background: #f3e8ff; color: #6b21a8; font-size: 0.72rem; border: 1px solid #d8b4fe;">
+                                            Optional
+                                        </span>
+                                    </div>
+
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="NONE" {{ ($pg2Doc === 'NONE' || !$academicDetails?->pg2_doc_type) ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>Not Applicable</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="CMM" {{ $pg2Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>PG 2 Consolidated Marks Memo (CMM)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="PC_OD" {{ $pg2Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>PG 2 Provisional Certificate / Original Degree (PC/OD)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="BOTH" {{ $pg2Doc === 'BOTH' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>Both (CMM &amp; PC/OD)</span>
+                                        </label>
+                                    </div>
+
+                                    <div id="pg2_cmm_container" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 CMM Memo / Serial No:</label>
+                                            <input type="text" name="pg2_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 CMM Marks / CGPA:</label>
+                                            <input type="text" name="pg2_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_cgpa }}" placeholder="e.g. 9.10">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 CMM Issue Year:</label>
+                                            <input type="number" name="pg2_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_year }}" placeholder="e.g. 2026" min="2000" max="2030">
+                                        </div>
+                                    </div>
+
+                                    <div id="pg2_pc_container" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 PC / OD Certificate No:</label>
+                                            <input type="text" name="pg2_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_no }}" placeholder="Enter PC / OD Number">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 PC / OD Issue Year:</label>
+                                            <input type="number" name="pg2_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_year }}" placeholder="e.g. 2026" min="2000" max="2030">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 PC / OD Certificate Status:</label>
+                                            <select name="pg2_pc_od_status" class="mockup-select">
+                                                <option value="Provisional" {{ ($academicDetails?->pg2_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
+                                                <option value="Original Degree" {{ ($academicDetails?->pg2_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2421,6 +2601,41 @@
                                 return true;
                             }
 
+                            function togglePg1DocFields(val) {
+                                const cmm = document.getElementById('pg1_cmm_container');
+                                const pc = document.getElementById('pg1_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                }
+                            }
+
+                            function togglePg2DocFields(val) {
+                                const cmm = document.getElementById('pg2_cmm_container');
+                                const pc = document.getElementById('pg2_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else if (val === 'BOTH') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'none';
+                                }
+                            }
+
                             document.addEventListener('DOMContentLoaded', function() {
                                 setDegreeLevel('{{ $degreeLevel }}');
                                 if (!document.getElementById('tenth_percentage')?.value) {
@@ -2498,6 +2713,38 @@
                                 'icon' => '📚',
                                 'title' => 'M.Tech / PG Memo',
                                 'sub' => 'Postgraduate Marks Memo or Degree Certificate',
+                                'levels' => 'mtech',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'pg1_cmm' => [
+                                'icon' => '📜',
+                                'title' => 'PG 1 Consolidated Marks Memo (CMM)',
+                                'sub' => 'Consolidated Marks Memo for PG 1 (Any one mandatory with PC/OD)',
+                                'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'pg1_pc' => [
+                                'icon' => '🎓',
+                                'title' => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (Any one mandatory with CMM)',
+                                'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'pg2_cmm' => [
+                                'icon' => '📜',
+                                'title' => 'PG 2 Consolidated Marks Memo (CMM)',
+                                'sub' => 'Consolidated Marks Memo for PG 2 (Optional)',
+                                'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'pg2_pc' => [
+                                'icon' => '🎓',
+                                'title' => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 2 (Optional)',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,

@@ -852,7 +852,9 @@ class DashboardsController extends Controller
                     }
 
 
-                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board');
+                    self::ensureAcademicColumns();
+
+                    $courseChoice = $request->input('inter_board_of_study') ?? $request->input('pu2_board_of_study') ?? $request->input('course_choice') ?? $request->input('pu2_study_board');
                     $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? ($isPgOrDoc ? 'Second Year' : 'First Year');
                     if ($isPgOrDoc) {
                         $subsetChoice = 'Second Year';
@@ -924,6 +926,7 @@ class DashboardsController extends Controller
                         'tenth_percentage' => $tenthPct,
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
                         'pu2_study_board' => $courseChoice,
+                        'pu2_board_of_study' => $courseChoice,
                         'pu2_college_city' => $cityVal,
                         'pu2_college_state' => $jrStateVal,
                         'pu2_college_district' => $jrDistrictVal,
@@ -979,6 +982,16 @@ class DashboardsController extends Controller
                         $academicPayload['pg_percentage'] = $pgPct;
                         $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: null;
 
+                        // PG 1 CMM & PC/OD Details (At least one mandatory for PhD)
+                        $pg1DocType = $request->input('pg1_doc_type') ?: 'BOTH';
+                        $academicPayload['pg1_doc_type'] = $pg1DocType;
+                        $academicPayload['pg1_cmm_memo_no'] = $request->input('pg1_cmm_memo_no') ?: null;
+                        $academicPayload['pg1_cmm_cgpa'] = is_numeric($request->input('pg1_cmm_cgpa')) ? (float)$request->input('pg1_cmm_cgpa') : null;
+                        $academicPayload['pg1_cmm_year'] = $request->filled('pg1_cmm_year') ? (int)$request->input('pg1_cmm_year') : null;
+                        $academicPayload['pg1_pc_od_no'] = $request->input('pg1_pc_od_no') ?: null;
+                        $academicPayload['pg1_pc_od_year'] = $request->filled('pg1_pc_od_year') ? (int)$request->input('pg1_pc_od_year') : null;
+                        $academicPayload['pg1_pc_od_status'] = $request->input('pg1_pc_od_status') ?: null;
+
                         // Postgraduate 2
                         $pg2MarksRaw = is_numeric($request->input('pg2_marks')) ? (float) $request->input('pg2_marks') : (is_numeric($request->input('pg2_cgpa')) ? (float)$request->input('pg2_cgpa') : null);
                         $pg2Pct = ($pg2MarksRaw && $pg2MarksRaw <= 10) ? round($pg2MarksRaw * 9.5, 2) : (($pg2MarksRaw && $pg2MarksRaw > 100) ? round(($pg2MarksRaw / 1000) * 100, 2) : $pg2MarksRaw);
@@ -995,6 +1008,15 @@ class DashboardsController extends Controller
                         $academicPayload['pg2_marks_earned'] = $pg2MarksRaw;
                         $academicPayload['pg2_percentage'] = $pg2Pct;
                         $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: null;
+
+                        // PG 2 CMM & PC/OD Details (Optional for PhD)
+                        $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'NONE';
+                        $academicPayload['pg2_cmm_memo_no'] = $request->input('pg2_cmm_memo_no') ?: null;
+                        $academicPayload['pg2_cmm_cgpa'] = is_numeric($request->input('pg2_cmm_cgpa')) ? (float)$request->input('pg2_cmm_cgpa') : null;
+                        $academicPayload['pg2_cmm_year'] = $request->filled('pg2_cmm_year') ? (int)$request->input('pg2_cmm_year') : null;
+                        $academicPayload['pg2_pc_od_no'] = $request->input('pg2_pc_od_no') ?: null;
+                        $academicPayload['pg2_pc_od_year'] = $request->filled('pg2_pc_od_year') ? (int)$request->input('pg2_pc_od_year') : null;
+                        $academicPayload['pg2_pc_od_status'] = $request->input('pg2_pc_od_status') ?: null;
                     }
 
                     StudentAcademicDetail::updateOrCreate(
@@ -1026,6 +1048,7 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $allowedDocKeys = [
                         'marksheet10', 'marksheet12', 'btech', 'mtech', 'pg',
+                        'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc',
                         'aadhaar', 'photo', 'tc', 'study_conduct'
                     ];
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
@@ -1048,6 +1071,14 @@ class DashboardsController extends Controller
                         'btech' => ['btech_file_name', 'btech_file_path'],
                         'mtech' => ['mtech_file_name', 'mtech_file_path'],
                         'pg' => ['pg_file_name', 'pg_file_path'],
+                    'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
+                    'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
+                    'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
+                    'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
+                        'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
+                        'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
+                        'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
+                        'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
                         'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
                         'photo' => ['passport_file_name', 'passport_file_path'],
                         'tc' => ['transfer_file_name', 'transfer_file_path'],
@@ -1283,9 +1314,48 @@ class DashboardsController extends Controller
 
                 CREATE INDEX IF NOT EXISTS idx_student_uploads_crmid ON crm.student_uploads (crmid);
                 CREATE INDEX IF NOT EXISTS idx_student_uploads_applino ON crm.student_uploads (applino);
+
+                ALTER TABLE crm.student_uploads
+                ADD COLUMN IF NOT EXISTS pg1_cmm_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS pg1_pc_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg1_pc_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS pg2_pc_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg2_pc_file_path VARCHAR(500);
             ");
         } catch (\Throwable $e) {
             // Silently continue if table already exists
+        }
+    }
+
+    /**
+     * Ensure academic details columns exist in crm.student_academic_details.
+     */
+    public static function ensureAcademicColumns(): void
+    {
+        try {
+            DB::unprepared("
+                ALTER TABLE crm.student_academic_details
+                ADD COLUMN IF NOT EXISTS pu2_board_of_study VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg1_doc_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_memo_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_cgpa NUMERIC(10,2),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_year INT,
+                ADD COLUMN IF NOT EXISTS pg1_pc_od_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg1_pc_od_year INT,
+                ADD COLUMN IF NOT EXISTS pg1_pc_od_status VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg2_doc_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_memo_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_cgpa NUMERIC(10,2),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_year INT,
+                ADD COLUMN IF NOT EXISTS pg2_pc_od_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg2_pc_od_year INT,
+                ADD COLUMN IF NOT EXISTS pg2_pc_od_status VARCHAR(50);
+            ");
+        } catch (\Throwable $e) {
+            Log::warning('ensureAcademicColumns: ' . $e->getMessage());
         }
     }
 
@@ -1304,7 +1374,7 @@ class DashboardsController extends Controller
         }
 
         $dir = public_path('uploads/documents/' . $cleanAppli);
-        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct', 'btech', 'mtech', 'pg'];
+        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct', 'btech', 'mtech', 'pg', 'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc'];
         $titles = [
             'marksheet10'   => '10th Standard Marksheet / SSC Certificate',
             'marksheet12'   => '12th Standard / Intermediate Marksheet',
@@ -1315,6 +1385,10 @@ class DashboardsController extends Controller
             'btech'         => 'B.Tech / Degree Certificate',
             'mtech'         => 'M.Tech / Post-Graduate Certificate',
             'pg'            => 'Post-Graduate (PG) Certificate',
+            'pg1_cmm'       => 'PG 1 Consolidated Marks Memo (CMM)',
+            'pg1_pc'        => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
+            'pg2_cmm'       => 'PG 2 Consolidated Marks Memo (CMM)',
+            'pg2_pc'        => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
         ];
         $mimeMap = [
             'pdf' => 'application/pdf',
@@ -1334,6 +1408,10 @@ class DashboardsController extends Controller
                     'btech' => ['btech_file_name', 'btech_file_path'],
                     'mtech' => ['mtech_file_name', 'mtech_file_path'],
                     'pg' => ['pg_file_name', 'pg_file_path'],
+                    'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
+                    'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
+                    'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
+                    'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
                     'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
                     'photo' => ['passport_file_name', 'passport_file_path'],
                     'tc' => ['transfer_file_name', 'transfer_file_path'],

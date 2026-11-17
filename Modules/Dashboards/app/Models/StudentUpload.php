@@ -34,6 +34,16 @@ class StudentUpload extends Model
         'pg_file_name',
         'pg_file_path',
 
+        'pg1_cmm_file_name',
+        'pg1_cmm_file_path',
+        'pg1_pc_file_name',
+        'pg1_pc_file_path',
+
+        'pg2_cmm_file_name',
+        'pg2_cmm_file_path',
+        'pg2_pc_file_name',
+        'pg2_pc_file_path',
+
         'aadhar_file_name',
         'aadhar_file_path',
 
