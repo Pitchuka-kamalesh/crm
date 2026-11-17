@@ -155,7 +155,7 @@ class DashboardsController extends Controller
         // Determine Degree Level for Step 3 based on registration (UG -> B.Tech, PG -> M.Tech, Doctoral -> PhD)
         $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
         $progShort = strtoupper($program?->program_short_name ?? '');
-        $progName = strtoupper($program?->program_name ?? '');
+        $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
 
         if (
             $progLevel === 'PG' ||
@@ -170,9 +170,12 @@ class DashboardsController extends Controller
             $progLevel === 'DOCTORAL' ||
             str_contains($progShort, 'PHD') ||
             str_contains($progShort, 'PH.D') ||
-            str_contains($progName, 'DOCTOR')
+            str_contains($progName, 'DOCTOR') ||
+            !empty($academicDetails?->pg_college_name)
         ) {
             $degreeLevel = 'phd';
+        } elseif (!empty($academicDetails?->ug_college_name)) {
+            $degreeLevel = 'mtech';
         } else {
             $degreeLevel = 'btech';
         }
@@ -185,16 +188,10 @@ class DashboardsController extends Controller
         $academicDetails = null;
         if ($crmStudent) {
             try {
-                $personalInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)
-                    ->where('phoneno', $crmStudent->phoneno)
-                    ->first()
-                    ?? StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
-                    ?? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->first();
-                $academicDetails = StudentAcademicDetail::where('applino', $crmStudent->applinano)
-                    ->where('phoneno', $crmStudent->phoneno)
-                    ->first()
-                    ?? StudentAcademicDetail::where('applino', $crmStudent->applinano)->first()
-                    ?? StudentAcademicDetail::where('phoneno', $crmStudent->phoneno)->first();
+                $personalInfo = StudentPersonalInfo::where('applino', $crmStudent->applinano)->first()
+                    ?? (!empty($crmStudent->phoneno) ? StudentPersonalInfo::where('phoneno', $crmStudent->phoneno)->where('applino', $crmStudent->applinano)->first() : null);
+                $academicDetails = StudentAcademicDetail::where('applino', $crmStudent->applinano)->first()
+                    ?? (!empty($crmStudent->phoneno) ? StudentAcademicDetail::where('phoneno', $crmStudent->phoneno)->where('applino', $crmStudent->applinano)->first() : null);
             } catch (\Throwable $e) {
                 Log::warning('Could not load student personal/academic details: ' . $e->getMessage());
             }

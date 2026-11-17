@@ -204,9 +204,9 @@
             </tr>
         </table>
 
-        {{-- Educational Information (10th SSC & 12th Inter) --}}
+        {{-- Educational Information (10th SSC, 12th Inter, UG & PG) --}}
         <div class="card" style="margin-top:12px">
-            <h3>3. Qualifying Academic Records (10th SSC &amp; 12th Intermediate)</h3>
+            <h3>3. Qualifying Academic Records (10th SSC &amp; 12th Intermediate{{ !empty($student->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($student->academic->pg_college) ? ' &amp; Postgraduate' : '' }})</h3>
             <table class="fields" style="width:100%; border-collapse:collapse;">
                 <tr style="background:#F8FAFC; font-weight:bold; color:#475569;">
                     <td style="padding:4px 6px; width:18%;">Standard</td>
@@ -232,6 +232,26 @@
                     <td style="padding:4px 6px;">{{ $student->academic->inter_roll ?: 'N/A' }}</td>
                     <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->inter_percentage ?: 'N/A' }}</td>
                 </tr>
+                @if(!empty($student->academic->ug_college) || ($student->degree_level ?? '') === 'mtech' || ($student->degree_level ?? '') === 'phd')
+                <tr>
+                    <td style="padding:4px 6px; font-weight:bold;">Undergraduate (UG)</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ug_college ?: 'Degree / B.Tech Institute' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ug_board ?: 'University / Board' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ug_year ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->ug_roll ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->ug_percentage ?: ($student->academic->ug_status ?: 'Completed') }}</td>
+                </tr>
+                @endif
+                @if(!empty($student->academic->pg_college) || ($student->degree_level ?? '') === 'phd')
+                <tr>
+                    <td style="padding:4px 6px; font-weight:bold;">Postgraduate (PG)</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->pg_college ?: 'Master / PG Institute' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->pg_board ?: 'University / Board' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->pg_year ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px;">{{ $student->academic->pg_roll ?: 'N/A' }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ $student->academic->pg_percentage ?: ($student->academic->pg_status ?: 'Completed') }}</td>
+                </tr>
+                @endif
             </table>
         </div>
 
