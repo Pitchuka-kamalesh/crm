@@ -72,10 +72,23 @@
 
             <!-- TAB: STUDENT KPI & CONVERSION ANALYTICS -->
             <div class="content-card">
-                <div class="card-header-bar" style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                <div class="card-header-bar" style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <h2 class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                         <span>🎓 Student KPI &amp; Conversion Analytics</span>
                     </h2>
+                    <button type="button" 
+                            id="exportStudentKpiTopBtn"
+                            onclick="exportStudentKpiExcel()" 
+                            style="height: 36px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #059669; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(5, 150, 105, 0.25);"
+                            onmouseover="this.style.background='#047857'"
+                            onmouseout="this.style.background='#059669'">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Export Excel</span>
+                    </button>
                 </div>
 
                 <div style="padding: 1.5rem;">
@@ -210,11 +223,24 @@
 
                     <!-- 4. EAGER-LOADED STUDENT REGISTRATIONS TABLE (LIVE-REPLACED VIA AJAX) -->
                     <div id="studentTableContainer" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-                        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
                             <div>
                                 <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Verified Student Records</span>
                                 <span id="studentTableCountText" style="font-size: 0.75rem; color: #64748b; margin-left: 0.5rem;">(Showing {{ $students->firstItem() ?? 0 }} to {{ $students->lastItem() ?? 0 }} of {{ $students->total() }} records)</span>
                             </div>
+                            <button type="button" 
+                                    id="exportStudentKpiTableBtn"
+                                    onclick="exportStudentKpiExcel()" 
+                                    style="height: 32px; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0 0.95rem; background: #059669; color: #ffffff; border: none; border-radius: 7px; font-size: 0.785rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);"
+                                    onmouseover="this.style.background='#047857'"
+                                    onmouseout="this.style.background='#059669'">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Export Excel</span>
+                            </button>
                         </div>
 
                         <div class="table-responsive">
@@ -550,6 +576,19 @@ window.resetKpiFilters = function () {
     if (searchInput) searchInput.value = '';
     if (stageSelect) stageSelect.value = '';
     window.handleKpiLiveFilter(true);
+};
+
+window.exportStudentKpiExcel = function () {
+    const searchInput = document.getElementById('kpiLiveSearch');
+    const stageSelect = document.getElementById('kpiStageSelect');
+    const q = searchInput ? searchInput.value.trim() : '';
+    const stage = stageSelect ? stageSelect.value : '';
+
+    const url = new URL('{{ route("kpi.studentkpi.export") }}', window.location.origin);
+    if (q) url.searchParams.set('q', q);
+    if (stage) url.searchParams.set('stage', stage);
+
+    window.location.href = url.toString();
 };
 
 function attachPaginationAjax() {

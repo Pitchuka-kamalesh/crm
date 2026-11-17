@@ -34,6 +34,25 @@ class KpiDashboardsTest extends TestCase
         $response->assertSee('studentFunnelChart');
         $response->assertSee('branchDistributionChart');
         $response->assertSee('Verified Student Records');
+        $response->assertSee('Export Excel');
+    }
+
+    public function test_student_kpi_export_streams_csv_with_required_columns(): void
+    {
+        $user = User::first();
+        $this->assertNotNull($user);
+
+        $response = $this->actingAs($user)->get('/kpi/studentkpi/export');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('Application Number', $content);
+        $this->assertStringContainsString('Candidate Name', $content);
+        $this->assertStringContainsString('Mobile Number', $content);
+        $this->assertStringContainsString('Current Stage', $content);
+        $this->assertStringContainsString('Stage', $content);
     }
 
     public function test_telecaller_kpi_dashboard_renders_with_leaderboard(): void
