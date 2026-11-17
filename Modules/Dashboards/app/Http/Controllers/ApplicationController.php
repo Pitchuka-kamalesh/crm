@@ -54,7 +54,7 @@ class ApplicationController extends Controller
                     ->setOptions([
                         'isHtml5ParserEnabled' => true,
                         'isRemoteEnabled' => true,
-                        'chroot' => public_path(),
+                        'chroot' => [public_path(), base_path()],
                     ])
                     ->setPaper('a4', 'portrait')
                     ->download($filename);
@@ -67,7 +67,7 @@ class ApplicationController extends Controller
             'student' => $student,
             'logo' => asset('images/vignan-logo.png'),
             'downloadUrl' => route('application.download', ['id' => $id]),
-            'autoPrint' => true,
+            'autoPrint' => false,
         ]);
     }
 
@@ -236,29 +236,39 @@ class ApplicationController extends Controller
             }
         }
 
+        $pg2Percentage = (float)($academicDetails?->pg2_percentage ?? 0);
+        if ($pg2Percentage <= 0) {
+            if ((float) $academicDetails?->pg2_marks_earned > 0 && (float) $academicDetails?->pg2_marks_conducted > 0) {
+                $pg2Percentage = ((float) $academicDetails->pg2_marks_earned / (float) $academicDetails->pg2_marks_conducted) * 100;
+            } elseif ((float) $academicDetails?->pg2_marks > 0) {
+                $rawPg2 = (float) $academicDetails->pg2_marks;
+                $pg2Percentage = $rawPg2 <= 10 ? ($rawPg2 * 9.5) : ($rawPg2 > 100 ? ($rawPg2 / 1000) * 100 : $rawPg2);
+            }
+        }
+
         // Determine Degree Level (UG / M.Tech / PhD)
         $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
         $progShort = strtoupper($programObj?->program_short_name ?? '');
         $progLong = strtoupper($programObj?->program_long_name ?? '');
 
         if (
-            $progLevel === 'PG' ||
-            str_contains($progShort, 'M.TECH') ||
-            str_contains($progShort, 'MTECH') ||
-            str_contains($progLong, 'MASTER') ||
-            in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])
-        ) {
-            $degreeLevel = 'mtech';
-        } elseif (
             $progLevel === 'PHD' ||
             $progLevel === 'DOCTORAL' ||
             str_contains($progShort, 'PHD') ||
             str_contains($progShort, 'PH.D') ||
             str_contains($progLong, 'DOCTOR') ||
+            !empty($academicDetails?->pg2_college_name) ||
             !empty($academicDetails?->pg_college_name)
         ) {
             $degreeLevel = 'phd';
-        } elseif (!empty($academicDetails?->ug_college_name)) {
+        } elseif (
+            $progLevel === 'PG' ||
+            str_contains($progShort, 'M.TECH') ||
+            str_contains($progShort, 'MTECH') ||
+            str_contains($progLong, 'MASTER') ||
+            in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A']) ||
+            !empty($academicDetails?->ug_college_name)
+        ) {
             $degreeLevel = 'mtech';
         } else {
             $degreeLevel = 'btech';
@@ -379,7 +389,7 @@ class ApplicationController extends Controller
                 'ug_percentage' => ($ugPercentage && $ugPercentage > 0) ? number_format($ugPercentage, 2) . ' %' : ($academicDetails?->ug_cgpa ? $academicDetails->ug_cgpa . ' CGPA' : '-'),
                 'ug_status' => !empty($academicDetails?->ug_current_status) ? $academicDetails->ug_current_status : '-',
 
-                // Postgraduate (PG / Master's / M.Tech)
+                // Postgraduate 1 (PG 1 / Master's / M.Tech)
                 'pg_college' => !empty($academicDetails?->pg_college_name) ? $academicDetails->pg_college_name : '-',
                 'pg_board' => !empty($academicDetails?->pg_university_board) ? $academicDetails->pg_university_board : '-',
                 'pg_year' => !empty($academicDetails?->pg_passed_year) ? $academicDetails->pg_passed_year : '-',
@@ -388,6 +398,16 @@ class ApplicationController extends Controller
                 'pg_marks_earned' => !empty($academicDetails?->pg_marks_earned) ? $academicDetails->pg_marks_earned : '-',
                 'pg_percentage' => ($pgPercentage && $pgPercentage > 0) ? number_format($pgPercentage, 2) . ' %' : ($academicDetails?->pg_cgpa ? $academicDetails->pg_cgpa . ' CGPA' : '-'),
                 'pg_status' => !empty($academicDetails?->pg_current_status) ? $academicDetails->pg_current_status : '-',
+
+                // Postgraduate 2 (PG 2 / Ph.D)
+                'pg2_college' => !empty($academicDetails?->pg2_college_name) ? $academicDetails->pg2_college_name : '-',
+                'pg2_board' => !empty($academicDetails?->pg2_university_board) ? $academicDetails->pg2_university_board : '-',
+                'pg2_year' => !empty($academicDetails?->pg2_passed_year) ? $academicDetails->pg2_passed_year : '-',
+                'pg2_roll' => !empty($academicDetails?->pg2_roll_no) ? $academicDetails->pg2_roll_no : '-',
+                'pg2_marks_conducted' => !empty($academicDetails?->pg2_marks_conducted) ? $academicDetails->pg2_marks_conducted : '-',
+                'pg2_marks_earned' => !empty($academicDetails?->pg2_marks_earned) ? $academicDetails->pg2_marks_earned : '-',
+                'pg2_percentage' => ($pg2Percentage && $pg2Percentage > 0) ? number_format($pg2Percentage, 2) . ' %' : ($academicDetails?->pg2_cgpa ? $academicDetails->pg2_cgpa . ' CGPA' : '-'),
+                'pg2_status' => !empty($academicDetails?->pg2_current_status) ? $academicDetails->pg2_current_status : '-',
             ],
             'degree_level' => $degreeLevel,
             'street' => $villageVal ?: ($personalInfo?->village ?: ''),

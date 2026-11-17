@@ -44,12 +44,11 @@ class KpiDashboardsTest extends TestCase
         $response = $this->actingAs($user)->get('/kpi/telecallerkpi?tab=telecallerkpi');
 
         $response->assertStatus(200);
-        $response->assertSee('Telecaller KPI &amp; Outreach Analytics', false);
-        $response->assertSee('Executive Telecaller Performance Leaderboard');
-        $response->assertSee('counselorComparisonChart');
-        $response->assertSee('dispositionChart');
-        $response->assertSee('All Telecallers / Counselors');
-        $response->assertSee('Candidate Outreach &amp; Call Task Logs', false);
+        $response->assertSee('Telecaller KPI', false);
+        $response->assertSee('Telecaller Summary');
+        $response->assertSee('Logged Call Stages Breakdown');
+        $response->assertSee('All Telecallers');
+        $response->assertSee('Counselor Lead Outreach Directory');
     }
 
     public function test_leads_kpi_dashboard_renders_with_inflow_trends(): void

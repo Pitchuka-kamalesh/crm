@@ -79,6 +79,20 @@ class StudentAcademicDetail extends Model
         'pg_percentage',
         'pg_current_status',
 
+        // PG 2 (for Ph.D / Doctoral)
+        'pg2_college_name',
+        'pg2_university_board',
+        'pg2_college_city',
+        'pg2_college_district',
+        'pg2_roll_no',
+        'pg2_passed_year',
+        'pg2_marks_type',
+        'pg2_marks',
+        'pg2_marks_conducted',
+        'pg2_marks_earned',
+        'pg2_percentage',
+        'pg2_current_status',
+
         // Audit
         'log_userid',
         'log_datetime',
@@ -120,6 +134,14 @@ class StudentAcademicDetail extends Model
             return round(((float)$this->attributes['pg_percentage']) / 9.5, 2);
         }
         return $this->attributes['pg_marks'] ?? null;
+    }
+
+    public function getPg2CgpaAttribute()
+    {
+        if (!empty($this->attributes['pg2_percentage'])) {
+            return round(((float)$this->attributes['pg2_percentage']) / 9.5, 2);
+        }
+        return $this->attributes['pg2_marks'] ?? null;
     }
 
     public function registration(): BelongsTo

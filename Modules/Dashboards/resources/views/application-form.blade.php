@@ -120,7 +120,7 @@
         </a>
         <div style="display:flex; gap:8px;">
             <button type="button" class="btn btn-back" onclick="window.print()">Print A4</button>
-            <a class="btn" href="{{ $downloadUrl ?? route('application.download', $student->id) }}">
+            <a class="btn" download href="{{ $downloadUrl ?? route('application.download', $student->id) }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>Download PDF
             </a>
         </div>
@@ -244,12 +244,22 @@
                 @endif
                 @if((!empty($student->academic->pg_college) && $student->academic->pg_college !== '-') || ($student->degree_level ?? '') === 'phd')
                 <tr>
-                    <td style="padding:4px 6px; font-weight:bold;">Postgraduate (PG)</td>
+                    <td style="padding:4px 6px; font-weight:bold;">Postgraduate 1</td>
                     <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_college) && $student->academic->pg_college !== '-') ? $student->academic->pg_college : '-' }}</td>
                     <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_board) && $student->academic->pg_board !== '-') ? $student->academic->pg_board : '-' }}</td>
                     <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_year) && $student->academic->pg_year !== '-') ? $student->academic->pg_year : '-' }}</td>
                     <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_roll) && $student->academic->pg_roll !== '-') ? $student->academic->pg_roll : '-' }}</td>
                     <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->pg_percentage) && $student->academic->pg_percentage !== 'N/A' && $student->academic->pg_percentage !== '-') ? $student->academic->pg_percentage : '-' }}</td>
+                </tr>
+                @endif
+                @if((!empty($student->academic->pg2_college) && $student->academic->pg2_college !== '-') || ($student->degree_level ?? '') === 'phd')
+                <tr>
+                    <td style="padding:4px 6px; font-weight:bold;">Postgraduate 2</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_college) && $student->academic->pg2_college !== '-') ? $student->academic->pg2_college : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_board) && $student->academic->pg2_board !== '-') ? $student->academic->pg2_board : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_year) && $student->academic->pg2_year !== '-') ? $student->academic->pg2_year : '-' }}</td>
+                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_roll) && $student->academic->pg2_roll !== '-') ? $student->academic->pg2_roll : '-' }}</td>
+                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->pg2_percentage) && $student->academic->pg2_percentage !== 'N/A' && $student->academic->pg2_percentage !== '-') ? $student->academic->pg2_percentage : '-' }}</td>
                 </tr>
                 @endif
             </table>
@@ -419,13 +429,6 @@
             <div class="footer">Vignan's Foundation for Science, Technology &amp; Research &nbsp;|&nbsp; Application Dossier Attachment &bull; Page {{ $attachIdx + 1 }}</div>
         </div>
     @endforeach
-@endif
-@if (!empty($autoPrint))
-<script>
-    window.addEventListener('load', function() {
-        setTimeout(function() { window.print(); }, 350);
-    });
-</script>
 @endif
 </body>
 </html>
