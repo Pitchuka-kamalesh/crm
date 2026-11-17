@@ -49,9 +49,8 @@ class KpiDashboardsTest extends TestCase
         
         $content = $response->streamedContent();
         $this->assertStringContainsString('Application Number', $content);
-        $this->assertStringContainsString('Candidate Name', $content);
         $this->assertStringContainsString('Mobile Number', $content);
-        $this->assertStringContainsString('Current Stage', $content);
+        $this->assertStringContainsString('Current Step', $content);
         $this->assertStringContainsString('Stage', $content);
     }
 

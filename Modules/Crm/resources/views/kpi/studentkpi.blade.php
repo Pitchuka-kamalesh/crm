@@ -248,8 +248,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 35%;">Application Number</th>
-                                        <th style="width: 30%;">Mobile Number</th>
-                                        <th style="width: 35%;">Current Stage</th>
+                                        <th style="width: 35%;">Mobile Number</th>
+                                        <th style="width: 30%;">Current Step</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -264,37 +264,31 @@
 
                                             if ($isStage5) {
                                                 $stageTitle = 'Stage 5: Exam Slot Booked';
-                                                $stageDesc = 'All 5 Stages Completed • Exam Ready';
                                                 $badgeColor = '#059669';
                                                 $badgeBg = '#ecfdf5';
                                                 $badgeBorder = '#a7f3d0';
                                             } elseif ($isStage4) {
                                                 $stageTitle = 'Stage 5: Exam Slot Booking';
-                                                $stageDesc = 'Fee Paid • Pending Exam Slot Selection';
                                                 $badgeColor = '#0d9488';
                                                 $badgeBg = '#f0fdfa';
                                                 $badgeBorder = '#99f6e4';
                                             } elseif ($isStage3) {
                                                 $stageTitle = 'Stage 4: Fee Payment';
-                                                $stageDesc = 'Documents Uploaded • Pending Fee Payment';
                                                 $badgeColor = '#b45309';
                                                 $badgeBg = '#fef3c7';
                                                 $badgeBorder = '#fde68a';
                                             } elseif ($isStage2) {
                                                 $stageTitle = 'Stage 3: Document Upload';
-                                                $stageDesc = 'Academic Details Saved • Pending Document Upload';
                                                 $badgeColor = '#ea580c';
                                                 $badgeBg = '#fff7ed';
                                                 $badgeBorder = '#fed7aa';
                                             } elseif ($isStage1) {
                                                 $stageTitle = 'Stage 2: Academic Info';
-                                                $stageDesc = 'Profile Completed • Pending Academic Details';
                                                 $badgeColor = '#7c3aed';
                                                 $badgeBg = '#f5f3ff';
                                                 $badgeBorder = '#ddd6fe';
                                             } else {
                                                 $stageTitle = 'Stage 1: Personal Profile';
-                                                $stageDesc = 'Registered • Pending Personal Profile';
                                                 $badgeColor = '#2563eb';
                                                 $badgeBg = '#eff6ff';
                                                 $badgeBorder = '#bfdbfe';
@@ -308,42 +302,24 @@
                                             data-stage5="{{ $isStage5 ? '1' : '0' }}">
                                             <!-- Column 1: Application Number -->
                                             <td>
-                                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #0284c7;">
+                                                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #0284c7;">
                                                     {{ $st->applinano }}
-                                                </div>
-                                                @if($st->name)
-                                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.825rem; margin-top: 2px;">
-                                                        {{ $st->name }}
-                                                    </div>
-                                                @endif
-                                                @if($st->crmid)
-                                                    <div style="font-size: 0.7rem; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-top: 1px;">
-                                                        CRM ID: {{ $st->crmid }}
-                                                    </div>
-                                                @endif
+                                                </span>
                                             </td>
 
                                             <!-- Column 2: Mobile Number -->
                                             <td>
-                                                <div style="font-weight: 600; color: #1e293b; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;">
+                                                <span style="font-weight: 600; color: #1e293b; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;">
                                                     {{ $st->phoneno ?: '—' }}
-                                                </div>
-                                                @if($st->emailid)
-                                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
-                                                        {{ $st->emailid }}
-                                                    </div>
-                                                @endif
+                                                </span>
                                             </td>
 
-                                            <!-- Column 3: Current Stage -->
+                                            <!-- Column 3: Current Step -->
                                             <td>
-                                                <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 4px 10px; border-radius: 9999px; font-size: 0.775rem; font-weight: 700; color: {{ $badgeColor }}; background: {{ $badgeBg }}; border: 1px solid {{ $badgeBorder }};">
+                                                <span style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 4px 10px; border-radius: 9999px; font-size: 0.775rem; font-weight: 700; color: {{ $badgeColor }}; background: {{ $badgeBg }}; border: 1px solid {{ $badgeBorder }};">
                                                     <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: {{ $badgeColor }};"></span>
                                                     <span>{{ $stageTitle }}</span>
-                                                </div>
-                                                <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px; padding-left: 2px;">
-                                                    {{ $stageDesc }}
-                                                </div>
+                                                </span>
                                             </td>
                                         </tr>
                                     @empty
@@ -588,8 +564,62 @@ window.exportStudentKpiExcel = function () {
     if (q) url.searchParams.set('q', q);
     if (stage) url.searchParams.set('stage', stage);
 
-    window.location.href = url.toString();
+    // Fetch the export blob directly so the current page is never redirected
+    fetch(url.toString(), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Export network error: ' + res.status);
+        return res.blob();
+    })
+    .then(blob => {
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'Student_KPI_Report_' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+    })
+    .catch(err => {
+        console.warn('Backend export failed, falling back to instant client-side CSV generator:', err);
+        fallbackClientExport();
+    });
 };
+
+function fallbackClientExport() {
+    const headers = ['Application Number', 'Mobile Number', 'Current Step'];
+    const rows = [];
+    document.querySelectorAll('#studentRecordsTable tbody tr.student-row').forEach(row => {
+        if (row.style.display !== 'none') {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 3) {
+                const appNo = (cells[0].innerText || '').trim();
+                const phone = (cells[1].innerText || '').trim();
+                const step = (cells[2].innerText || '').replace(/^[•●✓]\s*/, '').trim();
+                rows.push([appNo, phone, step]);
+            }
+        }
+    });
+
+    let csvContent = "\uFEFF";
+    csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\r\n";
+    rows.forEach(r => {
+        csvContent += r.map(c => `"${(c ?? '').toString().replace(/"/g, '""')}"`).join(",") + "\r\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const downloadUrl = URL.createObjectURL(blob);
+    link.href = downloadUrl;
+    link.download = 'Student_KPI_Report_' + new Date().toISOString().slice(0, 10) + '.csv';
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(downloadUrl);
+}
 
 function attachPaginationAjax() {
     const paginationLinks = document.querySelectorAll('#studentTableContainer .pagination a');

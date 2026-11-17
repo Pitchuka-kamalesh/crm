@@ -215,13 +215,6 @@ class StudentKpiController extends Controller
      */
     public function export(Request $request)
     {
-        $user = auth()->user();
-        $roleId = $user ? (int)($user->role_id ?? 0) : 0;
-
-        if ($roleId && RoleService::isTelecaller($roleId)) {
-            return redirect()->route('kpi.telecallerkpi')->with('error', 'Telecallers only have access to Telecaller KPI.');
-        }
-
         $pdPaid = PayDetail::where(function ($q) {
             $q->where('txnstatus', 'success')
               ->orWhere('paidamount', '>', 0);
@@ -283,8 +276,8 @@ class StudentKpiController extends Controller
             // Write UTF-8 BOM so Microsoft Excel automatically recognises UTF-8 encoding
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // Write CSV Headers: Application Number, Candidate Name, Mobile Number, Current Stage
-            fputcsv($handle, ['Application Number', 'Candidate Name', 'Mobile Number', 'Current Stage']);
+            // Write CSV Headers: Application Number, Mobile Number, Current Step
+            fputcsv($handle, ['Application Number', 'Mobile Number', 'Current Step']);
 
             foreach ($students as $st) {
                 $appNo = (string)$st->applinano;
@@ -310,7 +303,6 @@ class StudentKpiController extends Controller
 
                 fputcsv($handle, [
                     $st->applinano,
-                    $st->name ?: '',
                     $st->phoneno ?: '',
                     $currentStage,
                 ]);
