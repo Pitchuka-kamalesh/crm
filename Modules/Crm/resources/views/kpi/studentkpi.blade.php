@@ -221,15 +221,9 @@
                             <table class="crm-table" id="studentRecordsTable">
                                 <thead>
                                     <tr>
-                                        <th>Application #</th>
-                                        <th>Student Details</th>
-                                        <th>Program &amp; Branch</th>
-                                        <th>Stage 1 (Profile)</th>
-                                        <th>Stage 2 (Academic)</th>
-                                        <th>Stage 3 (Docs)</th>
-                                        <th>Stage 4 (Fee)</th>
-                                        <th>Stage 5 (Slot Booking)</th>
-                                        <th>Overall Progress</th>
+                                        <th style="width: 35%;">Application Number</th>
+                                        <th style="width: 30%;">Mobile Number</th>
+                                        <th style="width: 35%;">Current Stage</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -242,8 +236,43 @@
                                             $isStage4 = in_array(strtolower(trim((string)$st->stage4)), ['paid', 'completed']) || ($st->stage1 === 'paid') || ($st->payDetail && ($st->payDetail->txnstatus === 'success' || $st->payDetail->paidamount > 0)) || $st->receipt || $verifiedPaidAppNos->contains($appNo);
                                             $isStage5 = in_array(strtolower(trim((string)$st->stage5)), ['completed', 'approved', 'done']) || $st->examSchedule;
 
-                                            $completedCount = ($isStage1 ? 1 : 0) + ($isStage2 ? 1 : 0) + ($isStage3 ? 1 : 0) + ($isStage4 ? 1 : 0) + ($isStage5 ? 1 : 0);
-                                            $progressPct = round(($completedCount / 5) * 100);
+                                            if ($isStage5) {
+                                                $stageTitle = 'Stage 5: Exam Slot Booked';
+                                                $stageDesc = 'All 5 Stages Completed • Exam Ready';
+                                                $badgeColor = '#059669';
+                                                $badgeBg = '#ecfdf5';
+                                                $badgeBorder = '#a7f3d0';
+                                            } elseif ($isStage4) {
+                                                $stageTitle = 'Stage 5: Exam Slot Booking';
+                                                $stageDesc = 'Fee Paid • Pending Exam Slot Selection';
+                                                $badgeColor = '#0d9488';
+                                                $badgeBg = '#f0fdfa';
+                                                $badgeBorder = '#99f6e4';
+                                            } elseif ($isStage3) {
+                                                $stageTitle = 'Stage 4: Fee Payment';
+                                                $stageDesc = 'Documents Uploaded • Pending Fee Payment';
+                                                $badgeColor = '#b45309';
+                                                $badgeBg = '#fef3c7';
+                                                $badgeBorder = '#fde68a';
+                                            } elseif ($isStage2) {
+                                                $stageTitle = 'Stage 3: Document Upload';
+                                                $stageDesc = 'Academic Details Saved • Pending Document Upload';
+                                                $badgeColor = '#ea580c';
+                                                $badgeBg = '#fff7ed';
+                                                $badgeBorder = '#fed7aa';
+                                            } elseif ($isStage1) {
+                                                $stageTitle = 'Stage 2: Academic Info';
+                                                $stageDesc = 'Profile Completed • Pending Academic Details';
+                                                $badgeColor = '#7c3aed';
+                                                $badgeBg = '#f5f3ff';
+                                                $badgeBorder = '#ddd6fe';
+                                            } else {
+                                                $stageTitle = 'Stage 1: Personal Profile';
+                                                $stageDesc = 'Registered • Pending Personal Profile';
+                                                $badgeColor = '#2563eb';
+                                                $badgeBg = '#eff6ff';
+                                                $badgeBorder = '#bfdbfe';
+                                            }
                                         @endphp
                                         <tr class="student-row"
                                             data-stage1="{{ $isStage1 ? '1' : '0' }}"
@@ -251,105 +280,56 @@
                                             data-stage3="{{ $isStage3 ? '1' : '0' }}"
                                             data-stage4="{{ $isStage4 ? '1' : '0' }}"
                                             data-stage5="{{ $isStage5 ? '1' : '0' }}">
+                                            <!-- Column 1: Application Number -->
                                             <td>
-                                                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; font-weight: 700; color: #0284c7;">
+                                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #0284c7;">
                                                     {{ $st->applinano }}
-                                                </span>
-                                                @if($st->crmid)
-                                                    <div style="font-size: 0.7rem; color: #64748b; font-family: 'JetBrains Mono', monospace;">CRM: {{ $st->crmid }}</div>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <div style="font-weight: 700; color: #1e293b; font-size: 0.875rem;">{{ $st->name ?: 'Candidate' }}</div>
-                                                <div style="font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 0.35rem; margin-top: 2px;">
-                                                    <span>📞 {{ $st->phoneno }}</span>
-                                                    @if($st->emailid)
-                                                        <span>• ✉️ {{ $st->emailid }}</span>
-                                                    @endif
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <div style="font-weight: 600; color: #334155; font-size: 0.825rem;">
-                                                    {{ $st->branch?->branch_short_name ?: ($st->branch?->branch_long_name ?: 'General Engineering') }}
-                                                </div>
-                                                <div style="font-size: 0.72rem; color: #64748b;">
-                                                    {{ $st->program?->program_short_name ?: ($st->program?->program_name ?: 'B.Tech') }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                @if($isStage1)
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Done
-                                                    </span>
-                                                @else
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($isStage2)
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #6d28d9; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Done
-                                                    </span>
-                                                @else
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($isStage3)
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #c2410c; background: #fff7ed; border: 1px solid #fed7aa; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Uploaded
-                                                    </span>
-                                                @else
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($isStage4)
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Paid
-                                                    </span>
-                                                @else
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($isStage5)
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; color: #0f766e; background: #f0fdfa; border: 1px solid #99f6e4; padding: 2px 8px; border-radius: 6px;">
-                                                        ✓ Booked
-                                                    </span>
-                                                @else
-                                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px;">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                    <div style="flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; min-width: 60px;">
-                                                        <div style="width: {{ $progressPct }}%; height: 100%; background: {{ $progressPct >= 80 ? '#10b981' : ($progressPct >= 50 ? '#3b82f6' : '#f59e0b') }}; border-radius: 3px;"></div>
+                                                @if($st->name)
+                                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.825rem; margin-top: 2px;">
+                                                        {{ $st->name }}
                                                     </div>
-                                                    <span style="font-size: 0.75rem; font-weight: 700; color: #334155;">{{ $progressPct }}%</span>
+                                                @endif
+                                                @if($st->crmid)
+                                                    <div style="font-size: 0.7rem; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-top: 1px;">
+                                                        CRM ID: {{ $st->crmid }}
+                                                    </div>
+                                                @endif
+                                            </td>
+
+                                            <!-- Column 2: Mobile Number -->
+                                            <td>
+                                                <div style="font-weight: 600; color: #1e293b; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;">
+                                                    {{ $st->phoneno ?: '—' }}
+                                                </div>
+                                                @if($st->emailid)
+                                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                                        {{ $st->emailid }}
+                                                    </div>
+                                                @endif
+                                            </td>
+
+                                            <!-- Column 3: Current Stage -->
+                                            <td>
+                                                <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 4px 10px; border-radius: 9999px; font-size: 0.775rem; font-weight: 700; color: {{ $badgeColor }}; background: {{ $badgeBg }}; border: 1px solid {{ $badgeBorder }};">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: {{ $badgeColor }};"></span>
+                                                    <span>{{ $stageTitle }}</span>
+                                                </div>
+                                                <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px; padding-left: 2px;">
+                                                    {{ $stageDesc }}
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                            <td colspan="3" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
                                                 <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                                 <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student registrations found</div>
                                             </td>
                                         </tr>
                                     @endforelse
                                     <tr id="kpiClientNoMatchesRow" style="display: none;">
-                                        <td colspan="9" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                        <td colspan="3" style="text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
                                             <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                             <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No matching student registrations found</div>
                                         </td>
