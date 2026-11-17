@@ -504,9 +504,8 @@ function updateCallStagesChart(stages, totalTasks) {
                             if (data.labels.length && data.datasets.length) {
                                 return data.labels.map((label, i) => {
                                     const val = data.datasets[0].data[i];
-                                    const pct = total > 0 ? ((val / total) * 100).toFixed(0) : 0;
                                     return {
-                                        text: `${label} (${val} • ${pct}%)`,
+                                        text: `${label} (${val})`,
                                         fillStyle: data.datasets[0].backgroundColor[i],
                                         strokeStyle: '#ffffff',
                                         lineWidth: 1,
@@ -523,8 +522,7 @@ function updateCallStagesChart(stages, totalTasks) {
                     callbacks: {
                         label: function (context) {
                             const val = context.parsed;
-                            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                            return ` ${context.label}: ${val} calls (${pct}%)`;
+                            return ` ${context.label}: ${val} calls`;
                         }
                     }
                 }
