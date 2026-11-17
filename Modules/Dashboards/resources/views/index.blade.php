@@ -2966,7 +2966,7 @@
                                     Admission Registration Fee Paid &amp; Verified
                                 </h3>
                                 <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
-                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to exam slot booking.
+                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to @if(($degreeLevel ?? '') === 'phd') application form preview & download. @else exam slot booking. @endif
                                 </p>
                                 <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                                     <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
@@ -2974,7 +2974,7 @@
                                         <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                     </a>
                                     <a href="{{ route('dashboards.index', ['step' => 5]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                                        <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                                        <span>Proceed to Step 5: {{ $stages[5]['title'] ?? (($degreeLevel ?? '') === 'phd' ? 'Application Download' : 'Exam Slot Booking') }} &rarr;</span>
                                     </a>
                                 </div>
                             </div>
@@ -3056,18 +3056,18 @@
                         </div>
                         @if($isPaid)
                             <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
-                                <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                                <span>Proceed to Step 5: {{ $stages[5]['title'] ?? (($degreeLevel ?? '') === 'phd' ? 'Application Download' : 'Exam Slot Booking') }} &rarr;</span>
                             </a>
                         @else
                             <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 5">
-                                <span>🔒 Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} (Locked until Fee Payment)</span>
+                                <span>🔒 Step 5: {{ $stages[5]['title'] ?? (($degreeLevel ?? '') === 'phd' ? 'Application Download' : 'Exam Slot Booking') }} (Locked until Fee Payment)</span>
                             </button>
                         @endif
                     </div>
                 </div>
 
             <!-- ================= STAGE 5: EXAM SLOT BOOKING (master.menus: EXAM00002) ================= -->
-            @elseif($activeStep === 5)
+            @elseif($activeStep === 5 && ($degreeLevel ?? '') !== 'phd')
                 @php
                     $now = \Carbon\Carbon::now();
                     $cutoffHour = 17; // 5:00 PM daily cutoff
@@ -3284,7 +3284,7 @@
                 </form>
 
             <!-- ================= STAGE 6: APPLICATION DOWNLOAD (master.menus: CRMM0010) ================= -->
-            @elseif($activeStep === 6)
+            @elseif(($activeStep === 6 && ($degreeLevel ?? '') !== 'phd') || ($activeStep === 5 && ($degreeLevel ?? '') === 'phd'))
                 @php
                     $appStudent = $applicationData ?? \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) ($appNo ?: ($user?->usercode ?? '0')));
                     $formLogo = asset('images/vignan-logo.png');
@@ -3303,7 +3303,7 @@
 
                 <div class="step-panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                     <div>
-                        <div class="step-panel-kicker">Stage 6 of {{ count($stages) }} &bull; Official Candidate Dossier</div>
+                        <div class="step-panel-kicker">Stage {{ $activeStep }} of {{ count($stages) }} &bull; Official Candidate Dossier</div>
                         <h3>Application Form Preview &amp; Download</h3>
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
@@ -3319,7 +3319,7 @@
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
                     @csrf
-                    <input type="hidden" name="step" value="6">
+                    <input type="hidden" name="step" value="{{ $activeStep }}">
 
                     <!-- EMBEDDED A4 ADMISSION APPLICATION FORM -->
                     <div class="embedded-a4-form" style="max-width: 820px; margin: 0 auto; background: #F4F7FB; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1B2430;">
@@ -3397,6 +3397,7 @@
                                     </div>
                                     <div style="font-size: 10px; color: #12875B; font-weight: 700;">Provisional Allotment Confirmed</div>
                                 </div>
+                                @if(($degreeLevel ?? '') !== 'phd')
                                 <div>
                                     <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Booked Entrance Exam Slot</div>
                                     <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
@@ -3404,6 +3405,15 @@
                                     </div>
                                     <div style="font-size: 10px; color: #B25E09; font-weight: 700;">⏰ {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
                                 </div>
+                                @else
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Entrance Examination</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        Exempted / Direct Ph.D
+                                    </div>
+                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Departmental Evaluation</div>
+                                </div>
+                                @endif
                             </div>
 
                             <!-- 2-Column: Personal Information & Address Information -->
@@ -3890,13 +3900,18 @@
                         </div>
                     </div>
 
+                    @php
+                        $isPhd = (($degreeLevel ?? '') === 'phd');
+                        $appPrevStep = $isPhd ? 4 : 5;
+                        $appNextStep = $isPhd ? 6 : 7;
+                    @endphp
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
-                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            &larr; Stage 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }}
+                        <a href="{{ route('dashboards.index', ['step' => $appPrevStep]) }}" class="btn-step-prev">
+                            &larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot Booking') }}
                         </a>
-                        @if(isset($stages[7]))
+                        @if(isset($stages[$appNextStep]))
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Proceed to Stage 7: {{ $stages[7]['title'] }} &rarr;</span>
+                                <span>Proceed to Stage {{ $appNextStep }}: {{ $stages[$appNextStep]['title'] }} &rarr;</span>
                             </button>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #16a34a;">
@@ -3907,17 +3922,20 @@
                 </form>
 
             <!-- ================= STAGE 7: V-SAT RESULTS (master.menus: CRMM0007) ================= -->
-            @elseif($activeStep === 7 && isset($stages[7]))
+            @elseif((($degreeLevel ?? '') !== 'phd' && $activeStep === 7 && isset($stages[7])) || (($degreeLevel ?? '') === 'phd' && $activeStep === 6 && isset($stages[6])))
                 @php
-                    $isStage7Done = ($stages[7]['status'] ?? 'pending') === 'completed';
+                    $isPhd = (($degreeLevel ?? '') === 'phd');
+                    $vsatStepNum = $isPhd ? 6 : 7;
+                    $vsatPrevStep = $isPhd ? 5 : 6;
+                    $isStage7Done = ($stages[$vsatStepNum]['status'] ?? 'pending') === 'completed';
                     $examDateFormatted = $examSchedule?->examdate ? \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') : 'Booked in Stage 5';
                     $slotFormatted = $examSchedule?->exam_slot ?? 'Session Scheduled';
                 @endphp
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 7 of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
-                        <h3>{{ $stages[7]['title'] ?? 'V-SAT Results' }}</h3>
-                        <p>{{ $stages[7]['subtitle'] ?? 'Official V-SAT examination scorecard and admission merit records.' }}</p>
+                        <div class="step-panel-kicker">Stage {{ $vsatStepNum }} of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
+                        <h3>{{ $stages[$vsatStepNum]['title'] ?? 'V-SAT Results' }}</h3>
+                        <p>{{ $stages[$vsatStepNum]['subtitle'] ?? 'Official V-SAT examination scorecard and admission merit records.' }}</p>
                     </div>
                     @if($isStage7Done)
                         <span class="step-header-tag tag-success">✓ Onboarding Completed</span>
@@ -3928,7 +3946,7 @@
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="7">
+                    <input type="hidden" name="step" value="{{ $vsatStepNum }}">
 
                     <!-- Candidate Examination Record from DB -->
                     <div class="section-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
@@ -4003,8 +4021,8 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
-                            &larr; Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }}
+                        <a href="{{ route('dashboards.index', ['step' => $vsatPrevStep]) }}" class="btn-step-prev">
+                            &larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #15803d;">
                             <span>✓ Complete Onboarding &amp; Finalize Registration</span>

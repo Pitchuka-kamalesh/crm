@@ -153,11 +153,13 @@ class DashboardsController extends Controller
         $campusName = $campus ? $campus->campus_short_name : '';
 
         // Determine Degree Level for Step 3 based on registration (UG -> B.Tech, PG -> M.Tech, Doctoral -> PhD)
+        $requestedLevel = strtolower(trim((string)($request->query('degree_level') ?? $request->input('degree_level') ?? session('degree_level') ?? '')));
         $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
         $progShort = strtoupper($program?->program_short_name ?? '');
         $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
 
         if (
+            $requestedLevel === 'phd' ||
             $progLevel === 'PHD' ||
             $progLevel === 'DOCTORAL' ||
             str_contains($progShort, 'PHD') ||
@@ -168,6 +170,7 @@ class DashboardsController extends Controller
         ) {
             $degreeLevel = 'phd';
         } elseif (
+            $requestedLevel === 'mtech' ||
             $progLevel === 'PG' ||
             str_contains($progShort, 'M.TECH') ||
             str_contains($progShort, 'MTECH') ||
@@ -256,7 +259,28 @@ class DashboardsController extends Controller
         }
 
         ksort($stageMeta);
+
+        // PhD candidate: Completely remove Exam Slot Booking stage (EXAM00002) and re-index stages
+        if ($degreeLevel === 'phd') {
+            $filteredMeta = [];
+            foreach ($stageMeta as $meta) {
+                $mCode = $meta['menu_code'] ?? '';
+                $mTitle = strtolower($meta['title'] ?? '');
+                if ($mCode === 'EXAM00002' || str_contains($mTitle, 'exam slot')) {
+                    continue;
+                }
+                $filteredMeta[] = $meta;
+            }
+            $stageMeta = [];
+            foreach ($filteredMeta as $idx => $m) {
+                $stageMeta[$idx + 1] = $m;
+            }
+        }
+
         $totalSteps = count($stageMeta);
+        if ($activeStep > $totalSteps) {
+            $activeStep = $totalSteps;
+        }
 
         // Calculate stage statuses dynamically from crmStudent DB columns and actual completed data
         $stages = [];
@@ -275,6 +299,12 @@ class DashboardsController extends Controller
                 $isCompleted = ($val === 'completed' || $academicDetails !== null);
             } elseif ($mCode === 'CRMM0006') {
                 $isCompleted = ($val === 'completed' || !empty($uploadedDocs));
+            } elseif ($mCode === 'CRMM0010') {
+                // Application download
+                $isCompleted = ($val === 'completed' || ($crmStudent && ($crmStudent->stage5 === 'completed' || $crmStudent->stage6 === 'completed')));
+            } elseif ($mCode === 'CRMM0007') {
+                // V-SAT results
+                $isCompleted = ($val === 'completed' || ($crmStudent && ($crmStudent->stage6 === 'completed' || $crmStudent->stage7 === 'completed')));
             } else {
                 $isCompleted = ($val === 'completed' || $val === 'paid');
             }
@@ -493,8 +523,27 @@ class DashboardsController extends Controller
         $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
         $regNo = $crmStudent?->applinano ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
 
+        $progId = $crmStudent?->programid;
+        $program = $progId ? Program::where('program_id', $progId)->first() : null;
+        $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
+        $progShort = strtoupper($program?->program_short_name ?? '');
+        $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
+        $requestedLevel = strtolower(trim((string)($request->query('degree_level') ?? $request->input('degree_level') ?? session('degree_level') ?? '')));
+
+        $isPhd = (
+            $requestedLevel === 'phd' ||
+            $progLevel === 'PHD' ||
+            $progLevel === 'DOCTORAL' ||
+            str_contains($progShort, 'PHD') ||
+            str_contains($progShort, 'PH.D') ||
+            str_contains($progName, 'DOCTOR') ||
+            str_contains($progName, 'PH.D') ||
+            str_contains($progName, 'PHD')
+        );
+
         $step = (int) $request->input('step', 1);
-        $nextStep = min(7, $step + 1);
+        $maxSteps = $isPhd ? 6 : 7;
+        $nextStep = min($maxSteps, $step + 1);
 
         $hasPaidRecord = false;
         try {
@@ -552,7 +601,7 @@ class DashboardsController extends Controller
         // Security validation: Block saving higher steps if fee payment in Step 4 is not completed
         if ($step > 4 && !$isPaid) {
             return redirect()->route('dashboards.index', ['step' => 4])
-                ->withErrors(['error' => 'Admission fee payment in Step 4 must be completed before booking an exam slot.']);
+                ->withErrors(['error' => 'Admission fee payment in Step 4 must be completed before proceeding.']);
         }
 
         try {
@@ -1026,11 +1075,22 @@ class DashboardsController extends Controller
                         $academicPayload
                     );
 
-                    $crmStudent->update([
+                    $crmUpdates = [
                         'stage2' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
-                    ]);
+                    ];
+                    if ($request->filled('degree_level')) {
+                        $lvl = strtolower(trim((string)$request->input('degree_level')));
+                        if ($lvl === 'mtech') {
+                            $crmUpdates['programlevel'] = 'PG';
+                        } elseif ($lvl === 'phd') {
+                            $crmUpdates['programlevel'] = 'Doctoral';
+                        } elseif ($lvl === 'btech') {
+                            $crmUpdates['programlevel'] = 'UG';
+                        }
+                    }
+                    $crmStudent->update($crmUpdates);
                 }
                 $nextStep = 3;
                 $msg = 'Stage 2: Academic Records saved successfully!';
@@ -1155,6 +1215,18 @@ class DashboardsController extends Controller
                 }
                 $nextStep = 5;
                 $msg = 'Stage 4: Admission Fee Payment confirmed!';
+            } elseif ($step === 5 && $isPhd) {
+                // Ph.D candidate: Step 5 is Application Download (Exam Slot Booking is skipped)
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage5' => 'completed',
+                        'stage6' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 6;
+                $msg = 'Stage 5: Application Download verified!';
             } elseif ($step === 5) {
                 // Step 5: Exam Slot Booking (finance.exam_schedule)
                 $now = now();
@@ -1227,6 +1299,18 @@ class DashboardsController extends Controller
                 $msg = $existingExamSchedule
                     ? 'Stage 5: Exam slot updated successfully!'
                     : 'Stage 5: Exam Slot confirmed and booked successfully!';
+            } elseif ($step === 6 && $isPhd) {
+                // Ph.D candidate: Step 6 is V-SAT Results (Final Stage)
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage6' => 'completed',
+                        'stage7' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 6;
+                $msg = 'Stage 6: Onboarding completed successfully!';
             } elseif ($step === 6) {
                 // Step 6: Application Download
                 if ($crmStudent) {
@@ -1353,6 +1437,20 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_no VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_year INT,
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_status VARCHAR(50);
+
+                ALTER TABLE crm.student_academic_details
+                ALTER COLUMN tenth_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN tenth_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN tenth_marks_earned TYPE NUMERIC(12,2),
+                ALTER COLUMN pu2_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN pu2_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN pu2_marks_earned TYPE NUMERIC(12,2),
+                ALTER COLUMN ug_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN ug_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN ug_marks_earned TYPE NUMERIC(12,2),
+                ALTER COLUMN pg_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN pg_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN pg_marks_earned TYPE NUMERIC(12,2);
             ");
         } catch (\Throwable $e) {
             Log::warning('ensureAcademicColumns: ' . $e->getMessage());
