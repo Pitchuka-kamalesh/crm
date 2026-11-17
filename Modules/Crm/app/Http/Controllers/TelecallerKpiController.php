@@ -94,6 +94,99 @@ class TelecallerKpiController extends Controller
             ->get()
             ->groupBy('empcode');
 
+        // Pre-fetch completed indicators across the system for "all steps completed" vs "not completed"
+        $completedFromReg = DB::table('crm.student_registration')
+            ->where(function ($q) {
+                $q->whereIn(DB::raw('LOWER(stage1)'), ['paid', 'completed'])
+                  ->whereIn(DB::raw('LOWER(stage2)'), ['completed', 'na'])
+                  ->whereIn(DB::raw('LOWER(stage3)'), ['completed', 'na']);
+            })
+            ->orWhere('std_status', 'Admitted')
+            ->get(['phoneno', 'applinano']);
+
+        $regCompletedPhones = $completedFromReg->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
+        $regCompletedApplis = $completedFromReg->pluck('applinano')->filter()->map(fn($a) => (string)$a)->unique();
+
+        $examScheduled = DB::table('exam_schedule')->get(['phoneno', 'applino']);
+        $examPhones = $examScheduled->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
+        $examApplis = $examScheduled->pluck('applino')->filter()->map(fn($a) => (string)$a)->unique();
+
+        $paidApplis = DB::table('finance.paydetails')
+            ->where(function ($q) {
+                $q->where('txnstatus', 'success')->orWhere('paymentstatus', 'SUCCESS');
+            })
+            ->pluck('applino')
+            ->filter()
+            ->map(fn($a) => (string)$a)
+            ->unique();
+
+        $personalPhones = DB::table('crm.student_personal_info')->pluck('phoneno')->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
+        $personalApplis = DB::table('crm.student_personal_info')->pluck('applino')->map(fn($a) => (string)$a)->unique();
+
+        $academicPhones = DB::table('crm.student_academic_details')->pluck('phoneno')->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
+        $academicApplis = DB::table('crm.student_academic_details')->pluck('applino')->map(fn($a) => (string)$a)->unique();
+
+        $completedTaskStages = [
+            'academic details completed',
+            'admission confirmed',
+            'admitted',
+            'all steps completed',
+            'completed',
+            'exam slot booked',
+        ];
+        $taskCompleted = DB::table('crm.telecaller_leads_tasks')
+            ->whereIn(DB::raw('LOWER(stage_name)'), $completedTaskStages)
+            ->get(['phoneno', 'applino']);
+        $taskCompletedPhones = $taskCompleted->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
+        $taskCompletedApplis = $taskCompleted->pluck('applino')->filter()->map(fn($a) => (string)$a)->unique();
+
+        // Calculate completed vs not completed per allocated lead
+        $allAllocLeads = TelecallerLead::when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
+            ->select('empcode', 'phoneno', 'applino')
+            ->get();
+
+        $stepStatsByEmp = [];
+        $totalAllStepsCompleted = 0;
+        $totalAllStepsNotCompleted = 0;
+
+        foreach ($allAllocLeads as $lead) {
+            $emp = (string)$lead->empcode;
+            $cleanPhone = preg_replace('/\D/', '', (string)$lead->phoneno);
+            $appNo = (string)($lead->applino ?? '0');
+
+            if (!isset($stepStatsByEmp[$emp])) {
+                $stepStatsByEmp[$emp] = [
+                    'allocated' => 0,
+                    'completed' => 0,
+                    'not_completed' => 0,
+                ];
+            }
+            $stepStatsByEmp[$emp]['allocated']++;
+
+            $isCompleted = false;
+            if ($regCompletedPhones->contains($cleanPhone) || ($appNo !== '0' && $regCompletedApplis->contains($appNo))) {
+                $isCompleted = true;
+            } elseif ($examPhones->contains($cleanPhone) || ($appNo !== '0' && $examApplis->contains($appNo))) {
+                $isCompleted = true;
+            } elseif ($taskCompletedPhones->contains($cleanPhone) || ($appNo !== '0' && $taskCompletedApplis->contains($appNo))) {
+                $isCompleted = true;
+            } elseif ($appNo !== '0' && $paidApplis->contains($appNo)) {
+                $hasPersonal = $personalPhones->contains($cleanPhone) || $personalApplis->contains($appNo);
+                $hasAcademic = $academicPhones->contains($cleanPhone) || $academicApplis->contains($appNo);
+                if ($hasPersonal && $hasAcademic) {
+                    $isCompleted = true;
+                }
+            }
+
+            if ($isCompleted) {
+                $stepStatsByEmp[$emp]['completed']++;
+                $totalAllStepsCompleted++;
+            } else {
+                $stepStatsByEmp[$emp]['not_completed']++;
+                $totalAllStepsNotCompleted++;
+            }
+        }
+
         // Overall Global Aggregates (or Scoped to user if Telecaller)
         if ($isTelecaller) {
             $totalTelecallerLeads = (int)($leadCountsByEmp[$userEmpCode] ?? 0);
@@ -123,13 +216,14 @@ class TelecallerKpiController extends Controller
         }
 
         // Build individual telecaller stats for dropdown filtering and live JS switching
-        $telecallerStats = $telecallers->map(function ($emp) use ($leadCountsByEmp, $taskCountsByEmp, $contactedByEmp, $stagesRaw) {
+        $telecallerStats = $telecallers->map(function ($emp) use ($leadCountsByEmp, $taskCountsByEmp, $contactedByEmp, $stagesRaw, $stepStatsByEmp) {
             $empCode = (string)$emp->emp_code;
             $leadsCount = (int)($leadCountsByEmp[$empCode] ?? 0);
             $tasksCount = (int)($taskCountsByEmp[$empCode] ?? 0);
             $contactedCount = (int)($contactedByEmp[$empCode] ?? 0);
             $pendingCount = max(0, $leadsCount - $contactedCount);
             $empStages = ($stagesRaw->get($empCode) ?? collect())->values();
+            $stepStats = $stepStatsByEmp[$empCode] ?? ['allocated' => $leadsCount, 'completed' => 0, 'not_completed' => $leadsCount];
 
             return (object)[
                 'emp_code'        => $empCode,
@@ -141,6 +235,8 @@ class TelecallerKpiController extends Controller
                 'contacted_count' => $contactedCount,
                 'pending_count'   => $pendingCount,
                 'stages'          => $empStages,
+                'allocated_completed'     => (int)$stepStats['completed'],
+                'allocated_not_completed' => (int)$stepStats['not_completed'],
                 'status'          => $leadsCount > 0 ? 'Active' : 'Standby',
             ];
         });
@@ -213,7 +309,9 @@ class TelecallerKpiController extends Controller
             'telePendingCount',
             'teleTaskStages',
             'telecallerStats',
-            'telecallerLeadsList'
+            'telecallerLeadsList',
+            'totalAllStepsCompleted',
+            'totalAllStepsNotCompleted'
         ));
     }
 }

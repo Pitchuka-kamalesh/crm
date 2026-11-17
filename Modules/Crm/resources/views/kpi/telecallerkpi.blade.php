@@ -196,9 +196,76 @@
                         </div>
                     </div>
 
-                    <!-- 2. GENUINE CALL STAGES & TOUCHPOINT BREAKDOWN -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem;">
-                        <!-- Stage Breakdown List -->
+                    <!-- 2. TELECALLER ALLOCATION & CALL STAGES BREAKDOWN -->
+                    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.5rem; margin-bottom: 1.75rem;">
+                        <!-- 1. Telecallers Step Completion Table (Replaces old Logged Call Stages Breakdown) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Telecaller Step Completion Summary</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Allocated leads by onboarding steps completed vs not completed</div>
+                                </div>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 0.2rem 0.6rem; border-radius: 20px;">Telecaller Summary</span>
+                            </div>
+                            <div class="table-responsive" style="max-height: 290px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                <table class="crm-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0;">
+                                    <thead>
+                                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 2;">
+                                            <th style="padding: 0.6rem 0.75rem; text-align: left; font-weight: 700; color: #475569; font-size: 0.72rem; text-transform: uppercase;">Telecaller</th>
+                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #475569; font-size: 0.72rem; text-transform: uppercase;">Allocated</th>
+                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #15803d; font-size: 0.72rem; text-transform: uppercase;">All Steps Completed</th>
+                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #b45309; font-size: 0.72rem; text-transform: uppercase;">Not Completed</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse(($telecallerStats ?? []) as $tStat)
+                                            <tr class="telecaller-stat-row" data-empcode="{{ $tStat->emp_code }}" style="border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s ease;" onclick="selectTelecaller('{{ $tStat->emp_code }}')" title="Click to filter by {{ $tStat->name }}">
+                                                <td style="padding: 0.65rem 0.75rem;">
+                                                    <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                                                        <span style="font-size: 0.95rem;">👤</span>
+                                                        <span>{{ $tStat->name }}</span>
+                                                    </div>
+                                                    <div style="font-size: 0.7rem; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-top: 1px;">Emp: {{ $tStat->emp_code }}</div>
+                                                </td>
+                                                <td style="padding: 0.65rem 0.75rem; text-align: center;">
+                                                    <span style="display: inline-block; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #0f172a; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;">
+                                                        {{ number_format($tStat->leads_count) }}
+                                                    </span>
+                                                </td>
+                                                <td style="padding: 0.65rem 0.75rem; text-align: center;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #15803d; background: #dcfce7; border: 1px solid #86efac; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;">
+                                                        ✓ {{ number_format($tStat->allocated_completed) }}
+                                                    </span>
+                                                </td>
+                                                <td style="padding: 0.65rem 0.75rem; text-align: center;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;">
+                                                        ⏳ {{ number_format($tStat->allocated_not_completed) }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" style="text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+                                                    No telecaller data available.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                    @if(isset($telecallerStats) && $telecallerStats->isNotEmpty())
+                                        <tfoot style="border-top: 2px solid #e2e8f0; background: #f8fafc; position: sticky; bottom: 0;">
+                                            <tr style="font-weight: 800;">
+                                                <td style="padding: 0.6rem 0.75rem; color: #334155; font-size: 0.75rem; text-transform: uppercase;">Total</td>
+                                                <td style="padding: 0.6rem 0.75rem; text-align: center; font-family: 'JetBrains Mono', monospace; color: #0f172a; font-size: 0.85rem;">{{ number_format($totalTelecallerLeads) }}</td>
+                                                <td style="padding: 0.6rem 0.75rem; text-align: center; font-family: 'JetBrains Mono', monospace; color: #15803d; font-size: 0.85rem;">✓ {{ number_format($totalAllStepsCompleted) }}</td>
+                                                <td style="padding: 0.6rem 0.75rem; text-align: center; font-family: 'JetBrains Mono', monospace; color: #b45309; font-size: 0.85rem;">⏳ {{ number_format($totalAllStepsNotCompleted) }}</td>
+                                            </tr>
+                                        </tfoot>
+                                    @endif
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 2. Logged Call Stages Breakdown (Replaces old Outreach Pipeline Status) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                                 <div>
@@ -207,7 +274,7 @@
                                 </div>
                                 <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 0.2rem 0.6rem; border-radius: 20px;">Task Stages</span>
                             </div>
-                            <div id="kpiStagesContainer" style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; justify-content: center;">
+                            <div id="kpiStagesContainer" style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; justify-content: center; max-height: 290px; overflow-y: auto;">
                                 @forelse($teleTaskStages as $index => $tStage)
                                     @php
                                         $sPct = $teleTasksCount > 0 ? round(($tStage->count / $teleTasksCount) * 100, 1) : 0;
@@ -234,35 +301,6 @@
                                         No call stages recorded in database yet.
                                     </div>
                                 @endforelse
-                            </div>
-                        </div>
-
-                        <!-- Outreach Progress Summary Card -->
-                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                                <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Outreach Pipeline Status</div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Genuine lead disposition overview from database</div>
-                                </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 0.2rem 0.6rem; border-radius: 20px;">Live Pipeline</span>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; justify-content: center;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                    <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Total Allocated Leads</span>
-                                    <strong id="kpiPipeAllotted" style="color: #0f172a; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">{{ number_format($totalTelecallerLeads) }}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                    <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Unique Leads Reached</span>
-                                    <strong id="kpiPipeContacted" style="color: #059669; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleDistinctContacted) }}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                    <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Pending First Call</span>
-                                    <strong id="kpiPipePending" style="color: #d97706; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">{{ number_format($telePendingCount) }}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                    <span style="color: #334155; font-size: 0.85rem; font-weight: 600;">Total Call Tasks Logged</span>
-                                    <strong id="kpiPipeTasks" style="color: #2563eb; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</strong>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -425,15 +463,16 @@ function handleTelecallerChange(empCode) {
     // 3. Update Call Stages Breakdown
     renderStagesList(data.stages, data.tasks);
 
-    // 4. Update Pipeline Status Card
-    const pipeAllotted = document.getElementById('kpiPipeAllotted');
-    const pipeContacted = document.getElementById('kpiPipeContacted');
-    const pipePending = document.getElementById('kpiPipePending');
-    const pipeTasks = document.getElementById('kpiPipeTasks');
-    if (pipeAllotted) pipeAllotted.textContent = Number(data.allotted).toLocaleString();
-    if (pipeContacted) pipeContacted.textContent = Number(data.contacted).toLocaleString();
-    if (pipePending) pipePending.textContent = Number(data.pending).toLocaleString();
-    if (pipeTasks) pipeTasks.textContent = Number(data.tasks).toLocaleString();
+    // 4. Highlight active row in Telecaller Step Completion Table
+    document.querySelectorAll('.telecaller-stat-row').forEach(row => {
+        if (empCode !== 'all' && row.getAttribute('data-empcode') === empCode) {
+            row.style.background = '#f0fdf4';
+            row.style.boxShadow = 'inset 3px 0 0 #10b981';
+        } else {
+            row.style.background = '';
+            row.style.boxShadow = '';
+        }
+    });
 
     // 5. Filter Directory Table
     filterTelecallerTable();
