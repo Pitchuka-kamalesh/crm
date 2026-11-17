@@ -1711,20 +1711,20 @@
             @if($activeTab === 'allocation')
                 <div class="allocation-command-card" style="padding: 0.65rem 0.95rem; margin-bottom: 0.65rem;">
                     <!-- Single-line form: Select Telecaller, Allocation Target, Allocate, Auto Allocate, Download -->
-                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); openAllocateConfirmModal();" style="margin: 0; padding: 0;">
-                        <div style="display: flex; align-items: flex-end; gap: 0.65rem; flex-wrap: wrap;">
+                    <form id="leadInchargeAllotForm" onsubmit="event.preventDefault(); openAllocateConfirmModal();" style="margin: 0; padding: 0; width: 100%;">
+                        <div style="display: flex; align-items: flex-end; gap: 0.85rem; width: 100%; flex-wrap: wrap;">
                             <!-- 1. Select Telecaller -->
-                            <div style="flex: 1; min-width: 175px; max-width: 230px;">
-                                <label for="inchargeTelecallerSelect" class="incharge-label" style="font-size: 0.76rem; font-weight: 700; color: #334155; margin-bottom: 0.2rem; display: block;">
+                            <div style="flex: 1 1 240px; min-width: 200px;">
+                                <label for="inchargeTelecallerSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
                                     <span>Select Telecaller<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
-                                <div class="incharge-control-shell" style="height: 38px;">
+                                <div class="incharge-control-shell" style="height: 38px; width: 100%;">
                                     <span class="input-icon-left">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                                         </svg>
                                     </span>
-                                    <select id="inchargeTelecallerSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem;" required>
+                                    <select id="inchargeTelecallerSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem; width: 100%;" required>
                                         <option value="">-- Choose Telecaller --</option>
                                         @foreach($telecallers as $tc)
                                             <option value="{{ $tc->emp_code }}">
@@ -1736,11 +1736,11 @@
                             </div>
 
                             <!-- 2. Allocation Target with bucket sizes 100, 300, 500, 1000 -->
-                            <div style="flex: 1; min-width: 175px; max-width: 220px;">
-                                <label for="inchargeTargetSelect" class="incharge-label" style="font-size: 0.76rem; font-weight: 700; color: #334155; margin-bottom: 0.2rem; display: block;">
+                            <div style="flex: 1 1 240px; min-width: 200px;">
+                                <label for="inchargeTargetSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
                                     <span>Allocation Target<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
-                                <div class="incharge-control-shell" style="height: 38px;">
+                                <div class="incharge-control-shell" style="height: 38px; width: 100%;">
                                     <span class="input-icon-left">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -1749,7 +1749,7 @@
                                             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                         </svg>
                                     </span>
-                                    <select id="inchargeTargetSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem;" required>
+                                    <select id="inchargeTargetSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem; width: 100%;" required>
                                         <option value="selected">Selected Checked Leads</option>
                                         <option value="100">Bucket: 100 Leads</option>
                                         <option value="300">Bucket: 300 Leads</option>
@@ -1761,8 +1761,8 @@
                             </div>
 
                             <!-- 3. Action Buttons: Allocate, Auto Allocate, Download -->
-                            <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;">
-                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 38px; margin: 0; padding: 0 0.8rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap;" title="Allocate selected or bucket leads to chosen telecaller">
+                            <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
+                                <button type="submit" id="btnInchargeAllot" class="incharge-btn-submit" style="height: 38px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" title="Allocate selected or bucket leads to chosen telecaller">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
@@ -1770,13 +1770,13 @@
                                     </svg>
                                     <span>Allocate</span>
                                 </button>
-                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 38px; margin: 0; padding: 0 0.8rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: 1px solid #4338ca; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.25); transition: all 0.2s ease;" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
+                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 38px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: 1px solid #4338ca; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.25); transition: all 0.2s ease;" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                                     </svg>
                                     <span>Auto Allocate</span>
                                 </button>
-                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" style="height: 38px; margin: 0; padding: 0 0.85rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; background: #0f172a; color: #ffffff; border: 1px solid #1e293b; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2); transition: all 0.2s ease;" title="Download Leads in PDF or Excel format">
+                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" style="height: 38px; margin: 0; padding: 0 0.95rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #0f172a; color: #ffffff; border: 1px solid #1e293b; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2); transition: all 0.2s ease;" title="Download Leads in PDF or Excel format">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                         <polyline points="7 10 12 15 17 10"/>
