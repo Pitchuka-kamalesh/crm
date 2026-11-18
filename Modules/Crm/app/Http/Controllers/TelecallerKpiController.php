@@ -215,33 +215,7 @@ class TelecallerKpiController extends Controller
                 ->get();
         }
 
-        // Build individual telecaller stats for dropdown filtering and live JS switching
-        $telecallerStats = $telecallers->map(function ($emp) use ($leadCountsByEmp, $taskCountsByEmp, $contactedByEmp, $stagesRaw, $stepStatsByEmp) {
-            $empCode = (string)$emp->emp_code;
-            $leadsCount = (int)($leadCountsByEmp[$empCode] ?? 0);
-            $tasksCount = (int)($taskCountsByEmp[$empCode] ?? 0);
-            $contactedCount = (int)($contactedByEmp[$empCode] ?? 0);
-            $pendingCount = max(0, $leadsCount - $contactedCount);
-            $empStages = ($stagesRaw->get($empCode) ?? collect())->values();
-            $stepStats = $stepStatsByEmp[$empCode] ?? ['allocated' => $leadsCount, 'completed' => 0, 'not_completed' => $leadsCount];
-
-            return (object)[
-                'emp_code'        => $empCode,
-                'name'            => $emp->full_name,
-                'email'           => $emp->ofc_mailid ?: ($emp->personal_mailid ?: 'N/A'),
-                'phone'           => $emp->phone_primary ?: 'N/A',
-                'leads_count'     => $leadsCount,
-                'tasks_count'     => $tasksCount,
-                'contacted_count' => $contactedCount,
-                'pending_count'   => $pendingCount,
-                'stages'          => $empStages,
-                'allocated_completed'     => (int)$stepStats['completed'],
-                'allocated_not_completed' => (int)$stepStats['not_completed'],
-                'status'          => $leadsCount > 0 ? 'Active' : 'Standby',
-            ];
-        });
-
-        // 3. Counselor Lead Outreach Directory List
+        // 3. Counselor Lead Outreach Directory List (Built early so lead stages can be aggregated for Card 2)
         $leadsQuery = DB::table('crm.telecaller_leads as tl')
             ->leftJoin('master.employees as e', 'e.emp_code', '=', 'tl.empcode')
             ->select(
@@ -294,6 +268,90 @@ class TelecallerKpiController extends Controller
             return $lead;
         });
 
+        // Group allotted leads by their current call stage (for exact allotted lead distribution in Card 2)
+        $globalLeadStages = $telecallerLeadsList->groupBy('latest_stage')->map(function ($group, $stage) {
+            return [
+                'stage_name' => $stage,
+                'count'      => $group->count(),
+            ];
+        })->sortByDesc('count')->values();
+
+        $leadStagesByEmp = $telecallerLeadsList->groupBy('empcode')->map(function ($empLeads) {
+            return $empLeads->groupBy('latest_stage')->map(function ($group, $stage) {
+                return [
+                    'stage_name' => $stage,
+                    'count'      => $group->count(),
+                ];
+            })->sortByDesc('count')->values();
+        });
+
+        // Build individual telecaller stats for dropdown filtering and live JS switching
+        $telecallerStats = $telecallers->map(function ($emp) use ($leadCountsByEmp, $taskCountsByEmp, $contactedByEmp, $stagesRaw, $stepStatsByEmp, $leadStagesByEmp) {
+            $empCode = (string)$emp->emp_code;
+            $leadsCount = (int)($leadCountsByEmp[$empCode] ?? 0);
+            $tasksCount = (int)($taskCountsByEmp[$empCode] ?? 0);
+            $contactedCount = (int)($contactedByEmp[$empCode] ?? 0);
+            $pendingCount = max(0, $leadsCount - $contactedCount);
+            $empStages = ($stagesRaw->get($empCode) ?? collect())->values();
+            $empLeadStages = ($leadStagesByEmp->get($empCode) ?? collect())->values();
+            $stepStats = $stepStatsByEmp[$empCode] ?? ['allocated' => $leadsCount, 'completed' => 0, 'not_completed' => $leadsCount];
+
+            return (object)[
+                'emp_code'        => $empCode,
+                'name'            => $emp->full_name,
+                'email'           => $emp->ofc_mailid ?: ($emp->personal_mailid ?: 'N/A'),
+                'phone'           => $emp->phone_primary ?: 'N/A',
+                'leads_count'     => $leadsCount,
+                'tasks_count'     => $tasksCount,
+                'contacted_count' => $contactedCount,
+                'pending_count'   => $pendingCount,
+                'stages'          => $empStages,
+                'lead_stages'     => $empLeadStages,
+                'allocated_completed'     => (int)$stepStats['completed'],
+                'allocated_not_completed' => (int)$stepStats['not_completed'],
+                'status'          => $leadsCount > 0 ? 'Active' : 'Standby',
+            ];
+        });
+
+        // 4. All Call Tasks for Date/Month/Year Analytics
+        $allTasksRaw = DB::table('crm.telecaller_leads_tasks')
+            ->select(
+                'leadtaskid',
+                'empcode',
+                'phoneno',
+                'applino',
+                'stage_name',
+                'stage_calltime',
+                'log_timestamp',
+                'stage_call_duration',
+                'stage_remark'
+            )
+            ->when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
+            ->orderBy('stage_calltime', 'desc')
+            ->get();
+
+        $allTasksData = $allTasksRaw->map(function ($t) {
+            $rawTime = $t->stage_calltime ?: $t->log_timestamp;
+            $ts = $rawTime ? strtotime($rawTime) : time();
+            return [
+                'id'             => (int)$t->leadtaskid,
+                'empcode'        => (string)$t->empcode,
+                'phone'          => (string)$t->phoneno,
+                'applino'        => (string)($t->applino ?? ''),
+                'stage'          => (string)($t->stage_name ?: 'Telecaller Stage'),
+                'year'           => (int)date('Y', $ts),
+                'month'          => (int)date('n', $ts),
+                'month_name'     => date('M', $ts),
+                'day'            => (int)date('j', $ts),
+                'date_str'       => date('Y-m-d', $ts),
+                'date_label'     => date('d M', $ts),
+                'date_formatted' => date('d M Y', $ts),
+                'time_str'       => date('h:i A', $ts),
+                'duration'       => (string)($t->stage_call_duration ?: 'N/A'),
+                'remark'         => (string)($t->stage_remark ?: ''),
+            ];
+        });
+
         return view('crm::kpi.telecallerkpi', compact(
             'user',
             'roleId',
@@ -308,10 +366,12 @@ class TelecallerKpiController extends Controller
             'teleDistinctContacted',
             'telePendingCount',
             'teleTaskStages',
+            'globalLeadStages',
             'telecallerStats',
             'telecallerLeadsList',
             'totalAllStepsCompleted',
-            'totalAllStepsNotCompleted'
+            'totalAllStepsNotCompleted',
+            'allTasksData'
         ));
     }
 }
