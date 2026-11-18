@@ -1459,7 +1459,7 @@
             </div>
         @endif
 
-        @if(isset($errors) && $errors->any())
+        @if(isset($errors) && $errors->any() && (int)($activeStep ?? 1) !== 2)
             <div class="alert-box alert-error">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div>
@@ -2642,6 +2642,28 @@
                                 populateDistrictDropdown(stateId, 'geo-pg2-district-select', '{{ $academicDetails?->pg2_college_district }}');
                             }
 
+                            const interFields = ['inter_college', 'inter_board_of_study', 'inter_city', 'geo-inter-state-select', 'geo-inter-district-select', 'inter_year', 'pu2_marks_conducted', 'pu2_marks_earned'];
+                            const ugFields = ['ug_college_name', 'ug_university_board', 'ug_college_city', 'geo-ug-state-select', 'geo-ug-district-select', 'ug_passed_year', 'ug_roll_no', 'ug_marks_conducted', 'ug_marks_earned'];
+                            const pg1Fields = ['pg_college_name', 'pg_university_board', 'pg_college_city', 'geo-pg-state-select', 'geo-pg-district-select', 'pg_passed_year', 'pg_roll_no', 'pg_marks_conducted', 'pg_marks_earned'];
+
+                            function setFieldsRequired(fieldIds, isReq) {
+                                fieldIds.forEach(function(id) {
+                                    const el = document.getElementById(id);
+                                    if (el) {
+                                        if (isReq) {
+                                            el.setAttribute('required', 'required');
+                                            el.required = true;
+                                        } else {
+                                            el.removeAttribute('required');
+                                            el.required = false;
+                                            if (typeof el.setCustomValidity === 'function') {
+                                                el.setCustomValidity('');
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
                             function setDegreeLevel(level) {
                                 const hiddenInput = document.getElementById('degree_level_input');
                                 if (hiddenInput) hiddenInput.value = level;
@@ -2671,6 +2693,10 @@
                                     }
                                     if (optUgFinalYear) optUgFinalYear.style.display = '';
                                     if (spanCutoff) spanCutoff.style.display = 'none';
+
+                                    setFieldsRequired(interFields, true);
+                                    setFieldsRequired(ugFields, true);
+                                    setFieldsRequired(pg1Fields, false);
                                 } else if (level === 'phd') {
                                     // PhD: 10th, Intermediate (default 2nd year), UG (Completed), PG1 (mandatory), PG2 (optional)
                                     if (ugSec) ugSec.style.display = 'block';
@@ -2688,6 +2714,10 @@
                                     const ugStatusSel = document.getElementById('ug_current_status');
                                     if (ugStatusSel && ugStatusSel.value === 'Final Year') ugStatusSel.value = 'Completed';
                                     if (spanCutoff) spanCutoff.style.display = 'none';
+
+                                    setFieldsRequired(interFields, false);
+                                    setFieldsRequired(ugFields, true);
+                                    setFieldsRequired(pg1Fields, true);
                                 } else {
                                     // UG (btech): 10th, Intermediate (1st year / 2nd year option). UG, PG1, PG2 hidden.
                                     if (ugSec) ugSec.style.display = 'none';
@@ -2698,6 +2728,10 @@
                                         firstYearRadio.disabled = false;
                                     }
                                     if (spanCutoff) spanCutoff.style.display = '';
+
+                                    setFieldsRequired(interFields, true);
+                                    setFieldsRequired(ugFields, false);
+                                    setFieldsRequired(pg1Fields, false);
                                 }
                             }
 
@@ -2892,11 +2926,56 @@
                                 if (form) form.submit();
                             }
 
+                            function getActiveRequiredFields() {
+                                const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                const isPhd = (degreeLevel === 'phd');
+                                const isPg = (degreeLevel === 'mtech');
+                                const isUg = (!isPhd && !isPg);
+
+                                let fields = [];
+                                if (isUg || isPg) {
+                                    fields = fields.concat(interFields);
+                                }
+                                if (isPg || isPhd) {
+                                    fields = fields.concat(ugFields);
+                                }
+                                if (isPhd) {
+                                    fields = fields.concat(pg1Fields);
+                                }
+                                return fields;
+                            }
+
                             function validateStep2Form(form) {
                                 calculatePu2Pct();
+                                calculateUgPct();
+                                calculatePgPct();
+                                calculatePg2Pct();
+
                                 const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
-                                const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
-                                if (isPgOrDoc) {
+                                const isPhd = (degreeLevel === 'phd');
+                                const isPg = (degreeLevel === 'mtech');
+                                const isUg = (!isPhd && !isPg);
+
+                                // Check all active required fields in order: if any empty, scroll, focus, and reportValidity
+                                const fieldsToCheck = getActiveRequiredFields();
+                                for (let i = 0; i < fieldsToCheck.length; i++) {
+                                    const el = document.getElementById(fieldsToCheck[i]);
+                                    if (!el) continue;
+                                    const val = el.value ? el.value.trim() : '';
+                                    if (val === '' || val.startsWith('-- Select')) {
+                                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        el.focus();
+                                        if (typeof el.reportValidity === 'function') {
+                                            el.setCustomValidity('Please fill out this field.');
+                                            el.reportValidity();
+                                            el.oninput = function() { el.setCustomValidity(''); };
+                                            el.onchange = function() { el.setCustomValidity(''); };
+                                        }
+                                        return false;
+                                    }
+                                }
+
+                                if (isPg || isPhd) {
                                     return true;
                                 }
 
@@ -2907,7 +2986,11 @@
                                 if (isSecondYear) {
                                     if (pu2Pct < 60) {
                                         openNotEligibleModal();
-                                        document.getElementById('pu2_marks_earned')?.focus();
+                                        const earnedInput = document.getElementById('pu2_marks_earned');
+                                        if (earnedInput) {
+                                            earnedInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            earnedInput.focus();
+                                        }
                                         return false;
                                     }
                                 } else {
@@ -2996,6 +3079,22 @@
                                 if (pg2State && pg2State.value) {
                                     onPg2StateChange(pg2State.value);
                                 }
+
+                                // Automatically move pointer / focus to the first unfilled required field on load
+                                try {
+                                    const fieldsToCheck = getActiveRequiredFields();
+                                    for (let i = 0; i < fieldsToCheck.length; i++) {
+                                        const el = document.getElementById(fieldsToCheck[i]);
+                                        if (el) {
+                                            const val = el.value ? el.value.trim() : '';
+                                            if (val === '' || val.startsWith('-- Select')) {
+                                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                el.focus();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (e) {}
                             });
                         </script>
                     </div>

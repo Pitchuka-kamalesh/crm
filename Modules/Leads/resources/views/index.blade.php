@@ -636,6 +636,147 @@
             background: var(--theme-accent-hover, #1d4ed8);
         }
 
+        /* Leads Action Buttons (Allocate, Auto Allocate, Download) - Color Palette Shades & Micro-transitions */
+        .btn-palette-action {
+            height: 38px;
+            margin: 0;
+            padding: 0 1.05rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            white-space: nowrap;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #ffffff !important;
+            border: 1px solid transparent;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, background-color 0.22s ease, border-color 0.22s ease;
+        }
+        .btn-palette-action:hover {
+            transform: translateY(-2px);
+        }
+        .btn-palette-action:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Default / Maroon Palette Shades (3 Harmonious Shades of Maroon) */
+        .btn-palette-allocate {
+            background: #7b1113;
+            border-color: #640a0b;
+            box-shadow: 0 2px 6px rgba(123, 17, 19, 0.28);
+        }
+        .btn-palette-allocate:hover {
+            background: #640a0b;
+            box-shadow: 0 5px 14px rgba(123, 17, 19, 0.38);
+        }
+        .btn-palette-auto {
+            background: #991b1b;
+            border-color: #7f1d1d;
+            box-shadow: 0 2px 6px rgba(153, 27, 27, 0.28);
+        }
+        .btn-palette-auto:hover {
+            background: #7f1d1d;
+            box-shadow: 0 5px 14px rgba(153, 27, 27, 0.38);
+        }
+        .btn-palette-download {
+            background: #54090b;
+            border-color: #3d0507;
+            box-shadow: 0 2px 6px rgba(84, 9, 11, 0.28);
+        }
+        .btn-palette-download:hover {
+            background: #3d0507;
+            box-shadow: 0 5px 14px rgba(84, 9, 11, 0.38);
+        }
+
+        /* Blue Palette Shades (3 Harmonious Shades of Blue) */
+        [data-theme-color="blue"] .btn-palette-allocate {
+            background: #2563eb;
+            border-color: #1d4ed8;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.28);
+        }
+        [data-theme-color="blue"] .btn-palette-allocate:hover {
+            background: #1d4ed8;
+            box-shadow: 0 5px 14px rgba(37, 99, 235, 0.38);
+        }
+        [data-theme-color="blue"] .btn-palette-auto {
+            background: #3b82f6;
+            border-color: #2563eb;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.28);
+        }
+        [data-theme-color="blue"] .btn-palette-auto:hover {
+            background: #2563eb;
+            box-shadow: 0 5px 14px rgba(59, 130, 246, 0.38);
+        }
+        [data-theme-color="blue"] .btn-palette-download {
+            background: #1e3a8a;
+            border-color: #172554;
+            box-shadow: 0 2px 6px rgba(30, 58, 138, 0.28);
+        }
+        [data-theme-color="blue"] .btn-palette-download:hover {
+            background: #172554;
+            box-shadow: 0 5px 14px rgba(30, 58, 138, 0.38);
+        }
+
+        /* Green Palette Shades (3 Harmonious Shades of Green) */
+        [data-theme-color="green"] .btn-palette-allocate {
+            background: #059669;
+            border-color: #047857;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.28);
+        }
+        [data-theme-color="green"] .btn-palette-allocate:hover {
+            background: #047857;
+            box-shadow: 0 5px 14px rgba(5, 150, 105, 0.38);
+        }
+        [data-theme-color="green"] .btn-palette-auto {
+            background: #10b981;
+            border-color: #059669;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.28);
+        }
+        [data-theme-color="green"] .btn-palette-auto:hover {
+            background: #059669;
+            box-shadow: 0 5px 14px rgba(16, 185, 129, 0.38);
+        }
+        [data-theme-color="green"] .btn-palette-download {
+            background: #064e3b;
+            border-color: #022c22;
+            box-shadow: 0 2px 6px rgba(6, 78, 59, 0.28);
+        }
+        [data-theme-color="green"] .btn-palette-download:hover {
+            background: #022c22;
+            box-shadow: 0 5px 14px rgba(6, 78, 59, 0.38);
+        }
+
+        /* Purple Palette Shades (3 Harmonious Shades of Purple) */
+        [data-theme-color="purple"] .btn-palette-allocate {
+            background: #7c3aed;
+            border-color: #6d28d9;
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.28);
+        }
+        [data-theme-color="purple"] .btn-palette-allocate:hover {
+            background: #6d28d9;
+            box-shadow: 0 5px 14px rgba(124, 58, 237, 0.38);
+        }
+        [data-theme-color="purple"] .btn-palette-auto {
+            background: #8b5cf6;
+            border-color: #7c3aed;
+            box-shadow: 0 2px 6px rgba(139, 92, 246, 0.28);
+        }
+        [data-theme-color="purple"] .btn-palette-auto:hover {
+            background: #7c3aed;
+            box-shadow: 0 5px 14px rgba(139, 92, 246, 0.38);
+        }
+        [data-theme-color="purple"] .btn-palette-download {
+            background: #4c1d95;
+            border-color: #2e1065;
+            box-shadow: 0 2px 6px rgba(76, 29, 149, 0.28);
+        }
+        [data-theme-color="purple"] .btn-palette-download:hover {
+            background: #2e1065;
+            box-shadow: 0 5px 14px rgba(76, 29, 149, 0.38);
+        }
+
         .tele-status-select {
             padding: 0.38rem 1.85rem 0.38rem 0.75rem;
             border: 1.5px solid var(--card-border);
@@ -1762,7 +1903,7 @@
 
                             <!-- 3. Action Buttons: Allocate, Auto Allocate, Download -->
                             <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
-                                <button type="submit" id="btnInchargeAllot" style="height: 38px; margin: 0; padding: 0 1rem; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #7b1113; color: #ffffff; border: 1px solid #640a0b; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(123, 17, 19, 0.28); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#640a0b'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(123, 17, 19, 0.35)';" onmouseout="this.style.background='#7b1113'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(123, 17, 19, 0.28)';" onmousedown="this.style.transform='translateY(0)';" title="Allocate selected or bucket leads to chosen telecaller">
+                                <button type="submit" id="btnInchargeAllot" class="btn-palette-action btn-palette-allocate" title="Allocate selected or bucket leads to chosen telecaller">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                         <circle cx="9" cy="7" r="4"/>
@@ -1770,13 +1911,13 @@
                                     </svg>
                                     <span>Allocate</span>
                                 </button>
-                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" style="height: 38px; margin: 0; padding: 0 1rem; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #991b1b; color: #ffffff; border: 1px solid #7f1d1d; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(153, 27, 27, 0.28); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#7f1d1d'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(153, 27, 27, 0.35)';" onmouseout="this.style.background='#991b1b'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(153, 27, 27, 0.28)';" onmousedown="this.style.transform='translateY(0)';" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
+                                <button type="button" id="btnAutoAllocateTrigger" onclick="openAutoAllocateModal()" class="btn-palette-action btn-palette-auto" title="Auto allocate leads sequentially across all active telecallers in round-robin sequence">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                                     </svg>
                                     <span>Auto Allocate</span>
                                 </button>
-                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" style="height: 38px; margin: 0; padding: 0 1rem; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; background: #580b0d; color: #ffffff; border: 1px solid #420607; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 5px rgba(88, 11, 13, 0.28); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#420607'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(88, 11, 13, 0.35)';" onmouseout="this.style.background='#580b0d'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(88, 11, 13, 0.28)';" onmousedown="this.style.transform='translateY(0)';" title="Download Leads in PDF or Excel format">
+                                <button type="button" id="btnDownloadLeadsTrigger" onclick="openLeadDownloadModal()" class="btn-palette-action btn-palette-download" title="Download Leads in PDF or Excel format">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                         <polyline points="7 10 12 15 17 10"/>
@@ -3646,12 +3787,20 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': token,
                 'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ count: val })
         })
         .then(async response => {
-            const data = await response.json();
-            if (response.ok && data.success) {
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (jsonErr) {
+                const text = await response.text();
+                throw new Error(text || 'Invalid server response');
+            }
+
+            if (response.ok && data && data.success) {
                 closeAutoAllocateModal();
                 if (typeof showToast === 'function') {
                     showToast(`✓ ${data.message}`);
@@ -3662,7 +3811,7 @@
                     window.location.reload();
                 }, 1000);
             } else {
-                alert(data.message || 'Auto allocation failed.');
+                alert((data && data.message) ? data.message : 'Auto allocation failed. Please try a smaller batch size.');
                 if (btn) btn.disabled = false;
                 if (spinner) spinner.style.display = 'none';
                 if (btnText) btnText.textContent = 'Allocate Leads Now';
@@ -3670,7 +3819,10 @@
         })
         .catch(err => {
             console.error('Auto allocation error:', err);
-            alert('An error occurred while connecting to the server. Please try again.');
+            const errMsg = (err && err.message && !err.message.includes('<html') && !err.message.includes('<!DOCTYPE'))
+                ? err.message
+                : 'Server busy or request timed out while allocating. The leads may still be processing in the background.';
+            alert(errMsg);
             if (btn) btn.disabled = false;
             if (spinner) spinner.style.display = 'none';
             if (btnText) btnText.textContent = 'Allocate Leads Now';

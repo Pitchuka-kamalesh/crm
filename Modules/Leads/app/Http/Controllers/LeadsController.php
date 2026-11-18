@@ -719,26 +719,41 @@ class LeadsController extends Controller
      */
     public function allocate(Request $request)
     {
-        $res = TelecallerService::allocateLeads([
-            'empcode' => $request->input('empcode'),
-            'crmid' => auth()->user()?->usercode ?? 'SYSTEM',
-            'allot_mode' => $request->input('allot_mode', 'selected'),
-            'applino' => $request->input('applino'),
-            'phoneno' => $request->input('phoneno'),
-            'lead_keys' => $request->input('lead_keys', []),
-            'allot_count' => $request->input('allot_count', 25),
-            'allot_date' => $request->input('allot_date'),
-            'stage_name' => $request->input('stage_name', 'Stage 1: Calling & Verification'),
-            'stage_remark' => $request->input('stage_remark', 'Allocated via Leads Incharge allocation portal'),
-            'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
-            'log_ipaddress' => $request->ip() ?: '127.0.0.1',
-        ]);
+        @ini_set('max_execution_time', '300');
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
 
-        if ($request->wantsJson()) {
-            return response()->json($res, $res['success'] ? 200 : 422);
+        try {
+            $res = TelecallerService::allocateLeads([
+                'empcode' => $request->input('empcode'),
+                'crmid' => auth()->user()?->usercode ?? 'SYSTEM',
+                'allot_mode' => $request->input('allot_mode', 'selected'),
+                'applino' => $request->input('applino'),
+                'phoneno' => $request->input('phoneno'),
+                'lead_keys' => $request->input('lead_keys', []),
+                'allot_count' => $request->input('allot_count', 25),
+                'allot_date' => $request->input('allot_date'),
+                'stage_name' => $request->input('stage_name', 'Stage 1: Calling & Verification'),
+                'stage_remark' => $request->input('stage_remark', 'Allocated via Leads Incharge allocation portal'),
+                'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
+                'log_ipaddress' => $request->ip() ?: '127.0.0.1',
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json($res, $res['success'] ? 200 : 422);
+            }
+
+            return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('LeadsController allocate error: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Allocation failed: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Allocation failed: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
     }
 
     /**
@@ -746,18 +761,33 @@ class LeadsController extends Controller
      */
     public function autoAllocate(Request $request)
     {
-        $count = (int) $request->input('count', 0);
-        $res = TelecallerService::autoAllocateRoundRobin(
-            $count,
-            auth()->user()?->usercode ?? 'SYSTEM',
-            $request->ip() ?: '127.0.0.1'
-        );
+        @ini_set('max_execution_time', '300');
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
 
-        if ($request->wantsJson()) {
-            return response()->json($res, $res['success'] ? 200 : 422);
+        try {
+            $count = (int) $request->input('count', 0);
+            $res = TelecallerService::autoAllocateRoundRobin(
+                $count,
+                auth()->user()?->usercode ?? 'SYSTEM',
+                $request->ip() ?: '127.0.0.1'
+            );
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json($res, $res['success'] ? 200 : 422);
+            }
+
+            return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('LeadsController autoAllocate error: ' . $e->getMessage());
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Auto allocation failed: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Auto allocation failed: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
     }
 
     /**

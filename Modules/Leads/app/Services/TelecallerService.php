@@ -61,6 +61,10 @@ class TelecallerService
      */
     public static function allocateLeads(array $params): array
     {
+        @ini_set('max_execution_time', '300');
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
+
         $empCode = trim($params['empcode'] ?? '');
         $allotMode = trim($params['allot_mode'] ?? 'single');
         $stageName = trim($params['stage_name'] ?? 'Stage 1: Calling & Verification');
@@ -352,6 +356,10 @@ class TelecallerService
      */
     public static function autoAllocateRoundRobin(int $count, ?string $logUser = null, ?string $ipAddress = null): array
     {
+        @ini_set('max_execution_time', '300');
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
+
         $logUser = trim($logUser ?? auth()->user()?->usercode ?? 'SYSTEM');
         $ipAddress = trim($ipAddress ?? request()->ip() ?? '127.0.0.1');
 
@@ -424,30 +432,40 @@ class TelecallerService
                             FROM unallocated u
                             WHERE l.phoneno = u.phoneno
                             RETURNING l.phoneno, COALESCE(l.applino, '0') as applino
+                        ),
+                        inserted AS (
+                            INSERT INTO crm.telecaller_leads (applino, phoneno, crmid, empcode, leadcount, assigndatetime, log_userid, log_ipaddress, log_timestamp)
+                            SELECT 
+                                ul.applino,
+                                ul.phoneno,
+                                '0',
+                                :emp2,
+                                :curr_max + ROW_NUMBER() OVER (),
+                                :now2,
+                                :user2,
+                                :ip,
+                                :now3
+                            FROM updated_leads ul
+                            ON CONFLICT (applino, phoneno) DO UPDATE SET
+                                empcode = EXCLUDED.empcode,
+                                leadcount = EXCLUDED.leadcount,
+                                assigndatetime = EXCLUDED.assigndatetime,
+                                log_userid = EXCLUDED.log_userid,
+                                log_ipaddress = EXCLUDED.log_ipaddress,
+                                log_timestamp = EXCLUDED.log_timestamp
+                            RETURNING phoneno, applino
                         )
-                        INSERT INTO crm.telecaller_leads (applino, phoneno, crmid, empcode, leadcount, assigndatetime, log_userid, log_ipaddress, log_timestamp)
                         SELECT 
-                            ul.applino,
-                            ul.phoneno,
-                            '0',
-                            :emp2,
-                            :curr_max + ROW_NUMBER() OVER (),
-                            :now2,
-                            :user2,
-                            :ip,
-                            :now3
-                        FROM updated_leads ul
-                        ON CONFLICT (applino, phoneno) DO UPDATE SET
-                            empcode = EXCLUDED.empcode,
-                            leadcount = EXCLUDED.leadcount,
-                            assigndatetime = EXCLUDED.assigndatetime,
-                            log_userid = EXCLUDED.log_userid,
-                            log_ipaddress = EXCLUDED.log_ipaddress,
-                            log_timestamp = EXCLUDED.log_timestamp
-                        RETURNING phoneno, applino
+                            COUNT(*)::int as total_allocated,
+                            COALESCE(
+                                (SELECT json_agg(sub.lead_ref) 
+                                 FROM (SELECT COALESCE(NULLIF(applino, '0'), phoneno) as lead_ref FROM inserted LIMIT 50) sub),
+                                '[]'::json
+                            )::text as sample_leads
+                        FROM inserted;
                     ";
 
-                    $res = DB::select($sql, [
+                    $res = DB::selectOne($sql, [
                         'emp1' => $targetEmpCode,
                         'now1' => $now,
                         'user1' => $logUser,
@@ -459,14 +477,16 @@ class TelecallerService
                         'now3' => $now,
                     ]);
 
-                    $actualAllocated = count($res);
+                    $actualAllocated = (int) ($res->total_allocated ?? 0);
                     if ($actualAllocated > 0) {
                         $allocatedCount += $actualAllocated;
                         $perTelecallerSummary[$targetName] = ($perTelecallerSummary[$targetName] ?? 0) + $actualAllocated;
                         $lastAllocatedEmpCode = $targetEmpCode;
-                        if (count($allocatedApplis) < 50) {
-                            foreach (array_slice($res, 0, 50 - count($allocatedApplis)) as $row) {
-                                $allocatedApplis[] = $row->applino !== '0' ? $row->applino : (string)$row->phoneno;
+                        if (count($allocatedApplis) < 50 && !empty($res->sample_leads)) {
+                            $samples = json_decode($res->sample_leads, true) ?: [];
+                            foreach ($samples as $sRef) {
+                                if (count($allocatedApplis) >= 50) break;
+                                $allocatedApplis[] = (string) $sRef;
                             }
                         }
                     }
