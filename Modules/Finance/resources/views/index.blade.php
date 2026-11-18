@@ -35,8 +35,14 @@
             </div>
 
             <div class="top-bar-right">
-                <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="btn-header-action" title="View Paid Details">
-                    <span>🧾 Paid Details</span>
+                <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="btn-header-action" title="View Paid Details" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span>Paid Details</span>
                 </a>
                 @include('layouts.role-switcher')
             </div>
@@ -50,24 +56,46 @@
                 </div>
             @endif
 
-            <!-- FINANCIAL METRICS -->
-            <div style="display: flex; gap: 1.25rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-                <div class="metric-card" style="padding: 1.15rem 1.35rem; min-width: 260px; flex: 1; max-width: 380px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    <div class="metric-info">
-                        <div class="metric-label" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">TOTAL REVENUE COLLECTED</div>
-                        <div class="metric-value" style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0.25rem 0 0.15rem;">₹ {{ number_format($totalRevenue, 2) }}</div>
-                        <div style="font-size: 0.75rem; font-weight: 600; color: #059669;">Verified Collections (Real-time)</div>
+            <!-- FINANCIAL METRICS (COMPACT SINGLE ROW, SINGLE LINE) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+                <!-- Card 1: Total Revenue Collected (Single Line) -->
+                <div class="metric-card" style="padding: 0.75rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);">
+                    <div style="display: flex; align-items: center; gap: 0.85rem;">
+                        <div style="width: 38px; height: 38px; border-radius: 9px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                <circle cx="12" cy="12" r="2"></circle>
+                                <path d="M6 12h.01M18 12h.01"></path>
+                            </svg>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Total Revenue Collected</span>
+                            <span style="font-size: 0.68rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 12px; border: 1px solid #a7f3d0; white-space: nowrap;">Real-time</span>
+                        </div>
                     </div>
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💰</div>
+                    <div style="font-size: 1.45rem; font-weight: 800; color: #0f172a; font-family: 'JetBrains Mono', monospace; white-space: nowrap;">
+                        ₹ {{ number_format($totalRevenue, 2) }}
+                    </div>
                 </div>
 
-                <div class="metric-card" style="padding: 1.15rem 1.35rem; min-width: 260px; flex: 1; max-width: 380px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    <div class="metric-info">
-                        <div class="metric-label" style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">VERIFIED PAID STUDENTS</div>
-                        <div class="metric-value" style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0.25rem 0 0.15rem;">{{ $totalPaidStudents }}</div>
-                        <div style="font-size: 0.75rem; font-weight: 600; color: #059669;">Reconciled with Gateway</div>
+                <!-- Card 2: Verified Paid Students (Single Line) -->
+                <div class="metric-card" style="padding: 0.75rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);">
+                    <div style="display: flex; align-items: center; gap: 0.85rem;">
+                        <div style="width: 38px; height: 38px; border-radius: 9px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <polyline points="16 11 18 13 22 9"></polyline>
+                            </svg>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Verified Paid Students</span>
+                            <span style="font-size: 0.68rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 12px; border: 1px solid #bfdbfe; white-space: nowrap;">Reconciled</span>
+                        </div>
                     </div>
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: #fffbeb; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🧾</div>
+                    <div style="font-size: 1.45rem; font-weight: 800; color: #0f172a; font-family: 'JetBrains Mono', monospace; white-space: nowrap;">
+                        {{ $totalPaidStudents }}
+                    </div>
                 </div>
             </div>
 
@@ -75,7 +103,8 @@
             <div class="content-card">
                 <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
                     <div class="card-title" style="font-size: 1.1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                        <span>🧾 Paid Details Ledger</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #2563eb);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <span>Paid Details Ledger</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <div class="filter-count-badge" style="font-size: 0.8rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.4rem 0.85rem; border-radius: 20px;">
@@ -184,15 +213,18 @@
                                         <span style="font-size: 0.8rem; color: #64748b;">{{ $txnDateFormatted }}</span>
                                     </td>
                                     <td style="white-space: nowrap;">
-                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.65rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;">
-                                            ✓ Verified
+                                        <span class="badge-status badge-paid" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.65rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                            Verified
                                         </span>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="9" style="text-align: center; padding: 3.5rem 1.5rem; color: #64748b;">
-                                        <div style="font-size: 2.2rem; margin-bottom: 0.6rem;">🧾</div>
+                                        <div style="width: 52px; height: 52px; margin: 0 auto 0.75rem; border-radius: 12px; background: #f1f5f9; color: #94a3b8; display: flex; align-items: center; justify-content: center;">
+                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                        </div>
                                         <div style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">No Verified Paid Students Found</div>
                                         <div style="font-size: 0.85rem; color: #94a3b8; max-width: 480px; margin: 0 auto; line-height: 1.5;">
                                             Only students who have completed payment (with verified payment status or transaction logs in <code>finance.paydetails</code>) are displayed here.
