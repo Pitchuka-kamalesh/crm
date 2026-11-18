@@ -450,6 +450,20 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $renderStagePill = function(string $pillClass, string $text, string $type, string $appliNo, string $stageKey, bool $isTracking): string {
+                                        if ($type === 'done') {
+                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"/></svg>';
+                                        } elseif ($type === 'due') {
+                                            $iconSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+                                        } else {
+                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+                                        }
+                                        $cursorStyle = $isTracking ? 'cursor: pointer; transition: transform 0.15s ease;' : '';
+                                        $hoverAttr = $isTracking ? 'onmouseover="this.style.transform=\'scale(1.06)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="openStudentStageModal(\'' . e($appliNo) . '\', \'' . e($stageKey) . '\')" title="Click to view details"' : '';
+                                        return '<span class="tracking-pill ' . e($pillClass) . '" style="' . $cursorStyle . '" ' . $hoverAttr . '>' . $iconSvg . '<span>' . e($text) . '</span></span>';
+                                    };
+                                @endphp
                                 @forelse($allStudents as $std)
                                     @php
                                         $phone = $std->mobile ?? $std->phoneno ?? '';
@@ -468,47 +482,47 @@
                                         $hasAppli = (!empty($appliNo) && $appliNo !== 'N/A');
                                         $stdStatus = strtolower(trim((string)($std->std_status ?? '')));
                                         if ($hasAppli || in_array($stdStatus, ['applied', 'registered', 'verified', 'admitted', 'enrolled', 'completed'])) {
-                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done';
+                                            $st1Pill = 'pill-done'; $st1Type = 'done'; $st1Icon = '✓'; $st1Text = 'Done';
                                         } else {
-                                            $st1Pill = 'pill-awaiting'; $st1Icon = '⏳'; $st1Text = 'Pending';
+                                            $st1Pill = 'pill-pending'; $st1Type = 'pending'; $st1Icon = '⏳'; $st1Text = 'Pending';
                                         }
 
                                         // 2. Payment (stage1 fee payment)
                                         if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
-                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done';
+                                            $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Icon = '✓'; $st2Text = 'Done';
                                         } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st2Pill = 'pill-danger'; $st2Icon = '❌'; $st2Text = 'Fee Due';
+                                            $st2Pill = 'pill-danger'; $st2Type = 'due'; $st2Icon = '✕'; $st2Text = 'Fee Due';
                                         } else {
-                                            $st2Pill = 'pill-awaiting'; $st2Icon = '⏳'; $st2Text = 'Pending';
+                                            $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Icon = '⏳'; $st2Text = 'Pending';
                                         }
 
                                         // 3. Personal Details (stage2)
                                         if (in_array($s2, ['completed', 'approved', 'done'])) {
-                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done';
+                                            $st3Pill = 'pill-done'; $st3Type = 'done'; $st3Icon = '✓'; $st3Text = 'Done';
                                         } else {
-                                            $st3Pill = 'pill-awaiting'; $st3Icon = '⏳'; $st3Text = 'Pending';
+                                            $st3Pill = 'pill-pending'; $st3Type = 'pending'; $st3Icon = '⏳'; $st3Text = 'Pending';
                                         }
 
                                         // 4. Academic Details (stage3)
                                         if (in_array($s3, ['completed', 'approved', 'done'])) {
-                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done';
+                                            $st4Pill = 'pill-done'; $st4Type = 'done'; $st4Icon = '✓'; $st4Text = 'Done';
                                         } else {
-                                            $st4Pill = 'pill-awaiting'; $st4Icon = '⏳'; $st4Text = 'Pending';
+                                            $st4Pill = 'pill-pending'; $st4Type = 'pending'; $st4Icon = '⏳'; $st4Text = 'Pending';
                                         }
 
                                         // 5. Application Download (stage4)
                                         if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
-                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done';
+                                            $st5Pill = 'pill-done'; $st5Type = 'done'; $st5Icon = '✓'; $st5Text = 'Done';
                                         } else {
-                                            $st5Pill = 'pill-awaiting'; $st5Icon = '⏳'; $st5Text = 'Pending';
+                                            $st5Pill = 'pill-pending'; $st5Type = 'pending'; $st5Icon = '⏳'; $st5Text = 'Pending';
                                         }
 
                                         // 6. VSAT Result (stage5)
                                         $isVsatDone = in_array($s5, ['completed', 'approved', 'done', 'qualified']);
                                         if ($isVsatDone) {
-                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done';
+                                            $st6Pill = 'pill-done'; $st6Type = 'done'; $st6Icon = '✓'; $st6Text = 'Done';
                                         } else {
-                                            $st6Pill = 'pill-awaiting'; $st6Icon = '⏳'; $st6Text = 'Pending';
+                                            $st6Pill = 'pill-pending'; $st6Type = 'pending'; $st6Icon = '⏳'; $st6Text = 'Pending';
                                         }
 
                                         // Detailed student payload for instant interactive stage popup
@@ -608,110 +622,32 @@
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st1Pill }}" 
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'registration')"
-                                                          title="Click to view Registration Form details">
-                                                        {{ $st1Icon }} {{ $st1Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st1Pill }}">
-                                                        {{ $st1Icon }} {{ $st1Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st1Pill, $st1Text, $st1Type, $appliNo, 'registration', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st2Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'payment')"
-                                                          title="Click to view Payment details">
-                                                        {{ $st2Icon }} {{ $st2Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st2Pill }}">
-                                                        {{ $st2Icon }} {{ $st2Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st2Pill, $st2Text, $st2Type, $appliNo, 'payment', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st3Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'personal')"
-                                                          title="Click to view Personal details">
-                                                        {{ $st3Icon }} {{ $st3Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st3Pill }}">
-                                                        {{ $st3Icon }} {{ $st3Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st3Pill, $st3Text, $st3Type, $appliNo, 'personal', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st4Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'academic')"
-                                                          title="Click to view Academic details">
-                                                        {{ $st4Icon }} {{ $st4Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st4Pill }}">
-                                                        {{ $st4Icon }} {{ $st4Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliNo, 'academic', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st5Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'application')"
-                                                          title="Click to view Application Download details">
-                                                        {{ $st5Icon }} {{ $st5Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st5Pill }}">
-                                                        {{ $st5Icon }} {{ $st5Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st5Pill, $st5Text, $st5Type, $appliNo, 'application', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st6Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'vsat')"
-                                                          title="Click to view VSAT Result details">
-                                                        {{ $st6Icon }} {{ $st6Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st6Pill }}">
-                                                        {{ $st6Icon }} {{ $st6Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st6Pill, $st6Text, $st6Type, $appliNo, 'vsat', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                     </tr>
