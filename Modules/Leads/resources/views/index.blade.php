@@ -4097,14 +4097,7 @@
         if (typeof showToast === 'function') {
             showToast('Preparing your leads download...');
         }
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', '');
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => {
-            document.body.removeChild(link);
-        }, 100);
+        window.location.href = url;
     }
 
     // ===== ALLOCATE CONFIRMATION MODAL FUNCTIONS =====

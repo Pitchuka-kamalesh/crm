@@ -313,9 +313,18 @@
                 <span>&larr; View Portal Steps</span>
             </a>
         </div>
+        @php
+            $progText = strtoupper(trim((string)($programName ?? $student?->programlevel ?? $student?->program?->program_short_name ?? '')));
+            $crmIdText = strtoupper(trim((string)($crmId ?? $student?->crmid ?? '')));
+            $isPhd = str_contains($progText, 'PHD') || str_contains($progText, 'PH.D') || str_contains($progText, 'DOCTOR') || str_starts_with($crmIdText, 'PHD');
+        @endphp
         <div style="display: flex; gap: 0.65rem; align-items: center;">
             <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-primary">
-                <span>Continue to Step 5: Exam Slot Booking &rarr;</span>
+                @if($isPhd)
+                    <span>Continue to Application Download &rarr;</span>
+                @else
+                    <span>Continue to Step 5: Exam Slot Booking &rarr;</span>
+                @endif
             </a>
         </div>
     </div>

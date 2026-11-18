@@ -1852,7 +1852,6 @@
                             <div class="mockup-subbox" id="sec-10th-details">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
                                     <h4 class="mockup-subbox-title">10th / Secondary School Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #64748b; color: #fff; font-size: 0.72rem;">Optional</span>
                                 </div>
 
                                 <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
@@ -1912,7 +1911,7 @@
                                         <input type="number" name="passing_year" id="tenth_passed_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number/Registration number:</label>
+                                        <label class="mockup-label">Hall Ticket number:</label>
                                         <input type="text" name="roll_no" id="tenth_roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Hall Ticket / Reg No">
                                     </div>
                                     <div class="mockup-field-group">
@@ -1951,7 +1950,6 @@
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
                                     <h4 class="mockup-subbox-title">12th / Intermediate Details <span style="font-size: 0.76rem; font-weight: 700; color: #2563eb; margin-left: 0.35rem;">(option 1st year/2nd year for UG; default 2nd year for PG &amp; Ph.D)</span></h4>
-                                    <span class="mockup-pill-badge" id="badge-inter-mandatory" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Mandatory for UG*</span>
                                 </div>
                                 <input type="hidden" name="course_choice" value="{{ $academicDetails?->pu2_study_board ?? '' }}">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
@@ -1981,7 +1979,7 @@
                                             @foreach($states as $s)
                                                 @php
                                                     $curState = $academicDetails?->pu2_college_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2013,7 +2011,7 @@
                                         <input type="number" name="inter_year" id="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number/Registration number:</label>
+                                        <label class="mockup-label">Hall Ticket number:</label>
                                         <input type="text" name="inter_hallticket" id="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket number">
                                     </div>
                                     <div class="mockup-field-group">
@@ -2070,7 +2068,6 @@
                             <div class="mockup-subbox" id="sec-ug-details" style="display: {{ in_array($degreeLevel ?? '', ['mtech', 'phd']) ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
                                     <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (UG / B.Tech / Degree) Details</h4>
-                                    <span class="mockup-pill-badge" id="badge-ug-status" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Mandatory for PG &amp; Ph.D</span>
                                 </div>
 
                                 <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
@@ -2098,7 +2095,7 @@
                                             @foreach($states as $s)
                                                 @php
                                                     $curState = $academicDetails?->ug_college_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2130,7 +2127,7 @@
                                         <input type="number" name="ug_passed_year" id="ug_passed_year" class="mockup-input" value="{{ $academicDetails?->ug_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number/Registration number: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Registration number: <span class="req-ug" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="ug_roll_no" id="ug_roll_no" class="mockup-input" value="{{ $academicDetails?->ug_roll_no }}" placeholder="Enter UG Roll No / Reg No">
                                     </div>
                                     <div class="mockup-field-group">
@@ -2172,9 +2169,6 @@
                                     <h4 class="mockup-subbox-title" style="color: #6b21a8;">
                                         Postgraduate 1 (PG1) Details <span style="color:#ef4444;">*</span>
                                     </h4>
-                                    <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">
-                                        (pg1(cmm), pg1 (pc/od))* &bull; (any one only mandatory)
-                                    </span>
                                 </div>
 
                                 <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
@@ -2202,7 +2196,7 @@
                                             @foreach($states as $s)
                                                 @php
                                                     $curState = $academicDetails?->pg_college_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2234,7 +2228,7 @@
                                         <input type="number" name="pg_passed_year" id="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number/Registration number: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Registration number: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="pg_roll_no" id="pg_roll_no" class="mockup-input" value="{{ $academicDetails?->pg_roll_no }}" placeholder="PG 1 Roll NO / Reg No">
                                     </div>
                                     <div class="mockup-field-group">
@@ -2338,7 +2332,6 @@
                             <div class="mockup-subbox" id="sec-pg2-details" style="display: {{ ($degreeLevel ?? '') === 'phd' ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
                                     <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate 2 (PG2) Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #7c3aed; color: #fff; font-size: 0.72rem;">(pg2(cmm), pg2(pc/od)) (Optional)</span>
                                 </div>
 
                                 <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
@@ -2366,7 +2359,7 @@
                                             @foreach($states as $s)
                                                 @php
                                                     $curState = $academicDetails?->pg2_college_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2398,7 +2391,7 @@
                                         <input type="number" name="pg2_passed_year" id="pg2_passed_year" class="mockup-input" value="{{ $academicDetails?->pg2_passed_year }}" placeholder="Passing Year (e.g. 2026)" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number/Registration number:</label>
+                                        <label class="mockup-label">Registration number:</label>
                                         <input type="text" name="pg2_roll_no" id="pg2_roll_no" class="mockup-input" value="{{ $academicDetails?->pg2_roll_no }}" placeholder="PG 2 Roll Number / Reg No">
                                     </div>
                                     <div class="mockup-field-group">
@@ -2440,12 +2433,9 @@
                                 <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                                         <label class="mockup-label" style="font-weight: 800; color: #581c87; margin-bottom: 0;">
-                                            Proof of PG 2 Degree / Certificate (Optional):
+                                            Proof of PG 2 Degree / Certificate:
                                             <span style="font-size: 0.75rem; font-weight: 600; color: #7e22ce;">(pg2(cmm), pg2(pc/od))</span>
                                         </label>
-                                        <span class="mockup-pill-badge" style="background: #f3e8ff; color: #6b21a8; font-size: 0.72rem; border: 1px solid #d8b4fe;">
-                                            Optional
-                                        </span>
                                     </div>
 
                                     <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
@@ -2736,10 +2726,18 @@
                             }
 
                             function calculateTenthPct() {
-                                const conducted = parseFloat(document.getElementById('tenth_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('tenth_marks_earned')?.value || 0);
+                                const conductedIn = document.getElementById('tenth_marks_conducted');
+                                const earnedIn = document.getElementById('tenth_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
                                 const type = document.getElementById('tenth_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('tenth_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
                                 if (!pctInput) return;
 
                                 let pct = 0;
@@ -2764,11 +2762,19 @@
                             }
 
                             function calculatePu2Pct() {
-                                const conducted = parseFloat(document.getElementById('pu2_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('pu2_marks_earned')?.value || 0);
+                                const conductedIn = document.getElementById('pu2_marks_conducted');
+                                const earnedIn = document.getElementById('pu2_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
                                 const type = document.getElementById('pu2_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('pu2_percentage');
                                 const warning = document.getElementById('pu2_pct_warning');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
                                 if (!pctInput) return;
 
                                 let pct = 0;
@@ -2796,10 +2802,18 @@
                             }
 
                             function calculateUgPct() {
-                                const conducted = parseFloat(document.getElementById('ug_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('ug_marks_earned')?.value || 0);
+                                const conductedIn = document.getElementById('ug_marks_conducted');
+                                const earnedIn = document.getElementById('ug_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
                                 const type = document.getElementById('ug_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('ug_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
                                 if (!pctInput) return;
 
                                 let pct = 0;
@@ -2822,10 +2836,18 @@
                             }
 
                             function calculatePgPct() {
-                                const conducted = parseFloat(document.getElementById('pg_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('pg_marks_earned')?.value || 0);
+                                const conductedIn = document.getElementById('pg_marks_conducted');
+                                const earnedIn = document.getElementById('pg_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
                                 const type = document.getElementById('pg_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('pg_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
                                 if (!pctInput) return;
 
                                 let pct = 0;
@@ -2848,10 +2870,18 @@
                             }
 
                             function calculatePg2Pct() {
-                                const conducted = parseFloat(document.getElementById('pg2_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('pg2_marks_earned')?.value || 0);
+                                const conductedIn = document.getElementById('pg2_marks_conducted');
+                                const earnedIn = document.getElementById('pg2_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
                                 const type = document.getElementById('pg2_marks_type')?.value || 'Marks';
                                 const pctInput = document.getElementById('pg2_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
                                 if (!pctInput) return;
 
                                 let pct = 0;
@@ -2975,6 +3005,33 @@
                                     }
                                 }
 
+                                // Validate Marks Earned <= Total Marks Conducted for all qualifications
+                                const marksChecks = [
+                                    { earned: 'tenth_marks_earned', cond: 'tenth_marks_conducted', name: '10th' },
+                                    { earned: 'pu2_marks_earned', cond: 'pu2_marks_conducted', name: '12th / Intermediate' },
+                                    { earned: 'ug_marks_earned', cond: 'ug_marks_conducted', name: 'UG' },
+                                    { earned: 'pg_marks_earned', cond: 'pg_marks_conducted', name: 'PG 1' },
+                                    { earned: 'pg2_marks_earned', cond: 'pg2_marks_conducted', name: 'PG 2' },
+                                ];
+                                for (let m = 0; m < marksChecks.length; m++) {
+                                    const eEl = document.getElementById(marksChecks[m].earned);
+                                    const cEl = document.getElementById(marksChecks[m].cond);
+                                    if (eEl && cEl && eEl.value !== '' && cEl.value !== '') {
+                                        const eVal = parseFloat(eEl.value);
+                                        const cVal = parseFloat(cEl.value);
+                                        if (cVal > 0 && eVal > cVal) {
+                                            eEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            eEl.focus();
+                                            if (typeof eEl.reportValidity === 'function') {
+                                                eEl.setCustomValidity('Marks Earned (' + eVal + ') cannot be greater than Total Marks Conducted (' + cVal + ') in ' + marksChecks[m].name + '.');
+                                                eEl.reportValidity();
+                                                eEl.oninput = function() { eEl.setCustomValidity(''); };
+                                            }
+                                            return false;
+                                        }
+                                    }
+                                }
+
                                 if (isPg || isPhd) {
                                     return true;
                                 }
@@ -3080,21 +3137,54 @@
                                     onPg2StateChange(pg2State.value);
                                 }
 
-                                // Automatically move pointer / focus to the first unfilled required field on load
-                                try {
-                                    const fieldsToCheck = getActiveRequiredFields();
-                                    for (let i = 0; i < fieldsToCheck.length; i++) {
-                                        const el = document.getElementById(fieldsToCheck[i]);
-                                        if (el) {
-                                            const val = el.value ? el.value.trim() : '';
-                                            if (val === '' || val.startsWith('-- Select')) {
-                                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                el.focus();
-                                                break;
+                                @if(isset($errors) && $errors->any())
+                                    @php
+                                        $firstErrorField = array_key_first($errors->toArray());
+                                        $fieldMap = [
+                                            'inter_college' => 'inter_college',
+                                            'inter_board_of_study' => 'inter_board_of_study',
+                                            'city' => 'inter_city',
+                                            'jr_state' => 'geo-inter-state-select',
+                                            'jr_district' => 'geo-inter-district-select',
+                                            'inter_year' => 'inter_year',
+                                            'pu2_marks_conducted' => 'pu2_marks_conducted',
+                                            'pu2_marks_earned' => 'pu2_marks_earned',
+                                            'pu2_percentage' => 'pu2_percentage',
+                                            'ug_college_name' => 'ug_college_name',
+                                            'ug_university_board' => 'ug_university_board',
+                                            'ug_college_city' => 'ug_college_city',
+                                            'ug_college_state' => 'geo-ug-state-select',
+                                            'ug_college_district' => 'geo-ug-district-select',
+                                            'ug_passed_year' => 'ug_passed_year',
+                                            'ug_roll_no' => 'ug_roll_no',
+                                            'ug_marks_conducted' => 'ug_marks_conducted',
+                                            'ug_marks_earned' => 'ug_marks_earned',
+                                            'pg_college_name' => 'pg_college_name',
+                                            'pg_university_board' => 'pg_university_board',
+                                            'pg_college_city' => 'pg_college_city',
+                                            'pg_college_state' => 'geo-pg-state-select',
+                                            'pg_college_district' => 'geo-pg-district-select',
+                                            'pg_passed_year' => 'pg_passed_year',
+                                            'pg_roll_no' => 'pg_roll_no',
+                                            'pg_marks_conducted' => 'pg_marks_conducted',
+                                            'pg_marks_earned' => 'pg_marks_earned',
+                                        ];
+                                        $targetId = $fieldMap[$firstErrorField] ?? $firstErrorField;
+                                    @endphp
+                                    setTimeout(function() {
+                                        const errEl = document.getElementById('{{ $targetId }}');
+                                        if (errEl) {
+                                            errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            errEl.focus();
+                                            if (typeof errEl.reportValidity === 'function') {
+                                                errEl.setCustomValidity('{{ addslashes($errors->first()) }}');
+                                                errEl.reportValidity();
+                                                errEl.oninput = function() { errEl.setCustomValidity(''); };
+                                                errEl.onchange = function() { errEl.setCustomValidity(''); };
                                             }
                                         }
-                                    }
-                                } catch (e) {}
+                                    }, 250);
+                                @endif
                             });
                         </script>
                     </div>
@@ -3210,7 +3300,7 @@
                                 'icon' => '💼',
                                 'title' => 'Work Experience Letter / Certificate',
                                 'sub' => 'Service certificate or work experience letter (Optional)',
-                                'levels' => 'mtech phd',
+                                'levels' => 'btech mtech phd',
                                 'is_common' => false,
                                 'is_required' => false,
                             ],
@@ -4121,25 +4211,42 @@
                                             <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
                                                 5. Document Verification Status
                                             </h4>
-                                            <table style="width: 100%; border-collapse: collapse;">
-                                                @foreach(array_chunk($formDocs, 2, true) as $dRow)
-                                                    <tr>
-                                                        @foreach($dRow as $dKey => $dLabel)
-                                                            @php
-                                                                $dExt = $formUploaded[$dKey] ?? null;
-                                                                $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
-                                                                $dType = $isUploaded ? ($dExt ?: 'VERIFIED') : 'Pending';
-                                                            @endphp
-                                                            <td style="width: 50%; padding: 2.5px;">
-                                                                <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: {{ $isUploaded ? '#E2F5EC' : '#FDF0DC' }}; color: #1B2430; border: 1px solid {{ $isUploaded ? '#a7f3d0' : '#fde68a' }};">
-                                                                    <span>{{ $dLabel }}</span>
-                                                                    <small style="color: {{ $isUploaded ? '#12875B' : '#B25E09' }}; font-weight: 800;">{{ $isUploaded ? '✓ ' . $dType : 'Pending' }}</small>
-                                                                </div>
-                                                            </td>
-                                                        @endforeach
-                                                    </tr>
-                                                @endforeach
-                                            </table>
+                                            @php
+                                                $onlyUploadedDocs = [];
+                                                foreach($formDocs as $dKey => $dLabel) {
+                                                    $dExt = $formUploaded[$dKey] ?? null;
+                                                    $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
+                                                    if ($isUploaded) {
+                                                        $onlyUploadedDocs[$dKey] = [
+                                                            'label' => $dLabel,
+                                                            'ext' => $dExt ?: 'VERIFIED'
+                                                        ];
+                                                    }
+                                                }
+                                            @endphp
+                                            @if(empty($onlyUploadedDocs))
+                                                <div style="padding: 10px; font-size: 9.5px; color: #64748b; font-style: italic; text-align: center;">
+                                                    No documents uploaded yet.
+                                                </div>
+                                            @else
+                                                <table style="width: 100%; border-collapse: collapse;">
+                                                    @foreach(array_chunk($onlyUploadedDocs, 2, true) as $dRow)
+                                                        <tr>
+                                                            @foreach($dRow as $dKey => $dInfo)
+                                                                <td style="width: 50%; padding: 2.5px;">
+                                                                    <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: #E2F5EC; color: #1B2430; border: 1px solid #a7f3d0;">
+                                                                        <span>{{ $dInfo['label'] }}</span>
+                                                                        <small style="color: #12875B; font-weight: 800;">✓ {{ $dInfo['ext'] }}</small>
+                                                                    </div>
+                                                                </td>
+                                                            @endforeach
+                                                            @if(count($dRow) === 1)
+                                                                <td style="width: 50%; padding: 2.5px;"></td>
+                                                            @endif
+                                                        </tr>
+                                                    @endforeach
+                                                </table>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -4345,7 +4452,7 @@
                     <div style="max-width: 820px; margin: 1.5rem auto 0 auto; background: #ffffff; border-radius: 10px; border: 1px solid #cbd5e1; overflow: hidden; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);">
                         <div style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                             <div style="font-size: 11px; font-weight: 800; color: #0F2A4A; text-transform: uppercase; letter-spacing: 0.4px;">
-                                📋 Candidate Document Dossier Checklist
+                                Candidate Document Dossier Checklist
                             </div>
                             <div style="font-size: 10.5px; color: #64748b;">
                                 {{ $uploadedCount }} attached &bull; {{ count($standardSlots) - $uploadedCount }} pending / optional

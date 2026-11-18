@@ -888,6 +888,22 @@ class DashboardsController extends Controller
                     $validationRules['pg_university_board'] = ['required', 'string', 'max:255'];
                 }
 
+                if ($request->filled('tenth_marks_conducted') && $request->filled('tenth_marks_earned')) {
+                    $validationRules['tenth_marks_earned'] = ['nullable', 'numeric', 'lte:tenth_marks_conducted'];
+                }
+                if ($request->filled('pu2_marks_conducted') && $request->filled('pu2_marks_earned')) {
+                    $validationRules['pu2_marks_earned'] = array_merge((array)$validationRules['pu2_marks_earned'], ['lte:pu2_marks_conducted']);
+                }
+                if ($request->filled('ug_marks_conducted') && $request->filled('ug_marks_earned')) {
+                    $validationRules['ug_marks_earned'] = ['nullable', 'numeric', 'lte:ug_marks_conducted'];
+                }
+                if ($request->filled('pg_marks_conducted') && $request->filled('pg_marks_earned')) {
+                    $validationRules['pg_marks_earned'] = ['nullable', 'numeric', 'lte:pg_marks_conducted'];
+                }
+                if ($request->filled('pg2_marks_conducted') && $request->filled('pg2_marks_earned')) {
+                    $validationRules['pg2_marks_earned'] = ['nullable', 'numeric', 'lte:pg2_marks_conducted'];
+                }
+
                 $request->validate($validationRules, [
                     'inter_college.required' => 'College Name / Institute Name is required.',
                     'city.required' => 'College City is required.',
@@ -898,6 +914,11 @@ class DashboardsController extends Controller
                     'pu2_marks_type.required' => 'Marks Type is required.',
                     'pu2_marks_conducted.required' => 'Total Marks (Conducted) is required.',
                     'pu2_marks_earned.required' => 'Marks Earned is required.',
+                    'pu2_marks_earned.lte' => '12th Marks Earned cannot exceed Total Marks Conducted.',
+                    'tenth_marks_earned.lte' => '10th Marks Earned cannot exceed Total Marks Conducted.',
+                    'ug_marks_earned.lte' => 'UG Marks Earned cannot exceed Total Marks Conducted.',
+                    'pg_marks_earned.lte' => 'PG 1 Marks Earned cannot exceed Total Marks Conducted.',
+                    'pg2_marks_earned.lte' => 'PG 2 Marks Earned cannot exceed Total Marks Conducted.',
                     'pu2_percentage.required' => 'Percentage is required.',
                     'ug_college_name.required' => 'UG College Name / Institute Name is required.',
                     'ug_university_board.required' => 'UG Board is required.',

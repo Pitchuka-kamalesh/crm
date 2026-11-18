@@ -29,6 +29,12 @@
             --bg-body: #f8fafc;
         }
 
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #ffffff;
@@ -37,6 +43,9 @@
             display: flex;
             flex-direction: column;
             line-height: 1.5;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
         }
 
         /* Top Header Bar */
@@ -114,11 +123,12 @@
         .page-wrapper {
             max-width: 1320px;
             width: 100%;
+            box-sizing: border-box;
             margin: 0 auto;
             padding: 3rem 1.5rem 4rem 1.5rem;
             display: grid;
             grid-template-columns: 1.05fr 0.95fr;
-            gap: 3.5rem;
+            gap: 3rem;
             align-items: start;
             flex: 1;
         }
@@ -780,11 +790,11 @@
             margin-bottom: 1rem;
         }
 
-        @media (max-width: 960px) {
+        @media (max-width: 1080px) {
             .page-wrapper {
                 grid-template-columns: 1fr;
                 gap: 2rem;
-                padding-top: 1.5rem;
+                padding: 1.5rem 1rem 3rem 1rem;
             }
             .hero-headline {
                 font-size: 2.2rem;
