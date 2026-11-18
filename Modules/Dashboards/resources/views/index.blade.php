@@ -4569,71 +4569,420 @@
 
     @if(!$hasAcceptedTerms)
         <!-- ================= TERMS & CONDITIONS POPUP MODAL ================= -->
-        <div id="termsConditionsModalOverlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1.25rem;">
-            <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+        <style>
+            .terms-modal-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.72);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                z-index: 99999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1.25rem;
+                animation: termsFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes termsFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            .terms-modal-card {
+                background: #ffffff;
+                width: 100%;
+                max-width: 590px;
+                border-radius: 20px;
+                box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+                overflow: hidden;
+                border: 1px solid #e2e8f0;
+                display: flex;
+                flex-direction: column;
+                animation: termsSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes termsSlideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(18px) scale(0.98);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            /* Header */
+            .terms-modal-header {
+                background: linear-gradient(135deg, #091e3a 0%, #1e3a8a 100%);
+                color: #ffffff;
+                padding: 1.35rem 1.65rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .terms-modal-header::after {
+                content: '';
+                position: absolute;
+                top: -30px;
+                right: -30px;
+                width: 120px;
+                height: 120px;
+                background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            .terms-header-icon-box {
+                width: 46px;
+                height: 46px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                color: #93c5fd;
+            }
+
+            .terms-header-title {
+                margin: 0;
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: #ffffff;
+                letter-spacing: -0.2px;
+                line-height: 1.25;
+            }
+
+            .terms-header-subtitle {
+                margin: 0.25rem 0 0 0;
+                font-size: 0.78rem;
+                color: #93c5fd;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+            }
+
+            .terms-header-subtitle-dot {
+                width: 4px;
+                height: 4px;
+                border-radius: 50%;
+                background: #60a5fa;
+            }
+
+            /* Body */
+            .terms-modal-body {
+                padding: 1.45rem 1.65rem 1.25rem;
+                color: #334155;
+                font-size: 0.88rem;
+                line-height: 1.6;
+                max-height: 65vh;
+                overflow-y: auto;
+            }
+
+            .terms-intro-text {
+                font-weight: 700;
+                color: #0f172a;
+                margin-top: 0;
+                margin-bottom: 1rem;
+                font-size: 0.88rem;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+            }
+
+            .terms-cards-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.85rem;
+            }
+
+            .terms-card-row {
+                display: flex;
+                gap: 0.85rem;
+                align-items: flex-start;
+                padding: 0.85rem 1rem;
+                border-radius: 12px;
+                transition: all 0.2s ease;
+                border: 1px solid transparent;
+            }
+
+            /* 1. Authenticity Row - Blue */
+            .terms-card-row.row-blue {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+                border-left: 4px solid #2563eb;
+            }
+            .terms-card-row.row-blue:hover {
+                background: #f0f7ff;
+                border-color: #bfdbfe;
+                border-left-color: #1d4ed8;
+            }
+
+            /* 2. Code of Conduct - Green */
+            .terms-card-row.row-green {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+                border-left: 4px solid #16a34a;
+            }
+            .terms-card-row.row-green:hover {
+                background: #f0fdf4;
+                border-color: #bbf7d0;
+                border-left-color: #15803d;
+            }
+
+            /* 3. Forfeiture Policy - Amber */
+            .terms-card-row.row-amber {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+                border-left: 4px solid #d97706;
+            }
+            .terms-card-row.row-amber:hover {
+                background: #fffbeb;
+                border-color: #fde68a;
+                border-left-color: #b45309;
+            }
+
+            .terms-badge-pill {
+                width: 26px;
+                height: 26px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.78rem;
+                font-weight: 800;
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
+
+            .terms-badge-pill.badge-blue {
+                background: #eff6ff;
+                color: #1d4ed8;
+                border: 1.5px solid #bfdbfe;
+            }
+
+            .terms-badge-pill.badge-green {
+                background: #f0fdf4;
+                color: #15803d;
+                border: 1.5px solid #bbf7d0;
+            }
+
+            .terms-badge-pill.badge-amber {
+                background: #fffbeb;
+                color: #b45309;
+                border: 1.5px solid #fde68a;
+            }
+
+            .terms-row-content {
+                flex: 1;
+                font-size: 0.84rem;
+                color: #334155;
+                line-height: 1.55;
+            }
+
+            /* Checkbox Agreement Card */
+            .terms-agreement-box {
+                margin-top: 1.15rem;
+                padding: 0.95rem 1.15rem;
+                background: #f8fafc;
+                border: 1.5px solid #cbd5e1;
+                border-radius: 12px;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+
+            .terms-agreement-box:hover {
+                background: #eff6ff;
+                border-color: #93c5fd;
+            }
+
+            .terms-agreement-box.is-agreed {
+                background: #eff6ff;
+                border-color: #2563eb;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+            }
+
+            .terms-checkbox-label {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                cursor: pointer;
+                user-select: none;
+                margin: 0;
+            }
+
+            .terms-checkbox-input {
+                width: 19px;
+                height: 19px;
+                accent-color: #2563eb;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .terms-checkbox-text {
+                font-size: 0.86rem;
+                font-weight: 700;
+                color: #1e3a8a;
+                line-height: 1.4;
+            }
+
+            /* Footer */
+            .terms-modal-footer {
+                padding: 1rem 1.65rem;
+                background: #f8fafc;
+                border-top: 1px solid #e2e8f0;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .btn-terms-submit {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.55rem;
+                background: #cbd5e1;
+                color: #64748b;
+                padding: 0.7rem 1.65rem;
+                border-radius: 10px;
+                font-size: 0.88rem;
+                font-weight: 700;
+                border: none;
+                cursor: not-allowed;
+                transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: none;
+            }
+
+            .btn-terms-submit.is-active {
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                color: #ffffff;
+                cursor: pointer;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+                transform: translateY(0);
+            }
+
+            .btn-terms-submit.is-active:hover {
+                background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+                box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+                transform: translateY(-1px);
+            }
+
+            .btn-terms-submit.is-active:active {
+                transform: translateY(0);
+            }
+        </style>
+
+        <div id="termsConditionsModalOverlay" class="terms-modal-overlay">
+            <div class="terms-modal-card">
 
                 <!-- Modal Header -->
-                <div style="background: linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 0.85rem;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-                        📜
+                <div class="terms-modal-header">
+                    <div class="terms-header-icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <path d="M9 15l2 2 4-4"></path>
+                        </svg>
                     </div>
                     <div>
-                        <h3 style="margin: 0; font-size: 1.12rem; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;">Terms &amp; Conditions Agreement</h3>
-                        <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #cbd5e1;">VFSTR Vignan University &bull; Admissions Onboarding</p>
+                        <h3 class="terms-header-title">Terms &amp; Conditions Agreement</h3>
+                        <p class="terms-header-subtitle">
+                            <span>VFSTR Vignan University</span>
+                            <span class="terms-header-subtitle-dot"></span>
+                            <span>Admissions Onboarding</span>
+                        </p>
                     </div>
                 </div>
 
-                <!-- Modal Body with 3 Sample Lines -->
-                <div style="padding: 1.5rem 1.65rem; color: #334155; font-size: 0.88rem; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
-                    <p style="font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 0.85rem;">Please review and confirm your acceptance of the admission terms before proceeding:</p>
+                <!-- Modal Body with 3 Terms Lines -->
+                <div class="terms-modal-body">
+                    <p class="terms-intro-text">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>Please review and confirm your acceptance of the admission terms before proceeding:</span>
+                    </p>
 
-                    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #3b82f6;">
-                            <span style="font-weight: 800; color: #2563eb; font-size: 0.85rem; line-height: 1.4;">1.</span>
-                            <span style="color: #334155; font-size: 0.84rem;">I confirm that all personal, contact, academic, and category details provided by me in this application are accurate and authentic to the best of my knowledge.</span>
+                    <div class="terms-cards-list">
+                        <!-- 1. Personal & Academic Details Authenticity -->
+                        <div class="terms-card-row row-blue">
+                            <div class="terms-badge-pill badge-blue">1</div>
+                            <div class="terms-row-content">
+                                I confirm that all personal, contact, academic, and category details provided by me in this application are accurate and authentic to the best of my knowledge.
+                            </div>
                         </div>
 
-                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #10b981;">
-                            <span style="font-weight: 800; color: #059669; font-size: 0.85rem; line-height: 1.4;">2.</span>
-                            <span style="color: #334155; font-size: 0.84rem;">I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.</span>
+                        <!-- 2. Academic & Conduct Compliance -->
+                        <div class="terms-card-row row-green">
+                            <div class="terms-badge-pill badge-green">2</div>
+                            <div class="terms-row-content">
+                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.
+                            </div>
                         </div>
 
-                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #f59e0b;">
-                            <span style="font-weight: 800; color: #d97706; font-size: 0.85rem; line-height: 1.4;">3.</span>
-                            <span style="color: #334155; font-size: 0.84rem;">I understand that providing any false, incomplete, or misleading information will result in immediate cancellation of my admission and forfeiture of fees.</span>
+                        <!-- 3. Legal Undertaking & Forfeiture Policy -->
+                        <div class="terms-card-row row-amber">
+                            <div class="terms-badge-pill badge-amber">3</div>
+                            <div class="terms-row-content">
+                                I understand that providing any false, incomplete, or misleading information will result in immediate cancellation of my admission and forfeiture of fees.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Checkbox (Unticked by default) -->
-                    <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;">
-                        <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none; margin: 0;">
-                            <input type="checkbox" id="termsAgreementCheckbox" onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
-                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a;">I have read, understood, and accept all the terms and conditions stated above.</span>
+                    <div id="termsAgreementBox" class="terms-agreement-box" onclick="toggleCheckboxFromBox(event)">
+                        <label class="terms-checkbox-label">
+                            <input type="checkbox" id="termsAgreementCheckbox" onchange="toggleTermsSubmitBtn(this)" class="terms-checkbox-input">
+                            <span class="terms-checkbox-text">I have read, understood, and accept all the terms and conditions stated above.</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Footer Actions -->
-                <div style="padding: 1rem 1.65rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
-                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" disabled style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: not-allowed; opacity: 0.5; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
-                        <span>I Agree &amp; Continue &rarr;</span>
+                <div class="terms-modal-footer">
+                    <button type="button" id="btnAcceptTermsModal" class="btn-terms-submit" onclick="submitTermsAgreement()" disabled>
+                        <span>I Agree &amp; Continue</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
                     </button>
                 </div>
             </div>
         </div>
 
         <script>
+            function toggleCheckboxFromBox(e) {
+                if (e.target && e.target.id === 'termsAgreementCheckbox') {
+                    return; // native checkbox handles itself
+                }
+                const chk = document.getElementById('termsAgreementCheckbox');
+                if (chk) {
+                    chk.checked = !chk.checked;
+                    toggleTermsSubmitBtn(chk);
+                }
+            }
+
             function toggleTermsSubmitBtn(chk) {
                 const btn = document.getElementById('btnAcceptTermsModal');
+                const box = document.getElementById('termsAgreementBox');
                 if (!btn) return;
                 if (chk.checked) {
                     btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.style.cursor = 'pointer';
+                    btn.classList.add('is-active');
+                    if (box) box.classList.add('is-agreed');
                 } else {
                     btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.style.cursor = 'not-allowed';
+                    btn.classList.remove('is-active');
+                    if (box) box.classList.remove('is-agreed');
                 }
             }
 
@@ -4646,7 +4995,8 @@
                 const btn = document.getElementById('btnAcceptTermsModal');
                 if (btn) {
                     btn.disabled = true;
-                    btn.textContent = 'Saving agreement...';
+                    btn.classList.remove('is-active');
+                    btn.innerHTML = '<span>Saving agreement...</span>';
                 }
 
                 fetch('{{ route("dashboards.accept-terms") }}', {
