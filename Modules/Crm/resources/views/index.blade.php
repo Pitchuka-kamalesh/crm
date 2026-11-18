@@ -168,10 +168,10 @@
                 <!-- TAB: ENQUIRY LIST -->
                 <div class="content-card">
                     <!-- LIVE SINGLE SEARCH: APPLICATION NO, PHONE NUMBER, STUDENT NAME -->
-                    <div class="enquiry-filter-toolbar">
-                        <div class="filter-inputs-row">
+                    <div class="enquiry-filter-toolbar" style="display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.85rem 1.25rem;">
+                        <div class="filter-inputs-row" style="flex: 1; margin: 0; min-width: 260px;">
                             <!-- Unified Search Filter -->
-                            <div class="filter-control-group filter-control-search">
+                            <div class="filter-control-group filter-control-search" style="margin: 0; width: 100%; max-width: 420px;">
                                 <label for="liveFilterSearch" class="filter-label">
                                     Search Enquiries
                                 </label>
@@ -189,9 +189,9 @@
                             </div>
                         </div>
 
-                        <!-- Record Count Badge -->
-                        <div class="filter-meta-bar" style="display: flex; align-items: center; justify-content: flex-end; padding-top: 0.5rem; border-top: 1px dashed #e2e8f0;">
-                            <div id="filterCountBadge" class="filter-count-badge" style="font-size: 0.85rem; font-weight: 700; color: #334155; background: #f8fafc; padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <!-- Record Count Badge (Single Row Alignment) -->
+                        <div class="filter-meta-bar" style="display: flex; align-items: center; justify-content: flex-end; margin: 0; padding: 0; border: none;">
+                            <div id="filterCountBadge" class="filter-count-badge" style="font-size: 0.85rem; font-weight: 700; color: #334155; background: #ffffff; padding: 7px 14px; border-radius: 8px; border: 1px solid #cbd5e1; white-space: nowrap; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);">
                                 Total Records: {{ $allStudents->count() }}
                             </div>
                         </div>
