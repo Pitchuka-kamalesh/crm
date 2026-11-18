@@ -3,6 +3,7 @@
 namespace Modules\Sms\Services;
 
 use Modules\Sms\Models\CommunicationLog;
+use Modules\Sms\Models\SmsLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -90,24 +91,42 @@ class SmsService
             Log::error('[SmsService] SMS send failed', ['to' => $destTo, 'error' => $e->getMessage()]);
         }
 
+        $now = now();
+        $ip = request()?->ip() ?? '127.0.0.1';
+
+        // 1. Store directly into master.smslogs (primary official SMS logs table)
         try {
-            CommunicationLog::updateOrCreate(
-                [
-                    'wapptophone' => $cleanTo,
-                    'channel'     => 'sms',
-                ],
-                [
-                    'wauser'           => $user ?? 'SYSTEM_USER',
-                    'waregisterno'     => $registerNo ?? '',
-                    'jiotraceid'       => $traceId,
-                    'template_name'    => $templateId,
-                    'wapptext'         => $body,
-                    'var1'             => $cleanTo,
-                    'status'           => $status,
-                    'ipaddr'           => request()?->ip() ?? '127.0.0.1',
-                    'response_payload' => is_array($data) ? $data : ['response' => $data],
-                ]
-            );
+            SmsLog::create([
+                'smsuser'       => (string)($user ?? 'SYSTEM_USER'),
+                'smsregisterno' => (string)($registerNo ?? ''),
+                'smstophone'    => (string)$cleanTo,
+                'jiotraceid'    => (string)($traceId ?? ''),
+                'smstext'       => (string)$body,
+                'datetime'      => $now,
+                'ipaddr'        => (string)$ip,
+                'status'        => (string)$status,
+                'var1'          => (string)$cleanTo,
+                'var2'          => (string)$templateId,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('[SmsService] Could not write to master.smslogs: ' . $e->getMessage());
+        }
+
+        // 2. Also record in master.wapp_logs / communication_logs for unified dashboard tracking
+        try {
+            CommunicationLog::create([
+                'channel'          => 'sms',
+                'wapptophone'      => $cleanTo,
+                'wauser'           => $user ?? 'SYSTEM_USER',
+                'waregisterno'     => $registerNo ?? '',
+                'jiotraceid'       => $traceId,
+                'template_name'    => $templateId,
+                'wapptext'         => $body,
+                'var1'             => $cleanTo,
+                'status'           => $status,
+                'ipaddr'           => $ip,
+                'response_payload' => is_array($data) ? $data : ['response' => $data],
+            ]);
         } catch (\Throwable $e) {
             Log::warning('[SmsService] Could not write SMS communication log: ' . $e->getMessage());
         }
@@ -223,10 +242,18 @@ class SmsService
     protected function extractTraceId(array|string $body): ?string
     {
         if (is_array($body)) {
-            $keys = ['trace_id', 'message_id', 'id', 'requestId', 'msg_id'];
+            $keys = ['transaction_id', 'trace_id', 'message_id', 'id', 'requestId', 'msg_id', 'txnid'];
             foreach ($keys as $k) {
                 if (!empty($body[$k])) {
                     return (string) $body[$k];
+                }
+            }
+
+            if (isset($body['data']) && is_array($body['data'])) {
+                foreach ($keys as $k) {
+                    if (!empty($body['data'][$k])) {
+                        return (string) $body['data'][$k];
+                    }
                 }
             }
         }
