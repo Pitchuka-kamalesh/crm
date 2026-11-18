@@ -1704,11 +1704,16 @@
                 <div class="content-card">
                     <div class="card-header-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div>
-                            <div class="card-title">🎟️ Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</div>
+                            <div class="card-title" style="display: flex; align-items: center; gap: 7px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #2563eb);"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                                <span>Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</span>
+                            </div>
                             <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Personal Coupons (Derived from 8 Digits of Application No + P1 Suffix, e.g. 27000005P1)</div>
                         </div>
-                        <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; cursor: pointer;">
-                            + 🎟️ Generate Personal Coupon (e.g. 27000005P1)
+                        <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; color: #ffffff; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                            <span>Generate Personal Coupon (e.g. 27000005P1)</span>
                         </button>
                     </div>
                     <!-- Search Toolbar with Live Search -->
@@ -1854,15 +1859,16 @@
                                                         data-payload="{{ base64_encode(json_encode($paymentPayload)) }}"
                                                         title="View Official Payment Receipt"
                                                         style="height: 32px; padding: 0 12px; font-size: 0.82rem; font-weight: 700; background: #1e40af; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);">
-                                                    <span>💳</span> Receipt
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                                    <span>Receipt</span>
                                                 </button>
                                                 @if(!$personalCoupon)
                                                     <button type="button" 
                                                             class="btn-action-sm" 
                                                             onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $expectedPersonalCode }}', '{{ $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($appliNo) }}', '{{ addslashes($candidateName) }}', '{{ $programName }}')"
-                                                            style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe;"
+                                                            style="height: 32px; width: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; cursor: pointer;"
                                                             title="Generate Personal Coupon">
-                                                        🎟️
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
                                                     </button>
                                                 @endif
                                             </div>
@@ -1885,7 +1891,8 @@
                     <div style="background: #ffffff; border-radius: 16px; max-width: 520px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; overflow: hidden;">
                         <div style="padding: 1.25rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                             <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                <span>🎟️</span> Generate Personal Coupon (CRM Incharge)
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #2563eb);"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                                <span>Generate Personal Coupon (CRM Incharge)</span>
                             </div>
                             <button type="button" onclick="closePersonalCouponModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
                         </div>

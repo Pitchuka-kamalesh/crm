@@ -74,7 +74,8 @@
             <div class="content-card">
                 <div class="card-header-bar" style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <h2 class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🎓 Student KPI &amp; Conversion Analytics</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #059669);"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                        <span>Student KPI &amp; Conversion Analytics</span>
                     </h2>
                     <button type="button" 
                             id="exportStudentKpiTopBtn"
