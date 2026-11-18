@@ -421,10 +421,8 @@
                             <button type="button" 
                                     id="btnDownloadRegisterCsv" 
                                     onclick="downloadRegisterListCsv()" 
-                                    class="btn-action-sm" 
-                                    style="height: 42px; padding: 0 1.35rem; background: #059669; color: #ffffff; border: none; border-radius: 8px; font-size: 0.86rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.06); transition: all 0.15s ease;"
-                                    onmouseover="this.style.background='#047857'"
-                                    onmouseout="this.style.background='#059669'"
+                                    class="btn-action-sm btn-theme-export" 
+                                    style="height: 42px; padding: 0 1.35rem; background: var(--theme-accent, #059669); color: #ffffff; border: none; border-radius: 8px; font-size: 0.86rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; box-shadow: 0 1px 2px var(--theme-accent-ring, rgba(0,0,0,0.06)); transition: all 0.15s ease;"
                                     title="Download Register List data as CSV file">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>

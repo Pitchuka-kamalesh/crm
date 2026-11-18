@@ -1335,8 +1335,52 @@ html.sidebar-is-collapsed .topbar-toggle-sidebar-btn {
 .btn-call:hover { background: #059669; }
 .btn-whatsapp { background: #25d366; color: #ffffff; }
 .btn-whatsapp:hover { background: #1eb855; }
-.btn-verify { background: #2563eb; color: #ffffff; }
-.btn-verify:hover { background: #1d4ed8; }
+.btn-verify { background: var(--theme-accent, #2563eb); color: #ffffff; }
+.btn-verify:hover { background: var(--theme-accent-hover, #1d4ed8); }
+
+/* Universal Palette Action & Export Buttons (Syncs with Theme Palette: Maroon, Blue, Green, Purple) */
+.btn-verify,
+.btn-theme-export,
+.btn-export-excel,
+.btn-export-csv,
+.btn-print-action,
+.btn-download-action,
+.btn-palette-primary,
+.btn-filter,
+#exportStudentKpiTopBtn,
+#exportStudentKpiTableBtn,
+#btnDownloadRegisterCsv,
+button[onclick="exportStudentKpiExcel()"],
+button[onclick="exportTelecallerKpiCsv()"],
+button[onclick="downloadRegisterListCsv()"],
+button[onclick="downloadExamSlotCsv()"] {
+    background: var(--theme-accent, #2563eb) !important;
+    border-color: var(--theme-accent, #2563eb) !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px var(--theme-accent-ring, rgba(37, 99, 235, 0.25)) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-verify:hover,
+.btn-theme-export:hover,
+.btn-export-excel:hover,
+.btn-export-csv:hover,
+.btn-print-action:hover,
+.btn-download-action:hover,
+.btn-palette-primary:hover,
+.btn-filter:hover,
+#exportStudentKpiTopBtn:hover,
+#exportStudentKpiTableBtn:hover,
+#btnDownloadRegisterCsv:hover,
+button[onclick="exportStudentKpiExcel()"]:hover,
+button[onclick="exportTelecallerKpiCsv()"]:hover,
+button[onclick="downloadRegisterListCsv()"]:hover,
+button[onclick="downloadExamSlotCsv()"]:hover {
+    background: var(--theme-accent-hover, #1d4ed8) !important;
+    border-color: var(--theme-accent-hover, #1d4ed8) !important;
+    box-shadow: 0 4px 12px var(--theme-accent-ring, rgba(37, 99, 235, 0.35)) !important;
+    transform: translateY(-1px);
+}
 
 /* Filter Tabs */
 .filter-tabs-bar {
