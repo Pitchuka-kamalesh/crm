@@ -150,9 +150,12 @@
                                 : date('Y-m-d H:i:s', strtotime($lead->lead_allocated_at));
                         }
 
+                        $leadProgUpper = strtoupper(trim((string)($lead->student_program ?? '')));
+                        $isPhdLead = str_contains($leadProgUpper, 'PHD') || str_contains($leadProgUpper, 'DOCTOR') || str_starts_with(strtoupper((string)$leadAppli), 'PHD');
+
                         $allowedStages = ($leadAppli !== '0' && isset($stageEligibilityMap[$leadAppli]))
                             ? $stageEligibilityMap[$leadAppli]
-                            : \App\Services\TelecallerService::defaultAllowedStages();
+                            : \App\Services\TelecallerService::defaultAllowedStages($isPhdLead);
 
                         $lastStageTask = ($leadPhone !== '0' && isset($latestStageTasksByPhone[$leadPhone]))
                             ? $latestStageTasksByPhone[$leadPhone]
@@ -161,7 +164,8 @@
                         $currentStep = \App\Services\TelecallerService::resolveCurrentStep(
                             $lead->empcode ?? null,
                             $allowedStages,
-                            $lastStageTask?->stage_name ?? null
+                            $lastStageTask?->stage_name ?? null,
+                            $isPhdLead
                         );
                         $badgeStyle = \App\Services\TelecallerService::getStageBadgeStyle($currentStep);
 
@@ -288,24 +292,29 @@
                         $leadTasks = $latestTasks[$leadAppNo] ?? collect();
                         $lastTask = $leadTasks->first();
 
-                        // Compute progress across exactly 5 stages
+                        $leadProgUpper = strtoupper(trim((string)($leadProgram ?? $lead->student_program ?? '')));
+                        $realAppli = !empty($lead->applinano)
+                            ? (string) $lead->applinano
+                            : ((!empty($lead->applino) && $lead->applino !== '0') ? (string) $lead->applino : '0');
+                        $isPhdLead = str_contains($leadProgUpper, 'PHD') || str_contains($leadProgUpper, 'DOCTOR') || str_starts_with(strtoupper((string)$leadAppNo), 'PHD') || str_starts_with(strtoupper($realAppli), 'PHD');
+
+                        // Compute progress across stages (4 for PhD, 5 for non-PhD)
                         $stagesMap = [];
                         $completedCount = 0;
-                        foreach (['stage1','stage2','stage3','stage4','stage5'] as $stgKey) {
+                        $stageKeysToCheck = $isPhdLead ? ['stage1','stage2','stage3','stage4'] : ['stage1','stage2','stage3','stage4','stage5'];
+                        foreach ($stageKeysToCheck as $stgKey) {
                             $val = strtolower($lead->{$stgKey} ?? 'locked');
                             $stagesMap[$stgKey] = $val;
                             if (in_array($val, ['completed', 'paid', 'approved'])) {
                                 $completedCount++;
                             }
                         }
-                        $progressPct = round(($completedCount / 5) * 100);
+                        $totalStages = $isPhdLead ? 4 : 5;
+                        $progressPct = min(100, round(($completedCount / $totalStages) * 100));
                         $leadCrmId = $lead->crmid ?? ($alloc?->crmid ?? '0');
-                        $realAppli = !empty($lead->applinano)
-                            ? (string) $lead->applinano
-                            : ((!empty($lead->applino) && $lead->applino !== '0') ? (string) $lead->applino : '0');
                         $allowedStages = ($realAppli !== '0' && isset($stageEligibilityMap[$realAppli]))
                             ? $stageEligibilityMap[$realAppli]
-                            : \App\Services\TelecallerService::defaultAllowedStages();
+                            : \App\Services\TelecallerService::defaultAllowedStages($isPhdLead);
                     @endphp
                     <tr id="row-lead-{{ $leadAppNo }}">
                         <td style="text-align: center; vertical-align: middle;">
@@ -326,14 +335,16 @@
                             </div>
                             @php
                                 $cleanLeadPhone = preg_replace('/\D/', '', (string) $leadPhone);
-                                $isRowCompleted = (
+                                $isExamBooked = (
                                     (!empty($cleanLeadPhone) && isset($examScheduledPhones) && $examScheduledPhones->contains($cleanLeadPhone)) ||
                                     (!empty($leadAppNo) && $leadAppNo !== '0' && isset($examScheduledApplis) && $examScheduledApplis->contains($leadAppNo))
                                 );
+                                $isPaymentDone = in_array(strtolower($lead->stage4 ?? ''), ['paid', 'completed']) || in_array(strtolower($lead->stage1 ?? ''), ['paid']);
+                                $isRowCompleted = $isPhdLead ? ($isPaymentDone || $completedCount >= 4) : ($isExamBooked || $completedCount >= 5);
                             @endphp
                             @if($isRowCompleted)
                                 <div style="margin-top: 3px;">
-                                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; border-radius: 4px; padding: 1.5px 6px; font-weight: 800;" title="Student present in exam schedule (Completed)">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; border-radius: 4px; padding: 1.5px 6px; font-weight: 800;" title="{{ $isPhdLead ? 'PhD candidate fee payment completed (Completed)' : 'Student present in exam schedule (Completed)' }}">
                                         ✓ Done
                                     </span>
                                 </div>
@@ -367,7 +378,8 @@
                             $leadStage = \App\Services\TelecallerService::resolveCurrentStep(
                                 $alloc?->empcode ?? null,
                                 $allowedStages,
-                                $lastStageTask?->stage_name ?? null
+                                $lastStageTask?->stage_name ?? null,
+                                $isPhdLead
                             );
                             $leadBadge = \App\Services\TelecallerService::getStageBadgeStyle($leadStage);
                         @endphp

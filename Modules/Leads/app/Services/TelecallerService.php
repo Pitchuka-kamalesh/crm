@@ -7,9 +7,12 @@ use Modules\Crm\Models\CrmStudentRegistration;
 use Modules\Auth\Models\Employee;
 use Modules\Leads\Models\Lead;
 use Modules\Finance\Models\ReceiptDetail;
+use App\Models\PayDetail;
 use Modules\Auth\Models\RoleAssigned;
 use Modules\Dashboards\Models\StudentAcademicDetail;
 use Modules\Dashboards\Models\StudentPersonalInfo;
+use Modules\Dashboards\Models\StudentUpload;
+use App\Models\ExamSchedule;
 use Modules\Leads\Models\TelecallerLead;
 use Modules\Leads\Models\TelecallerLeadTask;
 use Illuminate\Support\Collection;
@@ -759,17 +762,22 @@ class TelecallerService
      * Determine candidate stage based on completed admission milestones:
      * 1. Application number not created & not assigned -> 'New Lead'
      * 2. Application number not created & assigned -> 'Telecaller Stage'
-     * 3. Registered (application number exists, not yet paid) -> 'Register Form'
-     * 4. Paid (not yet filled personal details) -> 'Payment Stage'
-     * 5. Personal details filled (not yet filled academic details) -> 'Personal Details'
-     * 6. Academic details filled -> 'Academic Details'
+     * 3. Registration form completed (crm.student_registration) -> 'Register Form completed'
+     * 4. Personal profile completed (crm.student_personal_info) -> 'Personal Details completed'
+     * 5. Academic info completed (crm.student_academic_details) -> 'Academic Info completed'
+     * 6. Document upload completed (crm.student_uploads) -> 'Document Upload completed'
+     * 7. Fee payment completed (finance.paydetails / receiptdetails) -> 'Fee Payment completed'
+     * 8. Exam slot booking completed (finance.exam_schedule - non-PhD only) -> 'Exam Slot Booking completed'
      */
     public static function determineLeadStage(
         ?string $applino,
         ?string $empcode,
         ?string $stage1 = null,
         ?string $stage2 = null,
-        ?string $stage3 = null
+        ?string $stage3 = null,
+        ?string $stage4 = null,
+        ?string $stage5 = null,
+        bool $isPhd = false
     ): string {
         $hasAppli = !empty($applino) && $applino !== '0';
         $isAssigned = !empty($empcode) && $empcode !== '0';
@@ -782,22 +790,32 @@ class TelecallerService
             return 'Telecaller Stage';
         }
 
-        $isPaid = in_array(strtolower((string) $stage1), ['paid', 'completed', 'approved'], true);
-        if (!$isPaid) {
-            return 'Register Form completed';
+        // Non-PhD candidates have Step 5 as Exam Slot Booking
+        if (!$isPhd && in_array(strtolower((string) $stage5), ['completed', 'approved'], true)) {
+            return 'Exam Slot Booking completed';
         }
 
-        $hasPersonal = in_array(strtolower((string) $stage2), ['completed', 'approved'], true);
-        if (!$hasPersonal) {
-            return 'Payment Stage completed';
+        // Step 4 is Fee Payment
+        if (in_array(strtolower((string) $stage4), ['paid', 'completed', 'approved'], true) || in_array(strtolower((string) $stage1), ['paid'], true)) {
+            return 'Fee Payment completed';
         }
 
-        $hasAcademic = in_array(strtolower((string) $stage3), ['completed', 'approved'], true);
-        if (!$hasAcademic) {
+        // Step 3 is Document Upload
+        if (in_array(strtolower((string) $stage3), ['completed', 'approved'], true)) {
+            return 'Document Upload completed';
+        }
+
+        // Step 2 is Academic Details
+        if (in_array(strtolower((string) $stage2), ['completed', 'approved'], true)) {
+            return 'Academic Info completed';
+        }
+
+        // Step 1 is Personal Profile
+        if (in_array(strtolower((string) $stage1), ['completed', 'approved'], true)) {
             return 'Personal Details completed';
         }
 
-        return 'Academic Details completed';
+        return 'Register Form completed';
     }
 
     /**
@@ -808,10 +826,12 @@ class TelecallerService
         return match (strtolower(trim($stage))) {
             'new lead' => ['bg' => '#f1f5f9', 'color' => '#475569', 'border' => '#cbd5e1', 'icon' => ''],
             'telecaller stage' => ['bg' => '#fef3c7', 'color' => '#b45309', 'border' => '#fde68a', 'icon' => ''],
-            'register form', 'register form completed' => ['bg' => '#e0e7ff', 'color' => '#3730a3', 'border' => '#c7d2fe', 'icon' => ''],
-            'payment stage', 'payment stage completed', 'not paid stage' => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'border' => '#fecaca', 'icon' => ''],
-            'personal details', 'personal details completed' => ['bg' => '#eff6ff', 'color' => '#1d4ed8', 'border' => '#bfdbfe', 'icon' => ''],
-            'academic details', 'academic details completed' => ['bg' => '#f3e8ff', 'color' => '#7e22ce', 'border' => '#e9d5ff', 'icon' => ''],
+            'register form', 'register form completed', 'registration form completed' => ['bg' => '#e0e7ff', 'color' => '#3730a3', 'border' => '#c7d2fe', 'icon' => ''],
+            'personal details', 'personal details completed', 'personal profile completed' => ['bg' => '#eff6ff', 'color' => '#1d4ed8', 'border' => '#bfdbfe', 'icon' => ''],
+            'academic info', 'academic info completed', 'academic details', 'academic details completed' => ['bg' => '#f3e8ff', 'color' => '#7e22ce', 'border' => '#e9d5ff', 'icon' => ''],
+            'document upload', 'document upload completed' => ['bg' => '#fef9c3', 'color' => '#854d0e', 'border' => '#fef08a', 'icon' => ''],
+            'payment stage', 'payment stage completed', 'fee payment', 'fee payment completed' => ['bg' => '#ecfdf5', 'color' => '#065f46', 'border' => '#a7f3d0', 'icon' => ''],
+            'exam slot booking', 'exam slot booking completed', 'slot booking completed' => ['bg' => '#f0fdf4', 'color' => '#15803d', 'border' => '#86efac', 'icon' => ''],
             default => ['bg' => '#f8fafc', 'color' => '#334155', 'border' => '#e2e8f0', 'icon' => ''],
         };
     }
@@ -821,15 +841,26 @@ class TelecallerService
      *
      * @return array<string, bool>
      */
-    public static function defaultAllowedStages(): array
+    public static function defaultAllowedStages(bool $isPhd = false): array
     {
-        return [
+        $stages = [
             'Telecaller Stage' => true,
             'Register Form completed' => false,
-            'Payment Stage completed' => false,
             'Personal Details completed' => false,
-            'Academic Details completed' => false,
+            'Academic Info completed' => false,
+            'Document Upload completed' => false,
+            'Fee Payment completed' => false,
         ];
+
+        if (!$isPhd) {
+            $stages['Exam Slot Booking completed'] = false;
+        }
+
+        // Backwards compatibility aliases
+        $stages['Payment Stage completed'] = false;
+        $stages['Academic Details completed'] = false;
+
+        return $stages;
     }
 
     /**
@@ -840,31 +871,65 @@ class TelecallerService
     public static function resolveCurrentStep(
         ?string $empcode,
         array $allowedStages,
-        ?string $lastTaskStage = null
+        ?string $lastTaskStage = null,
+        bool $isPhd = false
     ): string {
         $ranks = [
             'New Lead' => 0,
             'Telecaller Stage' => 1,
             'Register Form completed' => 2,
-            'Payment Stage completed' => 3,
-            'Personal Details completed' => 4,
-            'Academic Details completed' => 5,
+            'Personal Details completed' => 3,
+            'Academic Info completed' => 4,
+            'Academic Details completed' => 4,
+            'Document Upload completed' => 5,
+            'Fee Payment completed' => 6,
+            'Payment Stage completed' => 6,
+            'Exam Slot Booking completed' => 7,
         ];
 
         $aliases = [
             'Register Form' => 'Register Form completed',
-            'Payment Stage' => 'Payment Stage completed',
+            'Register Form completed' => 'Register Form completed',
+            'Registration Form' => 'Register Form completed',
+            'Registration Form completed' => 'Register Form completed',
+
             'Personal Details' => 'Personal Details completed',
-            'Academic Details' => 'Academic Details completed',
+            'Personal Details completed' => 'Personal Details completed',
+            'Personal Profile' => 'Personal Details completed',
+            'Personal Profile completed' => 'Personal Details completed',
+
+            'Academic Details' => 'Academic Info completed',
+            'Academic Details completed' => 'Academic Info completed',
+            'Academic Info' => 'Academic Info completed',
+            'Academic Info completed' => 'Academic Info completed',
+
+            'Document Upload' => 'Document Upload completed',
+            'Document Upload completed' => 'Document Upload completed',
+            'Document upload' => 'Document Upload completed',
+            'Document upload completed' => 'Document Upload completed',
+
+            'Payment Stage' => 'Fee Payment completed',
+            'Payment Stage completed' => 'Fee Payment completed',
+            'Fee Payment' => 'Fee Payment completed',
+            'Fee Payment completed' => 'Fee Payment completed',
+
+            'Exam Slot Booking' => 'Exam Slot Booking completed',
+            'Exam Slot Booking completed' => 'Exam Slot Booking completed',
+            'Slot Booking' => 'Exam Slot Booking completed',
+            'Slot Booking completed' => 'Exam Slot Booking completed',
         ];
 
         $studentStep = 'New Lead';
-        if (!empty($allowedStages['Academic Details completed'])) {
-            $studentStep = 'Academic Details completed';
+        if (!$isPhd && !empty($allowedStages['Exam Slot Booking completed'])) {
+            $studentStep = 'Exam Slot Booking completed';
+        } elseif (!empty($allowedStages['Fee Payment completed']) || !empty($allowedStages['Payment Stage completed'])) {
+            $studentStep = 'Fee Payment completed';
+        } elseif (!empty($allowedStages['Document Upload completed'])) {
+            $studentStep = 'Document Upload completed';
+        } elseif (!empty($allowedStages['Academic Info completed']) || !empty($allowedStages['Academic Details completed'])) {
+            $studentStep = 'Academic Info completed';
         } elseif (!empty($allowedStages['Personal Details completed'])) {
             $studentStep = 'Personal Details completed';
-        } elseif (!empty($allowedStages['Payment Stage completed'])) {
-            $studentStep = 'Payment Stage completed';
         } elseif (!empty($allowedStages['Register Form completed'])) {
             $studentStep = 'Register Form completed';
         } elseif (!empty($empcode) && $empcode !== '0') {
@@ -875,6 +940,11 @@ class TelecallerService
         if (isset($aliases[$taskStage])) {
             $taskStage = $aliases[$taskStage];
         }
+
+        if ($isPhd && $taskStage === 'Exam Slot Booking completed') {
+            $taskStage = 'Fee Payment completed';
+        }
+
         if ($taskStage !== '' && isset($ranks[$taskStage])) {
             $isTaskStageEligible = ($taskStage === 'Telecaller Stage') || !empty($allowedStages[$taskStage]);
             if ($isTaskStageEligible && $ranks[$taskStage] >= $ranks[$studentStep]) {
@@ -887,6 +957,13 @@ class TelecallerService
 
     /**
      * Batch-compute selectable action modal stages keyed by application number.
+     * Checks dedicated database tables for each stage:
+     * - crm.student_registration (Registration)
+     * - crm.student_personal_info (Personal Profile)
+     * - crm.student_academic_details (Academic Info)
+     * - crm.student_uploads (Document Upload)
+     * - finance.paydetails / receiptdetails (Fee Payment)
+     * - finance.exam_schedule (Exam Slot Booking - non-PhD only)
      *
      * @param  array<int, string|null>  $applinos
      * @return array<string, array<string, bool>>
@@ -902,35 +979,80 @@ class TelecallerService
             return [];
         }
 
-        $regSet = CrmStudentRegistration::whereIn('applinano', $clean)
-            ->pluck('applinano')
-            ->mapWithKeys(fn ($v) => [(string) $v => true])
-            ->all();
+        // 1. Registration Table (crm.student_registration)
+        $students = CrmStudentRegistration::whereIn('applinano', $clean)
+            ->get()
+            ->keyBy('applinano');
 
-        $receiptSet = ReceiptDetail::whereIn('applino', $clean)
-            ->pluck('applino')
-            ->mapWithKeys(fn ($v) => [(string) $v => true])
-            ->all();
-
+        // 2. Personal Details Table (crm.student_personal_info)
         $personalSet = StudentPersonalInfo::whereIn('applino', $clean)
             ->pluck('applino')
             ->mapWithKeys(fn ($v) => [(string) $v => true])
             ->all();
 
+        // 3. Academic Details Table (crm.student_academic_details)
         $academicSet = StudentAcademicDetail::whereIn('applino', $clean)
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        // 4. Document Uploads Table (crm.student_uploads)
+        $uploadSet = StudentUpload::whereIn('applino', $clean)
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        // 5. Fee Payment (finance.receiptdetails & finance.paydetails)
+        $receiptSet = ReceiptDetail::whereIn('applino', $clean)
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        $paySet = PayDetail::whereIn('applino', $clean)
+            ->where('txnstatus', 'success')
+            ->pluck('applino')
+            ->mapWithKeys(fn ($v) => [(string) $v => true])
+            ->all();
+
+        // 6. Exam Slot Booking Table (finance.exam_schedule)
+        $examSet = ExamSchedule::whereIn('applino', $clean)
             ->pluck('applino')
             ->mapWithKeys(fn ($v) => [(string) $v => true])
             ->all();
 
         $map = [];
         foreach ($clean as $app) {
-            $map[$app] = [
+            $student = $students[$app] ?? null;
+            $progText = strtoupper(trim((string)($student?->programlevel ?? $student?->program_name ?? '')));
+            $crmIdText = strtoupper(trim((string)($student?->crmid ?? '')));
+            $isPhd = str_contains($progText, 'PHD') || str_contains($progText, 'PH.D') || str_contains($progText, 'DOCTOR') || str_starts_with($crmIdText, 'PHD');
+
+            $isReg = isset($students[$app]);
+            $hasPersonal = isset($personalSet[$app]) || in_array(strtolower($student?->stage1 ?? ''), ['completed', 'approved', 'paid']);
+            $hasAcademic = isset($academicSet[$app]) || in_array(strtolower($student?->stage2 ?? ''), ['completed', 'approved', 'paid']);
+            $hasUploads = isset($uploadSet[$app]) || in_array(strtolower($student?->stage3 ?? ''), ['completed', 'approved', 'paid']);
+            $hasPayment = isset($receiptSet[$app]) || isset($paySet[$app]) || in_array(strtolower($student?->stage4 ?? ''), ['paid', 'completed', 'approved']) || in_array(strtolower($student?->stage1 ?? ''), ['paid']);
+            $hasExam = !$isPhd && (isset($examSet[$app]) || in_array(strtolower($student?->stage5 ?? ''), ['completed', 'approved']));
+
+            $stages = [
                 'Telecaller Stage' => true,
-                'Register Form completed' => isset($regSet[$app]),
-                'Payment Stage completed' => isset($receiptSet[$app]),
-                'Personal Details completed' => isset($personalSet[$app]),
-                'Academic Details completed' => isset($academicSet[$app]),
+                'Register Form completed' => $isReg,
+                'Personal Details completed' => $hasPersonal,
+                'Academic Info completed' => $hasAcademic,
+                'Document Upload completed' => $hasUploads,
+                'Fee Payment completed' => $hasPayment,
             ];
+
+            if (!$isPhd) {
+                $stages['Exam Slot Booking completed'] = $hasExam;
+            }
+
+            // Backwards-compatibility aliases
+            $stages['Payment Stage completed'] = $hasPayment;
+            $stages['Academic Details completed'] = $hasAcademic;
+            $stages['is_phd'] = $isPhd;
+
+            $map[$app] = $stages;
         }
 
         return $map;
@@ -941,16 +1063,16 @@ class TelecallerService
      *
      * @return array<string, bool>
      */
-    public static function getAllowedStagesForLead(?string $applino): array
+    public static function getAllowedStagesForLead(?string $applino, bool $isPhd = false): array
     {
         $app = trim((string) $applino);
         if ($app === '' || $app === '0' || str_starts_with($app, 'APP')) {
-            return self::defaultAllowedStages();
+            return self::defaultAllowedStages($isPhd);
         }
 
         $map = self::getStageEligibilityMap([$app]);
 
-        return $map[$app] ?? self::defaultAllowedStages();
+        return $map[$app] ?? self::defaultAllowedStages($isPhd);
     }
 }
 

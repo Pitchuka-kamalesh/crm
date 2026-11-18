@@ -592,7 +592,17 @@ class LeadsController extends Controller
         $validationAppli = ($student?->applinano && $student->applinano !== '0')
             ? (string) $student->applinano
             : (string) $tApplino;
-        $allowedStages = TelecallerService::getAllowedStagesForLead($validationAppli);
+        $progText = strtoupper(trim((string)($student?->programlevel ?? $student?->program_name ?? '')));
+        $crmIdText = strtoupper(trim((string)($student?->crmid ?? '')));
+        $isPhd = str_contains($progText, 'PHD') || str_contains($progText, 'PH.D') || str_contains($progText, 'DOCTOR') || str_starts_with($crmIdText, 'PHD');
+
+        $allowedStages = TelecallerService::getAllowedStagesForLead($validationAppli, $isPhd);
+        if ($isPhd && $customStageName === 'Exam Slot Booking completed') {
+            return response()->json([
+                'success' => false,
+                'message' => "Exam Slot Booking is not applicable for PhD students.",
+            ], 422);
+        }
         if (array_key_exists($customStageName, $allowedStages) && !$allowedStages[$customStageName]) {
             return response()->json([
                 'success' => false,

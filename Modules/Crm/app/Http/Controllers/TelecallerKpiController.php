@@ -108,6 +108,7 @@ class TelecallerKpiController extends Controller
         $regPaidRecords = DB::table('crm.student_registration')
             ->where(function ($q) {
                 $q->where(DB::raw('LOWER(stage1)'), 'paid')
+                  ->orWhere(DB::raw('LOWER(stage4)'), 'paid')
                   ->orWhere(DB::raw('LOWER(std_status)'), 'fee paid')
                   ->orWhere(DB::raw('LOWER(std_status)'), 'admitted');
             })

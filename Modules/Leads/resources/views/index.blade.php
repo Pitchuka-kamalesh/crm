@@ -2810,9 +2810,11 @@
                     <select id="modalStageNameSelect" class="incharge-select incharge-input-no-icon" style="height: 38px; font-size: 0.8rem;">
                         <option value="Telecaller Stage">Telecaller Stage</option>
                         <option value="Register Form completed">Register Form completed</option>
-                        <option value="Payment Stage completed">Payment Stage completed</option>
                         <option value="Personal Details completed">Personal Details completed</option>
-                        <option value="Academic Details completed">Academic Details completed</option>
+                        <option value="Academic Info completed">Academic Info completed</option>
+                        <option value="Document Upload completed">Document Upload completed</option>
+                        <option value="Fee Payment completed">Fee Payment completed</option>
+                        <option value="Exam Slot Booking completed" id="optSlotBooking">Exam Slot Booking completed</option>
                     </select>
                 </div>
 
@@ -3241,6 +3243,14 @@
             remarksInput.value = remarks || '';
         }
 
+        const progUpper = String(program || '').toUpperCase();
+        const appliUpper = String(applinano || '').toUpperCase();
+        const isCandidatePhd = Boolean(
+            progUpper.includes('PHD') || progUpper.includes('DOCTOR') ||
+            appliUpper.startsWith('PHD') ||
+            (allowedStages && allowedStages.is_phd === true)
+        );
+
         const stageSelect = document.getElementById('modalStageNameSelect');
         if (stageSelect) {
             const permissions = (allowedStages && typeof allowedStages === 'object') ? allowedStages : {};
@@ -3248,8 +3258,18 @@
                 const opt = stageSelect.options[i];
                 if (opt.value === 'Telecaller Stage') {
                     opt.disabled = false;
+                    opt.style.display = '';
+                } else if (opt.value === 'Exam Slot Booking completed') {
+                    if (isCandidatePhd) {
+                        opt.disabled = true;
+                        opt.style.display = 'none';
+                    } else {
+                        opt.disabled = !(permissions[opt.value] === true);
+                        opt.style.display = '';
+                    }
                 } else {
                     opt.disabled = !(permissions[opt.value] === true);
+                    opt.style.display = '';
                 }
             }
             stageSelect.value = 'Telecaller Stage';
