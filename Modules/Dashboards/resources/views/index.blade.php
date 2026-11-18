@@ -3167,18 +3167,20 @@
                             'pg1_cmm' => [
                                 'icon' => '📜',
                                 'title' => 'PG 1 Consolidated Marks Memo (CMM)',
-                                'sub' => 'Consolidated Marks Memo for PG 1 (Any one mandatory with PC/OD)',
+                                'sub' => 'Consolidated Marks Memo for PG 1 (At least one mandatory with PC/OD)*',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
+                                'is_pg1_group' => true,
                             ],
                             'pg1_pc' => [
                                 'icon' => '🎓',
                                 'title' => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
-                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (Any one mandatory with CMM)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (At least one mandatory with CMM)*',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
+                                'is_pg1_group' => true,
                             ],
                             'pg2_cmm' => [
                                 'icon' => '📜',
@@ -3201,6 +3203,14 @@
                                 'title' => 'Doctoral / Advanced PG Memo',
                                 'sub' => 'Doctoral coursework or post-master qualification certificate',
                                 'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'experience' => [
+                                'icon' => '💼',
+                                'title' => 'Work Experience Letter / Certificate',
+                                'sub' => 'Service certificate or work experience letter (Optional)',
+                                'levels' => 'mtech phd',
                                 'is_common' => false,
                                 'is_required' => false,
                             ],
@@ -3260,6 +3270,11 @@
                                     <div class="kyc-doc-top">
                                         <div class="kyc-doc-icon">{{ $docMeta['icon'] }}</div>
                                         <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                                            @if(!empty($docMeta['is_pg1_group']))
+                                                <span style="font-size: 0.68rem; font-weight: 700; background: #faf5ff; color: #7c3aed; padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid #d8b4fe;">
+                                                    Any 1 Mandatory *
+                                                </span>
+                                            @endif
                                             @if($docMeta['is_common'])
                                                 <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid #bfdbfe;">
                                                     Common
@@ -3275,7 +3290,7 @@
                                     <div>
                                         <h4 class="kyc-doc-title">
                                             {{ $docMeta['title'] }}
-                                            @if($docMeta['is_required'])
+                                            @if($docMeta['is_required'] || !empty($docMeta['is_pg1_group']))
                                                 <span style="color: #dc2626;" title="Mandatory field">*</span>
                                             @endif
                                         </h4>
@@ -3378,6 +3393,33 @@
 
                         document.addEventListener('DOMContentLoaded', function() {
                             setStage3DegreeLevel('{{ $degreeLevel ?? 'btech' }}');
+
+                            const form = document.getElementById('stage3-upload-form');
+                            if (form) {
+                                form.addEventListener('submit', function(e) {
+                                    const lvl = document.getElementById('stage3_degree_level_input')?.value || '{{ $degreeLevel ?? "btech" }}';
+                                    if (lvl === 'phd') {
+                                        const hasCmm = Boolean({{ !empty($uploadedDocs['pg1_cmm']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_cmm')?.files?.length > 0);
+                                        const hasPc = Boolean({{ !empty($uploadedDocs['pg1_pc']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_pc')?.files?.length > 0);
+
+                                        if (!hasCmm && !hasPc) {
+                                            e.preventDefault();
+                                            const cmmCard = document.getElementById('doc-card-pg1_cmm');
+                                            if (cmmCard) cmmCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            const input = document.getElementById('file-input-pg1_cmm');
+                                            if (input) {
+                                                input.focus();
+                                                if (typeof input.reportValidity === 'function') {
+                                                    input.setCustomValidity('Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).');
+                                                    input.reportValidity();
+                                                    input.onchange = function() { input.setCustomValidity(''); };
+                                                }
+                                            }
+                                            return false;
+                                        }
+                                    }
+                                });
+                            }
                         });
                     </script>
                 </form>
@@ -4202,9 +4244,6 @@
                             <span style="display: inline-block; font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px; background: #16a34a; color: #ffffff;">
                                 ✓ {{ $uploadedCount }} File(s) Attached
                             </span>
-                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.74rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 10px; text-decoration: none;">
-                                <span>📤 Add / Update Documents (Step 4)</span>
-                            </a>
                         </div>
                     </div>
 
@@ -4296,12 +4335,9 @@
                         <div style="max-width: 820px; margin: 1.25rem auto 0 auto; background: #ffffff; border-radius: 10px; padding: 2rem; border: 1.5px dashed #cbd5e1; text-align: center;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
                             <h4 style="margin: 0 0 0.5rem 0; color: #0f172a; font-weight: 800;">No Documents Attached Yet</h4>
-                            <p style="margin: 0 0 1rem 0; color: #64748b; font-size: 0.85rem;">
-                                Please upload your 10th marksheet, 12th marksheet, Aadhaar card, and photo in Stage 4 so they appear here under your application form.
+                            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">
+                                No document attachments found for this candidate.
                             </p>
-                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.84rem; padding: 0.55rem 1.2rem; border-radius: 6px;">
-                                <span>📤 Go to Stage 4: Document Upload &rarr;</span>
-                            </a>
                         </div>
                     @endif
 

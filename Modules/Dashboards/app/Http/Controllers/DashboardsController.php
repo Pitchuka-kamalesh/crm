@@ -1177,9 +1177,21 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $allowedDocKeys = [
                         'marksheet10', 'marksheet12', 'btech', 'mtech', 'pg',
-                        'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc',
+                        'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc', 'experience',
                         'aadhaar', 'photo', 'tc', 'study_conduct'
                     ];
+
+                    $isPhdCandidate = $isPhd || strtolower((string)$request->input('degree_level')) === 'phd' || strtoupper((string)$crmStudent->programlevel) === 'DOCTORAL' || strtoupper((string)$crmStudent->programlevel) === 'PHD';
+                    if ($isPhdCandidate) {
+                        $existingUpload = StudentUpload::where('applino', $crmStudent->applinano)->first();
+                        $hasPg1 = (!empty($existingUpload?->pg1_cmm_file_path) || !empty($existingUpload?->pg1_pc_file_path))
+                            || ($request->hasFile('docs.pg1_cmm') || $request->hasFile('docs.pg1_pc'));
+                        if (!$hasPg1) {
+                            return redirect()->route('dashboards.index', ['step' => 3])
+                                ->withErrors(['pg1_required' => 'Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).']);
+                        }
+                    }
+
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
                     $destDir = public_path('uploads/documents/' . $appliFolder);
 
@@ -1200,14 +1212,11 @@ class DashboardsController extends Controller
                         'btech' => ['btech_file_name', 'btech_file_path'],
                         'mtech' => ['mtech_file_name', 'mtech_file_path'],
                         'pg' => ['pg_file_name', 'pg_file_path'],
-                    'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
-                    'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
-                    'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
-                    'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
                         'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
                         'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
                         'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
                         'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
+                        'experience' => ['experience_file_name', 'experience_file_path'],
                         'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
                         'photo' => ['passport_file_name', 'passport_file_path'],
                         'tc' => ['transfer_file_name', 'transfer_file_path'],
@@ -1476,7 +1485,9 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS pg2_cmm_file_name VARCHAR(255),
                 ADD COLUMN IF NOT EXISTS pg2_cmm_file_path VARCHAR(500),
                 ADD COLUMN IF NOT EXISTS pg2_pc_file_name VARCHAR(255),
-                ADD COLUMN IF NOT EXISTS pg2_pc_file_path VARCHAR(500);
+                ADD COLUMN IF NOT EXISTS pg2_pc_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS experience_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS experience_file_path VARCHAR(500);
             ");
         } catch (\Throwable $e) {
             // Silently continue if table already exists
@@ -1545,7 +1556,7 @@ class DashboardsController extends Controller
         }
 
         $dir = public_path('uploads/documents/' . $cleanAppli);
-        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct', 'btech', 'mtech', 'pg', 'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc'];
+        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct', 'btech', 'mtech', 'pg', 'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc', 'experience'];
         $titles = [
             'marksheet10'   => '10th Standard Marksheet / SSC Certificate',
             'marksheet12'   => '12th Standard / Intermediate Marksheet',
@@ -1560,6 +1571,7 @@ class DashboardsController extends Controller
             'pg1_pc'        => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
             'pg2_cmm'       => 'PG 2 Consolidated Marks Memo (CMM)',
             'pg2_pc'        => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
+            'experience'    => 'Work Experience Letter / Certificate',
         ];
         $mimeMap = [
             'pdf' => 'application/pdf',
@@ -1583,6 +1595,7 @@ class DashboardsController extends Controller
                     'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
                     'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
                     'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
+                    'experience' => ['experience_file_name', 'experience_file_path'],
                     'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
                     'photo' => ['passport_file_name', 'passport_file_path'],
                     'tc' => ['transfer_file_name', 'transfer_file_path'],

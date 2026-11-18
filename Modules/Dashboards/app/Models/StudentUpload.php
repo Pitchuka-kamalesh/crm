@@ -44,6 +44,9 @@ class StudentUpload extends Model
         'pg2_pc_file_name',
         'pg2_pc_file_path',
 
+        'experience_file_name',
+        'experience_file_path',
+
         'aadhar_file_name',
         'aadhar_file_path',
 
