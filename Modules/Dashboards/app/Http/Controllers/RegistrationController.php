@@ -153,8 +153,16 @@ class RegistrationController extends Controller
 
         $appliNano = null;
         if ($crmRecord && !empty($crmRecord->applinano) && $crmRecord->applinano !== '0') {
-            $appliNano = (string) $crmRecord->applinano;
-        } else {
+            // Check if this applinano is already taken in master.login by a different phone number
+            $conflictUser = User::where('usercode', (string) $crmRecord->applinano)
+                ->where('phnno', '!=', $cleanMobile)
+                ->exists();
+            if (!$conflictUser) {
+                $appliNano = (string) $crmRecord->applinano;
+            }
+        }
+
+        if (!$appliNano) {
             // Generate 10-digit application number starting from 2027000001
             $appliNano = CrmStudentRegistration::generateNextApplicationNumber();
         }
@@ -163,6 +171,7 @@ class RegistrationController extends Controller
         try {
             if ($crmRecord) {
                 $crmRecord->update([
+                    'applinano'    => $appliNano,
                     'name'         => $applicantName,
                     'emailid'      => $email,
                     'campuscode'   => $campusCode,

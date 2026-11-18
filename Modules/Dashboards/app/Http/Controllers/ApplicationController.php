@@ -54,7 +54,7 @@ class ApplicationController extends Controller
                     ->setOptions([
                         'isHtml5ParserEnabled' => true,
                         'isRemoteEnabled' => true,
-                        'chroot' => public_path(),
+                        'chroot' => [public_path(), base_path()],
                     ])
                     ->setPaper('a4', 'portrait')
                     ->download($filename);
@@ -67,7 +67,7 @@ class ApplicationController extends Controller
             'student' => $student,
             'logo' => asset('images/vignan-logo.png'),
             'downloadUrl' => route('application.download', ['id' => $id]),
-            'autoPrint' => true,
+            'autoPrint' => false,
         ]);
     }
 
@@ -236,29 +236,39 @@ class ApplicationController extends Controller
             }
         }
 
+        $pg2Percentage = (float)($academicDetails?->pg2_percentage ?? 0);
+        if ($pg2Percentage <= 0) {
+            if ((float) $academicDetails?->pg2_marks_earned > 0 && (float) $academicDetails?->pg2_marks_conducted > 0) {
+                $pg2Percentage = ((float) $academicDetails->pg2_marks_earned / (float) $academicDetails->pg2_marks_conducted) * 100;
+            } elseif ((float) $academicDetails?->pg2_marks > 0) {
+                $rawPg2 = (float) $academicDetails->pg2_marks;
+                $pg2Percentage = $rawPg2 <= 10 ? ($rawPg2 * 9.5) : ($rawPg2 > 100 ? ($rawPg2 / 1000) * 100 : $rawPg2);
+            }
+        }
+
         // Determine Degree Level (UG / M.Tech / PhD)
         $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
         $progShort = strtoupper($programObj?->program_short_name ?? '');
         $progLong = strtoupper($programObj?->program_long_name ?? '');
 
         if (
-            $progLevel === 'PG' ||
-            str_contains($progShort, 'M.TECH') ||
-            str_contains($progShort, 'MTECH') ||
-            str_contains($progLong, 'MASTER') ||
-            in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A'])
-        ) {
-            $degreeLevel = 'mtech';
-        } elseif (
             $progLevel === 'PHD' ||
             $progLevel === 'DOCTORAL' ||
             str_contains($progShort, 'PHD') ||
             str_contains($progShort, 'PH.D') ||
             str_contains($progLong, 'DOCTOR') ||
+            !empty($academicDetails?->pg2_college_name) ||
             !empty($academicDetails?->pg_college_name)
         ) {
             $degreeLevel = 'phd';
-        } elseif (!empty($academicDetails?->ug_college_name)) {
+        } elseif (
+            $progLevel === 'PG' ||
+            str_contains($progShort, 'M.TECH') ||
+            str_contains($progShort, 'MTECH') ||
+            str_contains($progLong, 'MASTER') ||
+            in_array($progShort, ['MCA', 'MBA', 'M.PHARM', 'M.SC', 'M.A']) ||
+            !empty($academicDetails?->ug_college_name)
+        ) {
             $degreeLevel = 'mtech';
         } else {
             $degreeLevel = 'btech';
@@ -348,46 +358,56 @@ class ApplicationController extends Controller
             'program' => $programName,
             'branch' => $branchName,
             'campus' => $campusName,
-            'school_name' => $academicDetails?->tenth_school_name ?: ($academicDetails?->pu2_college_name ?: ''),
-            'board' => $academicDetails?->tenth_study_board ?: ($academicDetails?->pu2_study_board ?: ''),
+            'school_name' => $academicDetails?->tenth_school_name ?: '-',
+            'board' => $academicDetails?->tenth_study_board ?: '-',
             'percentage' => $tenthPercentage ?: $percentage,
-            'passing_year' => $academicDetails?->tenth_passed_year ?: ($academicDetails?->pu2_passed_year ?: ''),
-            'roll_number' => $academicDetails?->tenth_roll_no ?: ($academicDetails?->pu2_roll_no ?: ''),
+            'passing_year' => $academicDetails?->tenth_passed_year ?: '-',
+            'roll_number' => $academicDetails?->tenth_roll_no ?: '-',
             'academic' => (object) [
-                'ssc_board' => $academicDetails?->tenth_study_board ?: 'State Board',
-                'ssc_school' => $academicDetails?->tenth_school_name ?: '',
-                'ssc_year' => $academicDetails?->tenth_passed_year ?: '',
-                'ssc_roll' => $academicDetails?->tenth_roll_no ?: '',
-                'ssc_marks_conducted' => $academicDetails?->tenth_marks_conducted ?: '',
-                'ssc_marks_earned' => $academicDetails?->tenth_marks_earned ?: '',
-                'ssc_percentage' => $tenthPercentage > 0 ? number_format($tenthPercentage, 2) . ' %' : 'N/A',
-                'inter_college' => $academicDetails?->pu2_college_name ?: '',
-                'inter_board' => $academicDetails?->pu2_study_board ?: 'Board of Intermediate',
-                'inter_year' => $academicDetails?->pu2_passed_year ?: '',
-                'inter_roll' => $academicDetails?->pu2_roll_no ?: '',
-                'inter_marks_conducted' => $academicDetails?->pu2_marks_conducted ?: '',
-                'inter_marks_earned' => $academicDetails?->pu2_marks_earned ?: '',
-                'inter_percentage' => $interPercentage > 0 ? number_format($interPercentage, 2) . ' %' : 'N/A',
+                'ssc_board' => !empty($academicDetails?->tenth_study_board) ? $academicDetails->tenth_study_board : '-',
+                'ssc_school' => !empty($academicDetails?->tenth_school_name) ? $academicDetails->tenth_school_name : '-',
+                'ssc_year' => !empty($academicDetails?->tenth_passed_year) ? $academicDetails->tenth_passed_year : '-',
+                'ssc_roll' => !empty($academicDetails?->tenth_roll_no) ? $academicDetails->tenth_roll_no : '-',
+                'ssc_marks_conducted' => !empty($academicDetails?->tenth_marks_conducted) ? $academicDetails->tenth_marks_conducted : '-',
+                'ssc_marks_earned' => !empty($academicDetails?->tenth_marks_earned) ? $academicDetails->tenth_marks_earned : '-',
+                'ssc_percentage' => ($tenthPercentage && $tenthPercentage > 0) ? number_format($tenthPercentage, 2) . ' %' : '-',
+                'inter_college' => !empty($academicDetails?->pu2_college_name) ? $academicDetails->pu2_college_name : '-',
+                'inter_board' => !empty($academicDetails?->pu2_study_board) ? $academicDetails->pu2_study_board : '-',
+                'inter_year' => !empty($academicDetails?->pu2_passed_year) ? $academicDetails->pu2_passed_year : '-',
+                'inter_roll' => !empty($academicDetails?->pu2_roll_no) ? $academicDetails->pu2_roll_no : '-',
+                'inter_marks_conducted' => !empty($academicDetails?->pu2_marks_conducted) ? $academicDetails->pu2_marks_conducted : '-',
+                'inter_marks_earned' => !empty($academicDetails?->pu2_marks_earned) ? $academicDetails->pu2_marks_earned : '-',
+                'inter_percentage' => ($interPercentage && $interPercentage > 0) ? number_format($interPercentage, 2) . ' %' : '-',
 
                 // Undergraduate (UG / Degree / B.Tech)
-                'ug_college' => $academicDetails?->ug_college_name ?: '',
-                'ug_board' => $academicDetails?->ug_university_board ?: '',
-                'ug_year' => $academicDetails?->ug_passed_year ?: '',
-                'ug_roll' => $academicDetails?->ug_roll_no ?: '',
-                'ug_marks_conducted' => $academicDetails?->ug_marks_conducted ?: '',
-                'ug_marks_earned' => $academicDetails?->ug_marks_earned ?: '',
-                'ug_percentage' => $ugPercentage > 0 ? number_format($ugPercentage, 2) . ' %' : ($academicDetails?->ug_cgpa ? $academicDetails->ug_cgpa . ' CGPA' : ''),
-                'ug_status' => $academicDetails?->ug_current_status ?: '',
+                'ug_college' => !empty($academicDetails?->ug_college_name) ? $academicDetails->ug_college_name : '-',
+                'ug_board' => !empty($academicDetails?->ug_university_board) ? $academicDetails->ug_university_board : '-',
+                'ug_year' => !empty($academicDetails?->ug_passed_year) ? $academicDetails->ug_passed_year : '-',
+                'ug_roll' => !empty($academicDetails?->ug_roll_no) ? $academicDetails->ug_roll_no : '-',
+                'ug_marks_conducted' => !empty($academicDetails?->ug_marks_conducted) ? $academicDetails->ug_marks_conducted : '-',
+                'ug_marks_earned' => !empty($academicDetails?->ug_marks_earned) ? $academicDetails->ug_marks_earned : '-',
+                'ug_percentage' => ($ugPercentage && $ugPercentage > 0) ? number_format($ugPercentage, 2) . ' %' : ($academicDetails?->ug_cgpa ? $academicDetails->ug_cgpa . ' CGPA' : '-'),
+                'ug_status' => !empty($academicDetails?->ug_current_status) ? $academicDetails->ug_current_status : '-',
 
-                // Postgraduate (PG / Master's / M.Tech)
-                'pg_college' => $academicDetails?->pg_college_name ?: '',
-                'pg_board' => $academicDetails?->pg_university_board ?: '',
-                'pg_year' => $academicDetails?->pg_passed_year ?: '',
-                'pg_roll' => $academicDetails?->pg_roll_no ?: '',
-                'pg_marks_conducted' => $academicDetails?->pg_marks_conducted ?: '',
-                'pg_marks_earned' => $academicDetails?->pg_marks_earned ?: '',
-                'pg_percentage' => $pgPercentage > 0 ? number_format($pgPercentage, 2) . ' %' : ($academicDetails?->pg_cgpa ? $academicDetails->pg_cgpa . ' CGPA' : ''),
-                'pg_status' => $academicDetails?->pg_current_status ?: '',
+                // Postgraduate 1 (PG 1 / Master's / M.Tech)
+                'pg_college' => !empty($academicDetails?->pg_college_name) ? $academicDetails->pg_college_name : '-',
+                'pg_board' => !empty($academicDetails?->pg_university_board) ? $academicDetails->pg_university_board : '-',
+                'pg_year' => !empty($academicDetails?->pg_passed_year) ? $academicDetails->pg_passed_year : '-',
+                'pg_roll' => !empty($academicDetails?->pg_roll_no) ? $academicDetails->pg_roll_no : '-',
+                'pg_marks_conducted' => !empty($academicDetails?->pg_marks_conducted) ? $academicDetails->pg_marks_conducted : '-',
+                'pg_marks_earned' => !empty($academicDetails?->pg_marks_earned) ? $academicDetails->pg_marks_earned : '-',
+                'pg_percentage' => ($pgPercentage && $pgPercentage > 0) ? number_format($pgPercentage, 2) . ' %' : ($academicDetails?->pg_cgpa ? $academicDetails->pg_cgpa . ' CGPA' : '-'),
+                'pg_status' => !empty($academicDetails?->pg_current_status) ? $academicDetails->pg_current_status : '-',
+
+                // Postgraduate 2 (PG 2 / Ph.D)
+                'pg2_college' => !empty($academicDetails?->pg2_college_name) ? $academicDetails->pg2_college_name : '-',
+                'pg2_board' => !empty($academicDetails?->pg2_university_board) ? $academicDetails->pg2_university_board : '-',
+                'pg2_year' => !empty($academicDetails?->pg2_passed_year) ? $academicDetails->pg2_passed_year : '-',
+                'pg2_roll' => !empty($academicDetails?->pg2_roll_no) ? $academicDetails->pg2_roll_no : '-',
+                'pg2_marks_conducted' => !empty($academicDetails?->pg2_marks_conducted) ? $academicDetails->pg2_marks_conducted : '-',
+                'pg2_marks_earned' => !empty($academicDetails?->pg2_marks_earned) ? $academicDetails->pg2_marks_earned : '-',
+                'pg2_percentage' => ($pg2Percentage && $pg2Percentage > 0) ? number_format($pg2Percentage, 2) . ' %' : ($academicDetails?->pg2_cgpa ? $academicDetails->pg2_cgpa . ' CGPA' : '-'),
+                'pg2_status' => !empty($academicDetails?->pg2_current_status) ? $academicDetails->pg2_current_status : '-',
             ],
             'degree_level' => $degreeLevel,
             'street' => $villageVal ?: ($personalInfo?->village ?: ''),

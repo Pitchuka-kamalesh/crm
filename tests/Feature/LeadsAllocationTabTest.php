@@ -412,7 +412,6 @@ class LeadsAllocationTabTest extends TestCase
         $response->assertDontSee('Fee Paid & Enrolled');
 
         // Verify stage pills are removed
-        $response->assertDontSee('All Leads');
         $response->assertDontSee('Step 1: Fee Payment');
         $response->assertDontSee('Step 2: Personal Profile');
         $response->assertDontSee('Step 3: Academic Info');
@@ -985,5 +984,46 @@ class LeadsAllocationTabTest extends TestCase
         TelecallerLead::where('phoneno', $testPhone)->delete();
         \App\Models\CrmStudentRegistration::where('applinano', $testAppli)->delete();
         Lead::where('phoneno', (int) $testPhone)->delete();
+    }
+
+    public function test_allocation_view_has_download_button_and_modals()
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/leads/leadsallocation?tab=allocation');
+        $response->assertStatus(200);
+
+        // Verify Allocate, Auto Allocate, and Download buttons
+        $response->assertSee('btnInchargeAllot', false);
+        $response->assertSee('btnAutoAllocateTrigger', false);
+        $response->assertSee('btnDownloadLeadsTrigger', false);
+        $response->assertSee('Download');
+
+        // Verify Download modal with 3 checkboxes
+        $response->assertSee('id="leadDownloadModal"', false);
+        $response->assertSee('dl_chk_all', false);
+        $response->assertSee('dl_chk_allocated', false);
+        $response->assertSee('dl_chk_unallocated', false);
+
+        // Verify Allocate confirmation modal
+        $response->assertSee('id="allocateConfirmModal"', false);
+        $response->assertSee('Confirm Leads Allocation');
+    }
+
+    public function test_leads_download_excel_stream()
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/leads/download?format=excel&status=all');
+        $response->assertStatus(200);
+        $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('attachment; filename=', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_leads_download_pdf_stream()
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/leads/download?format=pdf&status=allocated');
+        $response->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('leads_allocated_', $response->headers->get('Content-Disposition'));
     }
 }

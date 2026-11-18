@@ -27,10 +27,12 @@ class StudentAcademicDetail extends Model
         'tenth_school_name',
         'tenth_study_board',
         'tenth_school_city',
+        'tenth_school_state',
         'tenth_school_district',
         'tenth_roll_no',
         'tenth_passed_year',
         'tenth_marks_type',
+        'tenth_current_status',
         'tenth_marks_conducted',
         'tenth_marks_earned',
         'tenth_percentage',
@@ -38,13 +40,10 @@ class StudentAcademicDetail extends Model
         // 12th / PUC / Diploma
         'pu2_college_name',
         'pu2_study_board',
+        'pu2_board_of_study',
         'pu2_college_city',
-        'pu2_college_district',
         'pu2_college_state',
-        'city',
-        'jr_city',
-        'jr_state',
-        'jr_district',
+        'pu2_college_district',
         'undertaking_60_pct',
         'pu2_roll_no',
         'pu2_passed_year',
@@ -59,6 +58,7 @@ class StudentAcademicDetail extends Model
         'ug_college_name',
         'ug_university_board',
         'ug_college_city',
+        'ug_college_state',
         'ug_college_district',
         'ug_roll_no',
         'ug_passed_year',
@@ -73,6 +73,7 @@ class StudentAcademicDetail extends Model
         'pg_college_name',
         'pg_university_board',
         'pg_college_city',
+        'pg_college_state',
         'pg_college_district',
         'pg_roll_no',
         'pg_passed_year',
@@ -82,6 +83,35 @@ class StudentAcademicDetail extends Model
         'pg_marks_earned',
         'pg_percentage',
         'pg_current_status',
+        'pg1_doc_type',
+        'pg1_cmm_memo_no',
+        'pg1_cmm_cgpa',
+        'pg1_cmm_year',
+        'pg1_pc_od_no',
+        'pg1_pc_od_year',
+        'pg1_pc_od_status',
+
+        // PG 2 (for Ph.D / Doctoral)
+        'pg2_college_name',
+        'pg2_university_board',
+        'pg2_college_city',
+        'pg2_college_state',
+        'pg2_college_district',
+        'pg2_roll_no',
+        'pg2_passed_year',
+        'pg2_marks_type',
+        'pg2_marks',
+        'pg2_marks_conducted',
+        'pg2_marks_earned',
+        'pg2_percentage',
+        'pg2_current_status',
+        'pg2_doc_type',
+        'pg2_cmm_memo_no',
+        'pg2_cmm_cgpa',
+        'pg2_cmm_year',
+        'pg2_pc_od_no',
+        'pg2_pc_od_year',
+        'pg2_pc_od_status',
 
         // Audit
         'log_userid',
@@ -124,6 +154,14 @@ class StudentAcademicDetail extends Model
             return round(((float)$this->attributes['pg_percentage']) / 9.5, 2);
         }
         return $this->attributes['pg_marks'] ?? null;
+    }
+
+    public function getPg2CgpaAttribute()
+    {
+        if (!empty($this->attributes['pg2_percentage'])) {
+            return round(((float)$this->attributes['pg2_percentage']) / 9.5, 2);
+        }
+        return $this->attributes['pg2_marks'] ?? null;
     }
 
     public function registration(): BelongsTo

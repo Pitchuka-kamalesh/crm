@@ -173,7 +173,7 @@
                             <!-- Unified Search Filter -->
                             <div class="filter-control-group filter-control-search">
                                 <label for="liveFilterSearch" class="filter-label">
-                                    <span class="filter-icon">🔍</span> Search Enquiries
+                                    Search Enquiries
                                 </label>
                                 <div class="input-with-icon">
                                     <input type="text" 
@@ -274,7 +274,6 @@
                                 <!-- LIVE FILTER NO RESULTS PLACEHOLDER -->
                                 <tr id="noFilterMatchesRow" style="display: none;">
                                     <td colspan="6" style="text-align: center; padding: 2.5rem 1rem; background: #fafafa;">
-                                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔍</div>
                                         <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">No enquiries match the selected filters</div>
                                         <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;" id="noMatchesDetailText">No records match search.</div>
                                         <button type="button" onclick="window.clearFilterInput('liveFilterSearch')" class="btn-action-sm btn-verify" style="margin: 0 auto; display: inline-flex;">
@@ -411,7 +410,7 @@
                                    placeholder="Search by Application No, Student Name, or Mobile..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="submit" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem; border-radius: 8px;">
-                                🔍 Search
+                                Search
                             </button>
                         </form>
 
@@ -1722,7 +1721,7 @@
                                    placeholder="Search by Application Number, Candidate Name, or Coupon Code..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="button" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
-                                🔍 Search
+                                Search
                             </button>
                         </div>
 
@@ -2182,7 +2181,7 @@
                                    placeholder="Search by Employee Name, Code, Email, Phone, or Designation..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="button" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
-                                🔍 Search
+                                Search
                             </button>
                         </div>
 
@@ -2382,34 +2381,34 @@
                                 <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👥</div>
                             </div>
 
-                            <!-- Card 2: Fee Payment (Stage 1) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
-                            </div>
-
-                            <!-- Card 3: Personal Profile (Stage 2) -->
+                            <!-- Card 2: Personal Profile (Stage 1) -->
                             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 <div>
                                     <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Submitted</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage1Profile }} Completed</div>
                                 </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👤</div>
                             </div>
 
-                            <!-- Card 4: Academic Records (Stage 3) -->
+                            <!-- Card 3: Academic Records (Stage 2) -->
                             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Completed</div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Records</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage2Academic }} Verified</div>
                                 </div>
                                 <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            </div>
+
+                            <!-- Card 4: Fee Payment (Stage 4) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Fee Payment</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage4Fee }} Fee Paid</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
                             </div>
                         </div>
 
@@ -2594,7 +2593,6 @@
                                         <!-- Empty match state when search yields zero rows -->
                                         <tr id="kpiNoResultsRow" style="display: none;">
                                             <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                                 <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">No matching student records found</div>
                                             </td>
                                         </tr>
@@ -2692,17 +2690,17 @@
 
                 function initKpiVisualCharts() {
                     const funnelLabels = [
-                        ['Registration'],
-                        ['Fee', 'Payment'],
-                        ['Personal', 'Details'],
-                        ['Academic', 'Records'],
-                        ['Application', 'Form'],
-                        ['Seat', 'Allotment']
+                        ['Total', 'Registered'],
+                        ['Stage 1:', 'Profile'],
+                        ['Stage 2:', 'Academic'],
+                        ['Stage 3:', 'Documents'],
+                        ['Stage 4:', 'Fee Paid'],
+                        ['Stage 5:', 'Slot Booking']
                     ];
-                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
+                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Profile }}, {{ (int)$kpiStage2Academic }}, {{ (int)$kpiStage3Docs }}, {{ (int)$kpiStage4Fee }}, {{ (int)$kpiStage5Slot }}];
                     const totalApplicants = {{ (int)$kpiTotal }};
-                    const paidCount = {{ (int)$kpiStage1Paid }};
-                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+                    const paidCount = {{ (int)$kpiStage4Fee }};
+                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage4Fee) }};
                     const branchLabels = {!! json_encode(array_keys($kpiBranchDistribution->toArray())) !!};
                     const branchCounts = {!! json_encode(array_values($kpiBranchDistribution->toArray())) !!};
 

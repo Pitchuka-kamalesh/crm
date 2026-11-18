@@ -42,8 +42,14 @@ class ApplicationDownloadTest extends TestCase
 
     public function test_step1_date_of_birth_rejects_future_dates(): void
     {
-        $user = User::where('role_id', 5)->first() ?? User::first();
-        $this->assertNotNull($user);
+        $user = User::firstOrCreate(
+            ['phnno' => '9999900001'],
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+        );
+        CrmStudentRegistration::updateOrCreate(
+            ['phoneno' => '9999900001'],
+            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+        );
 
         // Date of birth in the future
         $invalidDob = now()->addDay()->format('Y-m-d');
@@ -53,7 +59,7 @@ class ApplicationDownloadTest extends TestCase
             'step' => 1,
             'candidate_name' => 'Candidate Test',
             'parent_name' => 'Parent Test',
-            'student_number' => '9888877771',
+            'student_number' => '9999900001',
             'parent_phone_no' => '9876543211',
             'dob' => $invalidDob,
             'gender' => 'Male',
@@ -78,23 +84,46 @@ class ApplicationDownloadTest extends TestCase
 
     public function test_step2_academic_details_view(): void
     {
-        $user = User::where('role_id', 5)->first() ?? User::first();
-        $this->assertNotNull($user);
+        $user = User::firstOrCreate(
+            ['phnno' => '9999900001'],
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+        );
+        CrmStudentRegistration::updateOrCreate(
+            ['phoneno' => '9999900001'],
+            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+        );
 
         // Make sure user's student record allows step 2
         CrmStudentRegistration::where('phoneno', $user->phnno)->update([
             'stage1' => 'completed',
         ]);
 
-        // Check step 2 view
+        // Check step 2 view for UG: Higher Academic details must NOT appear
         $response = $this->actingAs($user)->get('/dashboards?step=2');
         $response->assertStatus(200);
+        $response->assertDontSee('id="btn-toggle-ug-pg"', false);
+        $response->assertDontSee('Undergraduate (B.Tech / Degree) Details');
+
+        // Check step 2 view for PG: Higher Academic details MUST appear
+        CrmStudentRegistration::where('phoneno', $user->phnno)->update(['programlevel' => 'PG', 'programid' => null]);
+        $responsePg = $this->actingAs($user)->get('/dashboards?step=2');
+        $responsePg->assertStatus(200);
+        $responsePg->assertSee('Undergraduate (B.Tech / Degree) Details');
+
+        // Restore to UG
+        CrmStudentRegistration::where('phoneno', $user->phnno)->update(['programlevel' => 'UG', 'programid' => 1]);
     }
 
     public function test_exam_slot_booking_blocks_date_selection_when_in_exam_schedule(): void
     {
-        $user = User::where('role_id', 5)->first() ?? User::first();
-        $this->assertNotNull($user);
+        $user = User::firstOrCreate(
+            ['phnno' => '9999900001'],
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+        );
+        CrmStudentRegistration::updateOrCreate(
+            ['phoneno' => '9999900001'],
+            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+        );
 
         $student = CrmStudentRegistration::where('phoneno', $user->phnno)->first()
             ?? CrmStudentRegistration::first();
@@ -142,7 +171,7 @@ class ApplicationDownloadTest extends TestCase
             [
                 'crmid' => $student->crmid ?? 'V-SAT-0001',
                 'phoneno' => $student->phoneno,
-                'examdate' => now()->addDay()->format('Y-m-d'),
+                'examdate' => now()->subDay()->format('Y-m-d'),
                 'exam_slot' => 'S1 11:00 AM to 1:00 PM',
                 'exam_status' => 1,
             ]
@@ -170,5 +199,133 @@ class ApplicationDownloadTest extends TestCase
         $response2 = $this->actingAs($user)->get('/dashboards?step=5');
         $response2->assertStatus(200);
         $response2->assertSee('Reschedule Allowed');
+    }
+
+    public function test_crm_id_service_never_collides_with_existing_personal_info(): void
+    {
+        $existingId = \Modules\Dashboards\Models\StudentPersonalInfo::whereNotNull('crmid')->value('crmid');
+        $this->assertNotEmpty($existingId);
+
+        $dummyStudent = new \Modules\Crm\Models\CrmStudentRegistration();
+        $dummyStudent->applinano = '9999999999';
+        $dummyStudent->programlevel = 'UG';
+        $dummyStudent->crmid = $existingId; // deliberately set to existing ID
+
+        $generatedId = \Modules\Crm\Services\CrmIdService::generateForStudent($dummyStudent);
+        $this->assertNotEquals($existingId, $generatedId);
+        $this->assertFalse(\Modules\Crm\Services\CrmIdService::isCrmIdInUse($generatedId, '9999999999'));
+    }
+
+    public function test_stage2_doctoral_saves_and_renders_postgraduate_1_and_2(): void
+    {
+        $suffix = (string) rand(100000, 999999);
+        $phdPhone = '9988' . $suffix;
+        $phdApplino = 'VU2026' . $suffix;
+
+        User::where('phnno', $phdPhone)->orWhere('usercode', $phdApplino)->delete();
+        CrmStudentRegistration::where('phoneno', $phdPhone)->orWhere('applinano', $phdApplino)->delete();
+
+        $user = User::create([
+            'phnno' => $phdPhone,
+            'name' => 'Doctoral Candidate',
+            'pwd' => bcrypt('secret'),
+            'role_id' => 5,
+            'user_type' => 1,
+            'usercode' => $phdApplino,
+        ]);
+
+        $student = CrmStudentRegistration::create([
+            'phoneno' => $phdPhone,
+            'applinano' => $phdApplino,
+            'name' => 'Doctoral Candidate',
+            'programlevel' => 'DOCTORAL',
+            'stage1' => 'completed',
+            'stage2' => 'pending',
+            'stage4' => 'pending',
+        ]);
+
+        $payload = [
+            'step' => 2,
+            'degree_level' => 'phd',
+            'school_co_name' => 'ZPH School',
+            'boad_of_study' => 'State Board',
+            'roll_no' => '10TH9988',
+            'passing_year' => 2016,
+            'tenth_marks_conducted' => 600,
+            'tenth_marks_earned' => 550,
+            'tenth_percentage' => 91.67,
+            'tenth_marks_type' => 'Marks',
+
+            'inter_college' => 'Junior College',
+            'city' => 'Guntur',
+            'jr_state' => 'Andhra Pradesh',
+            'jr_district' => 'Guntur',
+            'subset_choice' => 'Second Year',
+            'inter_year' => 2018,
+            'inter_hallticket' => 'INTER9988',
+            'pu2_marks_type' => 'Marks',
+            'pu2_marks_conducted' => 1000,
+            'pu2_marks_earned' => 920,
+            'pu2_percentage' => 92.00,
+
+            // UG
+            'ug_college_name' => 'University College of Eng',
+            'ug_university_board' => 'JNTUK',
+            'ug_roll_no' => '18UG1001',
+            'ug_passed_year' => 2022,
+            'ug_cgpa' => '8.80',
+            'ug_current_status' => 'Completed',
+
+            // PG 1
+            'pg_college_name' => 'National Institute of Tech PG1',
+            'pg_university_board' => 'NIT',
+            'pg_roll_no' => '22PG1001',
+            'pg_passed_year' => 2024,
+            'pg_cgpa' => '9.20',
+            'pg_current_status' => 'Completed',
+
+            // PG 2
+            'pg2_college_name' => 'Indian Institute of Tech PG2',
+            'pg2_university_board' => 'IIT',
+            'pg2_roll_no' => '24PG2001',
+            'pg2_passed_year' => 2026,
+            'pg2_cgpa' => '9.50',
+            'pg2_current_status' => 'Completed',
+        ];
+
+        $saveResponse = $this->actingAs($user)->post('/dashboards/save-step', $payload);
+        $saveResponse->assertRedirect();
+
+        // Verify database records
+        $savedDetail = \Modules\Dashboards\Models\StudentAcademicDetail::where('applino', $phdApplino)->first();
+        $this->assertNotNull($savedDetail);
+        $this->assertEquals('National Institute of Tech PG1', $savedDetail->pg_college_name);
+        $this->assertEquals('Indian Institute of Tech PG2', $savedDetail->pg2_college_name);
+        $this->assertEquals('24PG2001', $savedDetail->pg2_roll_no);
+        $this->assertEquals(2026, $savedDetail->pg2_passed_year);
+
+        // Verify ApplicationController builds PG 1 and PG 2
+        $controller = new ApplicationController();
+        $reflection = new \ReflectionClass($controller);
+        $method = $reflection->getMethod('buildStudentApplicationData');
+        $method->setAccessible(true);
+        $appData = $method->invoke($controller, $phdApplino);
+
+        $this->assertEquals('phd', $appData->degree_level);
+        $this->assertEquals('National Institute of Tech PG1', $appData->academic->pg_college);
+        $this->assertEquals('Indian Institute of Tech PG2', $appData->academic->pg2_college);
+
+        // Verify blade views render Postgraduate 1 and Postgraduate 2
+        $view1 = view('dashboards::application-form', ['student' => $appData])->render();
+        $this->assertStringContainsString('Postgraduate 1', $view1);
+        $this->assertStringContainsString('National Institute of Tech PG1', $view1);
+        $this->assertStringContainsString('Postgraduate 2', $view1);
+        $this->assertStringContainsString('Indian Institute of Tech PG2', $view1);
+
+        $view2 = view('application-form', ['student' => $appData])->render();
+        $this->assertStringContainsString('Postgraduate 1', $view2);
+        $this->assertStringContainsString('National Institute of Tech PG1', $view2);
+        $this->assertStringContainsString('Postgraduate 2', $view2);
+        $this->assertStringContainsString('Indian Institute of Tech PG2', $view2);
     }
 }

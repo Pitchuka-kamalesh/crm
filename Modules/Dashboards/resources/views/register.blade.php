@@ -582,33 +582,99 @@
         }
 
         .level-pills-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.4rem;
+            display: flex;
+            align-items: center;
             background: #f1f5f9;
-            padding: 0.35rem;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            padding: 5px 6px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         .level-pill-btn {
-            padding: 0.55rem 0.5rem;
-            border: none;
+            flex: 1;
+            height: 40px;
+            padding: 0 0.5rem;
+            border: 1.5px solid transparent;
             background: transparent;
             border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 0.84rem;
             font-weight: 700;
-            color: #64748b;
+            color: #334155;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            user-select: none;
+            white-space: nowrap;
+            position: relative;
         }
 
-        .level-pill-btn.pill-active {
+        .level-pill-btn:hover:not(.pill-active):not(.pill-doctoral) {
+            background: rgba(255, 255, 255, 0.85);
+            color: #0f172a;
+        }
+
+        .level-pill-btn.pill-active:not(.pill-doctoral) {
             background: #2563eb;
             color: #ffffff;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            border-color: #2563eb;
+        }
+
+        /* Visible, crisp vertical separation line */
+        .level-pill-divider {
+            width: 1.5px;
+            height: 22px;
+            background: #94a3b8;
+            flex-shrink: 0;
+            border-radius: 1px;
+            margin: 0 6px;
+        }
+
+        /* Properly highlighted Doctoral Pill */
+        .level-pill-btn.pill-doctoral {
+            color: #6d28d9;
+            background: #f5f3ff;
+            border: 1.5px solid #8b5cf6;
+            font-weight: 750;
+            box-shadow: 0 1px 3px rgba(139, 92, 246, 0.15);
+        }
+
+        .level-pill-btn.pill-doctoral:hover:not(.pill-active) {
+            background: #ede9fe;
+            color: #5b21b6;
+            border-color: #7c3aed;
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+        }
+
+        .level-pill-btn.pill-doctoral.pill-active {
+            background: #7c3aed;
+            color: #ffffff;
+            border-color: #7c3aed;
+            box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
+        }
+
+        .level-pill-btn.pill-doctoral .doc-badge {
+            background: #7c3aed;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.4px;
+            transition: all 0.2s ease;
+        }
+
+        .level-pill-btn.pill-doctoral.pill-active .doc-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: none;
         }
 
         /* Captcha Card */
@@ -946,12 +1012,21 @@
                     </select>
                 </div>
 
-                <!-- 3. Undergrade | PG | Doctoral (from wireframe) -->
+                <!-- 3. Undergraduate | PG | Doctoral -->
                 <div class="level-section">
                     <div class="level-pills-row">
-                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">Undergrade</button>
-                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">PG</button>
-                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('Doctoral', this)">Doctoral</button>
+                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">
+                            <span>Undergraduate</span>
+                        </button>
+                        <div class="level-pill-divider"></div>
+                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">
+                            <span>PG</span>
+                        </button>
+                        <div class="level-pill-divider"></div>
+                        <button type="button" class="level-pill-btn pill-doctoral" onclick="selectProgramLevel('Doctoral', this)">
+                            <span>Doctoral</span>
+                            <span class="doc-badge">Ph.D</span>
+                        </button>
                     </div>
                 </div>
 
@@ -1030,7 +1105,8 @@
 
         function selectProgramLevel(level, btnEl, preserveVal = false) {
             document.querySelectorAll('.level-pill-btn').forEach(b => b.classList.remove('pill-active'));
-            if (btnEl) btnEl.classList.add('pill-active');
+            const targetBtn = btnEl ? (btnEl.closest('.level-pill-btn') || btnEl) : null;
+            if (targetBtn) targetBtn.classList.add('pill-active');
             document.getElementById('input_program_level').value = level;
 
             const courseSelect = document.getElementById('course_select');

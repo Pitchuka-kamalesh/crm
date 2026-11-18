@@ -26,6 +26,7 @@
         "psr-4": {
             "App\\": "app/",
             "Modules\\Sms\\": "Modules/Sms/app/",
+            "Modules\\Mail\\": "Modules/Mail/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
