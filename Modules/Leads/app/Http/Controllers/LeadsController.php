@@ -1217,6 +1217,9 @@ class LeadsController extends Controller
      */
     public function downloadReport(Request $request)
     {
+        @ini_set('memory_limit', '512M');
+        @set_time_limit(300);
+
         $format = strtolower((string) $request->input('format', 'excel'));
         $statuses = (array) $request->input('status', ['all']);
 
@@ -1247,37 +1250,32 @@ class LeadsController extends Controller
             });
         }
 
-        $leads = $query->orderBy('log_timestamp', 'desc')->get();
-
-        // Fetch telecaller names from employees table
-        $empCodes = $leads->pluck('empcode')->filter()->unique()->all();
+        // Fetch telecaller names from employees table directly without full table scan
         $employeeMap = [];
-        if (!empty($empCodes)) {
-            try {
-                $employeeMap = \App\Models\Employee::whereIn('emp_code', $empCodes)
-                    ->pluck('full_name', 'emp_code')
-                    ->all();
-            } catch (\Throwable $e) {}
-        }
+        try {
+            $employeeMap = \App\Models\Employee::pluck('full_name', 'emp_code')->all();
+        } catch (\Throwable $e) {}
 
         $statusSlug = $onlyAllocated ? 'allocated' : ($onlyUnallocated ? 'unallocated' : 'all');
         $statusLabel = $onlyAllocated ? 'Allocated Leads' : ($onlyUnallocated ? 'Not Allocated Leads' : 'All Leads');
         $dateStr = date('Y-m-d_His');
 
         if ($format === 'pdf') {
-            $pdfLeads = $leads->take(2000);
+            $totalCount = (clone $query)->count();
+            // DomPDF renders up to 300 rows reliably without hitting memory limits
+            $pdfLeads = (clone $query)->orderBy('log_timestamp', 'desc')->limit(300)->get();
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('leads::reports.leads_pdf', [
                 'leads' => $pdfLeads,
                 'employeeMap' => $employeeMap,
                 'statusLabel' => $statusLabel,
-                'totalCount' => $leads->count(),
+                'totalCount' => $totalCount,
                 'generatedAt' => date('d-M-Y H:i:s'),
             ])->setPaper('a4', 'landscape');
 
             return $pdf->download("leads_{$statusSlug}_{$dateStr}.pdf");
         }
 
-        // Default: Excel (.csv stream with UTF-8 BOM for Microsoft Excel)
+        // Default: Excel (.csv stream with UTF-8 BOM for Microsoft Excel) via cursor for 0-memory footprint
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"leads_{$statusSlug}_{$dateStr}.csv\"",
@@ -1286,7 +1284,7 @@ class LeadsController extends Controller
             'Expires' => '0',
         ];
 
-        $callback = function () use ($leads, $employeeMap) {
+        $callback = function () use ($query, $employeeMap) {
             $handle = fopen('php://output', 'w');
             // Write UTF-8 BOM so Excel opens it with proper encoding
             fwrite($handle, "\xEF\xBB\xBF");
@@ -1302,7 +1300,7 @@ class LeadsController extends Controller
             ]);
 
             $sno = 1;
-            foreach ($leads as $lead) {
+            foreach ($query->orderBy('log_timestamp', 'desc')->cursor() as $lead) {
                 $isAlloc = !empty($lead->empcode) && (string) $lead->empcode !== '0';
                 $empCodeStr = $isAlloc ? (string) $lead->empcode : '0';
                 $telecallerName = $isAlloc ? ($employeeMap[$lead->empcode] ?? $lead->empcode) : 'Unallocated';
