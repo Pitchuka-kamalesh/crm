@@ -94,53 +94,29 @@ class TelecallerKpiController extends Controller
             ->get()
             ->groupBy('empcode');
 
-        // Pre-fetch completed indicators across the system for "all steps completed" vs "not completed"
-        $completedFromReg = DB::table('crm.student_registration')
-            ->where(function ($q) {
-                $q->whereIn(DB::raw('LOWER(stage1)'), ['paid', 'completed'])
-                  ->whereIn(DB::raw('LOWER(stage2)'), ['completed', 'na'])
-                  ->whereIn(DB::raw('LOWER(stage3)'), ['completed', 'na']);
-            })
-            ->orWhere('std_status', 'Admitted')
-            ->get(['phoneno', 'applinano']);
-
-        $regCompletedPhones = $completedFromReg->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
-        $regCompletedApplis = $completedFromReg->pluck('applinano')->filter()->map(fn($a) => (string)$a)->unique();
-
-        $examScheduled = DB::table('exam_schedule')->get(['phoneno', 'applino']);
-        $examPhones = $examScheduled->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
-        $examApplis = $examScheduled->pluck('applino')->filter()->map(fn($a) => (string)$a)->unique();
-
+        // Pre-fetch completed payment indicators (payment completed = lead completed)
         $paidApplis = DB::table('finance.paydetails')
             ->where(function ($q) {
-                $q->where('txnstatus', 'success')->orWhere('paymentstatus', 'SUCCESS');
+                $q->where(DB::raw('LOWER(txnstatus)'), 'success')
+                  ->orWhere(DB::raw('LOWER(paymentstatus)'), 'success');
             })
             ->pluck('applino')
             ->filter()
             ->map(fn($a) => (string)$a)
             ->unique();
 
-        $personalPhones = DB::table('crm.student_personal_info')->pluck('phoneno')->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
-        $personalApplis = DB::table('crm.student_personal_info')->pluck('applino')->map(fn($a) => (string)$a)->unique();
+        $regPaidRecords = DB::table('crm.student_registration')
+            ->where(function ($q) {
+                $q->where(DB::raw('LOWER(stage1)'), 'paid')
+                  ->orWhere(DB::raw('LOWER(std_status)'), 'fee paid')
+                  ->orWhere(DB::raw('LOWER(std_status)'), 'admitted');
+            })
+            ->get(['phoneno', 'applinano']);
 
-        $academicPhones = DB::table('crm.student_academic_details')->pluck('phoneno')->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
-        $academicApplis = DB::table('crm.student_academic_details')->pluck('applino')->map(fn($a) => (string)$a)->unique();
+        $regPaidPhones = $regPaidRecords->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
+        $regPaidApplis = $regPaidRecords->pluck('applinano')->filter()->map(fn($a) => (string)$a)->unique();
 
-        $completedTaskStages = [
-            'academic details completed',
-            'admission confirmed',
-            'admitted',
-            'all steps completed',
-            'completed',
-            'exam slot booked',
-        ];
-        $taskCompleted = DB::table('crm.telecaller_leads_tasks')
-            ->whereIn(DB::raw('LOWER(stage_name)'), $completedTaskStages)
-            ->get(['phoneno', 'applino']);
-        $taskCompletedPhones = $taskCompleted->pluck('phoneno')->filter()->map(fn($p) => preg_replace('/\D/', '', (string)$p))->unique();
-        $taskCompletedApplis = $taskCompleted->pluck('applino')->filter()->map(fn($a) => (string)$a)->unique();
-
-        // Calculate completed vs not completed per allocated lead
+        // Calculate completed vs incompleted leads strictly based on payment completion
         $allAllocLeads = TelecallerLead::when($isTelecaller, fn($q) => $q->where('empcode', $userEmpCode))
             ->select('empcode', 'phoneno', 'applino')
             ->get();
@@ -163,22 +139,17 @@ class TelecallerKpiController extends Controller
             }
             $stepStatsByEmp[$emp]['allocated']++;
 
-            $isCompleted = false;
-            if ($regCompletedPhones->contains($cleanPhone) || ($appNo !== '0' && $regCompletedApplis->contains($appNo))) {
-                $isCompleted = true;
-            } elseif ($examPhones->contains($cleanPhone) || ($appNo !== '0' && $examApplis->contains($appNo))) {
-                $isCompleted = true;
-            } elseif ($taskCompletedPhones->contains($cleanPhone) || ($appNo !== '0' && $taskCompletedApplis->contains($appNo))) {
-                $isCompleted = true;
-            } elseif ($appNo !== '0' && $paidApplis->contains($appNo)) {
-                $hasPersonal = $personalPhones->contains($cleanPhone) || $personalApplis->contains($appNo);
-                $hasAcademic = $academicPhones->contains($cleanPhone) || $academicApplis->contains($appNo);
-                if ($hasPersonal && $hasAcademic) {
-                    $isCompleted = true;
-                }
+            // Lead is completed whenever payment is completed
+            $isPaid = false;
+            if ($appNo !== '0' && $paidApplis->contains($appNo)) {
+                $isPaid = true;
+            } elseif ($regPaidPhones->contains($cleanPhone)) {
+                $isPaid = true;
+            } elseif ($appNo !== '0' && $regPaidApplis->contains($appNo)) {
+                $isPaid = true;
             }
 
-            if ($isCompleted) {
+            if ($isPaid) {
                 $stepStatsByEmp[$emp]['completed']++;
                 $totalAllStepsCompleted++;
             } else {
