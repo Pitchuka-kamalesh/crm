@@ -224,10 +224,22 @@
             }
         }
 
+        .form-row-single {
+            width: 100%;
+        }
+
         .form-row-3col {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 0.75rem;
+        }
+
+        .form-row-3col .select-field {
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.74rem 1.85rem 0.74rem 0.75rem;
+            background-position: right 0.55rem center;
+            background-size: 0.88rem;
         }
 
         @media (max-width: 600px) {
@@ -458,7 +470,30 @@
             transform: rotate(180deg);
         }
 
-        /* 4-column compact triggers */
+        /* 3-column & 4-column compact triggers */
+        .form-row-3col .custom-select-trigger {
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.74rem 0.65rem;
+            letter-spacing: -0.01em;
+        }
+
+        .form-row-3col .custom-select-arrow {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row-3col .custom-select-trigger {
+                font-size: 0.85rem;
+                padding: 0.76rem 0.95rem;
+            }
+            .form-row-3col .custom-select-arrow {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
         .form-row-4col .custom-select-trigger {
             font-size: 0.80rem;
             font-weight: 600;
@@ -983,8 +1018,8 @@
                     </span>
                 </div>
 
-                <!-- 2. select campus | select country | State | District (dynamically populated from DB) -->
-                <div class="form-row-4col">
+                <!-- 2a. select campus (Single Row) -->
+                <div class="form-row-single">
                     <select name="campus_id" required class="select-field">
                         <option value="">select campus</option>
                         @foreach($campuses as $campus)
@@ -993,7 +1028,10 @@
                             </option>
                         @endforeach
                     </select>
+                </div>
 
+                <!-- 2b. select country | State | District (3 Fields Row) -->
+                <div class="form-row-3col">
                     <select name="country_id" id="country_select" required class="select-field" onchange="filterStates(this.value)">
                         <option value="">select country</option>
                         @foreach($countries as $country)
