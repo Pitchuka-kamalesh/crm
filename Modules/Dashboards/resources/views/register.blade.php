@@ -592,84 +592,106 @@
         }
 
         .level-pills-row {
-            display: flex;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 5px 6px;
-            border-radius: 12px;
-            border: 1px solid #cbd5e1;
-            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 0.15rem;
         }
 
         .level-pill-btn {
-            flex: 1;
-            height: 40px;
-            padding: 0 0.5rem;
-            border: 1.5px solid transparent;
-            background: transparent;
-            border-radius: 8px;
+            width: 100%;
+            height: 42px;
+            padding: 0 0.4rem;
+            border-radius: 10px;
             font-size: 0.84rem;
             font-weight: 700;
-            color: #334155;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
             user-select: none;
             white-space: nowrap;
             position: relative;
+            border: 1.5px solid transparent;
         }
 
-        .level-pill-btn:hover:not(.pill-active):not(.pill-doctoral) {
-            background: rgba(255, 255, 255, 0.85);
-            color: #0f172a;
+        /* 1. Undergraduate (UG) - Blue Theme */
+        .level-pill-btn.btn-ug {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+            box-shadow: 0 1px 2px rgba(29, 78, 216, 0.05);
         }
 
-        .level-pill-btn.pill-active:not(.pill-doctoral) {
-            background: #2563eb;
+        .level-pill-btn.btn-ug:hover:not(.pill-active) {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1e40af;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .level-pill-btn.btn-ug.pill-active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-color: #1d4ed8;
             color: #ffffff;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
         }
 
-        /* Visible, crisp vertical separation line */
-        .level-pill-divider {
-            width: 1.5px;
-            height: 22px;
-            background: #94a3b8;
-            flex-shrink: 0;
-            border-radius: 1px;
-            margin: 0 6px;
+        /* 2. Postgraduate (PG) - Green Theme */
+        .level-pill-btn.btn-pg {
+            background: #f0fdf4;
+            color: #15803d;
+            border-color: #bbf7d0;
+            box-shadow: 0 1px 2px rgba(21, 128, 61, 0.05);
         }
 
-        /* Properly highlighted Doctoral Pill */
-        .level-pill-btn.pill-doctoral {
+        .level-pill-btn.btn-pg:hover:not(.pill-active) {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+            box-shadow: 0 2px 6px rgba(22, 163, 74, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .level-pill-btn.btn-pg.pill-active {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border-color: #15803d;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+            transform: translateY(-1px);
+        }
+
+        /* 3. Doctoral (Ph.D) - Purple Theme */
+        .level-pill-btn.btn-doctoral {
+            background: #faf5ff;
+            color: #7c3aed;
+            border-color: #e9d5ff;
+            box-shadow: 0 1px 2px rgba(124, 58, 237, 0.05);
+        }
+
+        .level-pill-btn.btn-doctoral:hover:not(.pill-active) {
+            background: #f3e8ff;
+            border-color: #d8b4fe;
             color: #6d28d9;
-            background: #f5f3ff;
-            border: 1.5px solid #8b5cf6;
-            font-weight: 750;
-            box-shadow: 0 1px 3px rgba(139, 92, 246, 0.15);
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+            transform: translateY(-1px);
         }
 
-        .level-pill-btn.pill-doctoral:hover:not(.pill-active) {
-            background: #ede9fe;
-            color: #5b21b6;
-            border-color: #7c3aed;
-            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
-        }
-
-        .level-pill-btn.pill-doctoral.pill-active {
-            background: #7c3aed;
+        .level-pill-btn.btn-doctoral.pill-active {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border-color: #6d28d9;
             color: #ffffff;
-            border-color: #7c3aed;
-            box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.35);
+            transform: translateY(-1px);
         }
 
-        .level-pill-btn.pill-doctoral .doc-badge {
+        .level-pill-btn.btn-doctoral .doc-badge {
             background: #7c3aed;
             color: #ffffff;
             font-size: 0.65rem;
@@ -680,11 +702,15 @@
             transition: all 0.2s ease;
         }
 
-        .level-pill-btn.pill-doctoral.pill-active .doc-badge {
+        .level-pill-btn.btn-doctoral.pill-active .doc-badge {
             background: rgba(255, 255, 255, 0.25);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.4);
             box-shadow: none;
+        }
+
+        .level-pill-divider {
+            display: none;
         }
 
         /* Captcha Card */
@@ -1025,15 +1051,13 @@
                 <!-- 3. Undergraduate | PG | Doctoral -->
                 <div class="level-section">
                     <div class="level-pills-row">
-                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">
+                        <button type="button" class="level-pill-btn btn-ug pill-active" data-level="UG" onclick="selectProgramLevel('UG', this)">
                             <span>Undergraduate</span>
                         </button>
-                        <div class="level-pill-divider"></div>
-                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">
+                        <button type="button" class="level-pill-btn btn-pg" data-level="PG" onclick="selectProgramLevel('PG', this)">
                             <span>PG</span>
                         </button>
-                        <div class="level-pill-divider"></div>
-                        <button type="button" class="level-pill-btn pill-doctoral" onclick="selectProgramLevel('Doctoral', this)">
+                        <button type="button" class="level-pill-btn btn-doctoral" data-level="Doctoral" onclick="selectProgramLevel('Doctoral', this)">
                             <span>Doctoral</span>
                             <span class="doc-badge">Ph.D</span>
                         </button>
@@ -1115,7 +1139,7 @@
 
         function selectProgramLevel(level, btnEl, preserveVal = false) {
             document.querySelectorAll('.level-pill-btn').forEach(b => b.classList.remove('pill-active'));
-            const targetBtn = btnEl ? (btnEl.closest('.level-pill-btn') || btnEl) : null;
+            const targetBtn = btnEl ? (btnEl.closest('.level-pill-btn') || btnEl) : document.querySelector(`.level-pill-btn[data-level="${level}"]`);
             if (targetBtn) targetBtn.classList.add('pill-active');
             document.getElementById('input_program_level').value = level;
 
@@ -1239,7 +1263,8 @@
             }
 
             const currentLevel = document.getElementById('input_program_level')?.value || 'UG';
-            const activeBtn = Array.from(document.querySelectorAll('.level-pill-btn'))
+            const activeBtn = document.querySelector(`.level-pill-btn[data-level="${currentLevel}"]`) ||
+                Array.from(document.querySelectorAll('.level-pill-btn'))
                 .find(b => b.textContent.toLowerCase().includes(currentLevel.toLowerCase()) || (currentLevel === 'UG' && b.textContent.toLowerCase().includes('undergrade')));
             const oldProgId = '{{ old("progid", "") }}';
             if (activeBtn) {

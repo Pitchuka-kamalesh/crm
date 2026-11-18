@@ -254,7 +254,8 @@
             <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0 0 0.35rem 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🎟️</span> Discount Coupon Master
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #059669);"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                        <span>Discount Coupon Master</span>
                     </h1>
                     <p style="font-size: 0.85rem; color: #64748b; margin: 0;">
                         Configure admission fee concessions in <code>finance.couponinfo</code>. Switching the active coupon automatically stops the previous one.
@@ -275,8 +276,8 @@
             @if($activeCoupon)
                 <div class="active-banner">
                     <div style="display: flex; align-items: center; gap: 1.25rem;">
-                        <div style="width: 58px; height: 58px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.85rem;">
-                            🎟️
+                        <div style="width: 58px; height: 58px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ffffff;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
                         </div>
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
@@ -306,8 +307,9 @@
 
                         <form action="{{ route('crm.discountcoupon.stop', $activeCoupon->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to STOP this active coupon? Admission fee will revert to full base amount.');">
                             @csrf
-                            <button type="submit" style="padding: 10px 18px; background: rgba(255,255,255,0.18); color: #ffffff; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.18)'">
-                                🛑 Stop Coupon
+                            <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: rgba(255,255,255,0.18); color: #ffffff; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>
+                                <span>Stop Coupon</span>
                             </button>
                         </form>
                     </div>
@@ -315,7 +317,9 @@
             @else
                 <div class="active-banner-empty">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="font-size: 2rem;">⚠️</div>
+                        <div style="color: #f59e0b;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
                         <div>
                             <div style="font-size: 1.15rem; font-weight: 800;">No Active Default Coupon</div>
                             <div style="font-size: 0.85rem; opacity: 0.95;">
@@ -334,7 +338,8 @@
                 <div class="coupon-card-header">
                     <div>
                         <div class="coupon-card-title">
-                            <span>✍️</span> Set / Change Discount Coupon
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; color: var(--theme-accent, #059669);"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <span>Set / Change Discount Coupon</span>
                         </div>
                         <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">
                             Saving this form will automatically <strong>stop</strong> the previous coupon and <strong>activate</strong> the new concession.
@@ -427,8 +432,9 @@
                             <button type="reset" style="padding: 0 1.25rem; height: 44px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; cursor: pointer;">
                                 Reset Form
                             </button>
-                            <button type="submit" class="btn-save-coupon">
-                                <span>💾</span> Save &amp; Activate Coupon
+                            <button type="submit" class="btn-save-coupon" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                <span>Save &amp; Activate Coupon</span>
                             </button>
                         </div>
                     </form>
@@ -440,7 +446,8 @@
                 <div class="coupon-card-header">
                     <div>
                         <div class="coupon-card-title">
-                            <span>📋</span> Coupon History &amp; Audit Ledger
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; color: var(--theme-accent, #059669);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            <span>Coupon History &amp; Audit Ledger</span>
                         </div>
                         <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">
                             All discount coupon revisions recorded in <code>finance.couponinfo</code> (Total: {{ number_format($totalCount) }} records)
@@ -534,15 +541,17 @@
                                         @if($isActive)
                                             <form action="{{ route('crm.discountcoupon.stop', $coup->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Stop this coupon?');">
                                                 @csrf
-                                                <button type="submit" class="btn-stop-coupon" title="Stop this coupon">
-                                                    🛑 Stop
+                                                <button type="submit" class="btn-stop-coupon" title="Stop this coupon" style="display: inline-flex; align-items: center; gap: 4px;">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>
+                                                    <span>Stop</span>
                                                 </button>
                                             </form>
                                         @else
                                             <form action="{{ route('crm.discountcoupon.activate', $coup->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Activate this coupon? It will stop the currently active coupon.');">
                                                 @csrf
-                                                <button type="submit" class="btn-activate-coupon" title="Activate this coupon">
-                                                    ✓ Activate
+                                                <button type="submit" class="btn-activate-coupon" title="Activate this coupon" style="display: inline-flex; align-items: center; gap: 4px;">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                                    <span>Activate</span>
                                                 </button>
                                             </form>
                                         @endif
@@ -551,7 +560,9 @@
                             @empty
                                 <tr>
                                     <td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
-                                        <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">🎟️</div>
+                                        <div style="margin-bottom: 0.5rem; color: #cbd5e1;">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                                        </div>
                                         <div style="font-weight: 600;">No coupon records found in <code>finance.couponinfo</code>.</div>
                                     </td>
                                 </tr>

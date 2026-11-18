@@ -36,8 +36,8 @@
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
         }
         .telecaller-filter-wrapper:focus-within {
-            border-color: #2563eb !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+            border-color: var(--theme-accent, #2563eb) !important;
+            box-shadow: 0 0 0 3px var(--theme-accent-ring, rgba(37, 99, 235, 0.18)) !important;
         }
         .kpi-metric-card:hover {
             border-color: #cbd5e1 !important;
@@ -121,14 +121,14 @@
                         <!-- Telecaller Selection Dropdown Filter -->
                         <div class="telecaller-filter-wrapper" style="position: relative; display: inline-flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 9px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
                             <div style="display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; height: 38px; background: #f8fafc; border-right: 1.5px solid #cbd5e1; font-size: 0.74rem; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.4px; user-select: none; white-space: nowrap;">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-accent, #2563eb);" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="9" cy="7" r="4"></circle>
                                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                 </svg>
                                 <span>Telecallers:</span>
-                                <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px; padding: 0 6px; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 0.72rem; border-radius: 999px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);">
+                                <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px; padding: 0 6px; background: var(--theme-accent, #2563eb); color: #ffffff; font-weight: 800; font-size: 0.72rem; border-radius: 999px; box-shadow: 0 1px 2px var(--theme-accent-ring, rgba(37, 99, 235, 0.25));">
                                     {{ count($telecallerStats ?? []) }}
                                 </span>
                             </div>
@@ -151,7 +151,7 @@
                         @endif
 
                         <!-- Export CSV Button (Beside Telecaller Dropdown) -->
-                        <button type="button" onclick="exportTelecallerKpiCsv()" style="height: 38px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                        <button type="button" class="btn-theme-export" onclick="exportTelecallerKpiCsv()" style="height: 38px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: var(--theme-accent, #0284c7); color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px var(--theme-accent-ring, rgba(2, 132, 199, 0.25));">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -174,7 +174,7 @@
                         <!-- Card 2: Calls Logged -->
                         <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
                             <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Call Tasks Logged</span>
-                            <strong id="kpiCardTasksValue" style="font-size: 1.35rem; font-weight: 800; color: #2563eb; line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</strong>
+                            <strong id="kpiCardTasksValue" style="font-size: 1.35rem; font-weight: 800; color: var(--theme-accent, #2563eb); line-height: 1; font-family: 'JetBrains Mono', monospace;">{{ number_format($teleTasksCount) }}</strong>
                         </div>
 
                         <!-- Card 3: Leads Contacted -->

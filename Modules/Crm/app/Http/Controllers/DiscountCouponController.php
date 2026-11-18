@@ -19,7 +19,7 @@ class DiscountCouponController extends Controller
         $user = Auth::user();
         $roleId = $user ? $user->getActiveRoleId() : \Modules\Auth\Services\RoleService::defaultStaffRoleId();
         $roleName = $user ? $user->role_label : 'CRM Official';
-        $activeTab = $request->query('tab', 'couponinfo');
+        $activeTab = $request->query('tab', 'discountcoupon');
 
         $roleMenus = collect();
         try {
@@ -140,7 +140,7 @@ class DiscountCouponController extends Controller
 
         $quotaMsg = $stdCount ? "for {$stdCount} students" : "for ALL students (works until stopped)";
 
-        return redirect()->route('crm.discountcoupon', ['tab' => 'couponinfo'])
+        return redirect()->route('crm.discountcoupon', ['tab' => 'discountcoupon'])
             ->with('status', "✓ New discount coupon '{$name}' (₹" . number_format($amount, 2) . ") activated {$quotaMsg} starting from {$startDate}!{$stoppedNote}");
     }
 

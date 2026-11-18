@@ -74,14 +74,14 @@
             <div class="content-card">
                 <div class="card-header-bar" style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <h2 class="card-title" style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🎓 Student KPI &amp; Conversion Analytics</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #059669);"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                        <span>Student KPI &amp; Conversion Analytics</span>
                     </h2>
                     <button type="button" 
                             id="exportStudentKpiTopBtn"
                             onclick="exportStudentKpiExcel()" 
-                            style="height: 36px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #059669; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(5, 150, 105, 0.25);"
-                            onmouseover="this.style.background='#047857'"
-                            onmouseout="this.style.background='#059669'">
+                            class="btn-theme-export"
+                            style="height: 36px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: var(--theme-accent, #059669); color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px var(--theme-accent-ring, rgba(5, 150, 105, 0.25));">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
@@ -231,9 +231,8 @@
                             <button type="button" 
                                     id="exportStudentKpiTableBtn"
                                     onclick="exportStudentKpiExcel()" 
-                                    style="height: 32px; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0 0.95rem; background: #059669; color: #ffffff; border: none; border-radius: 7px; font-size: 0.785rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);"
-                                    onmouseover="this.style.background='#047857'"
-                                    onmouseout="this.style.background='#059669'">
+                                    class="btn-theme-export"
+                                    style="height: 32px; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0 0.95rem; background: var(--theme-accent, #059669); color: #ffffff; border: none; border-radius: 7px; font-size: 0.785rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 2px var(--theme-accent-ring, rgba(5, 150, 105, 0.2));">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="7 10 12 15 17 10"></polyline>
