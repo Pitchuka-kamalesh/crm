@@ -433,7 +433,7 @@
                                     <!-- Application No -->
                                     <td style="padding: 0.75rem 0.85rem; font-weight: 800; color: #0f172a; white-space: nowrap;">
                                         <a href="{{ route('application.show', ['id' => $row->applino]) }}" target="_blank" style="color: #2563eb; text-decoration: none;" title="Open Candidate Dossier">
-                                            #{{ $row->applino }}
+                                            {{ $row->applino }}
                                         </a>
                                     </td>
 
@@ -473,12 +473,10 @@
                                     <td style="padding: 0.75rem 0.85rem; white-space: nowrap;">
                                         @if($isS1)
                                             <span class="slot-pill-s1">
-                                                <span>🌅</span>
                                                 <span>{{ $row->exam_slot }}</span>
                                             </span>
                                         @elseif($isS2)
                                             <span class="slot-pill-s2">
-                                                <span>☀️</span>
                                                 <span>{{ $row->exam_slot }}</span>
                                             </span>
                                         @else
@@ -492,10 +490,11 @@
                                     <td style="padding: 0.75rem 0.85rem; text-align: center; white-space: nowrap;">
                                         @if($isConfirmed)
                                             <span class="status-badge-confirmed">
-                                                <span>✓</span> Confirmed
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Confirmed
                                             </span>
                                         @else
-                                            <span style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700;">
+                                            <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700;">
                                                 Pending
                                             </span>
                                         @endif
@@ -509,8 +508,9 @@
 
                                     <!-- Action -->
                                     <td class="no-print" style="padding: 0.75rem 0.85rem; text-align: center; white-space: nowrap;">
-                                        <a href="{{ route('application.show', ['id' => $row->applino]) }}" target="_blank" class="btn-table-action" style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.74rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; text-decoration: none;">
-                                            <span>👁️ View Form</span>
+                                        <a href="{{ route('application.show', ['id' => $row->applino]) }}" target="_blank" class="btn-table-action" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.74rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; text-decoration: none;">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            <span>View Form</span>
                                         </a>
                                     </td>
                                 </tr>
@@ -620,7 +620,7 @@
         const table = document.getElementById('examScheduleTable');
         if (!table) return;
 
-        const headers = ['#', 'Application No', 'Candidate Name', 'Phone No', 'CRM ID', 'Program & Branch', 'Scheduled Date', 'Exam Slot / Timing', 'Status', 'Booking Details'];
+        const headers = ['S.No', 'Application No', 'Candidate Name', 'Phone No', 'CRM ID', 'Program & Branch', 'Scheduled Date', 'Exam Slot / Timing', 'Status', 'Booking Details'];
         const rows = [];
         
         const trs = table.querySelectorAll('tbody tr');
@@ -629,19 +629,34 @@
             if (tr.style.display !== 'none' && !tr.querySelector('td[colspan]')) {
                 const cells = tr.querySelectorAll('td');
                 if (cells.length >= 10) {
-                    const rowData = [
+                    const appNo = cells[1].innerText.replace(/^[#\s]+/, '').trim();
+                    const name = cells[2].innerText.replace(/\s+/g, ' ').trim();
+                    const phone = cells[3].innerText.replace(/\s+/g, ' ').trim();
+                    const crmId = cells[4].innerText.replace(/\s+/g, ' ').trim();
+                    const progBranch = cells[5].innerText.replace(/\s+/g, ' ').trim();
+                    const schedDate = cells[6].innerText.replace(/\s+/g, ' ').trim();
+                    const slotTiming = cells[7].innerText
+                        .replace(/[🌅☀️\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    const status = cells[8].innerText
+                        .replace(/[✓✔\u{2705}\u{2713}\u{2714}]/gu, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    const bookingDetails = cells[9].innerText.replace(/\s+/g, ' ').trim();
+
+                    rows.push([
                         index++,
-                        cells[1].innerText.trim(),
-                        cells[2].innerText.trim(),
-                        cells[3].innerText.trim(),
-                        cells[4].innerText.trim(),
-                        cells[5].innerText.trim(),
-                        cells[6].innerText.trim(),
-                        cells[7].innerText.trim(),
-                        cells[8].innerText.trim().replace(/\s+/g, ' '),
-                        cells[9].innerText.trim().replace(/\s+/g, ' ')
-                    ];
-                    rows.push(rowData);
+                        appNo,
+                        name,
+                        phone,
+                        crmId,
+                        progBranch,
+                        schedDate,
+                        slotTiming,
+                        status,
+                        bookingDetails
+                    ]);
                 }
             }
         });
@@ -652,7 +667,7 @@
         }
 
         let csvContent = "\uFEFF";
-        csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\r\n";
+        csvContent += headers.map(h => `"${(h || '').toString().replace(/"/g, '""')}"`).join(",") + "\r\n";
         rows.forEach(r => {
             csvContent += r.map(c => `"${(c ?? '').toString().replace(/"/g, '""')}"`).join(",") + "\r\n";
         });
