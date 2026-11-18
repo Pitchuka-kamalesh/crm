@@ -1848,53 +1848,34 @@
                             <input type="hidden" name="eval_type" id="eval_type" value="{{ $academicDetails?->tenth_marks_type ?? 'Marks' }}">
                             <fieldset @if($isPaid) disabled @endif style="border: none; margin: 0; padding: 0;">
 
-                            <!-- Degree Level Switcher Tabs -->
-                            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                                    <div style="font-size: 0.78rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Degree / Program Level</div>
-                                    <span style="font-size: 0.74rem; color: #64748b;">Switch tabs to see degree-specific academic qualifications</span>
-                                </div>
-                                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                                    <button type="button" id="tab-deg-ug" onclick="setDegreeLevel('btech')" class="btn-deg-pill" style="padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; transition: all 0.2s;">
-                                        🎓 Undergraduate (UG / B.Tech)
-                                    </button>
-                                    <button type="button" id="tab-deg-pg" onclick="setDegreeLevel('mtech')" class="btn-deg-pill" style="padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; transition: all 0.2s;">
-                                        📘 Postgraduate (PG / M.Tech)
-                                    </button>
-                                    <button type="button" id="tab-deg-phd" onclick="setDegreeLevel('phd')" class="btn-deg-pill" style="padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; transition: all 0.2s;">
-                                        🔬 Doctoral (Ph.D)
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
+                            <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO (OPTIONAL) ================= -->
                             <div class="mockup-subbox" id="sec-10th-details">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
                                     <h4 class="mockup-subbox-title">10th / Secondary School Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #10b981; color: #fff; font-size: 0.72rem;">Mandatory</span>
+                                    <span class="mockup-pill-badge" style="background: #64748b; color: #fff; font-size: 0.72rem;">Optional</span>
                                 </div>
 
                                 <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="school_co_name" id="tenth_school_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / Institute Name" required>
+                                        <label class="mockup-label">College Name / Institute Name:</label>
+                                        <input type="text" name="school_co_name" id="tenth_school_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / Institute Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Board: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="boad_of_study" id="tenth_study_board" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board (e.g. BSEAP, CBSE, ICSE)" required>
+                                        <label class="mockup-label">Board:</label>
+                                        <input type="text" name="boad_of_study" id="tenth_study_board" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board (e.g. BSEAP, CBSE, ICSE)">
                                     </div>
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
                                 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="tenth_school_city" id="tenth_school_city" class="mockup-input" value="{{ $academicDetails?->tenth_school_city }}" placeholder="Enter City" required>
+                                        <label class="mockup-label">City:</label>
+                                        <input type="text" name="tenth_school_city" id="tenth_school_city" class="mockup-input" value="{{ $academicDetails?->tenth_school_city }}" placeholder="Enter City">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">State: <span style="color:#ef4444;">*</span></label>
-                                        <select name="tenth_school_state" id="geo-tenth-state-select" class="mockup-select" onchange="onTenthStateChange(this.value)" required>
+                                        <label class="mockup-label">State:</label>
+                                        <select name="tenth_school_state" id="geo-tenth-state-select" class="mockup-select" onchange="onTenthStateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
@@ -1908,8 +1889,8 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">District: <span style="color:#ef4444;">*</span></label>
-                                        <select name="tenth_school_district" id="geo-tenth-district-select" class="mockup-select" required>
+                                        <label class="mockup-label">District:</label>
+                                        <select name="tenth_school_district" id="geo-tenth-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
@@ -1927,16 +1908,16 @@
                                 <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="passing_year" id="tenth_passed_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030" required>
+                                        <label class="mockup-label">Year:</label>
+                                        <input type="number" name="passing_year" id="tenth_passed_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number/Registration number: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="roll_no" id="tenth_roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Hall Ticket / Reg No" required>
+                                        <label class="mockup-label">Hall Ticket number/Registration number:</label>
+                                        <input type="text" name="roll_no" id="tenth_roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Hall Ticket / Reg No">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
-                                        <select name="tenth_current_status" id="tenth_current_status" class="mockup-select" required>
+                                        <label class="mockup-label">Current Status:</label>
+                                        <select name="tenth_current_status" id="tenth_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->tenth_current_status === 'Completed' || !$academicDetails?->tenth_current_status) ? 'selected' : '' }}>Completed / Passed</option>
                                         </select>
                                     </div>
@@ -1945,23 +1926,23 @@
                                 <!-- Row 4: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (%) (4 Columns) -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
-                                        <select name="tenth_marks_type" id="tenth_marks_type" class="mockup-select" onchange="onTenthMarksTypeChange(this.value)" required>
+                                        <label class="mockup-label">Marks Type:</label>
+                                        <select name="tenth_marks_type" id="tenth_marks_type" class="mockup-select" onchange="onTenthMarksTypeChange(this.value)">
                                             <option value="Marks" {{ ($academicDetails?->tenth_marks_type === 'Marks' || $academicDetails?->tenth_marks_type === 'marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->tenth_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted }}" placeholder="e.g. 600" oninput="calculateTenthPct()" required>
+                                        <label class="mockup-label">Total Marks (Conducted):</label>
+                                        <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()" required>
+                                        <label class="mockup-label">Marks Earned:</label>
+                                        <input type="number" step="0.01" name="tenth_marks_earned" id="tenth_marks_earned" class="mockup-input" value="{{ $academicDetails?->tenth_marks_earned ?? $academicDetails?->tenth_marks }}" placeholder="e.g. 580" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
+                                        <label class="mockup-label">Percentage (%):</label>
+                                        <input type="number" step="0.01" name="tenth_percentage" id="tenth_percentage" class="mockup-input" value="{{ $academicDetails?->tenth_percentage }}" placeholder="e.g. 96.67" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
                                     </div>
                                 </div>
                             </div>
@@ -2674,25 +2655,6 @@
                                 const optUgFinalYear = document.getElementById('opt-ug-final-year');
                                 const spanCutoff = document.getElementById('span-pu2-cutoff');
 
-                                // Tabs styling
-                                const tabs = {
-                                    'btech': document.getElementById('tab-deg-ug'),
-                                    'mtech': document.getElementById('tab-deg-pg'),
-                                    'phd': document.getElementById('tab-deg-phd')
-                                };
-                                Object.keys(tabs).forEach(k => {
-                                    const btn = tabs[k];
-                                    if (!btn) return;
-                                    if (k === level) {
-                                        btn.style.background = '#0f2744';
-                                        btn.style.color = '#ffffff';
-                                        btn.style.borderColor = '#0f2744';
-                                    } else {
-                                        btn.style.background = '#ffffff';
-                                        btn.style.color = '#334155';
-                                        btn.style.borderColor = '#cbd5e1';
-                                    }
-                                });
 
                                 if (level === 'mtech') {
                                     // PG: 10th, Intermediate (default 2nd year), UG (Completed / Final Year)
