@@ -4094,7 +4094,17 @@
 
         const url = `/leads/download?format=${encodeURIComponent(format)}&status=${encodeURIComponent(statuses.join(','))}`;
         closeLeadDownloadModal();
-        window.location.href = url;
+        if (typeof showToast === 'function') {
+            showToast('Preparing your leads download...');
+        }
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+            document.body.removeChild(link);
+        }, 100);
     }
 
     // ===== ALLOCATE CONFIRMATION MODAL FUNCTIONS =====
