@@ -1493,23 +1493,7 @@
             </a>
 
 
-            <!-- Appearance & Theme Palette Capsule (Matches Reference Image) -->
-            <div class="nav-theme-controls-capsule" title="Appearance &amp; Theme Palette">
-                <div class="nav-theme-color-palette" role="radiogroup" aria-label="Color Palette">
-                    <button type="button" class="nav-theme-color-dot dot-maroon" data-color="maroon" onclick="setAppThemeColor('maroon')" title="Dark Maroon Theme" aria-label="Dark Maroon Theme">
-                        <span class="theme-dot-check">✓</span>
-                    </button>
-                    <button type="button" class="nav-theme-color-dot dot-blue" data-color="blue" onclick="setAppThemeColor('blue')" title="Blue Theme" aria-label="Blue Theme">
-                        <span class="theme-dot-check">✓</span>
-                    </button>
-                    <button type="button" class="nav-theme-color-dot dot-green" data-color="green" onclick="setAppThemeColor('green')" title="Green Theme" aria-label="Green Theme">
-                        <span class="theme-dot-check">✓</span>
-                    </button>
-                    <button type="button" class="nav-theme-color-dot dot-purple" data-color="purple" onclick="setAppThemeColor('purple')" title="Purple Theme" aria-label="Purple Theme">
-                        <span class="theme-dot-check">✓</span>
-                    </button>
-                </div>
-            </div>
+
 
             <div class="user-nav-cluster">
                 <div class="user-info-text">
