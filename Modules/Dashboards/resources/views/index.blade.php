@@ -7,6 +7,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/vignan-shield-clean.png">
 
+    <!-- Immediate Theme Preloader (Prevents Theme Flash & Syncs Palette across all menus) -->
+    <script>
+        (function(){
+            var color = localStorage.getItem('crm_theme_color') || 'maroon';
+            if (color === 'red') color = 'maroon';
+            var mode = localStorage.getItem('crm_theme_mode') || 'light';
+            document.documentElement.setAttribute('data-theme-color', color);
+            document.documentElement.setAttribute('data-theme-mode', mode);
+        })();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -33,6 +44,107 @@
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --border-hover: #cbd5e1;
+        }
+
+        /* Dynamic Color Themes from Palette (Purple, Blue, Green, Maroon) */
+        [data-theme-color="purple"] {
+            --brand-primary: #5b21b6;
+            --brand-accent: #7c3aed;
+            --brand-sky: #8b5cf6;
+        }
+
+        [data-theme-color="blue"] {
+            --brand-primary: #1e3a8a;
+            --brand-accent: #2563eb;
+            --brand-sky: #0ea5e9;
+        }
+
+        [data-theme-color="green"] {
+            --brand-primary: #065f46;
+            --brand-accent: #059669;
+            --brand-sky: #10b981;
+        }
+
+        [data-theme-color="red"],
+        [data-theme-color="maroon"] {
+            --brand-primary: #4a000e;
+            --brand-accent: #670014;
+            --brand-sky: #9b112c;
+        }
+
+        /* Nav Theme Controls Capsule */
+        .nav-theme-controls-capsule {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 9999px;
+            padding: 4px 8px 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+            margin-right: 0.75rem;
+        }
+
+        .nav-theme-color-palette {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .nav-theme-color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .nav-theme-color-dot:hover {
+            transform: scale(1.12);
+        }
+
+        .nav-theme-color-dot.dot-maroon {
+            background: #670014;
+            --dot-color: #670014;
+        }
+
+        .nav-theme-color-dot.dot-blue {
+            background: #2563eb;
+            --dot-color: #2563eb;
+        }
+
+        .nav-theme-color-dot.dot-green {
+            background: #059669;
+            --dot-color: #059669;
+        }
+
+        .nav-theme-color-dot.dot-purple {
+            background: #7c3aed;
+            --dot-color: #7c3aed;
+        }
+
+        .nav-theme-color-dot .theme-dot-check {
+            display: none;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .nav-theme-color-dot.is-active {
+            box-shadow: 0 0 0 2px #f1f5f9, 0 0 0 4px var(--dot-color);
+        }
+
+        .nav-theme-color-dot.is-active .theme-dot-check {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         body {
@@ -1380,6 +1492,24 @@
                 </div>
             </a>
 
+
+            <!-- Appearance & Theme Palette Capsule (Matches Reference Image) -->
+            <div class="nav-theme-controls-capsule" title="Appearance &amp; Theme Palette">
+                <div class="nav-theme-color-palette" role="radiogroup" aria-label="Color Palette">
+                    <button type="button" class="nav-theme-color-dot dot-maroon" data-color="maroon" onclick="setAppThemeColor('maroon')" title="Dark Maroon Theme" aria-label="Dark Maroon Theme">
+                        <span class="theme-dot-check">✓</span>
+                    </button>
+                    <button type="button" class="nav-theme-color-dot dot-blue" data-color="blue" onclick="setAppThemeColor('blue')" title="Blue Theme" aria-label="Blue Theme">
+                        <span class="theme-dot-check">✓</span>
+                    </button>
+                    <button type="button" class="nav-theme-color-dot dot-green" data-color="green" onclick="setAppThemeColor('green')" title="Green Theme" aria-label="Green Theme">
+                        <span class="theme-dot-check">✓</span>
+                    </button>
+                    <button type="button" class="nav-theme-color-dot dot-purple" data-color="purple" onclick="setAppThemeColor('purple')" title="Purple Theme" aria-label="Purple Theme">
+                        <span class="theme-dot-check">✓</span>
+                    </button>
+                </div>
+            </div>
 
             <div class="user-nav-cluster">
                 <div class="user-info-text">
@@ -5024,5 +5154,26 @@
             }
         </script>
     @endif
+    <script>
+        function setAppThemeColor(color) {
+            localStorage.setItem('crm_theme_color', color);
+            document.documentElement.setAttribute('data-theme-color', color);
+            document.querySelectorAll('.nav-theme-color-dot').forEach(function(dot) {
+                var dotColor = dot.getAttribute('data-color');
+                if (dotColor === color || (color === 'maroon' && dotColor === 'red')) {
+                    dot.classList.add('is-active');
+                } else {
+                    dot.classList.remove('is-active');
+                }
+            });
+        }
+
+        (function() {
+            var c = localStorage.getItem('crm_theme_color') || 'maroon';
+            if (c === 'red') c = 'maroon';
+            var d = document.querySelector('.nav-theme-color-dot[data-color="' + c + '"]');
+            if (d) d.classList.add('is-active');
+        })();
+    </script>
 </body>
 </html>
