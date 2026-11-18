@@ -35,13 +35,7 @@
             </div>
 
             <div class="top-bar-right">
-                <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="btn-header-action" title="View Paid Details" style="display: inline-flex; align-items: center; gap: 0.45rem;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
+                <a href="{{ route('finance.paiddetails', ['tab' => 'paiddetails']) }}" class="btn-header-action" title="View Paid Details">
                     <span>Paid Details</span>
                 </a>
                 @include('layouts.role-switcher')
@@ -102,8 +96,7 @@
             <!-- PAID DETAILS TABLE -->
             <div class="content-card">
                 <div class="card-header-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.15rem 1.5rem; border-bottom: 1px solid #e2e8f0;">
-                    <div class="card-title" style="font-size: 1.1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #2563eb);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <div class="card-title" style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0;">
                         <span>Paid Details Ledger</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -190,7 +183,7 @@
                                     <td style="white-space: nowrap;">
                                         <div style="font-weight: 700; color: #1e293b;">{{ $name }}</div>
                                         @if(!empty($studentPhone))
-                                            <div style="font-size: 0.75rem; color: #64748b;">📞 {{ $studentPhone }}</div>
+                                            <div style="font-size: 0.75rem; color: #64748b; font-family: 'JetBrains Mono', monospace;">{{ $studentPhone }}</div>
                                         @endif
                                     </td>
                                     <td style="white-space: nowrap;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: #334155;">{{ $appNo }}</span></td>
