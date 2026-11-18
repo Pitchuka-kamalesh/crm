@@ -20,6 +20,17 @@
     <script>if (typeof Chart === 'undefined') { document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>'); }</script>
 
     <style>
+        .telecaller-charts-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.95fr 0.9fr;
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        @media (max-width: 1200px) {
+            .telecaller-charts-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
         .telecaller-filter-wrapper:hover {
             border-color: #94a3b8 !important;
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
@@ -179,25 +190,44 @@
                         </div>
                     </div>
 
-                    <!-- 2. TELECALLER ALLOCATION & CALL STAGES BREAKDOWN -->
-                    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.5rem; margin-bottom: 1.75rem;">
-                        <!-- 1. Telecallers Step Completion Table (Replaces old Logged Call Stages Breakdown) -->
+                    <!-- 2. TELECALLER ANALYTICS & VISUAL GRAPHS -->
+                    <div class="telecaller-charts-grid">
+                        <!-- Graph 1: Telecaller Outreach & Step Completion (Grouped Bar Chart with Table View Toggle) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
                                 <div>
-                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Telecaller Step Completion Summary</div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Allocated leads by onboarding steps completed vs not completed</div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Telecaller Summary &amp; Step Completion</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Workload comparison of allotted leads, completed steps, and incompleted leads</div>
                                 </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 0.2rem 0.6rem; border-radius: 20px;">Telecaller Summary</span>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="display: inline-flex; background: #f1f5f9; padding: 2px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                        <button type="button" id="btnShowBarChart" onclick="toggleTelecallerView('chart')" style="border: none; background: #ffffff; color: #0f172a; font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer;">
+                                            📊 Chart
+                                        </button>
+                                        <button type="button" id="btnShowTable" onclick="toggleTelecallerView('table')" style="border: none; background: transparent; color: #64748b; font-weight: 600; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 4px; cursor: pointer;">
+                                            📋 Table
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="table-responsive" style="max-height: 290px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+
+                            <!-- View A: Bar Chart Container -->
+                            <div id="telecallerChartView" style="position: relative; flex-grow: 1; min-height: 260px; max-height: 290px; display: flex; align-items: center; justify-content: center;">
+                                <canvas id="telecallerBarChart"></canvas>
+                                <div id="telecallerBarEmpty" style="display: none; text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                    <div style="font-size: 0.95rem; font-weight: 600; color: #64748b;">No records found</div>
+                                </div>
+                            </div>
+
+                            <!-- View B: Table Container (Toggleable) -->
+                            <div id="telecallerTableView" style="display: none; max-height: 290px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
                                 <table class="crm-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0;">
                                     <thead>
                                         <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 2;">
                                             <th style="padding: 0.6rem 0.75rem; text-align: left; font-weight: 700; color: #475569; font-size: 0.72rem; text-transform: uppercase;">Telecaller</th>
                                             <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #475569; font-size: 0.72rem; text-transform: uppercase;">Allocated</th>
-                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #15803d; font-size: 0.72rem; text-transform: uppercase;">All Steps Completed</th>
-                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #b45309; font-size: 0.72rem; text-transform: uppercase;">Not Completed</th>
+                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #15803d; font-size: 0.72rem; text-transform: uppercase;">Completed</th>
+                                            <th style="padding: 0.6rem 0.75rem; text-align: center; font-weight: 700; color: #b45309; font-size: 0.72rem; text-transform: uppercase;">Incompleted</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -248,19 +278,88 @@
                             </div>
                         </div>
 
-                        <!-- 2. Logged Call Stages Breakdown (Visual Graph) -->
+                        <!-- Graph 2: Allotted Leads by Stage (Stage Distribution - Exact Counts, No Percentage) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
                                 <div>
                                     <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Logged Call Stages Breakdown</div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Authentic stage categories from telecaller lead tasks</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Allotted leads by current call stage</div>
                                 </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 0.2rem 0.6rem; border-radius: 20px;">Task Stages</span>
+                                <span id="leadStagesAllottedBadge" style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 0.2rem 0.65rem; border-radius: 20px;">{{ number_format($totalTelecallerLeads) }} Allotted Leads</span>
                             </div>
-                            <div style="position: relative; flex-grow: 1; min-height: 250px; max-height: 290px; display: flex; align-items: center; justify-content: center;">
-                                <canvas id="callStagesChart"></canvas>
-                                <div id="callStagesEmpty" style="display: none; text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
-                                    <div style="font-size: 0.95rem; font-weight: 600; color: #64748b;">No records found</div>
+
+                            <!-- Donut Chart of Stages -->
+                            <div style="position: relative; width: 100%; height: 170px; display: flex; align-items: center; justify-content: center;">
+                                <canvas id="leadStagesDonutChart" style="width: 100%; height: 170px;"></canvas>
+                                <div id="leadStagesEmpty" style="display: none; width: 100%; text-align: center; padding: 2rem 1rem; color: #94a3b8;">
+                                    <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No allotted leads found</div>
+                                </div>
+                            </div>
+
+                            <!-- Stage Items List Below Donut (Proper, Clear, No Percentage) -->
+                            <div id="leadStagesList" style="margin-top: 0.75rem; border-top: 1px solid #f1f5f9; padding-top: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; max-height: 130px; overflow-y: auto;">
+                                <!-- Populated dynamically by updateLeadStagesChart -->
+                            </div>
+                        </div>
+
+                        <!-- Graph 3: Calls Made Activity Over Time (Year, Month, Date Dropdowns) -->
+                        <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Calls Made Activity</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Calls logged by Year, Month, and Date</div>
+                                </div>
+                                <span id="callsMadeCountBadge" style="font-size: 0.72rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 0.2rem 0.65rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace;">0 Calls Made</span>
+                            </div>
+
+                            <!-- Year, Month, Date Filter Dropdowns -->
+                            <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                                <!-- Year Dropdown -->
+                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <label for="callYearFilter" style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Year:</label>
+                                    <select id="callYearFilter" onchange="onCallFilterChange('year')" style="font-size: 0.75rem; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.18rem 0.45rem; outline: none; cursor: pointer;">
+                                        <option value="all">All Years</option>
+                                    </select>
+                                </div>
+
+                                <!-- Month Dropdown -->
+                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <label for="callMonthFilter" style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Month:</label>
+                                    <select id="callMonthFilter" onchange="onCallFilterChange('month')" style="font-size: 0.75rem; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.18rem 0.45rem; outline: none; cursor: pointer;">
+                                        <option value="all">All Months</option>
+                                        <option value="1">Jan</option>
+                                        <option value="2">Feb</option>
+                                        <option value="3">Mar</option>
+                                        <option value="4">Apr</option>
+                                        <option value="5">May</option>
+                                        <option value="6">Jun</option>
+                                        <option value="7">Jul</option>
+                                        <option value="8">Aug</option>
+                                        <option value="9">Sep</option>
+                                        <option value="10">Oct</option>
+                                        <option value="11" selected>Nov</option>
+                                        <option value="12">Dec</option>
+                                    </select>
+                                </div>
+
+                                <!-- Date Dropdown -->
+                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <label for="callDateFilter" style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Date:</label>
+                                    <select id="callDateFilter" onchange="onCallFilterChange('date')" style="font-size: 0.75rem; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.18rem 0.45rem; outline: none; cursor: pointer;">
+                                        <option value="all">All Dates</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Calls Made Visual Graph Container -->
+                            <div style="position: relative; flex-grow: 1; min-height: 200px; max-height: 240px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                                <div id="callsMadeChartWrap" style="width: 100%; height: 200px; display: flex; align-items: center; justify-content: center;">
+                                    <canvas id="callsMadeBarChart"></canvas>
+                                </div>
+                                <div id="callsMadeEmpty" style="display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1rem; margin: auto;">
+                                    <div style="font-size: 2.3rem; line-height: 1; margin-bottom: 0.5rem; opacity: 0.85;">📞</div>
+                                    <div style="font-size: 1.05rem; font-weight: 700; color: #334155;">No calls made</div>
+                                    <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 0.25rem;">No call records found for the selected filter</div>
                                 </div>
                             </div>
                         </div>
@@ -364,7 +463,10 @@ const telecallerData = {
         tasks: {{ $teleTasksCount }},
         contacted: {{ $teleDistinctContacted }},
         pending: {{ $telePendingCount }},
-        stages: {!! json_encode($teleTaskStages) !!}
+        completed: {{ $totalAllStepsCompleted }},
+        not_completed: {{ $totalAllStepsNotCompleted }},
+        stages: {!! json_encode($teleTaskStages) !!},
+        lead_stages: {!! json_encode($globalLeadStages ?? []) !!}
     },
     @foreach(($telecallerStats ?? []) as $tStat)
     '{{ $tStat->emp_code }}': {
@@ -374,10 +476,579 @@ const telecallerData = {
         tasks: {{ $tStat->tasks_count }},
         contacted: {{ $tStat->contacted_count }},
         pending: {{ $tStat->pending_count }},
-        stages: {!! json_encode($tStat->stages) !!}
+        completed: {{ $tStat->allocated_completed ?? 0 }},
+        not_completed: {{ $tStat->allocated_not_completed ?? 0 }},
+        stages: {!! json_encode($tStat->stages) !!},
+        lead_stages: {!! json_encode($tStat->lead_stages ?? []) !!}
     },
     @endforeach
 };
+
+const allTelecallerStats = [
+    @foreach(($telecallerStats ?? []) as $tStat)
+    {
+        emp_code: '{{ $tStat->emp_code }}',
+        name: '{{ addslashes($tStat->name) }}',
+        allotted: {{ (int)$tStat->leads_count }},
+        tasks: {{ (int)$tStat->tasks_count }},
+        contacted: {{ (int)$tStat->contacted_count }},
+        pending: {{ (int)$tStat->pending_count }},
+        completed: {{ (int)($tStat->allocated_completed ?? 0) }},
+        not_completed: {{ (int)($tStat->allocated_not_completed ?? 0) }}
+    },
+    @endforeach
+];
+
+const allTasksData = {!! json_encode($allTasksData ?? []) !!};
+
+let telecallerBarChart = null;
+let leadStagesDonutChart = null;
+let callsMadeBarChart = null;
+
+function toggleTelecallerView(view) {
+    const chartView = document.getElementById('telecallerChartView');
+    const tableView = document.getElementById('telecallerTableView');
+    const btnChart = document.getElementById('btnShowBarChart');
+    const btnTable = document.getElementById('btnShowTable');
+
+    if (!chartView || !tableView) return;
+
+    if (view === 'table') {
+        chartView.style.display = 'none';
+        tableView.style.display = 'block';
+        if (btnChart) {
+            btnChart.style.background = 'transparent';
+            btnChart.style.color = '#64748b';
+            btnChart.style.fontWeight = '600';
+            btnChart.style.boxShadow = 'none';
+        }
+        if (btnTable) {
+            btnTable.style.background = '#ffffff';
+            btnTable.style.color = '#0f172a';
+            btnTable.style.fontWeight = '700';
+            btnTable.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+        }
+    } else {
+        tableView.style.display = 'none';
+        chartView.style.display = 'flex';
+        if (btnChart) {
+            btnChart.style.background = '#ffffff';
+            btnChart.style.color = '#0f172a';
+            btnChart.style.fontWeight = '700';
+            btnChart.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+        }
+        if (btnTable) {
+            btnTable.style.background = 'transparent';
+            btnTable.style.color = '#64748b';
+            btnTable.style.fontWeight = '600';
+            btnTable.style.boxShadow = 'none';
+        }
+        if (telecallerBarChart) {
+            telecallerBarChart.resize();
+        }
+    }
+}
+
+function updateTelecallerBarChart(empCode) {
+    const canvas = document.getElementById('telecallerBarChart');
+    const emptyEl = document.getElementById('telecallerBarEmpty');
+    if (!canvas) return;
+
+    if (empCode === 'all') {
+        // Show comparison of telecallers with leads (or all if none)
+        let activeList = allTelecallerStats.filter(s => s.allotted > 0);
+        if (activeList.length === 0) activeList = allTelecallerStats.slice(0, 8);
+
+        if (activeList.length === 0) {
+            canvas.style.display = 'none';
+            if (emptyEl) emptyEl.style.display = 'block';
+            if (telecallerBarChart) {
+                telecallerBarChart.destroy();
+                telecallerBarChart = null;
+            }
+            return;
+        }
+
+        canvas.style.display = 'block';
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        const labels = activeList.map(s => s.name);
+        const allottedData = activeList.map(s => s.allotted);
+        const completedData = activeList.map(s => s.completed);
+        const incompletedData = activeList.map(s => s.not_completed);
+
+        const chartConfig = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Allotted Leads',
+                        data: allottedData,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6,
+                        maxBarThickness: 28
+                    },
+                    {
+                        label: 'Completed Steps',
+                        data: completedData,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6,
+                        maxBarThickness: 28
+                    },
+                    {
+                        label: 'Incompleted Leads',
+                        data: incompletedData,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6,
+                        maxBarThickness: 28
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 10,
+                            font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' },
+                            color: '#334155'
+                        }
+                    },
+                    tooltip: {
+                        padding: 10,
+                        callbacks: {
+                            label: function(ctx) {
+                                return ` ${ctx.dataset.label}: ${ctx.parsed.y} leads`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' },
+                            color: '#475569'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            font: { size: 10, family: 'JetBrains Mono' },
+                            color: '#64748b'
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        };
+
+        if (telecallerBarChart) {
+            telecallerBarChart.destroy();
+        }
+        telecallerBarChart = new Chart(canvas, chartConfig);
+    } else {
+        // Single Counselor View: Breakdown of metrics for the selected telecaller
+        const data = telecallerData[empCode] || telecallerData['all'];
+        if (!data || Number(data.allotted) === 0) {
+            canvas.style.display = 'none';
+            if (emptyEl) {
+                emptyEl.style.display = 'block';
+                emptyEl.querySelector('div').textContent = 'No leads allotted to ' + (data ? data.name : 'this telecaller');
+            }
+            if (telecallerBarChart) {
+                telecallerBarChart.destroy();
+                telecallerBarChart = null;
+            }
+            return;
+        }
+
+        canvas.style.display = 'block';
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        const labels = ['Allotted Leads', 'Completed Steps', 'Incompleted Leads'];
+        const values = [
+            Number(data.allotted || 0),
+            Number(data.completed || 0),
+            Number(data.not_completed || 0)
+        ];
+        const barColors = ['#3b82f6', '#10b981', '#f59e0b'];
+
+        const chartConfig = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: data.name,
+                    data: values,
+                    backgroundColor: barColors,
+                    borderRadius: 6,
+                    maxBarThickness: 38
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        padding: 10,
+                        callbacks: {
+                            label: function(ctx) {
+                                return ` ${ctx.label}: ${ctx.parsed.y} leads`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' },
+                            color: '#475569'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            font: { size: 10, family: 'JetBrains Mono' },
+                            color: '#64748b'
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        };
+
+        if (telecallerBarChart) {
+            telecallerBarChart.destroy();
+        }
+        telecallerBarChart = new Chart(canvas, chartConfig);
+    }
+}
+
+function updateLeadStagesChart(data) {
+    const canvas = document.getElementById('leadStagesDonutChart');
+    const emptyEl = document.getElementById('leadStagesEmpty');
+    const listEl = document.getElementById('leadStagesList');
+    const badgeEl = document.getElementById('leadStagesAllottedBadge');
+    if (!canvas) return;
+
+    const allotted = Number(data.allotted || 0);
+
+    if (badgeEl) {
+        badgeEl.textContent = `${allotted.toLocaleString()} Allotted Lead${allotted === 1 ? '' : 's'}`;
+    }
+
+    // Lead stages array from controller: exact allotted leads grouped by their current stage
+    let stageItems = Array.isArray(data.lead_stages) ? [...data.lead_stages] : [];
+
+    // Fallback if lead_stages is empty but allotted > 0
+    if (stageItems.length === 0 && allotted > 0) {
+        const pending = Number(data.pending || allotted);
+        if (pending > 0) stageItems.push({ stage_name: 'Pending Call', count: pending });
+        if (Array.isArray(data.stages)) {
+            data.stages.forEach(st => {
+                if (Number(st.count || 0) > 0) {
+                    stageItems.push({ stage_name: st.stage_name, count: Number(st.count) });
+                }
+            });
+        }
+    }
+
+    if (allotted === 0 || stageItems.length === 0) {
+        canvas.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'block';
+        if (listEl) listEl.innerHTML = '';
+        if (leadStagesDonutChart) {
+            leadStagesDonutChart.destroy();
+            leadStagesDonutChart = null;
+        }
+        return;
+    }
+
+    canvas.style.display = 'block';
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    // Palette for distinct stages
+    const palette = ['#f59e0b', '#0284c7', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b', '#3b82f6'];
+    const colorMap = {
+        'pending call': '#f59e0b',
+        'pending first call': '#f59e0b',
+        'telecaller stage': '#0284c7',
+        'register form completed': '#10b981',
+        'academic details completed': '#8b5cf6',
+        'exam slot booked': '#ec4899',
+    };
+
+    const chartLabels = [];
+    const chartCounts = [];
+    const chartColors = [];
+
+    stageItems.forEach((item, idx) => {
+        const name = item.stage_name || 'Stage Logged';
+        const cnt = Number(item.count || 0);
+        const lower = name.toLowerCase().trim();
+        const color = colorMap[lower] || palette[idx % palette.length];
+
+        chartLabels.push(name);
+        chartCounts.push(cnt);
+        chartColors.push(color);
+        item.assignedColor = color;
+        item.displayName = name;
+        item.cleanCount = cnt;
+    });
+
+    // Populate stage items list below donut (proper, clear, exact counts, NO percentages)
+    if (listEl) {
+        listEl.innerHTML = stageItems.map(item => `
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; padding: 0.35rem 0.5rem; font-size: 0.8rem; border-radius: 7px; background: #f8fafc; border: 1px solid #f1f5f9;">
+                <div style="display: flex; align-items: flex-start; gap: 8px; min-width: 0;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${item.assignedColor}; flex-shrink: 0; margin-top: 3px;"></span>
+                    <span style="font-weight: 600; color: #334155; line-height: 1.35; word-break: break-word;">${item.displayName}</span>
+                </div>
+                <span style="font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #0f172a; background: #ffffff; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.76rem; flex-shrink: 0; margin-left: 8px; white-space: nowrap;">
+                    ${item.cleanCount} lead${item.cleanCount === 1 ? '' : 's'}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    const chartData = {
+        labels: chartLabels,
+        datasets: [{
+            data: chartCounts,
+            backgroundColor: chartColors,
+            borderWidth: 2,
+            borderColor: '#ffffff',
+            hoverOffset: 4
+        }]
+    };
+
+    if (leadStagesDonutChart) {
+        leadStagesDonutChart.destroy();
+        leadStagesDonutChart = null;
+    }
+
+    leadStagesDonutChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: false // Display full list clearly below donut to prevent truncation and text mixing
+                },
+                tooltip: {
+                    padding: 9,
+                    boxPadding: 4,
+                    callbacks: {
+                        title: function(items) {
+                            return items[0]?.label || '';
+                        },
+                        label: function(ctx) {
+                            const val = ctx.parsed;
+                            return ` ${val} lead${val === 1 ? '' : 's'}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initCallsMadeFilters() {
+    const yearSelect = document.getElementById('callYearFilter');
+    const monthSelect = document.getElementById('callMonthFilter');
+    if (!yearSelect) return;
+
+    // Collect available years from tasks data
+    const years = Array.from(new Set(allTasksData.map(t => Number(t.year)))).filter(Boolean).sort((a,b) => b - a);
+    const currentYear = new Date().getFullYear();
+    if (!years.includes(currentYear)) years.unshift(currentYear);
+
+    yearSelect.innerHTML = '<option value="all">All Years</option>' + 
+        years.map(y => `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`).join('');
+
+    // If monthSelect is present, check if November or latest active month should be selected
+    if (monthSelect) {
+        const activeMonths = Array.from(new Set(allTasksData.map(t => Number(t.month)))).filter(Boolean);
+        if (activeMonths.length > 0 && !activeMonths.includes(Number(monthSelect.value))) {
+            monthSelect.value = String(activeMonths[0]);
+        }
+    }
+
+    updateCallDateDropdown();
+}
+
+function updateCallDateDropdown() {
+    const dateSelect = document.getElementById('callDateFilter');
+    if (!dateSelect) return;
+
+    const currentVal = dateSelect.value;
+    const yearVal = document.getElementById('callYearFilter')?.value || 'all';
+    const monthVal = document.getElementById('callMonthFilter')?.value || 'all';
+    const dropdown = document.getElementById('telecallerDropdownFilter');
+    const selectedEmp = dropdown ? dropdown.value : 'all';
+
+    let filtered = allTasksData;
+    if (selectedEmp !== 'all') filtered = filtered.filter(t => t.empcode === selectedEmp);
+    if (yearVal !== 'all') filtered = filtered.filter(t => t.year === Number(yearVal));
+    if (monthVal !== 'all') filtered = filtered.filter(t => t.month === Number(monthVal));
+
+    const distinctDays = Array.from(new Set(filtered.map(t => Number(t.day)))).filter(Boolean).sort((a,b) => a - b);
+
+    let optionsHtml = '<option value="all">All Dates</option>';
+    distinctDays.forEach(d => {
+        optionsHtml += `<option value="${d}">${d}</option>`;
+    });
+    dateSelect.innerHTML = optionsHtml;
+
+    if (distinctDays.includes(Number(currentVal))) {
+        dateSelect.value = currentVal;
+    } else {
+        dateSelect.value = 'all';
+    }
+}
+
+function onCallFilterChange(changedType) {
+    if (changedType !== 'date') {
+        updateCallDateDropdown();
+    }
+    renderCallsMadeChart();
+}
+
+function renderCallsMadeChart() {
+    const canvas = document.getElementById('callsMadeBarChart');
+    const chartWrap = document.getElementById('callsMadeChartWrap');
+    const emptyEl = document.getElementById('callsMadeEmpty');
+    const badge = document.getElementById('callsMadeCountBadge');
+    if (!canvas) return;
+
+    const dropdown = document.getElementById('telecallerDropdownFilter');
+    const selectedEmp = dropdown ? dropdown.value : 'all';
+
+    const yearVal = document.getElementById('callYearFilter')?.value || 'all';
+    const monthVal = document.getElementById('callMonthFilter')?.value || 'all';
+    const dayVal = document.getElementById('callDateFilter')?.value || 'all';
+
+    // Filter tasks by Telecaller, Year, Month, Day
+    const filtered = allTasksData.filter(t => {
+        const matchEmp = (selectedEmp === 'all' || t.empcode === selectedEmp);
+        const matchYear = (yearVal === 'all' || t.year === Number(yearVal));
+        const matchMonth = (monthVal === 'all' || t.month === Number(monthVal));
+        const matchDay = (dayVal === 'all' || t.day === Number(dayVal));
+        return matchEmp && matchYear && matchMonth && matchDay;
+    });
+
+    if (badge) {
+        badge.textContent = `${filtered.length} Call${filtered.length === 1 ? '' : 's'} Made`;
+    }
+
+    if (filtered.length === 0) {
+        if (chartWrap) chartWrap.style.display = 'none';
+        canvas.style.display = 'none';
+        if (emptyEl) {
+            emptyEl.style.display = 'flex';
+        }
+        if (callsMadeBarChart) {
+            callsMadeBarChart.destroy();
+            callsMadeBarChart = null;
+        }
+        return;
+    }
+
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (chartWrap) chartWrap.style.display = 'flex';
+    canvas.style.display = 'block';
+
+    let labels = [];
+    let dataCounts = [];
+    let datasetLabel = 'Calls Made';
+
+    if (dayVal === 'all') {
+        // Group by Date (e.g. 12 Nov, 13 Nov, 14 Nov, 18 Nov)
+        const dateGroups = {};
+        const sorted = [...filtered].sort((a,b) => a.date_str.localeCompare(b.date_str));
+        sorted.forEach(t => {
+            const key = t.date_label || t.date_str;
+            dateGroups[key] = (dateGroups[key] || 0) + 1;
+        });
+        labels = Object.keys(dateGroups);
+        dataCounts = Object.values(dateGroups);
+        datasetLabel = 'Calls on Date';
+    } else {
+        // Specific day selected: group by stage of calls made on that day
+        const stageGroups = {};
+        filtered.forEach(t => {
+            const key = t.stage || 'Call Logged';
+            stageGroups[key] = (stageGroups[key] || 0) + 1;
+        });
+        labels = Object.keys(stageGroups);
+        dataCounts = Object.values(stageGroups);
+        datasetLabel = `Calls on Day ${dayVal}`;
+    }
+
+    const chartConfig = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: datasetLabel,
+                data: dataCounts,
+                backgroundColor: '#0284c7',
+                borderRadius: 6,
+                maxBarThickness: 34
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    padding: 10,
+                    callbacks: {
+                        label: function(ctx) {
+                            return ` ${ctx.label}: ${ctx.parsed.y} call(s)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 10, family: 'Plus Jakarta Sans', weight: '600' },
+                        color: '#475569'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        font: { size: 10, family: 'JetBrains Mono' },
+                        color: '#64748b'
+                    },
+                    grid: { color: '#f1f5f9' }
+                }
+            }
+        }
+    };
+
+    if (callsMadeBarChart) {
+        callsMadeBarChart.destroy();
+    }
+    callsMadeBarChart = new Chart(canvas, chartConfig);
+}
 
 function selectTelecaller(empCode) {
     const dropdown = document.getElementById('telecallerDropdownFilter');
@@ -402,8 +1073,11 @@ function handleTelecallerChange(empCode) {
     if (cardContactedVal) cardContactedVal.textContent = Number(data.contacted).toLocaleString();
     if (cardPendingVal) cardPendingVal.textContent = Number(data.pending).toLocaleString();
 
-    // 2. Update Logged Call Stages Chart
-    updateCallStagesChart(data.stages, data.tasks);
+    // 2. Update All 3 Graphs
+    updateTelecallerBarChart(empCode);
+    updateLeadStagesChart(data);
+    updateCallDateDropdown();
+    renderCallsMadeChart();
 
     // 3. Highlight active row in Telecaller Step Completion Table
     document.querySelectorAll('.telecaller-stat-row').forEach(row => {
@@ -429,107 +1103,6 @@ function handleTelecallerChange(empCode) {
         }
         window.history.replaceState(null, '', url.toString());
     } catch (e) {}
-}
-
-let callStagesChart = null;
-
-function updateCallStagesChart(stages, totalTasks) {
-    const canvas = document.getElementById('callStagesChart');
-    const emptyEl = document.getElementById('callStagesEmpty');
-    if (!canvas) return;
-
-    const validStages = (stages || []).filter(s => Number(s.count || 0) > 0);
-
-    if (validStages.length === 0) {
-        canvas.style.display = 'none';
-        if (emptyEl) emptyEl.style.display = 'block';
-        if (callStagesChart) {
-            callStagesChart.destroy();
-            callStagesChart = null;
-        }
-        return;
-    }
-
-    canvas.style.display = 'block';
-    if (emptyEl) emptyEl.style.display = 'none';
-
-    const labels = validStages.map(s => s.stage_name);
-    const counts = validStages.map(s => Number(s.count));
-    const total = counts.reduce((a, b) => a + b, 0);
-
-    const palette = [
-        '#0284c7', // Sky Blue
-        '#059669', // Emerald
-        '#7c3aed', // Purple
-        '#ea580c', // Orange
-        '#e11d48', // Rose
-        '#d97706', // Amber
-        '#0891b2', // Cyan
-        '#4f46e5'  // Indigo
-    ];
-
-    if (callStagesChart) {
-        callStagesChart.data.labels = labels;
-        callStagesChart.data.datasets[0].data = counts;
-        callStagesChart.data.datasets[0].backgroundColor = palette.slice(0, labels.length);
-        callStagesChart.update();
-        return;
-    }
-
-    callStagesChart = new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: counts,
-                backgroundColor: palette.slice(0, labels.length),
-                borderWidth: 2,
-                borderColor: '#ffffff',
-                hoverOffset: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 12,
-                        font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' },
-                        color: '#334155',
-                        generateLabels: function(chart) {
-                            const data = chart.data;
-                            if (data.labels.length && data.datasets.length) {
-                                return data.labels.map((label, i) => {
-                                    const val = data.datasets[0].data[i];
-                                    return {
-                                        text: `${label} (${val})`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        strokeStyle: '#ffffff',
-                                        lineWidth: 1,
-                                        hidden: false,
-                                        index: i
-                                    };
-                                });
-                            }
-                            return [];
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const val = context.parsed;
-                            return ` ${context.label}: ${val} calls`;
-                        }
-                    }
-                }
-            },
-            cutout: '62%'
-        }
-    });
 }
 
 function filterTelecallerTable() {
@@ -634,9 +1207,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropdown = document.getElementById('telecallerDropdownFilter');
     const initialEmp = (dropdown && dropdown.value) ? dropdown.value : 'all';
     
-    // Initialize chart with initial selection data
+    // Initialize Year, Month, Date dropdown filters
+    initCallsMadeFilters();
+
+    // Initialize all 3 graphs with initial selection data
     const initialData = telecallerData[initialEmp] || telecallerData['all'];
-    updateCallStagesChart(initialData.stages, initialData.tasks);
+    updateTelecallerBarChart(initialEmp);
+    updateLeadStagesChart(initialData);
+    renderCallsMadeChart();
 
     if (initialEmp !== 'all') {
         handleTelecallerChange(initialEmp);
