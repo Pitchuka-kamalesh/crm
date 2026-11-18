@@ -22,7 +22,7 @@
     <style>
         .telecaller-charts-grid {
             display: grid;
-            grid-template-columns: 1.25fr 0.85fr 0.9fr;
+            grid-template-columns: 1.15fr 0.95fr 0.9fr;
             gap: 1.25rem;
             margin-bottom: 1.75rem;
         }
@@ -289,8 +289,8 @@
                             </div>
 
                             <!-- Donut Chart of Stages -->
-                            <div style="position: relative; height: 165px; display: flex; align-items: center; justify-content: center;">
-                                <canvas id="leadStagesDonutChart" style="max-height: 165px; max-width: 200px;"></canvas>
+                            <div style="position: relative; width: 100%; height: 170px; display: flex; align-items: center; justify-content: center;">
+                                <canvas id="leadStagesDonutChart" style="width: 100%; height: 170px;"></canvas>
                                 <div id="leadStagesEmpty" style="display: none; width: 100%; text-align: center; padding: 2rem 1rem; color: #94a3b8;">
                                     <div style="font-size: 0.9rem; font-weight: 600; color: #64748b;">No allotted leads found</div>
                                 </div>
@@ -808,12 +808,12 @@ function updateLeadStagesChart(data) {
     // Populate stage items list below donut (proper, clear, exact counts, NO percentages)
     if (listEl) {
         listEl.innerHTML = stageItems.map(item => `
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0.45rem; font-size: 0.78rem; border-radius: 6px; background: #f8fafc; border: 1px solid #f1f5f9;">
-                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
-                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${item.assignedColor}; flex-shrink: 0;"></span>
-                    <span style="font-weight: 600; color: #334155; white-space: normal; word-break: break-word;">${item.displayName}</span>
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; padding: 0.35rem 0.5rem; font-size: 0.8rem; border-radius: 7px; background: #f8fafc; border: 1px solid #f1f5f9;">
+                <div style="display: flex; align-items: flex-start; gap: 8px; min-width: 0;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${item.assignedColor}; flex-shrink: 0; margin-top: 3px;"></span>
+                    <span style="font-weight: 600; color: #334155; line-height: 1.35; word-break: break-word;">${item.displayName}</span>
                 </div>
-                <span style="font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #0f172a; background: #ffffff; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; flex-shrink: 0; margin-left: 8px;">
+                <span style="font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #0f172a; background: #ffffff; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 6px; font-size: 0.76rem; flex-shrink: 0; margin-left: 8px; white-space: nowrap;">
                     ${item.cleanCount} lead${item.cleanCount === 1 ? '' : 's'}
                 </span>
             </div>
@@ -832,9 +832,8 @@ function updateLeadStagesChart(data) {
     };
 
     if (leadStagesDonutChart) {
-        leadStagesDonutChart.data = chartData;
-        leadStagesDonutChart.update();
-        return;
+        leadStagesDonutChart.destroy();
+        leadStagesDonutChart = null;
     }
 
     leadStagesDonutChart = new Chart(canvas, {
@@ -843,17 +842,21 @@ function updateLeadStagesChart(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '68%',
+            cutout: '65%',
             plugins: {
                 legend: {
                     display: false // Display full list clearly below donut to prevent truncation and text mixing
                 },
                 tooltip: {
-                    padding: 10,
+                    padding: 9,
+                    boxPadding: 4,
                     callbacks: {
+                        title: function(items) {
+                            return items[0]?.label || '';
+                        },
                         label: function(ctx) {
                             const val = ctx.parsed;
-                            return ` ${ctx.label}: ${val} lead${val === 1 ? '' : 's'}`;
+                            return ` ${val} lead${val === 1 ? '' : 's'}`;
                         }
                     }
                 }
