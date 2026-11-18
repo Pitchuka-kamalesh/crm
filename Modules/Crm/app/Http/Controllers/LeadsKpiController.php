@@ -92,6 +92,8 @@ class LeadsKpiController extends Controller
             ];
         });
 
+        $normalLeadsCount = max(0, $totalRawLeads - $bulkUploadCount);
+
         // 3. Chronological lead inflow trends over time by enquirydate using Chart.js area graphs
         $inflowTrends = Lead::select(DB::raw("DATE(enquirydate) as date_val"), DB::raw('count(*) as count'))
             ->whereNotNull('enquirydate')
@@ -175,6 +177,7 @@ class LeadsKpiController extends Controller
             'unallocatedCount',
             'allocationRate',
             'bulkUploadCount',
+            'normalLeadsCount',
             'directPortalCount',
             'otherStaffCount',
             'sourceBreakdown',

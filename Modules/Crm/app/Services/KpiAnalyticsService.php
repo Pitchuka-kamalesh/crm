@@ -47,6 +47,7 @@ class KpiAnalyticsService
 
     /**
      * Compute Student Conversion Funnel & Branch Intake Demand metrics.
+     * Flow: Registration -> Stage 1 (Personal Profile) -> Stage 2 (Academic Info) -> Stage 3 (Document Upload) -> Stage 4 (Fee Payment) -> Stage 5 (Exam Slot Booking).
      */
     public function getStudentKpiMetrics(): array
     {
@@ -54,13 +55,36 @@ class KpiAnalyticsService
         $totalStudents = CrmStudentRegistration::count();
         $kpiTotal = max(1, $totalStudents);
 
-        // High-performance Eloquent count aggregations
-        $kpiStage1Paid = $paidAppNos->count() ?: CrmStudentRegistration::where('stage1', 'paid')->count();
+        // Stage 1: Personal Profile
+        $kpiStage1Profile = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage1))'), ['completed', 'approved', 'done'])
+              ->orWhereHas('personalInfo');
+        })->count();
 
-        $kpiStage2Done = CrmStudentRegistration::whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])->count();
-        $kpiStage3Done = CrmStudentRegistration::whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])->count();
-        $kpiStage4Done = CrmStudentRegistration::whereIn(DB::raw('LOWER(TRIM(stage4))'), ['completed', 'approved', 'done'])->count();
-        $kpiStage5Done = CrmStudentRegistration::whereIn(DB::raw('LOWER(TRIM(stage5))'), ['completed', 'approved', 'done'])->count();
+        // Stage 2: Academic Info
+        $kpiStage2Academic = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])
+              ->orWhereHas('academicDetails');
+        })->count();
+
+        // Stage 3: Document Upload
+        $kpiStage3Docs = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])
+              ->orWhereHas('uploads');
+        })->count();
+
+        // Stage 4: Fee Payment
+        $kpiStage4Fee = CrmStudentRegistration::where(function ($q) use ($paidAppNos) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['paid', 'completed'])
+              ->orWhere('stage1', 'paid')
+              ->orWhereIn('applinano', $paidAppNos);
+        })->count();
+
+        // Stage 5: Exam Slot Booking
+        $kpiStage5Slot = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage5))'), ['completed', 'approved', 'done'])
+              ->orWhereHas('examSchedule');
+        })->count();
 
         // Branch distribution aggregated via Eloquent Model query
         $branchCounts = CrmStudentRegistration::query()
@@ -73,11 +97,21 @@ class KpiAnalyticsService
 
         return [
             'kpiTotal'              => $kpiTotal,
-            'kpiStage1Paid'         => $kpiStage1Paid,
-            'kpiStage2Done'         => $kpiStage2Done,
-            'kpiStage3Done'         => $kpiStage3Done,
-            'kpiStage4Done'         => $kpiStage4Done,
-            'kpiStage5Done'         => $kpiStage5Done,
+            'kpiStage1Profile'      => $kpiStage1Profile,
+            'kpiStage2Academic'     => $kpiStage2Academic,
+            'kpiStage3Docs'         => $kpiStage3Docs,
+            'kpiStage4Fee'          => $kpiStage4Fee,
+            'kpiStage5Slot'         => $kpiStage5Slot,
+
+            // Backward compatibility aliases
+            'kpiStage1Done'         => $kpiStage1Profile,
+            'kpiStage2Done'         => $kpiStage2Academic,
+            'kpiStage3Done'         => $kpiStage3Docs,
+            'kpiStage4Done'         => $kpiStage4Fee,
+            'kpiStage4Paid'         => $kpiStage4Fee,
+            'kpiStage1Paid'         => $kpiStage4Fee,
+            'kpiStage5Done'         => $kpiStage5Slot,
+
             'kpiBranchDistribution' => $branchCounts,
             'paidAppNos'            => $paidAppNos,
         ];

@@ -59,39 +59,50 @@ class StudentKpiController extends Controller
         $rdPaid = ReceiptDetail::pluck('applino')->map(fn($v) => (string)$v);
         $verifiedPaidAppNos = $pdPaid->merge($rdPaid)->unique()->filter()->values();
 
-        // 2. Conversion funnel metrics across all 5 stages
+        // 2. Conversion funnel metrics across the 5 student onboarding stages:
+        // Stage 1 (Personal Profile) -> Stage 2 (Academic Info) -> Stage 3 (Document Upload) -> Stage 4 (Fee Payment) -> Stage 5 (Exam Slot Booking)
         $totalApplicants = CrmStudentRegistration::count();
         $kpiTotal = max(1, $totalApplicants);
 
-        // Stage 1: Fee Paid
-        $kpiStage1Paid = CrmStudentRegistration::where(function ($q) use ($verifiedPaidAppNos) {
-            $q->where('stage1', 'paid')
-              ->orWhereIn('applinano', $verifiedPaidAppNos);
-        })->count();
-
-        // Stage 2: Personal Profile / Info
-        $kpiStage2Done = CrmStudentRegistration::where(function ($q) {
-            $q->whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])
+        // Stage 1: Personal Profile
+        $kpiStage1Profile = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage1))'), ['completed', 'approved', 'done'])
               ->orWhereHas('personalInfo');
         })->count();
 
-        // Stage 3: Academic Details
-        $kpiStage3Done = CrmStudentRegistration::where(function ($q) {
-            $q->whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])
+        // Stage 2: Academic Info
+        $kpiStage2Academic = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])
               ->orWhereHas('academicDetails');
         })->count();
 
-        // Stage 4: Document Uploads
-        $kpiStage4Done = CrmStudentRegistration::where(function ($q) {
-            $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['completed', 'approved', 'done'])
+        // Stage 3: Document Uploads
+        $kpiStage3Docs = CrmStudentRegistration::where(function ($q) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])
               ->orWhereHas('uploads');
         })->count();
 
-        // Stage 5: Examination / Qualified
-        $kpiStage5Done = CrmStudentRegistration::where(function ($q) {
+        // Stage 4: Fee Payment
+        $kpiStage4Fee = CrmStudentRegistration::where(function ($q) use ($verifiedPaidAppNos) {
+            $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['paid', 'completed'])
+              ->orWhere('stage1', 'paid')
+              ->orWhereIn('applinano', $verifiedPaidAppNos);
+        })->count();
+
+        // Stage 5: Exam Slot Booking
+        $kpiStage5Slot = CrmStudentRegistration::where(function ($q) {
             $q->whereIn(DB::raw('LOWER(TRIM(stage5))'), ['completed', 'approved', 'done'])
               ->orWhereHas('examSchedule');
         })->count();
+
+        // Compatibility aliases for views & tests
+        $kpiStage1Done = $kpiStage1Profile;
+        $kpiStage2Done = $kpiStage2Academic;
+        $kpiStage3Done = $kpiStage3Docs;
+        $kpiStage4Done = $kpiStage4Fee;
+        $kpiStage4Paid = $kpiStage4Fee;
+        $kpiStage1Paid = $kpiStage4Fee;
+        $kpiStage5Done = $kpiStage5Slot;
 
         // 3. Top branch distribution using Eloquent model with master.branches join
         $branchDistribution = CrmStudentRegistration::query()
@@ -136,17 +147,19 @@ class StudentKpiController extends Controller
 
         if ($filterStage) {
             match ($filterStage) {
-                'stage1' => $studentsQuery->where(function ($q) use ($verifiedPaidAppNos) {
-                    $q->where('stage1', 'paid')->orWhereIn('applinano', $verifiedPaidAppNos);
+                'stage1' => $studentsQuery->where(function ($q) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage1))'), ['completed', 'approved', 'done'])->orWhereHas('personalInfo');
                 }),
                 'stage2' => $studentsQuery->where(function ($q) {
-                    $q->whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])->orWhereHas('personalInfo');
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])->orWhereHas('academicDetails');
                 }),
                 'stage3' => $studentsQuery->where(function ($q) {
-                    $q->whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])->orWhereHas('academicDetails');
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])->orWhereHas('uploads');
                 }),
-                'stage4' => $studentsQuery->where(function ($q) {
-                    $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['completed', 'approved', 'done'])->orWhereHas('uploads');
+                'stage4' => $studentsQuery->where(function ($q) use ($verifiedPaidAppNos) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['paid', 'completed'])
+                      ->orWhere('stage1', 'paid')
+                      ->orWhereIn('applinano', $verifiedPaidAppNos);
                 }),
                 'stage5' => $studentsQuery->where(function ($q) {
                     $q->whereIn(DB::raw('LOWER(TRIM(stage5))'), ['completed', 'approved', 'done'])->orWhereHas('examSchedule');
@@ -172,10 +185,17 @@ class StudentKpiController extends Controller
             'availableRoles',
             'totalApplicants',
             'kpiTotal',
-            'kpiStage1Paid',
+            'kpiStage1Profile',
+            'kpiStage2Academic',
+            'kpiStage3Docs',
+            'kpiStage4Fee',
+            'kpiStage5Slot',
+            'kpiStage1Done',
             'kpiStage2Done',
             'kpiStage3Done',
             'kpiStage4Done',
+            'kpiStage4Paid',
+            'kpiStage1Paid',
             'kpiStage5Done',
             'branchDistribution',
             'verifiedPaidAppNos',
@@ -188,5 +208,113 @@ class StudentKpiController extends Controller
             'filterBranch',
             'filterStage'
         ));
+    }
+
+    /**
+     * Export student records matching current filters as an Excel-compatible CSV.
+     */
+    public function export(Request $request)
+    {
+        $pdPaid = PayDetail::where(function ($q) {
+            $q->where('txnstatus', 'success')
+              ->orWhere('paidamount', '>', 0);
+        })->pluck('applino')->map(fn($v) => (string)$v);
+
+        $rdPaid = ReceiptDetail::pluck('applino')->map(fn($v) => (string)$v);
+        $verifiedPaidAppNos = $pdPaid->merge($rdPaid)->unique()->filter()->values();
+
+        $search = trim($request->input('q', ''));
+        $filterStage = $request->input('stage');
+
+        $studentsQuery = CrmStudentRegistration::with([
+            'personalInfo',
+            'academicDetails',
+            'uploads',
+            'payDetail',
+            'receipt',
+            'examSchedule',
+        ]);
+
+        if ($search !== '') {
+            $studentsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('applinano', 'like', "%{$search}%")
+                  ->orWhere('phoneno', 'like', "%{$search}%")
+                  ->orWhere('emailid', 'like', "%{$search}%");
+            });
+        }
+
+        if ($filterStage) {
+            match ($filterStage) {
+                'stage1' => $studentsQuery->where(function ($q) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage1))'), ['completed', 'approved', 'done'])->orWhereHas('personalInfo');
+                }),
+                'stage2' => $studentsQuery->where(function ($q) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage2))'), ['completed', 'approved', 'done'])->orWhereHas('academicDetails');
+                }),
+                'stage3' => $studentsQuery->where(function ($q) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage3))'), ['completed', 'approved', 'done'])->orWhereHas('uploads');
+                }),
+                'stage4' => $studentsQuery->where(function ($q) use ($verifiedPaidAppNos) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['paid', 'completed'])
+                      ->orWhere('stage1', 'paid')
+                      ->orWhereIn('applinano', $verifiedPaidAppNos);
+                }),
+                'stage5' => $studentsQuery->where(function ($q) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(stage5))'), ['completed', 'approved', 'done'])->orWhereHas('examSchedule');
+                }),
+                default => null,
+            };
+        }
+
+        $students = $studentsQuery->orderBy('applinano', 'asc')->get();
+
+        $filename = 'Student_KPI_Report_' . date('Y-m-d_His') . '.csv';
+
+        return response()->streamDownload(function () use ($students, $verifiedPaidAppNos) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Microsoft Excel automatically recognises UTF-8 encoding
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Write CSV Headers: Application Number, Mobile Number, Current Step
+            fputcsv($handle, ['Application Number', 'Mobile Number', 'Current Step']);
+
+            foreach ($students as $st) {
+                $appNo = (string)$st->applinano;
+                $isStage1 = in_array(strtolower(trim((string)$st->stage1)), ['completed', 'approved', 'done']) || $st->personalInfo;
+                $isStage2 = in_array(strtolower(trim((string)$st->stage2)), ['completed', 'approved', 'done']) || $st->academicDetails;
+                $isStage3 = in_array(strtolower(trim((string)$st->stage3)), ['completed', 'approved', 'done']) || $st->uploads;
+                $isStage4 = in_array(strtolower(trim((string)$st->stage4)), ['paid', 'completed']) || ($st->stage1 === 'paid') || ($st->payDetail && ($st->payDetail->txnstatus === 'success' || $st->payDetail->paidamount > 0)) || $st->receipt || $verifiedPaidAppNos->contains($appNo);
+                $isStage5 = in_array(strtolower(trim((string)$st->stage5)), ['completed', 'approved', 'done']) || $st->examSchedule;
+
+                if ($isStage5) {
+                    $currentStage = 'Stage 5: Exam Slot Booked';
+                } elseif ($isStage4) {
+                    $currentStage = 'Stage 5: Exam Slot Booking';
+                } elseif ($isStage3) {
+                    $currentStage = 'Stage 4: Fee Payment';
+                } elseif ($isStage2) {
+                    $currentStage = 'Stage 3: Document Upload';
+                } elseif ($isStage1) {
+                    $currentStage = 'Stage 2: Academic Info';
+                } else {
+                    $currentStage = 'Stage 1: Personal Profile';
+                }
+
+                fputcsv($handle, [
+                    $st->applinano,
+                    $st->phoneno ?: '',
+                    $currentStage,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ]);
     }
 }

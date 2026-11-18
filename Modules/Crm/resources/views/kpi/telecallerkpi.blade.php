@@ -15,6 +15,10 @@
     <!-- Shared Enterprise CRM Styles -->
     <link rel="stylesheet" href="/css/crm-dashboard.css?v={{ file_exists(public_path('css/crm-dashboard.css')) ? filemtime(public_path('css/crm-dashboard.css')) : time() }}">
 
+    <!-- Chart.js for High-Impact Analytics -->
+    <script src="/js/chart.min.js"></script>
+    <script>if (typeof Chart === 'undefined') { document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>'); }</script>
+
     <style>
         .telecaller-filter-wrapper:hover {
             border-color: #94a3b8 !important;
@@ -134,31 +138,10 @@
                             </div>
                         </div>
                         @endif
-                    </div>
 
-                    <!-- Right Side: Clean Metric Pills & Export Button -->
-                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: nowrap;">
-                        <!-- Total Leads Allotted Badge (Clearly Displayed) -->
-                        <div style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap;">
-                            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2563eb;"></span>
-                            <span id="headerTeleAllottedLabel" style="font-size: 0.74rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.3px;">TOTAL LEADS ALLOTTED:</span>
-                            <strong id="headerTeleAllottedBadge" style="font-size: 0.96rem; font-weight: 800; color: #1d4ed8; font-family: 'JetBrains Mono', monospace;">
-                                {{ number_format($totalTelecallerLeads) }}
-                            </strong>
-                        </div>
-
-                        <!-- Calls Logged Badge -->
-                        <div style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap;">
-                            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #16a34a;"></span>
-                            <span id="headerTeleTasksLabel" style="font-size: 0.74rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.3px;">CALLS LOGGED:</span>
-                            <strong id="headerTeleTasksBadge" style="font-size: 0.96rem; font-weight: 800; color: #15803d; font-family: 'JetBrains Mono', monospace;">
-                                {{ number_format($teleTasksCount) }}
-                            </strong>
-                        </div>
-
-                        <!-- Export CSV Button -->
-                        <button type="button" onclick="exportTelecallerKpiCsv()" style="height: 36px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Export CSV Button (Beside Telecaller Dropdown) -->
+                        <button type="button" onclick="exportTelecallerKpiCsv()" style="height: 38px; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0 1.15rem; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-size: 0.825rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -265,42 +248,20 @@
                             </div>
                         </div>
 
-                        <!-- 2. Logged Call Stages Breakdown (Replaces old Outreach Pipeline Status) -->
+                        <!-- 2. Logged Call Stages Breakdown (Visual Graph) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background: #ffffff; display: flex; flex-direction: column;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
                                 <div>
                                     <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Logged Call Stages Breakdown</div>
                                     <div style="font-size: 0.75rem; color: #64748b;">Authentic stage categories from telecaller lead tasks</div>
                                 </div>
                                 <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 0.2rem 0.6rem; border-radius: 20px;">Task Stages</span>
                             </div>
-                            <div id="kpiStagesContainer" style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; justify-content: center; max-height: 290px; overflow-y: auto;">
-                                @forelse($teleTaskStages as $index => $tStage)
-                                    @php
-                                        $sPct = $teleTasksCount > 0 ? round(($tStage->count / $teleTasksCount) * 100, 1) : 0;
-                                        $themeColors = [
-                                            ['bg' => '#eff6ff', 'text' => '#1d4ed8', 'badge' => '#2563eb', 'dot' => '#3b82f6'],
-                                            ['bg' => '#ecfdf5', 'text' => '#047857', 'badge' => '#059669', 'dot' => '#10b981'],
-                                            ['bg' => '#f5f3ff', 'text' => '#6d28d9', 'badge' => '#7c3aed', 'dot' => '#8b5cf6'],
-                                            ['bg' => '#fffbeb', 'text' => '#92400e', 'badge' => '#d97706', 'dot' => '#f59e0b'],
-                                        ];
-                                        $col = $themeColors[$index % count($themeColors)];
-                                    @endphp
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: {{ $col['bg'] }}; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: {{ $col['dot'] }};"></span>
-                                            <span style="font-weight: 700; color: {{ $col['text'] }}; font-size: 0.85rem;">{{ $tStage->stage_name }}</span>
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 6px;">
-                                            <strong style="color: {{ $col['badge'] }}; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">{{ $tStage->count }}</strong>
-                                            <span style="font-size: 0.75rem; color: #64748b;">({{ $sPct }}%)</span>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">
-                                        No call stages recorded in database yet.
-                                    </div>
-                                @endforelse
+                            <div style="position: relative; flex-grow: 1; min-height: 250px; max-height: 290px; display: flex; align-items: center; justify-content: center;">
+                                <canvas id="callStagesChart"></canvas>
+                                <div id="callStagesEmpty" style="display: none; text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8;">
+                                    <div style="font-size: 0.95rem; font-weight: 600; color: #64748b;">No records found</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -378,11 +339,11 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">No telecaller allocated leads found.</td>
+                                            <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No records found</td>
                                         </tr>
                                     @endforelse
                                     <tr id="telecallerNoRowsFound" style="display: none;">
-                                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No leads allocated to this telecaller yet.</td>
+                                        <td colspan="8" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">No records found</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -430,26 +391,7 @@ function selectTelecaller(empCode) {
 function handleTelecallerChange(empCode) {
     const data = telecallerData[empCode] || telecallerData['all'];
 
-    // 1. Update Header Pills
-    const allottedBadge = document.getElementById('headerTeleAllottedBadge');
-    const allottedLabel = document.getElementById('headerTeleAllottedLabel');
-    const tasksBadge = document.getElementById('headerTeleTasksBadge');
-    const tasksLabel = document.getElementById('headerTeleTasksLabel');
-
-    if (allottedBadge) allottedBadge.textContent = Number(data.allotted).toLocaleString();
-    if (tasksBadge) tasksBadge.textContent = Number(data.tasks).toLocaleString();
-    if (allottedLabel) {
-        allottedLabel.textContent = (empCode === 'all') 
-            ? 'TOTAL LEADS ALLOTTED:' 
-            : 'LEADS ALLOTTED (' + data.name + '):';
-    }
-    if (tasksLabel) {
-        tasksLabel.textContent = (empCode === 'all') 
-            ? 'CALLS LOGGED:' 
-            : 'CALLS LOGGED (' + data.name + '):';
-    }
-
-    // 2. Update Top 4 Metric Cards
+    // 1. Update Top 4 Metric Cards
     const cardAllottedVal = document.getElementById('kpiCardAllottedValue');
     const cardTasksVal = document.getElementById('kpiCardTasksValue');
     const cardContactedVal = document.getElementById('kpiCardContactedValue');
@@ -460,10 +402,10 @@ function handleTelecallerChange(empCode) {
     if (cardContactedVal) cardContactedVal.textContent = Number(data.contacted).toLocaleString();
     if (cardPendingVal) cardPendingVal.textContent = Number(data.pending).toLocaleString();
 
-    // 3. Update Call Stages Breakdown
-    renderStagesList(data.stages, data.tasks);
+    // 2. Update Logged Call Stages Chart
+    updateCallStagesChart(data.stages, data.tasks);
 
-    // 4. Highlight active row in Telecaller Step Completion Table
+    // 3. Highlight active row in Telecaller Step Completion Table
     document.querySelectorAll('.telecaller-stat-row').forEach(row => {
         if (empCode !== 'all' && row.getAttribute('data-empcode') === empCode) {
             row.style.background = '#f0fdf4';
@@ -474,10 +416,10 @@ function handleTelecallerChange(empCode) {
         }
     });
 
-    // 5. Filter Directory Table
+    // 4. Filter Directory Table
     filterTelecallerTable();
 
-    // 6. Update URL without page reload
+    // 5. Update URL without page reload
     try {
         const url = new URL(window.location.href);
         if (empCode !== 'all') {
@@ -489,37 +431,105 @@ function handleTelecallerChange(empCode) {
     } catch (e) {}
 }
 
-function renderStagesList(stages, totalTasks) {
-    const container = document.getElementById('kpiStagesContainer');
-    if (!container) return;
-    if (!stages || stages.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No call stages recorded in database for this telecaller yet.</div>';
+let callStagesChart = null;
+
+function updateCallStagesChart(stages, totalTasks) {
+    const canvas = document.getElementById('callStagesChart');
+    const emptyEl = document.getElementById('callStagesEmpty');
+    if (!canvas) return;
+
+    const validStages = (stages || []).filter(s => Number(s.count || 0) > 0);
+
+    if (validStages.length === 0) {
+        canvas.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'block';
+        if (callStagesChart) {
+            callStagesChart.destroy();
+            callStagesChart = null;
+        }
         return;
     }
-    const themeColors = [
-        { bg: '#eff6ff', text: '#1d4ed8', badge: '#2563eb', dot: '#3b82f6' },
-        { bg: '#ecfdf5', text: '#047857', badge: '#059669', dot: '#10b981' },
-        { bg: '#f5f3ff', text: '#6d28d9', badge: '#7c3aed', dot: '#8b5cf6' },
-        { bg: '#fffbeb', text: '#92400e', badge: '#d97706', dot: '#f59e0b' }
+
+    canvas.style.display = 'block';
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    const labels = validStages.map(s => s.stage_name);
+    const counts = validStages.map(s => Number(s.count));
+    const total = counts.reduce((a, b) => a + b, 0);
+
+    const palette = [
+        '#0284c7', // Sky Blue
+        '#059669', // Emerald
+        '#7c3aed', // Purple
+        '#ea580c', // Orange
+        '#e11d48', // Rose
+        '#d97706', // Amber
+        '#0891b2', // Cyan
+        '#4f46e5'  // Indigo
     ];
-    let html = '';
-    stages.forEach((stg, i) => {
-        const col = themeColors[i % themeColors.length];
-        const count = Number(stg.count || 0);
-        const pct = totalTasks > 0 ? ((count / totalTasks) * 100).toFixed(1) : 0;
-        html += `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.95rem; background: ${col.bg}; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: ${col.dot};"></span>
-                <span style="font-weight: 700; color: ${col.text}; font-size: 0.85rem;">${stg.stage_name}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <strong style="color: ${col.badge}; font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;">${count}</strong>
-                <span style="font-size: 0.75rem; color: #64748b;">(${pct}%)</span>
-            </div>
-        </div>`;
+
+    if (callStagesChart) {
+        callStagesChart.data.labels = labels;
+        callStagesChart.data.datasets[0].data = counts;
+        callStagesChart.data.datasets[0].backgroundColor = palette.slice(0, labels.length);
+        callStagesChart.update();
+        return;
+    }
+
+    callStagesChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: palette.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 12,
+                        font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' },
+                        color: '#334155',
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map((label, i) => {
+                                    const val = data.datasets[0].data[i];
+                                    return {
+                                        text: `${label} (${val})`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        strokeStyle: '#ffffff',
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const val = context.parsed;
+                            return ` ${context.label}: ${val} calls`;
+                        }
+                    }
+                }
+            },
+            cutout: '62%'
+        }
     });
-    container.innerHTML = html;
 }
 
 function filterTelecallerTable() {
@@ -561,27 +571,45 @@ function filterTelecallerTable() {
 function exportTelecallerKpiCsv() {
     const dropdown = document.getElementById('telecallerDropdownFilter');
     const selectedEmp = dropdown ? dropdown.value : 'all';
-    const suffix = (selectedEmp === 'all') ? 'All' : selectedEmp;
+
+    let suffix = 'All';
+    let counselorName = 'All Telecallers';
+    if (selectedEmp !== 'all' && telecallerData[selectedEmp]) {
+        counselorName = telecallerData[selectedEmp].name || ('Emp_' + selectedEmp);
+        suffix = counselorName.replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + selectedEmp;
+    }
 
     const headers = ['#', 'Lead Phone', 'Application No', 'Assigned Counselor', 'Counselor Emp Code', 'Allocation Date', 'Call Stage', 'Calls Made', 'Latest Remark'];
     const rows = [];
-    document.querySelectorAll('#telecallerTable tbody tr.telecaller-row').forEach((row, i) => {
-        if (row.style.display !== 'none') {
+    let count = 0;
+
+    document.querySelectorAll('#telecallerTable tbody tr.telecaller-row').forEach(row => {
+        const rowEmp = row.getAttribute('data-empcode');
+        // When a specific telecaller is selected, only export that specific telecaller's leads
+        if (selectedEmp === 'all' || rowEmp === selectedEmp) {
             const cells = row.querySelectorAll('td');
             if (cells.length >= 8) {
+                count++;
                 const phone = cells[1].innerText.replace(/\n.*/, '').trim();
                 const applino = cells[2].innerText.trim();
                 const counselor = cells[3].innerText.replace(/\n.*/, '').trim();
-                const empCode = (cells[3].innerText.match(/Emp:\s*(\S+)/) || [])[1] || '';
+                const empCode = (cells[3].innerText.match(/Emp:\s*(\S+)/) || [])[1] || rowEmp;
                 const allocDate = cells[4].innerText.trim();
                 const stage = cells[5].innerText.trim();
                 const callsCount = cells[6].innerText.trim();
                 const remark = cells[7].innerText.trim();
-                rows.push([i + 1, phone, applino, counselor, empCode, allocDate, stage, callsCount, remark]);
+                rows.push([count, phone, applino, counselor, empCode, allocDate, stage, callsCount, remark]);
             }
         }
     });
-    downloadCsv('Telecaller_KPI_Report_' + suffix + '.csv', headers, rows);
+
+    if (rows.length === 0) {
+        alert('No allocated leads found for ' + counselorName + ' to export.');
+        return;
+    }
+
+    const filename = 'Telecaller_KPI_Report_' + suffix + '_' + new Date().toISOString().slice(0, 10) + '.csv';
+    downloadCsv(filename, headers, rows);
 }
 
 function downloadCsv(filename, headers, rows) {
@@ -599,12 +627,19 @@ function downloadCsv(filename, headers, rows) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     const dropdown = document.getElementById('telecallerDropdownFilter');
-    if (dropdown && dropdown.value && dropdown.value !== 'all') {
-        handleTelecallerChange(dropdown.value);
+    const initialEmp = (dropdown && dropdown.value) ? dropdown.value : 'all';
+    
+    // Initialize chart with initial selection data
+    const initialData = telecallerData[initialEmp] || telecallerData['all'];
+    updateCallStagesChart(initialData.stages, initialData.tasks);
+
+    if (initialEmp !== 'all') {
+        handleTelecallerChange(initialEmp);
     }
 });
 </script>
