@@ -40,7 +40,10 @@ class CrmController extends Controller
         $currentRoute = $request->route() ? $request->route()->getName() : '';
         $activeTab = $request->query('tab');
         if (!$activeTab) {
-            if ($request->is('*coupoungenration*') || $request->is('*percoupongen*') || $request->is('*discountcoupon*') || $request->is('*couponinfo*')) {
+            if ($request->is('*discountcoupon*')) {
+                return redirect()->route('crm.discountcoupon', ['tab' => 'discountcoupon']);
+            }
+            if ($request->is('*coupoungenration*') || $request->is('*percoupongen*') || $request->is('*couponinfo*')) {
                 $activeTab = 'couponinfo';
             } elseif ($request->is('*crmdatatracking*') || $request->is('*datatracking*')) {
                 $activeTab = 'stdsearch';
@@ -54,7 +57,8 @@ class CrmController extends Controller
                 $activeTab = match ($currentRoute) {
                     'crm.stddata', 'crm.enquirylist' => 'stddata',
                     'crm.stdsearch', 'crm.registerlist', 'crm.crmdatatracking' => 'stdsearch',
-                    'crm.couponinfo', 'crm.coupoungenration', 'crm.percoupongen', 'crm.discountcoupon' => 'couponinfo',
+                    'crm.couponinfo', 'crm.coupoungenration', 'crm.percoupongen' => 'couponinfo',
+                    'crm.discountcoupon' => 'discountcoupon',
                     'crm.employeelist' => 'employeelist',
                     'kpi.telecallerkpi' => 'telecallerkpi',
                     'kpi.leadskpi' => 'leadskpi',
