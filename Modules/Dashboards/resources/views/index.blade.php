@@ -4001,7 +4001,7 @@
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
                     <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <a href="{{ route('application.show', ['id' => $appStudent->id, 'print' => 1]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;" title="Open and Print Application Form">
                             <span>🖨️ Print Form</span>
                         </a>
                         <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" download class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">

@@ -25,10 +25,14 @@ class ApplicationController extends Controller
         $student = $this->buildStudentApplicationData($id);
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
+        $logoPath = public_path('images/vignan-logo.png');
+        $logoBase64 = is_file($logoPath) ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))) : asset('images/vignan-logo.png');
+
         return view($viewName, [
             'student' => $student,
-            'logo' => asset('images/vignan-logo.png'),
+            'logo' => $logoBase64,
             'downloadUrl' => route('application.download', ['id' => $id]),
+            'autoPrint' => request()->boolean('print'),
         ]);
     }
 
@@ -37,6 +41,9 @@ class ApplicationController extends Controller
      */
     public function download(string $id): Response|View
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
+
         $student = $this->buildStudentApplicationData($id);
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
@@ -54,6 +61,9 @@ class ApplicationController extends Controller
                     ->setOptions([
                         'isHtml5ParserEnabled' => true,
                         'isRemoteEnabled' => true,
+                        'isFontSubsettingEnabled' => true,
+                        'defaultFont' => 'Helvetica',
+                        'dpi' => 96,
                         'chroot' => [public_path(), base_path()],
                     ])
                     ->setPaper('a4', 'portrait')

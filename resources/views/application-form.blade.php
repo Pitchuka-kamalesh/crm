@@ -204,7 +204,7 @@
             </tr>
         </table>
 
-        {{-- Educational Information (10th SSC & 12th Inter) --}}
+        {{-- Educational Information (10th SSC, 12th Inter, UG & PG) --}}
         <div class="card" style="margin-top:12px">
             <h3>3. Qualifying Academic Records (10th SSC &amp; 12th Intermediate{{ !empty($student->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($student->academic->pg_college) ? ' &amp; Postgraduate' : '' }})</h3>
             <table class="fields" style="width:100%; border-collapse:collapse;">
@@ -348,13 +348,29 @@
             $docExt = strtoupper($doc['ext'] ?? pathinfo($doc['filename'] ?? '', PATHINFO_EXTENSION) ?: 'DOC');
             $cleanExt = strtolower($docExt);
             $isImg = !empty($doc['is_image']) || in_array($cleanExt, ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg']);
-            $fPath = !empty($doc['path']) ? public_path($doc['path']) : null;
+            
+            // Robustly resolve the local filesystem path for the document (avoids double public_path prepending)
+            $absCandidates = [
+                $doc['abs_path'] ?? null,
+                $doc['path'] ?? null,
+                !empty($doc['path']) ? public_path($doc['path']) : null,
+                !empty($doc['rel_path']) ? public_path($doc['rel_path']) : null,
+                !empty($doc['filename']) ? public_path('uploads/documents/' . ($student->id ?? '') . '/' . $doc['filename']) : null,
+            ];
+            $realPath = null;
+            foreach ($absCandidates as $cand) {
+                if (!empty($cand) && is_file($cand)) {
+                    $realPath = $cand;
+                    break;
+                }
+            }
+
             $fUrl = $doc['url'] ?? '';
             $imgSrc = null;
             if ($isImg) {
-                if ($fPath && is_file($fPath)) {
+                if ($realPath && is_file($realPath)) {
                     $mime = $doc['mime'] ?? ('image/' . ($cleanExt === 'jpg' ? 'jpeg' : $cleanExt));
-                    $imgSrc = 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($fPath));
+                    $imgSrc = 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($realPath));
                 } else {
                     $imgSrc = $fUrl;
                 }
@@ -429,6 +445,15 @@
             <div class="footer">Vignan's Foundation for Science, Technology &amp; Research &nbsp;|&nbsp; Application Dossier Attachment &bull; Page {{ $attachIdx + 1 }}</div>
         </div>
     @endforeach
+@endif
+@if (!empty($autoPrint) || request()->has('print'))
+<script>
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.print();
+        }, 300);
+    });
+</script>
 @endif
 </body>
 </html>
