@@ -126,7 +126,7 @@ class KpiDashboardsTest extends TestCase
                 'coupstdcount'   => 200,
             ]);
 
-            $response->assertRedirect('/discountcoupon?tab=couponinfo');
+            $response->assertRedirect('/discountcoupon?tab=discountcoupon');
             $response->assertSessionHas('status');
 
             // Verify newly created coupon is active in database
@@ -143,7 +143,7 @@ class KpiDashboardsTest extends TestCase
                 'coupstdcount'   => 300,
             ]);
 
-            $response2->assertRedirect('/discountcoupon?tab=couponinfo');
+            $response2->assertRedirect('/discountcoupon?tab=discountcoupon');
 
             // Previous coupon must now be INACTIVE
             $prevCouponAfter = CouponInfo::find($newCoupon->id);
