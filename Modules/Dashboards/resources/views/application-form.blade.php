@@ -49,11 +49,15 @@
     $isSt = ($catUpper === 'ST');
     $isPwd = in_array($catUpper, ['PWD', 'PH', 'OTHER']);
 
-    $isHydCampus = str_contains(strtolower($student->campus ?? ''), 'hyderabad');
+    // Dynamic campuses from database table
+    $campusesList = \App\Models\Campus::where('is_active', true)->orWhereNull('is_active')->orderBy('campus_id')->get();
+    if ($campusesList->isEmpty()) {
+        $campusesList = collect([
+            (object)['campus_id' => 1, 'campus_short_name' => 'Vignan Main Campus', 'campus_code' => 'VDM']
+        ]);
+    }
 
-    // Base64 PNG radio and checkbox icons (100% compatible with DomPDF and print)
-    $radioChecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAvklEQVRIicWW2xWDIBBEF+rQFkxxUoYpTloIfZgvEwLs7IAnyXzKMJeHsIh8WY41btNylN9CimZ/aGiFatJgKqAMXx975bnPNxPSBOThrWAEKiEVoDfcgnwARsMR5AVgwvMAxhNSdBWA2cxcyB9SdF7tSYQz7V4Ej35EZ842LQecgTU6xmcu0VX9F8DuCfJ5kfehYNfcUtdvas3Cav/dSWYhSPAuugqhbtNRSFc9aEE00HBF0yBI3TWZgTGviidwFIAgG/qibQAAAABJRU5ErkJggg==';
-    $radioUnchecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAoUlEQVRIie2WyRGAIAxFg7VqB1AFdKC96gnFbOye/Ecm+Q/CkAAwWaY0cLX+xGtHcNl8NYAzlSTBRAA2370lMZsLWQgLSM05Yw2EIQRQa56DvACt5hrkBvSaS5AFB/SYc/kEMFoG4ClP7+5TxVJNP8EPyIq8gxEXHS+YfQejRQC4Q9YK53/Xi3ohRd20FVI1DziIBGqeaBJEU/VMLoGV/CouZJ1hgo2pIy8AAAAASUVORK5CYII=';
+    // Base64 PNG checkbox icons (100% compatible with DomPDF and print)
     $checkboxChecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAm0lEQVRIiWNgoDFgZGBgYBBb7PWfFoa/it3GyEQLg5EBC7rAmaBFFBlosi4OhU9zHwx9CzDigByAHu7IgGIfIBuOLYFQZAEhwym2gBhAtgXEuJ6BAUckE9JMrOEMDDh8gKwJPYWQYjhOC3BZQqrheC2gFsBrAa6gIqVAJOgDdMNILW2JKiooKcIHb0YjFmAEEb6SkRxAcx/QHAAAI/wutvZyBE4AAAAASUVORK5CYII=';
     $checkboxUnchecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAATUlEQVRIiWNgoDFgZGBgYJiyeMd/WhieE+vByEQLg5EBC7pAdow7RQZOXbIThU9zH4xaMGrBqAWjFoxaMGoBAwOWGg29RqIU0NwHNAcAibkJIuKcYLAAAAAASUVORK5CYII=';
 @endphp
@@ -333,9 +337,9 @@
             <td style="width: 50%; padding-right: 6px; padding-bottom: 5px;">
                 <div class="lbl">Gender <span class="lbl-req">*</span></div>
                 <div class="box-val" style="font-weight: normal;">
-                    <img src="{{ $isMale ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Male &nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isFemale ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Female &nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isOtherGender ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Other
+                    <img src="{{ $isMale ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> Male &nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isFemale ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> Female &nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isOtherGender ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> Other
                 </div>
             </td>
             <td style="width: 50%; padding-left: 6px; padding-bottom: 5px;">
@@ -347,11 +351,11 @@
             <td colspan="2" style="padding-bottom: 5px;">
                 <div class="lbl">Category</div>
                 <div class="box-val" style="font-weight: normal;">
-                    <img src="{{ $isGen ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> General &nbsp;&nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isObc ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> OBC &nbsp;&nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isSc ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> SC &nbsp;&nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isSt ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> ST &nbsp;&nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isPwd ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> PwD / Other
+                    <img src="{{ $isGen ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> General &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isObc ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> OBC &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isSc ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> SC &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isSt ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> ST &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isPwd ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> PwD / Other
                 </div>
             </td>
         </tr>
@@ -412,8 +416,15 @@
             <td colspan="2" style="padding-bottom: 5px;">
                 <div class="lbl">Campus preference <span class="lbl-req">*</span></div>
                 <div class="box-val" style="font-weight: normal;">
-                    <img src="{{ !$isHydCampus ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> VFSTR, Guntur &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <img src="{{ $isHydCampus ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Off-Campus, Hyderabad
+                    @foreach($campusesList as $c)
+                        @php
+                            $cShort = $c->campus_short_name ?: $c->campus_code;
+                            $isSelectedCampus = (string)($student->campus_id ?? '') === (string)$c->campus_id
+                                || (!empty($student->campus) && (str_contains(strtolower($student->campus), strtolower($cShort)) || str_contains(strtolower($student->campus), strtolower($c->campus_code ?? ''))))
+                                || ($loop->first && empty($student->campus));
+                        @endphp
+                        <img src="{{ $isSelectedCampus ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol"> {{ $cShort }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    @endforeach
                 </div>
             </td>
         </tr>
@@ -631,7 +642,7 @@
             </tr>
             <tr>
                 <td class="rl">Campus Allotted</td>
-                <td>{{ $isHydCampus ? 'Off-Campus, Hyderabad' : 'VFSTR, Vadlamudi (Guntur)' }}</td>
+                <td>{{ $student->campus ?: ($campusesList->first()->campus_short_name ?? 'Vignan Main Campus') }}</td>
                 <td class="rl">Quota / Category</td>
                 <td>{{ $student->category ?: 'General' }}</td>
             </tr>
@@ -773,8 +784,8 @@
     <table style="width: 100%; margin-top: 6px;">
         <tr>
             <td style="width: 50%;">
-                <img src="{{ $radioUnchecked }}" class="icon-symbol"> Selected &nbsp;&nbsp;&nbsp;
-                <img src="{{ $radioUnchecked }}" class="icon-symbol"> Not selected
+                <img src="{{ $checkboxUnchecked }}" class="icon-symbol"> Selected &nbsp;&nbsp;&nbsp;
+                <img src="{{ $checkboxUnchecked }}" class="icon-symbol"> Not selected
             </td>
             <td style="width: 50%;">
                 <b>Research assistantship:</b> &nbsp;

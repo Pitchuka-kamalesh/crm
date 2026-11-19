@@ -4784,6 +4784,13 @@
                             );
 
                             $isUg = !$isPhd && !$isPg;
+
+                            $campusesList = \App\Models\Campus::where('is_active', true)->orWhereNull('is_active')->orderBy('campus_id')->get();
+                            if ($campusesList->isEmpty()) {
+                                $campusesList = collect([
+                                    (object)['campus_id' => 1, 'campus_short_name' => 'Vignan Main Campus', 'campus_code' => 'VDM']
+                                ]);
+                            }
                         @endphp
                             <div class="phd-form-wrap">
                                 <style>
@@ -4896,21 +4903,21 @@
                                     <div class="f">
                                         <span class="lbl req">Gender</span>
                                         <div class="opts" data-group="gender">
-                                            <label class="chk"><input type="radio" name="gender" value="Male" {{ strtolower($student->gender ?? '') === 'male' ? 'checked' : '' }} disabled><span>Male</span></label>
-                                            <label class="chk"><input type="radio" name="gender" value="Female" {{ strtolower($student->gender ?? '') === 'female' ? 'checked' : '' }} disabled><span>Female</span></label>
-                                            <label class="chk"><input type="radio" name="gender" value="Other" {{ !in_array(strtolower($student->gender ?? ''), ['male','female']) && !empty($student->gender) && $student->gender !== '-' ? 'checked' : '' }} disabled><span>Other</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Male" {{ strtolower($student->gender ?? '') === 'male' ? 'checked' : '' }} disabled><span>Male</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Female" {{ strtolower($student->gender ?? '') === 'female' ? 'checked' : '' }} disabled><span>Female</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Other" {{ !in_array(strtolower($student->gender ?? ''), ['male','female']) && !empty($student->gender) && $student->gender !== '-' ? 'checked' : '' }} disabled><span>Other</span></label>
                                         </div>
                                     </div>
                                     <label class="f"><span class="req">Date of birth</span><input type="text" name="dob" value="{{ !empty($student->dob) && $student->dob !== '-' ? \Carbon\Carbon::parse($student->dob)->format('d M Y') : '-' }}" readonly></label>
                                     <div class="f full">
-                                        <span class="lbl">Category</span>
-                                        <div class="opts">
-                                            <label class="chk"><input type="radio" name="cat" value="General" {{ in_array(strtoupper($student->category ?? ''), ['GENERAL', 'OC', 'OPEN']) ? 'checked' : '' }} disabled><span>General</span></label>
-                                            <label class="chk"><input type="radio" name="cat" value="OBC" {{ str_contains(strtoupper($student->category ?? ''), 'OBC') || str_contains(strtoupper($student->category ?? ''), 'BC') ? 'checked' : '' }} disabled><span>OBC</span></label>
-                                            <label class="chk"><input type="radio" name="cat" value="SC" {{ strtoupper($student->category ?? '') === 'SC' ? 'checked' : '' }} disabled><span>SC</span></label>
-                                            <label class="chk"><input type="radio" name="cat" value="ST" {{ strtoupper($student->category ?? '') === 'ST' ? 'checked' : '' }} disabled><span>ST</span></label>
-                                            <label class="chk"><input type="radio" name="cat" value="PwD" {{ in_array(strtoupper($student->category ?? ''), ['PWD', 'PH', 'OTHER']) ? 'checked' : '' }} disabled><span>PwD / Other</span></label>
-                                        </div>
+                                         <span class="lbl">Category</span>
+                                         <div class="opts">
+                                             <label class="chk"><input type="checkbox" name="cat" value="General" {{ in_array(strtoupper($student->category ?? ''), ['GENERAL', 'OC', 'OPEN']) ? 'checked' : '' }} disabled><span>General</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="OBC" {{ str_contains(strtoupper($student->category ?? ''), 'OBC') || str_contains(strtoupper($student->category ?? ''), 'BC') ? 'checked' : '' }} disabled><span>OBC</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="SC" {{ strtoupper($student->category ?? '') === 'SC' ? 'checked' : '' }} disabled><span>SC</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="ST" {{ strtoupper($student->category ?? '') === 'ST' ? 'checked' : '' }} disabled><span>ST</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="PwD" {{ in_array(strtoupper($student->category ?? ''), ['PWD', 'PH', 'OTHER']) ? 'checked' : '' }} disabled><span>PwD / Other</span></label>
+                                         </div>
                                     </div>
                                     <label class="f"><span class="req">Mobile no.</span><input type="tel" name="mobile" value="{{ $student->phone ?: '-' }}" readonly></label>
                                     <label class="f"><span class="req">Parent’s mobile</span><input type="tel" name="pmobile" value="{{ $student->father_phone ?: ($student->parent_phone ?: '-') }}" readonly></label>
@@ -4928,8 +4935,15 @@
                                     <div class="f full">
                                         <span class="lbl req">Campus preference</span>
                                         <div class="opts">
-                                            <label class="chk"><input type="radio" name="campus" value="VFSTR, Guntur" {{ !str_contains(strtolower($student->campus ?? ''), 'hyderabad') ? 'checked' : '' }} disabled><span>VFSTR, Guntur</span></label>
-                                            <label class="chk"><input type="radio" name="campus" value="Off-Campus, Hyderabad" {{ str_contains(strtolower($student->campus ?? ''), 'hyderabad') ? 'checked' : '' }} disabled><span>Off-Campus, Hyderabad</span></label>
+                                            @foreach($campusesList as $c)
+                                                @php
+                                                    $cShort = $c->campus_short_name ?: $c->campus_code;
+                                                    $isSelectedCampus = (string)($student->campus_id ?? '') === (string)$c->campus_id
+                                                        || (!empty($student->campus) && (str_contains(strtolower($student->campus), strtolower($cShort)) || str_contains(strtolower($student->campus), strtolower($c->campus_code ?? ''))))
+                                                        || ($loop->first && empty($student->campus));
+                                                @endphp
+                                                <label class="chk"><input type="checkbox" name="campus" value="{{ $cShort }}" {{ $isSelectedCampus ? 'checked' : '' }} disabled><span>{{ $cShort }}</span></label>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
@@ -5038,7 +5052,7 @@
                                                         <td style="color: var(--ok); font-weight: 700;">Provisional Admission Confirmed</td>
                                                         <td style="color: var(--ok); font-weight: 700;">Verified &amp; Accounted</td>
                                                         <td>{{ $student->program ?: '-' }} ({{ $student->branch ?: '-' }})</td>
-                                                        <td>{{ $isHydCampus ? 'Off-Campus, Hyderabad' : 'VFSTR, Guntur' }} &bull; {{ $student->category ?: 'General' }}</td>
+                                                        <td>{{ $student->campus ?: ($campusesList->first()->campus_short_name ?? 'Vignan Main Campus') }} &bull; {{ $student->category ?: 'General' }}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -5087,11 +5101,11 @@
                                         <tr class="big"><td colspan="2">Grand total (selection score)</td><td>100</td><td><output id="o100">0</output></td></tr>
                                         </tbody></table></div>
                                     <div class="opts" style="margin-top:10px">
-                                        <label class="chk"><input type="radio" name="sel" value="Selected" disabled><span>Selected</span></label>
-                                        <label class="chk"><input type="radio" name="sel" value="Not selected" disabled><span>Not selected</span></label>
+                                        <label class="chk"><input type="checkbox" name="sel" value="Selected" disabled><span>Selected</span></label>
+                                        <label class="chk"><input type="checkbox" name="sel" value="Not selected" disabled><span>Not selected</span></label>
                                         <span class="lbl">Research assistantship:</span>
                                         <label class="chk"><input type="checkbox" disabled><span>ERA</span></label><label class="chk"><input type="checkbox" disabled><span>TRA</span></label><label class="chk"><input type="checkbox" disabled><span>CAP</span></label><label class="chk"><input type="checkbox" disabled><span>CRA</span></label>
-                                        <label class="chk"><input type="radio" name="trk" value="Industry" disabled><span>Industry</span></label><label class="chk"><input type="radio" name="trk" value="Academics" disabled><span>Academics</span></label>
+                                        <label class="chk"><input type="checkbox" name="trk" value="Industry" disabled><span>Industry</span></label><label class="chk"><input type="checkbox" name="trk" value="Academics" disabled><span>Academics</span></label>
                                     </div>
                                     <label class="f" style="margin-top:10px"><span>Remarks (not selected candidates)</span><textarea readonly placeholder="Department remarks..."></textarea></label>
                                     <div class="grid" style="margin-top:10px">
