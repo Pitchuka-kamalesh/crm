@@ -168,6 +168,7 @@
         /* Clean Table */
         .tele-table {
             width: 100%;
+            min-width: 860px;
             border-collapse: collapse;
             font-size: 0.84rem;
             text-align: left;
@@ -190,6 +191,40 @@
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             color: var(--text-body);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) {
+            .portal-card-topbar {
+                padding: 0.55rem 0.75rem !important;
+            }
+            .portal-card-topbar > div {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
+            }
+            .leads-dir-toolbar {
+                width: 100% !important;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+                gap: 0.35rem !important;
+            }
+            .leads-search-wrapper {
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+            }
+            .leads-search-wrapper input {
+                width: 100% !important;
+                min-width: 110px !important;
+            }
+            #btnResetFilters {
+                flex-shrink: 0 !important;
+                padding: 0.4rem 0.55rem !important;
+            }
+            .leads-size-wrapper {
+                flex-shrink: 0 !important;
+            }
         }
 
         .tele-table tbody tr:hover {
@@ -1704,18 +1739,20 @@
                     </svg>
                 </button>
                 <div class="topbar-page-breadcrumb">
-                    <span class="breadcrumb-item">Leads</span>
-                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item breadcrumb-desktop-only">Leads</span>
+                    <span class="breadcrumb-separator breadcrumb-desktop-only">/</span>
                     <span class="breadcrumb-active-tag">
                         <span class="breadcrumb-dot"></span>
                         @if($activeTab === 'upload')
                             <span>Leads Upload</span>
                         @elseif($activeTab === 'input')
-                            <span>Lead Input &bull; Complete Leads Directory</span>
+                            <span class="breadcrumb-lead-full">Lead Input &bull; Complete Leads Directory</span>
+                            <span class="breadcrumb-lead-mobile">Lead Input</span>
                         @elseif($activeTab === 'allocation' || in_array($roleId, [2, 3]))
-                            <span>Leads Allocation &bull; Unallocated Queue</span>
+                            <span class="breadcrumb-lead-full">Leads Allocation &bull; Unallocated Queue</span>
+                            <span class="breadcrumb-lead-mobile">Leads Allocation</span>
                         @else
-                            <span>Allotted Leads (Tele Caller)</span>
+                            <span>Allotted Leads</span>
                         @endif
                     </span>
                 </div>
@@ -1859,13 +1896,8 @@
                                 <label for="inchargeTelecallerSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
                                     <span>Select Telecaller<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
-                                <div class="incharge-control-shell" style="height: 38px; width: 100%;">
-                                    <span class="input-icon-left">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                                        </svg>
-                                    </span>
-                                    <select id="inchargeTelecallerSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem; width: 100%;" required>
+                                <div class="custom-select-container" id="customTelecallerDropdown">
+                                    <select id="inchargeTelecallerSelect" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" required>
                                         <option value="">-- Choose Telecaller --</option>
                                         @foreach($telecallers as $tc)
                                             <option value="{{ $tc->emp_code }}">
@@ -1873,6 +1905,28 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    <button type="button" class="custom-select-trigger" id="customTelecallerTrigger" onclick="toggleCustomDropdown('customTelecallerDropdown')">
+                                        <span class="custom-select-icon">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                            </svg>
+                                        </span>
+                                        <span class="custom-select-value is-placeholder" id="customTelecallerValue">-- Choose Telecaller --</span>
+                                        <svg class="custom-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"/>
+                                        </svg>
+                                    </button>
+                                    <div class="custom-select-dropdown" id="customTelecallerList">
+                                        <div class="custom-select-option is-placeholder is-selected" data-value="" onclick="selectCustomOption('inchargeTelecallerSelect', '', '-- Choose Telecaller --', 'customTelecallerDropdown')">
+                                            <span>-- Choose Telecaller --</span>
+                                        </div>
+                                        @foreach($telecallers as $tc)
+                                            <div class="custom-select-option" data-value="{{ $tc->emp_code }}" onclick="selectCustomOption('inchargeTelecallerSelect', '{{ $tc->emp_code }}', '{{ addslashes($tc->full_name) }} ({{ $tc->emp_code }})', 'customTelecallerDropdown')">
+                                                <span class="option-name">{{ $tc->full_name }}</span>
+                                                <span class="option-badge">{{ $tc->emp_code }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
 
@@ -1881,16 +1935,8 @@
                                 <label for="inchargeTargetSelect" class="incharge-label" style="font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem; display: block;">
                                     <span>Allocation Target<span class="required-dot" style="color: #ef4444; margin-left: 2px;">*</span></span>
                                 </label>
-                                <div class="incharge-control-shell" style="height: 38px; width: 100%;">
-                                    <span class="input-icon-left">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                            <circle cx="9" cy="7" r="4"/>
-                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                        </svg>
-                                    </span>
-                                    <select id="inchargeTargetSelect" class="incharge-select" style="height: 38px; font-size: 0.8rem; padding-left: 2.1rem; width: 100%;" required>
+                                <div class="custom-select-container" id="customTargetDropdown">
+                                    <select id="inchargeTargetSelect" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" required>
                                         <option value="selected">Selected Checked Leads</option>
                                         <option value="100">Bucket: 100 Leads</option>
                                         <option value="300">Bucket: 300 Leads</option>
@@ -1898,11 +1944,45 @@
                                         <option value="1000">Bucket: 1000 Leads</option>
                                         <option value="unallocated">All Unallocated Leads</option>
                                     </select>
+                                    <button type="button" class="custom-select-trigger" id="customTargetTrigger" onclick="toggleCustomDropdown('customTargetDropdown')">
+                                        <span class="custom-select-icon">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </span>
+                                        <span class="custom-select-value" id="customTargetValue">Selected Checked Leads</span>
+                                        <svg class="custom-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"/>
+                                        </svg>
+                                    </button>
+                                    <div class="custom-select-dropdown" id="customTargetList">
+                                        <div class="custom-select-option is-selected" data-value="selected" onclick="selectCustomOption('inchargeTargetSelect', 'selected', 'Selected Checked Leads', 'customTargetDropdown')">
+                                            <span>Selected Checked Leads</span>
+                                        </div>
+                                        <div class="custom-select-option" data-value="100" onclick="selectCustomOption('inchargeTargetSelect', '100', 'Bucket: 100 Leads', 'customTargetDropdown')">
+                                            <span>Bucket: 100 Leads</span>
+                                        </div>
+                                        <div class="custom-select-option" data-value="300" onclick="selectCustomOption('inchargeTargetSelect', '300', 'Bucket: 300 Leads', 'customTargetDropdown')">
+                                            <span>Bucket: 300 Leads</span>
+                                        </div>
+                                        <div class="custom-select-option" data-value="500" onclick="selectCustomOption('inchargeTargetSelect', '500', 'Bucket: 500 Leads', 'customTargetDropdown')">
+                                            <span>Bucket: 500 Leads</span>
+                                        </div>
+                                        <div class="custom-select-option" data-value="1000" onclick="selectCustomOption('inchargeTargetSelect', '1000', 'Bucket: 1000 Leads', 'customTargetDropdown')">
+                                            <span>Bucket: 1000 Leads</span>
+                                        </div>
+                                        <div class="custom-select-option" data-value="unallocated" onclick="selectCustomOption('inchargeTargetSelect', 'unallocated', 'All Unallocated Leads', 'customTargetDropdown')">
+                                            <span>All Unallocated Leads</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- 3. Action Buttons: Allocate, Auto Allocate, Download -->
-                            <div style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
+                            <div class="incharge-action-btn-group" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
                                 <button type="submit" id="btnInchargeAllot" class="btn-palette-action btn-palette-allocate" title="Allocate selected or bucket leads to chosen telecaller">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -2698,7 +2778,7 @@
                             @endif
                         </div>
 
-                        <div style="display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap;">
+                        <div class="leads-dir-toolbar" style="display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap;">
                             @if($activeTab !== 'allotted')
                                 <select id="allocStatusFilterSelect" onchange="applyExtraFilter('alloc_status', this.value)" style="padding: 0.38rem 0.65rem; border: 1.5px solid var(--card-border); border-radius: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #334155; background: #ffffff; outline: none;">
                                     <option value="all" {{ ($allocStatusFilter ?? 'all') === 'all' ? 'selected' : '' }}>Status: All Leads</option>
@@ -2725,7 +2805,7 @@
                             @endif
 
                             <!-- Search Input -->
-                            <div style="position: relative; display: flex; align-items: center;">
+                            <div class="leads-search-wrapper" style="position: relative; display: flex; align-items: center;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px;">
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -2750,7 +2830,7 @@
                             </button>
 
                             <!-- Table Size (Limit Enforced: Max Leads Table Size) (Right of Search) -->
-                            <div style="display: inline-flex; align-items: center; gap: 4px; background: #ffffff; border: 1.5px solid var(--card-border); border-radius: 0.45rem; padding: 0.1rem 0.45rem; height: 32px;" title="Rows per page (Limit up to leads table size: {{ $maxPageLimit ?? 100 }})">
+                            <div class="leads-size-wrapper" style="display: inline-flex; align-items: center; gap: 4px; background: #ffffff; border: 1.5px solid var(--card-border); border-radius: 0.45rem; padding: 0.1rem 0.45rem; height: 32px;" title="Rows per page (Limit up to leads table size: {{ $maxPageLimit ?? 100 }})">
                                 <label for="tablePageSizeInput" style="font-size: 0.74rem; font-weight: 700; color: #64748b; margin: 0; white-space: nowrap;">Size:</label>
                                 <input type="number" 
                                        id="tablePageSizeInput" 
@@ -3949,6 +4029,7 @@
         const empCode = empSelect?.value;
         if (!empCode) {
             alert('Please choose a telecaller from the dropdown.');
+            document.getElementById('customTelecallerTrigger')?.focus();
             empSelect?.focus();
             return;
         }
@@ -4126,6 +4207,7 @@
         const empCode = empSelect?.value;
         if (!empCode) {
             alert('Please choose a telecaller from the dropdown.');
+            document.getElementById('customTelecallerTrigger')?.focus();
             empSelect?.focus();
             return;
         }
@@ -4182,6 +4264,65 @@
                 fetchLeadsTable(currentPage, false);
             }
         }, 15000);
+    });
+
+    // ===== CUSTOM DROPDOWN LOGIC (Replaces OS Browser Dropdown) =====
+    window.toggleCustomDropdown = function(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const wasOpen = container.classList.contains('is-open');
+
+        // Close any other open custom dropdowns
+        document.querySelectorAll('.custom-select-container.is-open').forEach(c => {
+            if (c.id !== containerId) c.classList.remove('is-open');
+        });
+
+        container.classList.toggle('is-open', !wasOpen);
+    };
+
+    window.selectCustomOption = function(selectId, value, label, containerId) {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.value = value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        const container = document.getElementById(containerId);
+        if (container) {
+            const valueSpan = container.querySelector('.custom-select-value');
+            if (valueSpan) {
+                valueSpan.textContent = label;
+                if (value === '') {
+                    valueSpan.classList.add('is-placeholder');
+                } else {
+                    valueSpan.classList.remove('is-placeholder');
+                }
+            }
+
+            container.querySelectorAll('.custom-select-option').forEach(opt => {
+                opt.classList.toggle('is-selected', opt.getAttribute('data-value') === String(value));
+            });
+
+            container.classList.remove('is-open');
+        }
+    };
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-select-container')) {
+            document.querySelectorAll('.custom-select-container.is-open').forEach(c => {
+                c.classList.remove('is-open');
+            });
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.custom-select-container.is-open').forEach(c => {
+                c.classList.remove('is-open');
+            });
+        }
     });
 </script>
 </body>

@@ -172,6 +172,9 @@
     </div>
 </aside>
 
+<!-- Mobile Drawer Backdrop Overlay -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
 <!-- Interactive Accordion, Sidebar Toggle & Theme Management Scripts -->
 <script>
     function toggleAccordion(groupId) {
@@ -228,14 +231,33 @@
         }
     }
 
-    // Top 3 lines hamburger toggle: smoothly closes/opens sidebar
+    // Top 3 lines hamburger toggle: smoothly closes/opens sidebar (Desktop collapse / Mobile off-canvas drawer)
     window.toggleSidebarMenu = function() {
-        const sidebar = document.getElementById('appSidebar');
+        const sidebar = document.getElementById('appSidebar') || document.querySelector('.app-sidebar');
         if (!sidebar) return;
+
+        if (window.innerWidth <= 991) {
+            const isMobileOpen = document.body.classList.toggle('sidebar-mobile-open');
+            document.documentElement.classList.toggle('sidebar-mobile-open', isMobileOpen);
+            sidebar.classList.toggle('mobile-open', isMobileOpen);
+            sidebar.classList.toggle('active', isMobileOpen);
+            return;
+        }
+
         const isCollapsed = sidebar.classList.toggle('collapsed');
         document.documentElement.classList.toggle('sidebar-is-collapsed', isCollapsed);
         document.body.classList.toggle('sidebar-is-collapsed', isCollapsed);
         localStorage.setItem('crm_sidebar_collapsed', isCollapsed ? '1' : '0');
+    };
+
+    window.closeMobileSidebar = function() {
+        const sidebar = document.getElementById('appSidebar') || document.querySelector('.app-sidebar');
+        if (sidebar) {
+            sidebar.classList.remove('mobile-open');
+            sidebar.classList.remove('active');
+        }
+        document.body.classList.remove('sidebar-mobile-open');
+        document.documentElement.classList.remove('sidebar-mobile-open');
     };
 
     // Submenu click listener: only clicked submenu link glows, rest do not
@@ -253,6 +275,22 @@
             if (parentGroup) {
                 parentGroup.classList.add('open');
             }
+
+            if (window.innerWidth <= 991) {
+                closeMobileSidebar();
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMobileSidebar();
+        }
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+            closeMobileSidebar();
         }
     });
 

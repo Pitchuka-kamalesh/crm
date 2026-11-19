@@ -186,36 +186,37 @@
         .registration-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            padding: 2.25rem 2.25rem 2rem 2.25rem;
+            border-radius: 16px;
+            padding: 1.5rem 1.5rem 1.25rem 1.5rem;
             box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
         }
 
         .card-header-title {
             text-align: center;
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 900;
             color: #0f172a;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.85rem;
         }
 
         .reg-form {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.65rem;
         }
 
         .form-row-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         .form-row-2col .select-field {
-            font-size: 0.84rem;
-            padding: 0.76rem 2.25rem 0.76rem 0.85rem;
+            font-size: 0.80rem;
+            padding: 0.54rem 1.8rem 0.54rem 0.7rem;
+            min-height: 38px;
         }
 
         @media (max-width: 600px) {
@@ -228,24 +229,26 @@
             width: 100%;
         }
 
+        .form-row-single .select-field,
+        .form-row-single .custom-select-trigger {
+            min-height: 38px;
+            padding: 0.52rem 0.8rem;
+            font-size: 0.84rem;
+        }
+
         .form-row-3col {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 0.75rem;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 0.4rem;
         }
 
         .form-row-3col .select-field {
-            font-size: 0.82rem;
+            font-size: 0.76rem;
             font-weight: 600;
-            padding: 0.74rem 1.85rem 0.74rem 0.75rem;
-            background-position: right 0.55rem center;
-            background-size: 0.88rem;
-        }
-
-        @media (max-width: 600px) {
-            .form-row-3col {
-                grid-template-columns: 1fr;
-            }
+            padding: 0.5rem 1.35rem 0.5rem 0.45rem;
+            background-position: right 0.35rem center;
+            background-size: 0.75rem;
+            min-height: 38px;
         }
 
         .form-row-4col {
@@ -284,10 +287,11 @@
 
         .input-text-field {
             width: 100%;
-            padding: 0.76rem 0.95rem;
+            padding: 0.52rem 0.8rem;
+            min-height: 38px;
             border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 0.88rem;
+            border-radius: 9px;
+            font-size: 0.86rem;
             font-weight: 500;
             color: #0f172a;
             font-family: inherit;
@@ -341,10 +345,11 @@
 
         .select-field {
             width: 100%;
-            padding: 0.76rem 2.25rem 0.76rem 0.85rem;
+            padding: 0.52rem 1.8rem 0.52rem 0.75rem;
+            min-height: 38px;
             border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 0.86rem;
+            border-radius: 9px;
+            font-size: 0.84rem;
             font-weight: 600;
             color: #0f172a;
             font-family: inherit;
@@ -355,8 +360,8 @@
             -moz-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 0.95rem;
+            background-position: right 0.65rem center;
+            background-size: 0.85rem;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
@@ -378,11 +383,11 @@
         }
 
         .select-field option {
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 500;
             color: #0f172a;
             background-color: #ffffff;
-            padding: 10px 14px;
+            padding: 8px 12px;
         }
 
         .select-field option:hover,
@@ -410,11 +415,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 0.5rem;
-            padding: 0.76rem 0.95rem;
+            gap: 0.4rem;
+            padding: 0.52rem 0.8rem;
+            min-height: 38px;
             border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 0.86rem;
+            border-radius: 9px;
+            font-size: 0.84rem;
             font-weight: 600;
             color: #0f172a;
             font-family: inherit;
@@ -459,8 +465,8 @@
         }
 
         .custom-select-arrow {
-            width: 1rem;
-            height: 1rem;
+            width: 0.85rem;
+            height: 0.85rem;
             flex-shrink: 0;
             color: #2563eb;
             transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -472,26 +478,16 @@
 
         /* 3-column & 4-column compact triggers */
         .form-row-3col .custom-select-trigger {
-            font-size: 0.82rem;
+            font-size: 0.76rem;
             font-weight: 600;
-            padding: 0.74rem 0.65rem;
-            letter-spacing: -0.01em;
+            padding: 0.5rem 0.4rem;
+            letter-spacing: -0.015em;
+            min-height: 38px;
         }
 
         .form-row-3col .custom-select-arrow {
-            width: 0.9rem;
-            height: 0.9rem;
-        }
-
-        @media (max-width: 600px) {
-            .form-row-3col .custom-select-trigger {
-                font-size: 0.85rem;
-                padding: 0.76rem 0.95rem;
-            }
-            .form-row-3col .custom-select-arrow {
-                width: 1rem;
-                height: 1rem;
-            }
+            width: 0.75rem;
+            height: 0.75rem;
         }
 
         .form-row-4col .custom-select-trigger {
@@ -630,20 +626,20 @@
             display: flex;
             align-items: center;
             background: #f1f5f9;
-            padding: 5px 6px;
-            border-radius: 12px;
+            padding: 4px;
+            border-radius: 10px;
             border: 1px solid #cbd5e1;
             box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         .level-pill-btn {
             flex: 1;
-            height: 40px;
-            padding: 0 0.5rem;
+            height: 36px;
+            padding: 0 0.4rem;
             border: 1.5px solid transparent;
             background: transparent;
-            border-radius: 8px;
-            font-size: 0.84rem;
+            border-radius: 7px;
+            font-size: 0.80rem;
             font-weight: 700;
             color: #334155;
             cursor: pointer;
@@ -653,7 +649,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
             user-select: none;
             white-space: nowrap;
             position: relative;
@@ -763,12 +759,13 @@
         /* Register Submit Button */
         .btn-register-submit {
             width: 100%;
-            padding: 0.9rem 1.5rem;
+            padding: 0.68rem 1.25rem;
+            min-height: 42px;
             background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
             color: #ffffff;
             border: none;
-            border-radius: 10px;
-            font-size: 0.96rem;
+            border-radius: 9px;
+            font-size: 0.92rem;
             font-weight: 800;
             cursor: pointer;
             font-family: inherit;
@@ -776,9 +773,9 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.4);
             transition: all 0.2s ease;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
         }
 
         .btn-register-submit:hover {
@@ -789,9 +786,9 @@
 
         .login-back-link {
             text-align: center;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             color: #64748b;
-            margin-top: 0.85rem;
+            margin-top: 0.4rem;
         }
 
         .login-back-link a {
@@ -809,10 +806,10 @@
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
             color: #166534;
-            padding: 0.75rem 1rem;
+            padding: 0.45rem 0.75rem;
             border-radius: 8px;
-            font-size: 0.82rem;
-            margin-bottom: 1rem;
+            font-size: 0.74rem;
+            margin-bottom: 0.55rem;
         }
 
         .error-alert {
@@ -823,20 +820,6 @@
             border-radius: 8px;
             font-size: 0.82rem;
             margin-bottom: 1rem;
-        }
-
-        @media (max-width: 1080px) {
-            .page-wrapper {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                padding: 1.5rem 1rem 3rem 1rem;
-            }
-            .hero-headline {
-                font-size: 2.2rem;
-            }
-            .watermark-bg {
-                display: none;
-            }
         }
 
         /* Background Watermark (Ultra-crisp Vector, Zero Pixelation) */
@@ -857,7 +840,7 @@
             transition: opacity 0.3s ease, filter 0.3s ease;
         }
 
-        /* Hero Headline with Side Logo (Parallely Matched to Full 3 Rows) */
+        /* Hero Headline with Side Logo */
         .hero-headline-wrap {
             display: flex;
             align-items: center;
@@ -875,23 +858,179 @@
             transition: all 0.3s ease;
         }
 
-        @media (max-width: 900px) {
-            .hero-headline-wrap {
-                gap: 1.15rem;
+        @media (max-width: 1080px) {
+            .page-wrapper {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 1.5rem 1rem 3rem 1rem;
             }
-            .hero-side-logo {
-                height: 130px;
-                max-width: 120px;
+            .hero-headline {
+                font-size: 2.2rem;
+            }
+            .watermark-bg {
+                display: none;
             }
         }
 
-        @media (max-width: 600px) {
-            .hero-headline-wrap {
-                gap: 0.85rem;
+        @media (max-width: 900px) {
+            html, body {
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
             }
-            .hero-side-logo {
-                height: 95px;
-                max-width: 85px;
+            body {
+                background: #f8fafc !important;
+                display: block !important;
+            }
+            .hero-left {
+                display: none !important;
+            }
+            .top-navbar {
+                width: 100%;
+                padding: 0.65rem 1rem;
+            }
+            .page-wrapper {
+                display: block !important;
+                width: 100% !important;
+                max-width: 480px !important;
+                margin: 0.85rem auto 2.5rem auto !important;
+                padding: 0 0.85rem !important;
+                box-sizing: border-box !important;
+            }
+            .registration-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                background: #ffffff;
+                padding: 1.5rem 1.15rem 1.35rem 1.15rem;
+                border-radius: 18px;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08);
+            }
+            .card-header-title {
+                font-size: 1.2rem;
+                margin-bottom: 0.85rem;
+            }
+            .btn-apply-nav {
+                padding: 0.35rem 0.75rem;
+                font-size: 0.76rem;
+            }
+            .reg-form {
+                gap: 0.7rem;
+            }
+            .form-row-single {
+                margin-bottom: 0;
+            }
+            .form-row-single .custom-select-trigger,
+            .form-row-single .select-field {
+                min-height: 40px !important;
+                padding: 0.55rem 0.8rem !important;
+                font-size: 0.84rem !important;
+            }
+            .form-row-3col {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.5rem !important;
+            }
+            .form-row-3col > :first-child {
+                grid-column: 1 / -1 !important; /* Country: full width */
+            }
+            .form-row-3col > :nth-child(2) {
+                grid-column: 1 / 2 !important; /* State: left column */
+            }
+            .form-row-3col > :nth-child(3) {
+                grid-column: 2 / 3 !important; /* District: right column */
+            }
+            .form-row-3col .custom-select-container {
+                min-width: 0 !important;
+                width: 100% !important;
+            }
+            .form-row-3col .custom-select-trigger {
+                padding: 0.55rem 0.65rem !important;
+                font-size: 0.82rem !important;
+                min-height: 40px !important;
+                min-width: 0 !important;
+            }
+            .form-row-3col .custom-select-arrow {
+                width: 0.85rem !important;
+                height: 0.85rem !important;
+                flex-shrink: 0 !important;
+            }
+            .form-row-3col .select-field {
+                padding: 0.55rem 1.6rem 0.55rem 0.65rem !important;
+                font-size: 0.82rem !important;
+                min-height: 40px !important;
+            }
+            .form-row-3col > :nth-child(2) .custom-select-dropdown {
+                left: 0 !important;
+                right: auto !important;
+                max-width: calc(100vw - 36px) !important;
+            }
+            .form-row-3col > :nth-child(3) .custom-select-dropdown {
+                left: auto !important;
+                right: 0 !important;
+                max-width: calc(100vw - 36px) !important;
+            }
+            .form-row-2col {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.45rem !important;
+            }
+            .form-row-2col .custom-select-container {
+                min-width: 0 !important;
+            }
+            .form-row-2col .custom-select-trigger,
+            .form-row-2col .select-field {
+                min-height: 40px !important;
+                padding: 0.55rem 0.65rem !important;
+                font-size: 0.80rem !important;
+            }
+            .form-row-2col .custom-select-container:last-child .custom-select-dropdown {
+                left: auto !important;
+                right: 0 !important;
+                max-width: calc(100vw - 36px) !important;
+            }
+            .level-pills-row {
+                padding: 4px;
+                border-radius: 11px;
+            }
+            .level-pill-btn {
+                height: 38px;
+                font-size: 0.80rem;
+                padding: 0 0.4rem;
+            }
+            .level-pill-btn.pill-doctoral .doc-badge {
+                font-size: 0.62rem;
+                padding: 0.12rem 0.35rem;
+            }
+            .input-text-field {
+                font-size: 0.88rem;
+                padding: 0.55rem 0.8rem;
+                min-height: 40px;
+                border-radius: 9px;
+            }
+            .btn-register-submit {
+                min-height: 44px;
+                font-size: 0.94rem;
+                padding: 0.75rem 1.25rem;
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-wrapper {
+                padding: 0.85rem 0.75rem 1.5rem 0.75rem;
+            }
+            .registration-card {
+                padding: 1.35rem 0.95rem 1.15rem 0.95rem;
+            }
+            .level-pill-btn {
+                font-size: 0.76rem;
+                padding: 0 0.3rem;
+            }
+            .level-pill-btn.pill-doctoral .doc-badge {
+                font-size: 0.58rem;
+                padding: 0.1rem 0.25rem;
             }
         }
 

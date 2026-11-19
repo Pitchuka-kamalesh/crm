@@ -113,6 +113,7 @@
         }
         .mono {
             font-family: 'JetBrains Mono', monospace;
+            word-break: break-word;
         }
         .fee-table {
             width: 100%;
@@ -134,9 +135,11 @@
             padding: 0.75rem 1rem;
             border-bottom: 1px solid #f1f5f9;
             color: #1e293b;
+            word-break: break-word;
         }
         .fee-table td.right, .fee-table th.right {
             text-align: right;
+            white-space: nowrap;
         }
         .discount-row td {
             color: #059669;
@@ -171,6 +174,16 @@
             flex-wrap: wrap;
             gap: 0.75rem;
         }
+        .actions-secondary-group {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+        .actions-primary-group {
+            display: flex;
+            gap: 0.65rem;
+            align-items: center;
+        }
         .btn-secondary {
             background: #ffffff;
             color: #334155;
@@ -202,6 +215,115 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
         .btn-primary:hover { box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35); }
+
+        @media (max-width: 640px) {
+            body { padding: 0.75rem 0.65rem 2.25rem; }
+            .receipt-wrap { width: 100%; }
+            .status-banner {
+                padding: 0.75rem 0.9rem;
+                font-size: 0.8rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                border-radius: 10px;
+            }
+            .receipt-card {
+                border-radius: 14px;
+            }
+            .receipt-header {
+                padding: 1rem 0.95rem 0.95rem;
+                gap: 0.75rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .univ-brand {
+                gap: 10px;
+                align-items: center;
+            }
+            .univ-brand img {
+                height: 42px;
+                padding: 3px;
+                border-radius: 8px;
+            }
+            .univ-title {
+                font-size: 0.9rem;
+                line-height: 1.25;
+            }
+            .univ-sub {
+                font-size: 0.64rem;
+                line-height: 1.3;
+            }
+            .paid-stamp {
+                font-size: 0.72rem;
+                padding: 0.35rem 0.75rem;
+                align-self: flex-start;
+            }
+            .receipt-body {
+                padding: 1.15rem 0.85rem 1.25rem;
+            }
+            .meta-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+                padding-bottom: 1.15rem;
+                margin-bottom: 1.15rem;
+            }
+            .meta-item-label {
+                font-size: 0.68rem;
+            }
+            .meta-item-val {
+                font-size: 0.85rem;
+            }
+            .fee-table {
+                margin-bottom: 1.15rem;
+                font-size: 0.8rem;
+            }
+            .fee-table th, .fee-table td {
+                padding: 0.55rem 0.6rem;
+            }
+            .fee-table th {
+                font-size: 0.68rem;
+            }
+            .total-row td {
+                font-size: 0.94rem;
+            }
+            .receipt-footer-note {
+                padding: 0.75rem 0.8rem;
+                font-size: 0.72rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.4rem;
+                line-height: 1.4;
+            }
+            .actions-bar {
+                margin-top: 1.15rem;
+                flex-direction: column-reverse;
+                width: 100%;
+                gap: 0.65rem;
+            }
+            .actions-primary-group, .actions-secondary-group {
+                width: 100%;
+                flex-direction: column;
+                gap: 0.65rem;
+            }
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                min-height: 46px;
+                justify-content: center;
+                text-align: center;
+                padding: 0.65rem 1rem;
+                font-size: 0.86rem;
+                border-radius: 10px;
+                box-sizing: border-box;
+            }
+        }
+
+        @media (max-width: 360px) {
+            body { padding: 0.5rem 0.4rem 1.75rem; }
+            .receipt-header { padding: 0.85rem 0.75rem; }
+            .receipt-body { padding: 0.95rem 0.75rem 1rem; }
+            .univ-title { font-size: 0.84rem; }
+            .btn-primary, .btn-secondary { font-size: 0.8rem; }
+        }
         @media print {
             body { background: #ffffff; padding: 0; }
             .status-banner, .actions-bar { display: none !important; }
@@ -305,7 +427,7 @@
     </div>
 
     <div class="actions-bar">
-        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+        <div class="actions-secondary-group">
             <button type="button" onclick="window.print()" class="btn-secondary">
                 <span>🖨️ Print / Save PDF</span>
             </button>
@@ -318,7 +440,7 @@
             $crmIdText = strtoupper(trim((string)($crmId ?? $student?->crmid ?? '')));
             $isPhd = str_contains($progText, 'PHD') || str_contains($progText, 'PH.D') || str_contains($progText, 'DOCTOR') || str_starts_with($crmIdText, 'PHD');
         @endphp
-        <div style="display: flex; gap: 0.65rem; align-items: center;">
+        <div class="actions-primary-group">
             <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-primary">
                 @if($isPhd)
                     <span>Continue to Application Download &rarr;</span>

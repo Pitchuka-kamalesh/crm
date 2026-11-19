@@ -744,58 +744,89 @@
                 gap: 1.5rem;
             }
             .hero-title {
-                font-size: 2.1rem;
+                font-size: 2.2rem;
             }
-            .login-card-wrapper {
-                justify-content: center;
-            }
-            .login-card {
-                max-width: 440px;
+            .hero-desc {
+                font-size: 0.9rem;
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 900px) {
+            html, body {
+                height: 100%;
+                min-height: 100vh;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+            body {
+                padding: 1.25rem 1rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background-attachment: scroll;
+            }
+            .hero-section {
+                display: none !important;
+            }
+            .main-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                max-width: 440px;
+                margin: auto;
+                padding: 0;
+                gap: 0;
+            }
+            .login-card-wrapper {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            .login-card {
+                width: 100%;
+                max-width: 440px;
+                padding: 2rem 1.5rem 1.4rem 1.5rem;
+                border-radius: 1.5rem;
+                box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.18);
+            }
+            .crest-icon-box {
+                width: 56px;
+                height: 56px;
+                border-radius: 16px;
+            }
+            .card-heading {
+                font-size: 1.3rem;
+            }
+            .card-subtitle {
+                font-size: 0.78rem;
+            }
+            .input-control {
+                font-size: 1rem; /* Prevents auto-zoom on mobile devices */
+                padding: 0.82rem 1rem;
+            }
+            .input-with-prefix {
+                padding-left: 4.25rem;
+            }
+            .btn-submit {
+                min-height: 48px;
+                font-size: 0.94rem;
+                border-radius: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
             body {
                 padding: 1rem 0.75rem;
             }
             .login-card {
-                padding: 1.75rem 1.25rem;
+                padding: 1.75rem 1.25rem 1.25rem 1.25rem;
                 border-radius: 1.25rem;
             }
-            .hero-title {
-                font-size: 1.65rem;
-            }
-            .hero-desc {
-                font-size: 0.84rem;
-            }
-            .crest-icon-box {
-                width: 54px;
-                height: 54px;
-            }
             .card-heading {
-                font-size: 1.2rem;
-            }
-            .bubbles-grid {
-                gap: 0.45rem;
-            }
-            .feature-bubble {
-                padding: 0.4rem 0.75rem 0.4rem 0.45rem;
-                gap: 0.45rem;
-            }
-            .bubble-label {
-                font-size: 0.76rem;
-            }
-            .bubble-icon {
-                width: 26px;
-                height: 26px;
-            }
-            .bubble-icon svg {
-                width: 13px;
-                height: 13px;
-            }
-            .btn-submit {
-                padding: 0.85rem 1rem;
-                font-size: 0.88rem;
+                font-size: 1.22rem;
             }
         }
     </style>

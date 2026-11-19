@@ -106,13 +106,13 @@
         <table class="tele-table">
             <thead>
                 <tr>
-                    <th>Phone Number</th>
-                    <th>Student Created Timestamp</th>
-                    <th>Allocated Timestamp</th>
-                    <th>Current Step</th>
-                    <th>Application</th>
-                    <th>CRM ID</th>
-                    <th style="text-align: right;">Action</th>
+                    <th style="white-space: nowrap;">Phone Number</th>
+                    <th style="white-space: nowrap;">Student Created Timestamp</th>
+                    <th style="white-space: nowrap;">Allocated Timestamp</th>
+                    <th style="white-space: nowrap;">Current Step</th>
+                    <th style="white-space: nowrap;">Application</th>
+                    <th style="white-space: nowrap;">CRM ID</th>
+                    <th style="text-align: right; white-space: nowrap;">Action</th>
                 </tr>
             </thead>
             <tbody id="teleTableBody">
@@ -175,67 +175,68 @@
                     @endphp
                     <tr id="row-allotted-{{ $leadPhone }}">
                         <!-- 1. Phone Number -->
-                        <td>
-                            <div style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">
+                        <td style="white-space: nowrap;">
+                            <div style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; white-space: nowrap;">
                                 {{ $leadPhone }}
                             </div>
                         </td>
 
                         <!-- 2. Student Created Timestamp (sourced from leads table log_timestamp) -->
-                        <td>
+                        <td style="white-space: nowrap;">
                             @if($studentCreatedTs !== '0')
-                                <div style="color: #334155; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">
+                                <div style="color: #334155; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; white-space: nowrap;">
                                     {{ $studentCreatedTs }}
                                 </div>
                             @else
-                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">0</span>
+                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; white-space: nowrap;">0</span>
                             @endif
                         </td>
 
                         <!-- 3. Allocated Timestamp -->
-                        <td>
+                        <td style="white-space: nowrap;">
                             @if($allocatedTs !== '0')
-                                <div style="color: #334155; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">
+                                <div style="color: #334155; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; white-space: nowrap;">
                                     {{ $allocatedTs }}
                                 </div>
                             @else
-                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">0</span>
+                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; white-space: nowrap;">0</span>
                             @endif
                         </td>
 
                         <!-- 4. Current Step -->
-                        <td>
-                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; background: {{ $badgeStyle['bg'] }}; color: {{ $badgeStyle['color'] }}; border: 1px solid {{ $badgeStyle['border'] }};">
+                        <td style="white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; background: {{ $badgeStyle['bg'] }}; color: {{ $badgeStyle['color'] }}; border: 1px solid {{ $badgeStyle['border'] }};">
                                 {{ $currentStep }}
                             </span>
                         </td>
 
                         <!-- 5. Application -->
-                        <td>
+                        <td style="white-space: nowrap;">
                             @if($leadAppli !== '0')
-                                <span style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.84rem;">
+                                <span style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; white-space: nowrap;">
                                     {{ $leadAppli }}
                                 </span>
                             @else
-                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">0</span>
+                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; white-space: nowrap;">0</span>
                             @endif
                         </td>
 
                         <!-- 6. CRM ID -->
-                        <td>
+                        <td style="white-space: nowrap;">
                             @if($leadCrmId !== '0')
-                                <span style="display: inline-flex; align-items: center; font-size: 0.76rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1.5px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">
+                                <span style="display: inline-flex; align-items: center; font-size: 0.78rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 7px; border-radius: 5px; font-family: 'JetBrains Mono', monospace; white-space: nowrap;">
                                     {{ $leadCrmId }}
                                 </span>
                             @else
-                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">0</span>
+                                <span style="font-weight: 600; color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; white-space: nowrap;">0</span>
                             @endif
                         </td>
 
                         <!-- 7. Action Button -->
-                        <td style="text-align: right;">
+                        <td style="text-align: right; white-space: nowrap;">
                             <button type="button" 
                                     class="tele-btn-action tele-btn-wizard" 
+                                    style="white-space: nowrap;"
                                     onclick="openWizardModal('{{ $leadAppli !== '0' ? $leadAppli : $leadPhone }}', '{{ addslashes($candidateName) }}', '{{ $leadPhone }}', '{{ addslashes($candidateProgram) }}', {}, '{{ addslashes($candidateRemarks) }}', '{{ addslashes($currentStep) }}', @js($allowedStages))"
                                     title="Open action wizard to log call & update status">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -330,7 +331,7 @@
                             <div class="candidate-title">{{ $leadName }}</div>
                             <div class="candidate-sub" style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 3px;">
                                 <span>App: <strong style="color: #334155;">{{ $leadAppNo }}</strong></span>
-                                <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;" title="Branch CRM ID">{{ $leadCrmId }}</span>
+                                <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; white-space: nowrap;" title="Branch CRM ID">{{ $leadCrmId }}</span>
                                 @if(!empty($lead->state?->state_name)) • {{ $lead->state->state_name }}@endif
                             </div>
                             @php
@@ -383,12 +384,12 @@
                             );
                             $leadBadge = \App\Services\TelecallerService::getStageBadgeStyle($leadStage);
                         @endphp
-                        <td>
-                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; background: {{ $leadBadge['bg'] }}; color: {{ $leadBadge['color'] }}; border: 1px solid {{ $leadBadge['border'] }};">
+                        <td style="white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2.5px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; background: {{ $leadBadge['bg'] }}; color: {{ $leadBadge['color'] }}; border: 1px solid {{ $leadBadge['border'] }};">
                                 {{ $leadStage }}
                             </span>
                         </td>
-                        <td style="text-align: right;">
+                        <td style="text-align: right; white-space: nowrap;">
                             <button type="button" 
                                     class="tele-btn-action tele-btn-wizard" 
                                     onclick="openWizardModal('{{ $leadAppNo }}', '{{ addslashes($leadName) }}', '{{ $leadPhone }}', '{{ $leadProgram }}', {}, '{{ addslashes($lead->remarks ?? '') }}', '{{ addslashes($leadStage) }}', @js($allowedStages))"
