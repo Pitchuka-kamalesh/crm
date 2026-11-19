@@ -876,6 +876,7 @@
                     <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
                 </div>
 
+                <!-- Row 1: Online Application & Document Verification -->
                 <div class="bubbles-grid">
 
                     <!-- Bubble 1: Online Application -->
@@ -917,6 +918,11 @@
                             <p class="popover-text">Upload and verify educational certificates, 10th/12th memos, Transfer Certificate, Migration, and Aadhaar card.</p>
                         </div>
                     </div>
+
+                </div>
+
+                <!-- Row 2: Fee & Receipts, Seat Allotment, Provisional ID (Placed beside each other) -->
+                <div class="bubbles-grid" style="margin-top: 0.2rem;">
 
                     <!-- Bubble 3: Fee Payment & Receipts -->
                     <div class="feature-bubble">
