@@ -2476,8 +2476,8 @@
                                         <select name="country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
                                             @foreach($countries as $c)
                                                 @php
-                                                    $isCountrySel = ($personalInfo?->country == $c->country_name)
-                                                        || (!$personalInfo && ($c->country_name === 'India' || $c->country_id == 1 || strtoupper($c->country_code ?? '') === 'IN'));
+                                                    $targetCountry = $personalInfo?->country ?: ($defaultCountry ?? 'India');
+                                                    $isCountrySel = ($targetCountry == $c->country_name || $targetCountry == $c->country_id);
                                                 @endphp
                                                 <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ $isCountrySel ? 'selected' : '' }}>
                                                     {{ $c->country_name }}
@@ -2491,8 +2491,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $isStateSel = ($personalInfo?->state == $s->state_name)
-                                                        || (!$personalInfo && ($s->state_name === 'Andhra Pradesh' || $s->state_id == 1));
+                                                    $targetState = $personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh');
+                                                    $isStateSel = ($targetState == $s->state_name || $targetState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2506,8 +2506,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $isDistSel = ($personalInfo?->district == $d->DISTRICT_NAME)
-                                                        || (!$personalInfo && ($d->DISTRICT_NAME === 'Guntur' || $d->DISTRICT_ID == 1));
+                                                    $targetDist = $personalInfo?->district ?: ($defaultDistrict ?? 'Guntur');
+                                                    $isDistSel = ($targetDist == $d->DISTRICT_NAME || $targetDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2582,12 +2582,13 @@
                                 const currentSelectedDist = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
                                 let foundSelected = false;
+                                const targetDist = '{{ $personalInfo?->district ?: ($defaultDistrict ?? "Guntur") }}';
                                 allDistrictsData.forEach(function(d) {
                                     if (!stateId || d.STATE_ID == stateId) {
                                         const opt = document.createElement('option');
                                         opt.value = d.DISTRICT_ID;
                                         opt.textContent = d.DISTRICT_NAME;
-                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $personalInfo?->district ?: "Guntur" }}') {
+                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === targetDist || d.DISTRICT_ID == targetDist) {
                                             opt.selected = true;
                                             foundSelected = true;
                                         }
@@ -2705,8 +2706,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->tenth_school_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $curState = $academicDetails?->tenth_school_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2720,8 +2721,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->tenth_school_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->tenth_school_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2805,8 +2806,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pu2_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->pu2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2820,8 +2821,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pu2_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->pu2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2921,8 +2922,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->ug_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->ug_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2936,8 +2937,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->ug_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->ug_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -3022,8 +3023,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pg_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->pg_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -3037,8 +3038,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pg_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->pg_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -3185,8 +3186,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pg2_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->pg2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -3200,8 +3201,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pg2_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->pg2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -3442,23 +3443,23 @@
                             }
 
                             function onTenthStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-tenth-district-select', '{{ $academicDetails?->tenth_school_district }}');
+                                populateDistrictDropdown(stateId, 'geo-tenth-district-select', '{{ $academicDetails?->tenth_school_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onInterStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-inter-district-select', '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}');
+                                populateDistrictDropdown(stateId, 'geo-inter-district-select', '{{ $academicDetails?->pu2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onUgStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-ug-district-select', '{{ $academicDetails?->ug_college_district }}');
+                                populateDistrictDropdown(stateId, 'geo-ug-district-select', '{{ $academicDetails?->ug_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onPgStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-pg-district-select', '{{ $academicDetails?->pg_college_district }}');
+                                populateDistrictDropdown(stateId, 'geo-pg-district-select', '{{ $academicDetails?->pg_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onPg2StateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-pg2-district-select', '{{ $academicDetails?->pg2_college_district }}');
+                                populateDistrictDropdown(stateId, 'geo-pg2-district-select', '{{ $academicDetails?->pg2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             const interFields = ['inter_college', 'inter_board_of_study', 'inter_city', 'geo-inter-state-select', 'geo-inter-district-select', 'inter_year', 'pu2_marks_conducted', 'pu2_marks_earned'];

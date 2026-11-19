@@ -91,6 +91,7 @@ class RegistrationController extends Controller
             'campus_id'      => ['required'],
             'country_id'     => ['nullable', 'integer'],
             'state_id'       => ['nullable'],
+            'district_id'    => ['nullable'],
             'program_level'  => ['required', 'string', 'in:UG,PG,Doctoral,PhD'],
             'progid'         => ['required', 'integer'],
             'branch_id'      => ['nullable', 'integer'],
@@ -128,6 +129,31 @@ class RegistrationController extends Controller
 
         $countryId = (int) $request->input('country_id', 1);
         $stateId = (int) $request->input('state_id', 1);
+        $districtId = $request->input('district_id');
+
+        $countryName = 'India';
+        if ($countryId) {
+            $cModel = Country::where('country_id', $countryId)->first();
+            if ($cModel) {
+                $countryName = $cModel->country_name;
+            }
+        }
+
+        $stateName = 'Andhra Pradesh';
+        if ($stateId) {
+            $sModel = State::where('state_id', $stateId)->first();
+            if ($sModel) {
+                $stateName = $sModel->state_name;
+            }
+        }
+
+        $districtName = null;
+        if (!empty($districtId)) {
+            $dModel = District::where('DISTRICT_ID', (int) $districtId)->first();
+            if ($dModel) {
+                $districtName = $dModel->DISTRICT_NAME;
+            }
+        }
 
         $progLevel = $request->input('program_level', 'UG');
         $dbProgLevel = ($progLevel === 'Doctoral') ? 'PhD' : $progLevel;
@@ -288,6 +314,87 @@ class RegistrationController extends Controller
             }
         } catch (\Throwable $e) {
             Log::info('[RegistrationController] Lead sync notice: ' . $e->getMessage());
+        }
+
+        // 3c. Pre-populate Student Personal Info & Academic Details with selected Country, State, District
+        try {
+            $personalCrmId = $crmRecord?->crmid;
+            if (!$personalCrmId || $personalCrmId === '0') {
+                $personalCrmId = \App\Services\CrmIdService::generateForStudent($crmRecord);
+                if ($crmRecord && $personalCrmId) {
+                    $crmRecord->update(['crmid' => $personalCrmId]);
+                }
+            }
+
+            // Sync Personal Info with registered Country, State, District
+            $existingPersonal = \Modules\Dashboards\Models\StudentPersonalInfo::where('applino', (string) $appliNano)->first()
+                ?? (!empty($cleanMobile) ? \Modules\Dashboards\Models\StudentPersonalInfo::where('phoneno', (string) $cleanMobile)->first() : null);
+
+            if ($existingPersonal) {
+                $personalUpdates = [];
+                if (empty($existingPersonal->country)) {
+                    $personalUpdates['country'] = $countryName;
+                }
+                if (empty($existingPersonal->state) || $existingPersonal->state === 'Andhra Pradesh') {
+                    $personalUpdates['state'] = $stateName;
+                }
+                if ((empty($existingPersonal->district) || $existingPersonal->district === 'Guntur') && $districtName) {
+                    $personalUpdates['district'] = $districtName;
+                }
+                if (!empty($personalUpdates)) {
+                    $existingPersonal->update($personalUpdates);
+                }
+            } else {
+                \Modules\Dashboards\Models\StudentPersonalInfo::create([
+                    'crmid'          => $personalCrmId ?: '0',
+                    'applino'        => (string) $appliNano,
+                    'phoneno'        => (string) $cleanMobile,
+                    'country'        => $countryName,
+                    'state'          => $stateName,
+                    'district'       => $districtName ?? '',
+                    'terms_accepted' => 'no',
+                    'log_userid'     => 'SELF_REGISTER',
+                    'log_ipaddress'  => $request->ip() ?? '127.0.0.1',
+                    'log_timestamp'  => now(),
+                ]);
+            }
+
+            // Sync Academic Details with registered State and District for 10th & 12th
+            $existingAcademic = \Modules\Dashboards\Models\StudentAcademicDetail::where('applino', (string) $appliNano)->first()
+                ?? (!empty($cleanMobile) ? \Modules\Dashboards\Models\StudentAcademicDetail::where('phoneno', (string) $cleanMobile)->first() : null);
+
+            if ($existingAcademic) {
+                $academicUpdates = [];
+                if (empty($existingAcademic->tenth_school_state) || $existingAcademic->tenth_school_state === 'Andhra Pradesh') {
+                    $academicUpdates['tenth_school_state'] = $stateName;
+                }
+                if ((empty($existingAcademic->tenth_school_district) || $existingAcademic->tenth_school_district === 'Guntur') && $districtName) {
+                    $academicUpdates['tenth_school_district'] = $districtName;
+                }
+                if (empty($existingAcademic->pu2_college_state) || $existingAcademic->pu2_college_state === 'Andhra Pradesh') {
+                    $academicUpdates['pu2_college_state'] = $stateName;
+                }
+                if ((empty($existingAcademic->pu2_college_district) || $existingAcademic->pu2_college_district === 'Guntur') && $districtName) {
+                    $academicUpdates['pu2_college_district'] = $districtName;
+                }
+                if (!empty($academicUpdates)) {
+                    $existingAcademic->update($academicUpdates);
+                }
+            } else {
+                \Modules\Dashboards\Models\StudentAcademicDetail::create([
+                    'crmid'                 => $personalCrmId ?: '0',
+                    'applino'               => (string) $appliNano,
+                    'phoneno'               => (string) $cleanMobile,
+                    'progmid'               => $progId,
+                    'branchid'              => $branchId,
+                    'tenth_school_state'    => $stateName,
+                    'tenth_school_district' => $districtName ?? '',
+                    'pu2_college_state'     => $stateName,
+                    'pu2_college_district'  => $districtName ?? '',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[RegistrationController] Prefill personal/academic error: ' . $e->getMessage());
         }
 
         // 3c. Fill / update application number in crm.telecaller_leads table
