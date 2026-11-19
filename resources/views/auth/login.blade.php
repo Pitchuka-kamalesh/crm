@@ -820,7 +820,7 @@
             </div>
 
             <!-- Admission Information & Brochures -->
-            <div class="bubbles-cluster-wrap">
+            <div class="bubbles-cluster-wrap" style="margin-top: 1.75rem;">
                 <div class="bubbles-cluster-title">
                     <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
                 </div>
