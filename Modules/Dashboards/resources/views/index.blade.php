@@ -187,8 +187,8 @@
         .nav-inner {
             max-width: 1320px;
             margin: 0 auto;
-            padding: 0 1.25rem;
-            height: 58px;
+            padding: 0 1.5rem;
+            height: 66px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -197,13 +197,13 @@
         .brand-cluster {
             display: flex;
             align-items: center;
-            gap: 0.7rem;
+            gap: 0.75rem;
             text-decoration: none;
         }
 
         .brand-logo-img {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             transition: transform 0.2s ease;
         }
@@ -243,6 +243,7 @@
             border: 1px solid #dbeafe;
             text-transform: uppercase;
             letter-spacing: 0.04em;
+            white-space: nowrap;
         }
 
         /* Center Nav Links - Clean Understated Style */
@@ -305,6 +306,7 @@
             align-items: center;
             justify-content: flex-end;
             gap: 0.3rem;
+            white-space: nowrap;
         }
 
         .user-avatar-circle {
@@ -1089,7 +1091,7 @@
         /* Footer */
         .dash-footer {
             background: #ffffff;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid #e2e8f0;
             padding: 1.25rem 1.5rem;
             margin-top: auto;
             position: relative;
@@ -1104,6 +1106,7 @@
             justify-content: space-between;
             font-size: 0.78rem;
             color: #64748b;
+            gap: 1rem;
         }
 
         .footer-inner a {
@@ -1150,6 +1153,517 @@
             }
             .dash-container {
                 padding: 1rem;
+            }
+            .dash-footer {
+                padding: 1.15rem 1rem;
+                text-align: center;
+                margin-top: 1.25rem;
+            }
+            .footer-inner {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 0.45rem;
+                font-size: 0.75rem;
+                line-height: 1.5;
+            }
+            .footer-inner > div {
+                text-align: center;
+            }
+        }
+
+        /* Dedicated Stage Form Wrapper for consistent mobile padding */
+        .stage-form-wrapper {
+            padding: 1.5rem 2rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .embedded-a4-form-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+        }
+
+        .mobile-a4-scroll-hint {
+            display: none;
+        }
+
+        .btn-label-mobile {
+            display: none;
+        }
+        .btn-label-desktop {
+            display: inline;
+        }
+
+        .stage-action-row {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        @media (max-width: 640px) {
+            .stage-form-wrapper {
+                padding: 0.65rem 0.5rem !important;
+            }
+            .dash-container {
+                padding: 0.5rem 0.5rem 2rem !important;
+                gap: 0.5rem;
+            }
+            .dash-nav {
+                position: sticky;
+                top: 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            }
+            .nav-inner {
+                padding: 0.6rem 0.75rem !important;
+                height: auto !important;
+                min-height: 60px !important;
+            }
+            .brand-cluster {
+                gap: 0.45rem !important;
+            }
+            .brand-logo-img {
+                width: 34px !important;
+                height: 34px !important;
+                flex-shrink: 0 !important;
+            }
+            .brand-name-main {
+                font-size: 0.98rem !important;
+                font-weight: 800 !important;
+                white-space: nowrap !important;
+            }
+            .brand-tag {
+                font-size: 0.62rem !important;
+                padding: 0.1rem 0.4rem !important;
+                white-space: nowrap !important;
+            }
+            .brand-accred-sub {
+                display: none !important;
+            }
+            .user-nav-cluster {
+                gap: 0.4rem !important;
+            }
+            .user-name-title {
+                max-width: 90px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                font-size: 0.8rem !important;
+                font-weight: 700 !important;
+            }
+            .user-meta-sub {
+                font-size: 0.64rem !important;
+                font-weight: 600 !important;
+                white-space: nowrap !important;
+            }
+            .user-avatar-circle {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.8rem !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-nav-action {
+                padding: 0.3rem 0.45rem !important;
+                font-size: 0.72rem !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-signout svg {
+                width: 15px !important;
+                height: 15px !important;
+            }
+            .btn-signout span {
+                display: none;
+            }
+
+            .welcome-hero {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0.85rem 1rem !important;
+                gap: 0.55rem !important;
+                border-radius: 12px !important;
+            }
+            .welcome-hero-left {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            .welcome-heading {
+                font-size: 1.1rem !important;
+                line-height: 1.3 !important;
+                margin: 0;
+            }
+            .welcome-subtitle {
+                font-size: 0.76rem !important;
+                line-height: 1.4 !important;
+                color: #475569 !important;
+            }
+            .meta-badges-cluster {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+            }
+            .meta-badge {
+                font-size: 0.7rem !important;
+                padding: 0.22rem 0.6rem !important;
+                border-radius: 9999px;
+            }
+
+            .stepper-card {
+                padding: 0.75rem 0.85rem !important;
+                border-radius: 12px !important;
+            }
+            .stepper-header {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.45rem !important;
+                margin-bottom: 0.65rem !important;
+            }
+            .stepper-title-box {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+            }
+            .stepper-title-box h2 {
+                font-size: 0.88rem !important;
+                font-weight: 700;
+                color: #0f172a;
+                margin: 0;
+            }
+            .stepper-step-indicator {
+                font-size: 0.68rem !important;
+                padding: 0.12rem 0.5rem !important;
+                font-weight: 600;
+            }
+            .stepper-progress-box {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+                gap: 0.65rem !important;
+            }
+            .progress-bar-track {
+                flex: 1 !important;
+                width: auto !important;
+                height: 6px !important;
+                background: #f1f5f9;
+                border-radius: 9999px;
+            }
+            .progress-percent-label {
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
+                color: #475569 !important;
+                white-space: nowrap !important;
+            }
+            .stepper-nav-bar {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+                gap: 0.5rem !important;
+                padding: 0.5rem 0.2rem 0.25rem !important;
+                border-top: 1px solid #f1f5f9;
+            }
+            .stepper-nav-bar::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+            .stepper-nav-bar .step-nav-btn {
+                min-width: 82px !important;
+                max-width: 95px !important;
+                padding: 0.35rem 0.15rem !important;
+                flex: 0 0 auto !important;
+            }
+            .step-circle {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.75rem !important;
+            }
+            .step-nav-name {
+                font-size: 0.7rem !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                word-break: normal !important;
+                text-overflow: clip !important;
+                max-width: 100% !important;
+                text-align: center !important;
+                margin-top: 0.25rem !important;
+            }
+            .step-nav-status-sub {
+                font-size: 0.62rem !important;
+                margin-top: 0.1rem !important;
+            }
+
+            .step-panel-card {
+                border-radius: 10px;
+            }
+            .step-panel-header {
+                padding: 0.75rem 0.85rem !important;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.45rem;
+            }
+            .step-panel-header h3 {
+                font-size: 0.98rem !important;
+            }
+            .step-panel-body {
+                padding: 0.85rem 0.75rem !important;
+            }
+
+            .mockup-card {
+                padding: 1rem 0.85rem 1.35rem !important;
+                border-radius: 14px !important;
+            }
+            .mockup-card-title {
+                font-size: 0.98rem !important;
+            }
+            .mockup-subbox {
+                padding: 0.75rem 0.65rem !important;
+                border-radius: 10px !important;
+                gap: 0.6rem;
+            }
+            .mockup-subbox-title {
+                font-size: 0.88rem !important;
+            }
+
+            .mockup-input, .mockup-select, .field-input, .field-select, .field-textarea {
+                font-size: 16px !important; /* Prevents auto zoom in iOS Safari */
+                padding: 0.55rem 0.75rem !important;
+            }
+
+            .mockup-radio-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.4rem;
+            }
+            .mockup-radio-row {
+                flex-wrap: wrap;
+                gap: 0.4rem 0.75rem;
+            }
+
+            .kyc-docs-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem;
+            }
+            .kyc-doc-card, .download-doc-card {
+                padding: 0.85rem 0.75rem !important;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .step-footer-actions {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 0.65rem;
+                padding-top: 0.85rem;
+            }
+            .step-footer-actions .btn-step-prev,
+            .step-footer-actions .btn-step-next,
+            .step-footer-actions .btn-save-step,
+            .step-footer-actions button[type="submit"] {
+                width: 100%;
+                justify-content: center;
+                min-height: 44px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            #payuSubmitForm {
+                width: 100%;
+                display: block;
+            }
+            #btnPayUGateway {
+                width: 100% !important;
+                justify-content: center !important;
+                min-height: 44px !important;
+                box-sizing: border-box;
+            }
+
+            .fee-table {
+                font-size: 0.8rem;
+            }
+            .fee-table th, .fee-table td {
+                padding: 0.65rem 0.5rem;
+            }
+
+            .embedded-a4-form {
+                min-width: 680px;
+            }
+
+            .mobile-a4-scroll-hint {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4rem;
+                background: #e0f2fe;
+                color: #0369a1;
+                font-size: 0.74rem;
+                font-weight: 700;
+                padding: 6px 10px;
+                border-radius: 8px;
+                margin-bottom: 0.75rem;
+                border: 1px solid #bae6fd;
+                text-align: center;
+            }
+
+            .stage6-header-actions {
+                width: 100%;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+            .stage6-header-actions a {
+                width: 100%;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 0.55rem 0.5rem !important;
+                font-size: 0.78rem !important;
+                border-radius: 8px !important;
+                box-sizing: border-box !important;
+            }
+
+            .stage6-panel-body {
+                padding: 0.75rem 0.5rem !important;
+            }
+
+            .embedded-a4-attachment {
+                border-radius: 8px !important;
+                margin-top: 0.85rem !important;
+            }
+            .attachment-header {
+                padding: 10px 12px !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+            }
+            .attachment-actions {
+                width: 100% !important;
+                display: flex !important;
+                gap: 6px !important;
+                flex-wrap: wrap !important;
+            }
+            .attachment-actions a, .attachment-actions span {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                flex: 1 !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            .embedded-a4-attachment iframe {
+                height: 420px !important;
+            }
+
+            /* Stage 7 Mobile Refinements */
+            .stage7-banner-box {
+                padding: 0.95rem 0.85rem !important;
+                border-radius: 10px !important;
+            }
+            .stage7-banner-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.65rem !important;
+                margin-bottom: 0.85rem !important;
+            }
+            .stage7-banner-header h4 {
+                font-size: 0.92rem !important;
+                line-height: 1.25 !important;
+            }
+            .stage7-banner-header span {
+                font-size: 0.74rem !important;
+            }
+            .stage7-banner-header .meta-badge {
+                align-self: flex-start !important;
+                font-size: 0.76rem !important;
+                padding: 0.35rem 0.75rem !important;
+            }
+            .stage7-metric-card {
+                padding: 0.75rem 0.85rem !important;
+            }
+            .stage7-notice-box {
+                padding: 0.75rem 0.85rem !important;
+                font-size: 0.78rem !important;
+                line-height: 1.45 !important;
+            }
+
+            .dash-footer {
+                padding: 1rem 0.85rem !important;
+                margin-top: 1rem !important;
+                background: #ffffff !important;
+                border-top: 1px solid #e2e8f0 !important;
+            }
+            .footer-inner {
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                gap: 0.4rem !important;
+                font-size: 0.72rem !important;
+                line-height: 1.45 !important;
+            }
+            .footer-inner > div {
+                text-align: center !important;
+            }
+
+            .btn-label-desktop {
+                display: none !important;
+            }
+            .btn-label-mobile {
+                display: inline !important;
+            }
+
+            .stage-action-row {
+                margin-top: 1.5rem !important;
+                margin-bottom: 0.25rem !important;
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                gap: 0.75rem !important;
+            }
+            .stage-action-row .btn-step-prev,
+            .stage-action-row .btn-step-next,
+            .stage-action-row button,
+            .stage-action-row a {
+                width: 100% !important;
+                justify-content: center !important;
+                text-align: center !important;
+                min-height: 48px !important;
+                padding: 0.75rem 1rem !important;
+                font-size: 0.92rem !important;
+                font-weight: 700 !important;
+                border-radius: 10px !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                align-items: center !important;
+                line-height: 1.25 !important;
+            }
+            .stage-action-row .btn-step-next {
+                background: #2563eb !important;
+                color: #ffffff !important;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
+            }
+            .stage-action-row .btn-step-next:hover {
+                background: #1d4ed8 !important;
+            }
+            .stage-action-row .btn-step-prev {
+                background: #f8fafc !important;
+                color: #475569 !important;
+                border: 1.5px solid #cbd5e1 !important;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            }
+            .stage-action-row .btn-step-prev:hover {
+                background: #f1f5f9 !important;
+                color: #0f172a !important;
+                border-color: #94a3b8 !important;
             }
         }
 
@@ -1322,8 +1836,14 @@
             .mockup-field-row-2 {
                 grid-template-columns: 1fr;
             }
+            .mockup-field-row-3 {
+                grid-template-columns: 1fr !important;
+            }
             .mockup-field-row-4 {
                 grid-template-columns: 1fr;
+            }
+            .mockup-subgrid-3 {
+                grid-template-columns: 1fr !important;
             }
         }
 
@@ -1358,6 +1878,183 @@
             border-color: #0f2744;
             background: #ffffff;
             box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
+        }
+
+        .mockup-select {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.85rem;
+            padding-right: 2rem !important;
+        }
+
+        .mockup-select option {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.88rem;
+        }
+
+        /* ========================================================
+           CUSTOM DROPDOWN UI (Floating Styled Dropdown Card)
+           ======================================================== */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-container.is-open {
+            z-index: 1001;
+        }
+
+        .custom-select-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            padding: 0.6rem 0.85rem;
+            min-height: 40px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+            font-family: inherit;
+            background-color: #eef3f7;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .custom-select-trigger:hover {
+            border-color: #94a3b8;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+        }
+
+        .custom-select-container.is-open .custom-select-trigger,
+        .custom-select-trigger:focus {
+            outline: none;
+            border-color: #0f2744;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
+        }
+
+        .custom-select-trigger:disabled,
+        fieldset[disabled] .custom-select-trigger {
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+            border-color: #cbd5e1 !important;
+            cursor: not-allowed !important;
+            opacity: 0.85;
+            box-shadow: none !important;
+        }
+
+        .custom-select-value {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-select-value.is-placeholder {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .custom-select-arrow {
+            width: 0.85rem;
+            height: 0.85rem;
+            flex-shrink: 0;
+            color: #2563eb;
+            transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-select-container.is-open .custom-select-arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-select-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.16), 0 6px 14px -3px rgba(15, 23, 42, 0.08);
+            padding: 0.35rem;
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 1002;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+            box-sizing: border-box;
+        }
+
+        .custom-select-container.is-open .custom-select-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .custom-select-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-select-dropdown::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        .custom-select-dropdown::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
+        .custom-select-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .custom-select-option {
+            padding: 0.55rem 0.75rem;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #1e293b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .custom-select-option:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        .custom-select-option.is-selected {
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .custom-select-option.is-placeholder {
+            color: #94a3b8;
+            font-style: italic;
+            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 0.25rem;
         }
 
         fieldset[disabled] .mockup-input,
@@ -1484,7 +2181,7 @@
             <a href="{{ route('dashboards.index') }}" class="brand-cluster">
                 <img src="/images/vignan-shield-clean.png" alt="Vignan's University" class="brand-logo-img">
                 <div class="brand-title-wrap">
-                    <div style="display:flex; align-items:center; gap:0.45rem;">
+                    <div style="display:flex; align-items:center; gap:0.45rem; flex-wrap:nowrap;">
                         <span class="brand-name-main">VIGNAN'S</span>
                         <span class="brand-tag">Student Portal</span>
                     </div>
@@ -1499,7 +2196,7 @@
                 <div class="user-info-text">
                     <span class="user-name-title">{{ $displayName }}</span>
                     @if($appNo)
-                        <span class="user-meta-sub">ID: {{ $appNo }}</span>
+                        <span class="user-meta-sub" style="white-space:nowrap;">ID: {{ $appNo }}</span>
                     @endif
                 </div>
 
@@ -1613,12 +2310,14 @@
                     @endphp
                     @if($isLocked)
                         <div class="step-nav-btn is-locked"
-                             style="opacity: 0.45; cursor: not-allowed; pointer-events: none;"
+                             style="opacity: 0.65; cursor: not-allowed; pointer-events: none;"
                              title="Step {{ $num }}: {{ $stg['title'] }} (Locked until previous steps are completed)">
-                            <div class="step-circle" style="background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1;">
-                                🔒
+                            <div class="step-circle" style="background: #f8fafc; color: #64748b; border: 1.5px solid #cbd5e1;">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #64748b;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
                             </div>
-                            <span class="step-nav-name" style="color: #94a3b8;">{{ $stg['title'] }}</span>
+                            <span class="step-nav-name" style="color: #64748b;">{{ $stg['title'] }}</span>
                             <span class="step-nav-status-sub" style="color: #94a3b8;">Locked</span>
                         </div>
                     @else
@@ -1649,7 +2348,7 @@
 
             <!-- ================= STAGE 1: PERSONAL PROFILE ================= -->
             @if($activeStep === 1)
-                <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
+                <div class="stage-form-wrapper">
                     <!-- CARD 1: 2. PERSONAL DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
@@ -1776,7 +2475,11 @@
                                         <label class="mockup-label">Country: <span style="color:#ef4444;">*</span></label>
                                         <select name="country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
                                             @foreach($countries as $c)
-                                                <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ ($personalInfo?->country == $c->country_name || (!$personalInfo && $c->country_code === 'IN')) ? 'selected' : '' }}>
+                                                @php
+                                                    $targetCountry = $personalInfo?->country ?: ($defaultCountry ?? 'India');
+                                                    $isCountrySel = ($targetCountry == $c->country_name || $targetCountry == $c->country_id);
+                                                @endphp
+                                                <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ $isCountrySel ? 'selected' : '' }}>
                                                     {{ $c->country_name }}
                                                 </option>
                                             @endforeach
@@ -1787,7 +2490,11 @@
                                         <select name="state" id="geo-state-select" class="mockup-select" onchange="onStateChange(this.value)" required>
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
-                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ ($personalInfo?->state == $s->state_name || (!$personalInfo && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
+                                                @php
+                                                    $targetState = $personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh');
+                                                    $isStateSel = ($targetState == $s->state_name || $targetState == $s->state_id);
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
                                                 </option>
                                             @endforeach
@@ -1798,7 +2505,11 @@
                                         <select name="district" id="geo-district-select" class="mockup-select" required>
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
-                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ ($personalInfo?->district == $d->DISTRICT_NAME || (!$personalInfo && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
+                                                @php
+                                                    $targetDist = $personalInfo?->district ?: ($defaultDistrict ?? 'Guntur');
+                                                    $isDistSel = ($targetDist == $d->DISTRICT_NAME || $targetDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
                                                 </option>
                                             @endforeach
@@ -1822,14 +2533,16 @@
                             </div>
                             </fieldset>
 
-                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+                            <div class="stage-action-row">
                                 @if($isPaid)
                                     <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
-                                        <span>Next: Stage 2 - {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-desktop">Next: Stage 2 - {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Next: Stage 2 &rarr;</span>
                                     </a>
                                 @else
                                     <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                        <span>Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-desktop">Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Save &amp; Proceed to Stage 2 &rarr;</span>
                                     </button>
                                 @endif
                             </div>
@@ -1869,12 +2582,13 @@
                                 const currentSelectedDist = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
                                 let foundSelected = false;
+                                const targetDist = '{{ $personalInfo?->district ?: ($defaultDistrict ?? "Guntur") }}';
                                 allDistrictsData.forEach(function(d) {
                                     if (!stateId || d.STATE_ID == stateId) {
                                         const opt = document.createElement('option');
                                         opt.value = d.DISTRICT_ID;
                                         opt.textContent = d.DISTRICT_NAME;
-                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === '{{ $personalInfo?->district ?: "Guntur" }}') {
+                                        if (d.DISTRICT_ID == currentSelectedDist || d.DISTRICT_NAME === targetDist || d.DISTRICT_ID == targetDist) {
                                             opt.selected = true;
                                             foundSelected = true;
                                         }
@@ -1933,7 +2647,7 @@
 
             <!-- ================= STAGE 2: ACADEMIC DETAILS ================= -->
             @elseif($activeStep === 2)
-                <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
+                <div class="stage-form-wrapper">
                     <!-- CARD 2: 3. EDUCATION DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1981,7 +2695,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City:</label>
                                         <input type="text" name="tenth_school_city" id="tenth_school_city" class="mockup-input" value="{{ $academicDetails?->tenth_school_city }}" placeholder="Enter City">
@@ -1992,8 +2706,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->tenth_school_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $curState = $academicDetails?->tenth_school_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2007,8 +2721,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->tenth_school_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->tenth_school_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2081,7 +2795,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City: <span class="req-inter" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="city" id="inter_city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City">
@@ -2092,8 +2806,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pu2_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->pu2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2107,8 +2821,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pu2_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->pu2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2197,7 +2911,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City: <span class="req-ug" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="ug_college_city" id="ug_college_city" class="mockup-input" value="{{ $academicDetails?->ug_college_city }}" placeholder="Enter City">
@@ -2208,8 +2922,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->ug_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->ug_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2223,8 +2937,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->ug_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->ug_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2298,7 +3012,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="pg_college_city" id="pg_college_city" class="mockup-input" value="{{ $academicDetails?->pg_college_city }}" placeholder="Enter City">
@@ -2309,8 +3023,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pg_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->pg_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2324,8 +3038,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pg_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->pg_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2407,7 +3121,7 @@
                                         </label>
                                     </div>
 
-                                    <div id="pg1_cmm_container" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg1_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 1 CMM Memo / Serial No:</label>
                                             <input type="text" name="pg1_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
@@ -2422,7 +3136,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="pg1_pc_container" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg1_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 1 PC / OD Certificate No:</label>
                                             <input type="text" name="pg1_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_no }}" placeholder="Enter PC / OD Number">
@@ -2461,7 +3175,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City:</label>
                                         <input type="text" name="pg2_college_city" id="pg2_college_city" class="mockup-input" value="{{ $academicDetails?->pg2_college_city }}" placeholder="Enter City">
@@ -2472,8 +3186,8 @@
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
-                                                    $curState = $academicDetails?->pg2_college_state;
-                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                    $curState = $academicDetails?->pg2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
+                                                    $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -2487,8 +3201,8 @@
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
-                                                    $curDist = $academicDetails?->pg2_college_district;
-                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                    $curDist = $academicDetails?->pg2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? 'Guntur'));
+                                                    $isDistSel = ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
                                                 @endphp
                                                 <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
@@ -2571,7 +3285,7 @@
                                         </label>
                                     </div>
 
-                                    <div id="pg2_cmm_container" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg2_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 2 CMM Memo / Serial No:</label>
                                             <input type="text" name="pg2_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
@@ -2586,7 +3300,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="pg2_pc_container" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg2_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 2 PC / OD Certificate No:</label>
                                             <input type="text" name="pg2_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_no }}" placeholder="Enter PC / OD Number">
@@ -2607,17 +3321,19 @@
                             </div>
                             </fieldset>
 
-                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                            <div class="stage-action-row" style="justify-content: space-between;">
                                 <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
                                     &larr; Stage 1: {{ $stages[1]['title'] ?? 'Personal Profile' }}
                                 </a>
                                 @if($isPaid)
-                                    <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-next" style="background: #0f2744; text-decoration: none;">
-                                        <span>Next: Stage 3 - {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
+                                        <span class="btn-label-desktop">Next: Stage 3 - {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Next: Stage 3 &rarr;</span>
                                     </a>
                                 @else
-                                    <button type="submit" class="btn-step-next" style="background: #0f2744;">
-                                        <span>Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                        <span class="btn-label-desktop">Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Save &amp; Proceed to Stage 3 &rarr;</span>
                                     </button>
                                 @endif
                             </div>
@@ -2727,23 +3443,23 @@
                             }
 
                             function onTenthStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-tenth-district-select', '{{ $academicDetails?->tenth_school_district }}');
+                                populateDistrictDropdown(stateId, 'geo-tenth-district-select', '{{ $academicDetails?->tenth_school_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onInterStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-inter-district-select', '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}');
+                                populateDistrictDropdown(stateId, 'geo-inter-district-select', '{{ $academicDetails?->pu2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onUgStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-ug-district-select', '{{ $academicDetails?->ug_college_district }}');
+                                populateDistrictDropdown(stateId, 'geo-ug-district-select', '{{ $academicDetails?->ug_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onPgStateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-pg-district-select', '{{ $academicDetails?->pg_college_district }}');
+                                populateDistrictDropdown(stateId, 'geo-pg-district-select', '{{ $academicDetails?->pg_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             function onPg2StateChange(stateId) {
-                                populateDistrictDropdown(stateId, 'geo-pg2-district-select', '{{ $academicDetails?->pg2_college_district }}');
+                                populateDistrictDropdown(stateId, 'geo-pg2-district-select', '{{ $academicDetails?->pg2_college_district ?: ($personalInfo?->district ?: ($defaultDistrict ?? "Guntur")) }}');
                             }
 
                             const interFields = ['inter_college', 'inter_board_of_study', 'inter_city', 'geo-inter-state-select', 'geo-inter-district-select', 'inter_year', 'pu2_marks_conducted', 'pu2_marks_earned'];
@@ -3531,11 +4247,13 @@
                         </a>
                         @if($isPaid)
                             <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
-                                <span>Next: Stage 4 - {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-desktop">Next: Stage 4 - {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-mobile">Next: Stage 4 &rarr;</span>
                             </a>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-desktop">Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-mobile">Save &amp; Proceed to Stage 4 &rarr;</span>
                             </button>
                         @endif
                     </div>
@@ -3902,7 +4620,7 @@
                                         </span>
                                     @endif
                                 </label>
-                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
+                                <select id="stage5ExamSlotSelect" name="exam_slot" class="mockup-select" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
                                     <option value="Slot 1 11:00 AM to 1:00 PM" {{ (str_contains($currentSlot, '11') || str_contains($currentSlot, 'Slot 1') || str_contains($currentSlot, 'S1')) && !str_contains($currentSlot, 'Slot 2') && !str_contains($currentSlot, 'S2') ? 'selected' : '' }}>
                                         Slot 1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
@@ -3932,15 +4650,19 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}
+                            <span class="btn-label-desktop">&larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}</span>
+                            <span class="btn-label-mobile">&larr; Stage 4: Fee Payment</span>
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
                             @if($isSlotLocked)
-                                <span>Proceed to Stage 6: Application Download &rarr;</span>
+                                <span class="btn-label-desktop">Proceed to Stage 6: Application Download &rarr;</span>
+                                <span class="btn-label-mobile">Proceed to Stage 6 &rarr;</span>
                             @elseif($hasBookedSlot)
-                                <span>Update Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-desktop">Update Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-mobile">Update &amp; Proceed to Stage 6 &rarr;</span>
                             @else
-                                <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-desktop">Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-mobile">Confirm &amp; Proceed to Stage 6 &rarr;</span>
                             @endif
                         </button>
                     </div>
@@ -3980,6 +4702,7 @@
             @elseif(($activeStep === 6 && ($degreeLevel ?? '') !== 'phd') || ($activeStep === 5 && ($degreeLevel ?? '') === 'phd'))
                 @php
                     $appStudent = $applicationData ?? \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) ($appNo ?: ($user?->usercode ?? '0')));
+                    $student = $appStudent;
                     $formLogo = asset('images/vignan-logo.png');
                     $paid = strtolower($appStudent->payment_status ?? '') === 'completed';
                     $dobFormatted = !empty($appStudent->dob) ? \Carbon\Carbon::parse($appStudent->dob)->format('d M Y') : 'N/A';
@@ -3992,6 +4715,15 @@
                         'study_conduct' => 'Study & Conduct',
                     ];
                     $formUploaded = (array) ($appStudent->documents ?? []);
+                    $progUpper = strtoupper(trim((string)($appStudent->program ?? '')));
+                    $levelUpper = strtoupper(trim((string)($appStudent->degree_level ?? '')));
+                    $crmUpper = strtoupper(trim((string)($appStudent->student_id ?? '')));
+                    $isPhd = ($degreeLevel ?? '') === 'phd'
+                        || $levelUpper === 'PHD'
+                        || str_contains($progUpper, 'PHD')
+                        || str_contains($progUpper, 'PH.D')
+                        || str_contains($progUpper, 'DOCTOR')
+                        || str_starts_with($crmUpper, 'PHD');
                 @endphp
 
                 <div class="step-panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
@@ -4000,415 +4732,394 @@
                         <h3>Application Form Preview &amp; Download</h3>
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
-                    <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <div class="stage6-header-actions" style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
+                        <a href="{{ route('application.show', ['id' => $appStudent->id, 'print' => 1]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;" title="Open and Print Application Form">
                             <span>🖨️ Print Form</span>
                         </a>
                         <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" download class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span>📥 Download Application PDF</span>
+                            <span>📥 Download PDF</span>
                         </a>
                     </div>
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
+                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body stage6-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
                     @csrf
                     <input type="hidden" name="step" value="{{ $activeStep }}">
 
+                    <div class="mobile-a4-scroll-hint">
+                        <span>↔️ Swipe horizontally to view full official A4 sheet</span>
+                    </div>
+
                     <!-- EMBEDDED A4 ADMISSION APPLICATION FORM -->
-                    <div class="embedded-a4-form" style="max-width: 820px; margin: 0 auto; background: #F4F7FB; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1B2430;">
+                    <div class="embedded-a4-form-wrapper">
+                    <div class="embedded-a4-form" style="max-width: 860px; margin: 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: 'Source Sans 3', Helvetica, Arial, sans-serif; font-size: 13px; color: #1B2430;">
 
-                        <!-- Form Header Banner -->
-                        <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
-                            <tr>
-                                <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
-                                    <div style="background: #ffffff; border-radius: 8px; padding: 6px 10px; display: inline-block;">
-                                        <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 42px; display: block;">
-                                    </div>
-                                    <div style="color: #A9BCD6; font-size: 9px; padding-top: 8px;">
-                                        Application date: {{ $appStudent->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
-                                    </div>
-                                </td>
-                                <td style="padding: 18px 24px; vertical-align: top; width: 50%; text-align: right;">
-                                    <div style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">APPLICATION FORM</div>
-                                    <div style="color: #A9BCD6; font-size: 11px; line-height: 1.5; margin-top: 4px;">
-                                        University Admission Application<br>
-                                        Please read all details carefully before signing
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
+                        @php
+                            $uploadedKeys = array_keys((array)($student->uploaded_files ?? []));
+                            $hasTenth = in_array('marksheet10', $uploadedKeys);
+                            $hasInter = in_array('marksheet12', $uploadedKeys);
+                            $hasUg = in_array('btech', $uploadedKeys) || in_array('ug_cmm', $uploadedKeys);
+                            $hasPg = in_array('pg1_cmm', $uploadedKeys) || in_array('pg1_pc', $uploadedKeys) || in_array('pg', $uploadedKeys) || in_array('mtech', $uploadedKeys);
+                            $hasExp = in_array('experience', $uploadedKeys);
+                            $hasId = in_array('aadhaar', $uploadedKeys) || in_array('passport', $uploadedKeys);
+                            $hasPhoto = in_array('photo', $uploadedKeys) || !empty($student->photo_path);
 
-                        <div style="padding: 0 24px 20px 24px;">
+                            $progUpper = strtoupper(trim((string)($student->program ?? '')));
+                            $levelUpper = strtoupper(trim((string)($student->degree_level ?? '')));
+                            $crmUpper = strtoupper(trim((string)($student->student_id ?? '')));
+                            $isPhd = $levelUpper === 'PHD'
+                                || $levelUpper === 'DOCTORAL'
+                                || str_contains($progUpper, 'PHD')
+                                || str_contains($progUpper, 'PH.D')
+                                || str_contains($progUpper, 'DOCTOR')
+                                || str_starts_with($crmUpper, 'PHD');
 
-                            <!-- Profile Strip -->
-                            <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                                <tr>
-                                    <td style="padding: 10px 14px; width: 68px; vertical-align: middle;">
-                                        @if(!empty($appStudent->photo_path))
-                                            <div style="width: 58px; height: 72px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: #ffffff;">
-                                                <img src="{{ $appStudent->photo_path }}" alt="Photo" style="width: 58px; height: 72px; object-fit: cover; display: block;">
+                            $isPg = !$isPhd && (
+                                $levelUpper === 'MTECH'
+                                || $levelUpper === 'PG'
+                                || str_contains($progUpper, 'M.TECH')
+                                || str_contains($progUpper, 'MTECH')
+                                || str_contains($progUpper, 'MASTER')
+                                || str_contains($progUpper, 'MBA')
+                                || str_contains($progUpper, 'MCA')
+                            );
+
+                            $isUg = !$isPhd && !$isPg;
+
+                            $campusesList = \App\Models\Campus::where('is_active', true)->orWhereNull('is_active')->orderBy('campus_id')->get();
+                            if ($campusesList->isEmpty()) {
+                                $campusesList = collect([
+                                    (object)['campus_id' => 1, 'campus_short_name' => 'Vignan Main Campus', 'campus_code' => 'VDM']
+                                ]);
+                            }
+                        @endphp
+                            <div class="phd-form-wrap">
+                                <style>
+                                    .phd-form-wrap {
+                                        --bg: #f3f2ef; --paper: #fff; --ink: #1d1d1f; --mute: #5d5d63; --line: #cfcdc7;
+                                        --bar: #4a4a4f; --bar-ink: #fff; --accent: #8c1c2e; --accent-ink: #fff; --field: #fafaf8; --ok: #1f6b3a;
+                                        background: var(--paper); border: 1px solid var(--line); padding: 24px 28px;
+                                        font: 400 14px/1.5 "Source Sans 3", system-ui, -apple-system, sans-serif; color: var(--ink); border-radius: 4px;
+                                    }
+                                    .phd-form-wrap header {
+                                        display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
+                                        border-bottom: 2px solid var(--ink); padding-bottom: 14px;
+                                    }
+                                    .phd-form-wrap .logo-box { display: flex; align-items: center; justify-content: center; }
+                                    .phd-form-wrap .logo-box img { height: 56px; display: block; }
+                                    .phd-form-wrap .brand { font: 700 20px/1.1 "Source Serif 4", Georgia, serif; margin: 0; color: var(--ink); }
+                                    .phd-form-wrap .brand small { display: block; font: 400 12px "Source Sans 3", sans-serif; color: var(--mute); margin-top: 4px; }
+                                    .phd-form-wrap h1 { font: 700 18px/1.2 "Source Serif 4", Georgia, serif; margin: 12px 0 2px; color: var(--accent); }
+                                    .phd-form-wrap .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 8px; }
+                                    .phd-form-wrap .meta label { display: flex; gap: 6px; align-items: center; font-weight: 600; font-size: 13px; }
+                                    .phd-form-wrap .photo {
+                                        width: 115px; height: 145px; border: 1px dashed var(--mute); display: grid; place-items: center;
+                                        text-align: center; font-size: 11px; color: var(--mute); overflow: hidden; position: relative;
+                                        background: var(--field); border-radius: 4px;
+                                    }
+                                    .phd-form-wrap .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+                                    .phd-form-wrap .note {
+                                        font-size: 12.5px; color: var(--mute); margin: 12px 0; background: var(--field);
+                                        border-left: 3px solid var(--accent); padding: 6px 10px;
+                                    }
+                                    .phd-form-wrap h2 {
+                                        background: var(--bar); color: var(--bar-ink); font: 700 14.5px "Source Sans 3", sans-serif;
+                                        margin: 20px 0 10px; padding: 7px 12px; display: flex; gap: 10px; border-radius: 3px;
+                                    }
+                                    .phd-form-wrap .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; }
+                                    .phd-form-wrap .full { grid-column: 1 / -1; }
+                                    .phd-form-wrap .f { display: flex; flex-direction: column; gap: 4px; }
+                                    .phd-form-wrap .f > span, .phd-form-wrap .lbl { font-weight: 600; font-size: 13px; color: var(--ink); }
+                                    .phd-form-wrap .req::after { content: " *"; color: var(--accent); }
+                                    .phd-form-wrap input[type=text], .phd-form-wrap input[type=tel], .phd-form-wrap input[type=email],
+                                    .phd-form-wrap input[type=date], .phd-form-wrap input[type=number], .phd-form-wrap select, .phd-form-wrap textarea {
+                                        width: 100%; font: inherit; color: inherit; background: var(--field); border: 1px solid var(--line);
+                                        padding: 7px 10px; border-radius: 3px; font-size: 13px; box-sizing: border-box;
+                                    }
+                                    .phd-form-wrap textarea { resize: vertical; min-height: 56px; }
+                                    .phd-form-wrap .opts { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 6px 0; }
+                                    .phd-form-wrap .chk { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink); cursor: default; }
+                                    .phd-form-wrap .chk input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+                                    .phd-form-wrap .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; }
+                                    .phd-form-wrap table { border-collapse: collapse; width: 100%; min-width: 640px; }
+                                    .phd-form-wrap th, .phd-form-wrap td { border: 1px solid var(--line); padding: 6px; text-align: left; vertical-align: middle; font-size: 12.5px; }
+                                    .phd-form-wrap th { background: var(--field); font-size: 12px; padding: 7px 6px; font-weight: 700; }
+                                    .phd-form-wrap td input, .phd-form-wrap td select { border: 0; background: transparent; padding: 4px; width: 100%; font-size: 12.5px; }
+                                    .phd-form-wrap td.rl { font-weight: 600; font-size: 12.5px; white-space: nowrap; padding: 6px 8px; background: var(--field); }
+                                    .phd-form-wrap td output { display: block; padding: 4px; font-weight: 700; color: var(--ok); }
+                                    .phd-form-wrap .decl { border: 1px solid var(--line); padding: 12px; font-size: 13px; background: var(--field); border-radius: 3px; line-height: 1.5; }
+                                    .phd-form-wrap .sign { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+                                    .phd-form-wrap .rules { margin-top: 20px; }
+                                    .phd-form-wrap .rules .in { font-size: 12.5px; line-height: 1.55; }
+                                    .phd-form-wrap .rules h3 { font-size: 13px; margin: 12px 0 4px; font-weight: 700; }
+                                    .phd-form-wrap .rules ul, .phd-form-wrap .rules ol { margin: 0; padding-left: 22px; }
+                                    .phd-form-wrap .rules li { margin: 3px 0; }
+                                    .phd-form-wrap .glance { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 8px 0 12px; text-align: center; }
+                                    .phd-form-wrap .glance div { border: 1px solid var(--line); padding: 6px 2px; background: var(--field); font-size: 11px; border-radius: 3px; }
+                                    .phd-form-wrap .glance b { display: block; font-size: 15px; color: var(--ink); }
+                                    .phd-form-wrap .office { margin-top: 20px; border: 2px dashed var(--line); padding: 10px 14px 14px; border-radius: 4px; background: #fff; }
+                                    .phd-form-wrap .office h2 { margin: 6px -14px 12px -14px; border-radius: 0; }
+                                    .phd-form-wrap .office .big td { font-weight: 700; background: var(--field); }
+                                    @media(max-width: 640px) {
+                                        .phd-form-wrap .grid { grid-template-columns: 1fr; }
+                                        .phd-form-wrap header { grid-template-columns: 1fr; }
+                                        .phd-form-wrap .sign { grid-template-columns: 1fr; }
+                                    }
+                                </style>
+
+                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid var(--ink); padding-bottom: 12px;">
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 48px; object-fit: contain;">
+                                            <div>
+                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15;">
+                                                    Vignan’s Foundation for Science, Technology &amp; Research
+                                                    <small style="display: block; font-size: 11.5px; color: var(--mute); margin-top: 2px;">(Deemed to be University)</small>
+                                                </p>
                                             </div>
-                                        @else
-                                            <div style="width: 58px; height: 72px; border: 1px dashed #6B778A; background: #F4F7FB; text-align: center; font-size: 7.5px; color: #6B778A; line-height: 1.4; padding-top: 20px; font-weight: 700; border-radius: 4px;">
-                                                AFFIX<br>PASSPORT<br>PHOTO
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td style="padding: 10px 14px; vertical-align: middle;">
-                                        <div style="font-size: 17px; font-weight: 800; color: #0F2A4A; line-height: 1.2;">{{ $appStudent->name }}</div>
-                                        <div style="color: #6B778A; font-size: 11px; line-height: 1.6; margin-top: 3px;">
-                                            {{ $appStudent->email }} &nbsp;|&nbsp; {{ $appStudent->phone }}<br>
-                                            Applicant ID: <strong style="color: #0F2A4A;">{{ $appStudent->student_id }}</strong> (App #: {{ $appStudent->id }})
                                         </div>
-                                    </td>
-                                    <td style="padding: 10px 14px; vertical-align: middle; text-align: right;">
-                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 10px; margin-bottom: 4px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
-                                            PAYMENT {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }}
-                                        </span><br>
-                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 10px; color: #B25E09; background: #FDF0DC; border: 1px solid #fde68a;">
-                                            PROVISIONAL SEAT ALLOTMENT
-                                        </span>
-                                    </td>
-                                </tr>
-                            </table>
+                                        <h1 style="margin: 6px 0 2px 0; font-size: 16px; color: var(--accent); font-weight: 700;">Admission Information Form</h1>
+                                        <div style="font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
+                                            {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
+                                        </div>
+                                        <div class="meta" style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 16px;">
+                                            <label style="font-size: 12px; font-weight: 600;">Academic year <input type="text" id="ay" value="2026–2027" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                            <label style="font-size: 12px; font-weight: 600;">Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                            <label style="font-size: 12px; font-weight: 600;">CRM ID <input type="text" value="{{ $student->student_id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                        </div>
+                                    </div>
+                                    <label class="photo" id="ph" style="margin: 0; align-self: start;">
+                                        @if(!empty($student->photo_path))
+                                            <img src="{{ $student->photo_path }}" alt="Candidate Photo">
+                                        @else
+                                            <span>Passport-size<br>colour photograph</span>
+                                        @endif
+                                    </label>
+                                </header>
 
-                            <!-- Allotment & Examination Schedule Bar -->
-                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 10px 14px; margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                                <div>
-                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Allotted Program</div>
-                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
-                                        {{ $appStudent->program ?: ($programName ?: 'B.Tech - Bachelor of Technology') }}
+                                <h2>1 &nbsp;Personal details</h2>
+                                <div class="grid">
+                                    <label class="f full"><span class="req">Name of the candidate</span><input type="text" name="name" required style="text-transform:uppercase" value="{{ strtoupper($student->name ?: '-') }}" readonly></label>
+                                    <label class="f full"><span>Father’s / Guardian’s name</span><input type="text" name="father" style="text-transform:uppercase" value="{{ strtoupper($student->father_name ?: ($student->parent_name ?: '-')) }}" readonly></label>
+                                    <div class="f">
+                                        <span class="lbl req">Gender</span>
+                                        <div class="opts" data-group="gender">
+                                            <label class="chk"><input type="checkbox" name="gender" value="Male" {{ strtolower($student->gender ?? '') === 'male' ? 'checked' : '' }} disabled><span>Male</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Female" {{ strtolower($student->gender ?? '') === 'female' ? 'checked' : '' }} disabled><span>Female</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Other" {{ !in_array(strtolower($student->gender ?? ''), ['male','female']) && !empty($student->gender) && $student->gender !== '-' ? 'checked' : '' }} disabled><span>Other</span></label>
+                                        </div>
                                     </div>
-                                    @if(!empty($appStudent->branch) || !empty($branchName))
-                                        <div style="font-size: 10px; color: #1E7BD8; font-weight: 700;">{{ $appStudent->branch ?: $branchName }}</div>
+                                    <label class="f"><span class="req">Date of birth</span><input type="text" name="dob" value="{{ !empty($student->dob) && $student->dob !== '-' ? \Carbon\Carbon::parse($student->dob)->format('d M Y') : '-' }}" readonly></label>
+                                    <div class="f full">
+                                         <span class="lbl">Category</span>
+                                         <div class="opts">
+                                             <label class="chk"><input type="checkbox" name="cat" value="General" {{ in_array(strtoupper($student->category ?? ''), ['GENERAL', 'OC', 'OPEN']) ? 'checked' : '' }} disabled><span>General</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="OBC" {{ str_contains(strtoupper($student->category ?? ''), 'OBC') || str_contains(strtoupper($student->category ?? ''), 'BC') ? 'checked' : '' }} disabled><span>OBC</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="SC" {{ strtoupper($student->category ?? '') === 'SC' ? 'checked' : '' }} disabled><span>SC</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="ST" {{ strtoupper($student->category ?? '') === 'ST' ? 'checked' : '' }} disabled><span>ST</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="PwD" {{ in_array(strtoupper($student->category ?? ''), ['PWD', 'PH', 'OTHER']) ? 'checked' : '' }} disabled><span>PwD / Other</span></label>
+                                         </div>
+                                    </div>
+                                    <label class="f"><span class="req">Mobile no.</span><input type="tel" name="mobile" value="{{ $student->phone ?: '-' }}" readonly></label>
+                                    <label class="f"><span class="req">Parent’s mobile</span><input type="tel" name="pmobile" value="{{ $student->father_phone ?: ($student->parent_phone ?: '-') }}" readonly></label>
+                                    <label class="f full"><span class="req">Email ID</span><input type="email" name="email" value="{{ $student->email ?: '-' }}" readonly></label>
+                                    <label class="f full"><span>Address for communication</span><textarea name="addr" readonly>{{ $student->address ?: '-' }}</textarea></label>
+                                    <label class="f"><span>City / District</span><input type="text" name="city" value="{{ trim(($student->city !== '-' ? $student->city : '') . ($student->district !== '-' ? ', ' . $student->district : '')) ?: '-' }}" readonly></label>
+                                    <label class="f"><span>State / PIN code</span><input type="text" name="state" value="{{ trim(($student->state !== '-' ? $student->state : '') . ($student->pincode !== '-' ? ' - ' . $student->pincode : '')) ?: '-' }}" readonly></label>
+                                </div>
+
+                                <h2>2 &nbsp;Programme details</h2>
+                                <div class="grid">
+                                    <label class="f full"><span class="req">{{ $isPhd ? 'Name of the specialization in Ph.D. programme' : 'Programme & Specialization / Branch' }}</span><input type="text" name="spec" value="{{ $student->branch !== '-' ? $student->branch : ($student->program !== '-' ? $student->program : '-') }}" readonly></label>
+                                    <label class="f"><span>VSAT ID</span><input type="text" name="vsat" value="{{ $student->student_id ?: '-' }}" readonly></label>
+                                    <label class="f"><span>{{ $isPhd ? 'Research area' : 'Allotted Program' }}</span><input type="text" name="area" value="{{ $student->program !== '-' ? $student->program : ($student->branch !== '-' ? $student->branch : '-') }}" readonly></label>
+                                    <div class="f full">
+                                        <span class="lbl req">Campus preference</span>
+                                        <div class="opts">
+                                            @foreach($campusesList as $c)
+                                                @php
+                                                    $cShort = $c->campus_short_name ?: $c->campus_code;
+                                                    $isSelectedCampus = (string)($student->campus_id ?? '') === (string)$c->campus_id
+                                                        || (!empty($student->campus) && (str_contains(strtolower($student->campus), strtolower($cShort)) || str_contains(strtolower($student->campus), strtolower($c->campus_code ?? ''))))
+                                                        || ($loop->first && empty($student->campus));
+                                                @endphp
+                                                <label class="chk"><input type="checkbox" name="campus" value="{{ $cShort }}" {{ $isSelectedCampus ? 'checked' : '' }} disabled><span>{{ $cShort }}</span></label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h2>3 &nbsp;Academic qualifications</h2>
+                                <div class="lbl" style="margin-bottom:6px">School education</div>
+                                <div class="tw">
+                                    <table id="school">
+                                        <thead>
+                                            <tr><th>Examination</th><th>Board / School</th><th>Year of passing</th><th>Total marks</th><th>Marks obtained</th><th>Percentage</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="rl">SSC</td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_board !== '-' ? $student->academic->ssc_board : ($student->academic->ssc_school !== '-' ? $student->academic->ssc_school : '-') }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_year ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_marks_conducted ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_marks_earned ?: '-' }}" readonly></td>
+                                                <td><output>{{ $student->academic->ssc_percentage ?: '-' }}</output></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="rl">Intermediate</td>
+                                                <td><input type="text" value="{{ $student->academic->inter_board !== '-' ? $student->academic->inter_board : ($student->academic->inter_college !== '-' ? $student->academic->inter_college : '-') }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->inter_year ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->inter_marks_conducted ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->inter_marks_earned ?: '-' }}" readonly></td>
+                                                <td><output>{{ $student->academic->inter_percentage ?: '-' }}</output></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if(!$isUg)
+                                    <div class="lbl" style="margin:16px 0 6px">{{ $isPhd ? 'UG & PG programme details' : 'UG programme details' }}</div>
+                                    <div class="tw">
+                                        <table id="deg">
+                                            <thead>
+                                                <tr><th>Programme</th><th>Programme with specialization</th><th>College / University</th><th>Year</th><th>Division / grade points</th><th>% of marks</th><th>Mode of study</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="rl">UG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 20%)</small></td>
+                                                    <td><input type="text" value="B.Tech / Degree" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_college !== '-' ? $student->academic->ug_college : ($student->academic->ug_board !== '-' ? $student->academic->ug_board : '-') }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_year ?: '-' }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_status ?: '-' }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_percentage ?: '-' }}" readonly></td>
+                                                    <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
+                                                </tr>
+                                                @if($isPhd)
+                                                    <tr>
+                                                        <td class="rl">PG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 30%)</small></td>
+                                                        <td><input type="text" value="M.Tech / Master’s" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_college !== '-' ? $student->academic->pg_college : ($student->academic->pg_board !== '-' ? $student->academic->pg_board : '-') }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_year ?: '-' }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_status ?: '-' }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_percentage ?: '-' }}" readonly></td>
+                                                        <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+
+                                <h2>4 &nbsp;Enclosures checklist</h2>
+                                <p class="note" style="margin-top:0">Tick the documents enclosed with this form.</p>
+                                <div class="grid" id="enc">
+                                    <label class="chk"><input type="checkbox" name="enc" value="SSC / 10th marks memo" {{ $hasTenth ? 'checked' : '' }} disabled><span>SSC / 10th marks memo</span></label>
+                                    <label class="chk"><input type="checkbox" name="enc" value="Intermediate / 10+2 marks memo" {{ $hasInter ? 'checked' : '' }} disabled><span>Intermediate / 10+2 marks memo</span></label>
+                                    @if(!$isUg)
+                                        <label class="chk"><input type="checkbox" name="enc" value="UG degree certificate & marks memos" {{ $hasUg ? 'checked' : '' }} disabled><span>UG degree certificate &amp; marks memos</span></label>
+                                        @if($isPhd)
+                                            <label class="chk"><input type="checkbox" name="enc" value="PG degree certificate & marks memos" {{ $hasPg ? 'checked' : '' }} disabled><span>PG degree certificate &amp; marks memos</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="GATE / CSIR / NET / CAT score card (if any)" disabled><span>GATE / CSIR / NET / CAT score card (if any)</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="Experience certificate(s) (if any)" {{ $hasExp ? 'checked' : '' }} disabled><span>Experience certificate(s) (if any)</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="Publication proofs (if any)" disabled><span>Publication proofs (if any)</span></label>
+                                        @endif
                                     @endif
+                                    <label class="chk"><input type="checkbox" name="enc" value="Caste / category certificate (if applicable)" {{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? 'checked' : '' }} disabled><span>Caste / category certificate (if applicable)</span></label>
+                                    <label class="chk"><input type="checkbox" name="enc" value="Photo ID proof (Aadhaar / Passport etc.)" {{ $hasId ? 'checked' : '' }} disabled><span>Photo ID proof (Aadhaar / Passport etc.)</span></label>
+                                    <label class="chk"><input type="checkbox" name="enc" value="Passport-size photographs" {{ $hasPhoto ? 'checked' : '' }} disabled><span>Passport-size photographs</span></label>
                                 </div>
-                                <div>
-                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Allotted Campus</div>
-                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
-                                        {{ $appStudent->campus ?: ($campusName ?: 'Vignan Main Campus (Vadlamudi)') }}
+
+                                <h2>5 &nbsp;Declaration by the candidate</h2>
+                                <div class="decl">
+                                    I hereby declare that all the information furnished in this form is true and correct to the best of my knowledge and belief. I understand that any false information or suppression of facts will lead to the cancellation of my candidature / admission. I have read the eligibility criteria and admission procedure given at the end of this form and agree to abide by the rules and regulations of VFSTR.
+                                    <label class="chk" style="margin-top:10px"><input type="checkbox" id="agree" checked disabled><span><b>I agree to the declaration</b></span></label>
+                                </div>
+                                <div class="sign">
+                                    <label class="f"><span>Place</span><input type="text" name="place" value="{{ $student->city !== '-' ? $student->city : ($student->district !== '-' ? $student->district : 'Guntur') }}" readonly></label>
+                                    <label class="f"><span>Date</span><input type="text" name="sdate" value="{{ $student->applied_at ?: now()->format('d/m/Y') }}" readonly></label>
+                                    <label class="f"><span>Signature of the candidate (type full name)</span><input type="text" name="sign" value="{{ $student->name }}" readonly></label>
+                                </div>
+
+                                @if(!$isPhd)
+                                    <section class="office" aria-label="For office use only" style="margin-top: 20px;">
+                                        <h2>6 &nbsp;For office use only – Admission &amp; Verification</h2>
+                                        <div class="tw">
+                                            <table>
+                                                <thead>
+                                                    <tr><th>Admission status</th><th>Fee payment status</th><th>Allotted programme &amp; branch</th><th>Campus &amp; quota</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="color: var(--ok); font-weight: 700;">Provisional Admission Confirmed</td>
+                                                        <td style="color: var(--ok); font-weight: 700;">Verified &amp; Accounted</td>
+                                                        <td>{{ $student->program ?: '-' }} ({{ $student->branch ?: '-' }})</td>
+                                                        <td>{{ $student->campus ?: ($campusesList->first()->campus_short_name ?? 'Vignan Main Campus') }} &bull; {{ $student->category ?: 'General' }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="grid" style="margin-top: 14px;">
+                                            <label class="f"><span>Scrutiny Officer</span><input type="text" value="Verified &amp; Approved" readonly></label>
+                                            <label class="f"><span>Finance / Accounts Officer</span><input type="text" value="Fee Receipt Verified" readonly></label>
+                                            <label class="f"><span>Dean – Admissions</span><input type="text" value="Authorized Signatory" readonly></label>
+                                        </div>
+                                    </section>
+                                @endif
+
+                                @if($isPhd)
+                                <section class="rules" aria-label="Eligibility criteria">
+                                    <h2>Eligibility criteria</h2>
+                                    <div class="in">
+                                        <h3>Engineering streams</h3><ul><li>Full-time scholar: first class in both B.Tech and M.Tech, with scholarship.</li><li>Part-time scholar: as per UGC rules, subject to written test and interview by VFSTR.</li></ul>
+                                        <h3>General qualification norms</h3><ul><li>Minimum 55% in post-graduation as per UGC rules, relaxable by 5% for SC / ST / OBC candidates.</li><li>Minimum 60% aggregate in the qualifying degree; deserving cases may be referred to RMC.</li><li>Engineering: PG degree in a relevant engineering discipline. Management: Master’s in business management. Sciences / humanities: relevant PG degree.</li></ul>
+                                        <h3>Law</h3><ul><li>LL.B. from a Bar Council of India recognised institution and regular full-time LL.M. with minimum 55%. UGC NET / SET qualified candidates preferred.</li></ul>
+                                        <h3>Pharmaceutical sciences</h3><ul><li>First class in B.Pharmacy and M.Pharmacy or Pharm.D. GPAT qualified candidates preferred.</li></ul>
                                     </div>
-                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Provisional Allotment Confirmed</div>
-                                </div>
-                                @if(($degreeLevel ?? '') !== 'phd')
-                                <div>
-                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Booked Entrance Exam Slot</div>
-                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
-                                        📅 {{ $appStudent->exam_date ?: 'Stage 5 Scheduled' }}
+                                </section>
+
+                                <section class="rules" aria-label="Admission procedure">
+                                    <h2>Admission procedure</h2>
+                                    <div class="in">
+                                        <p>Selection into the Ph.D. programme is evaluated on the academic performance (% marks in B.Tech / UG and M.Tech / PG) and the institution last attended for Bachelor’s and Master’s degrees (maximum 20% and 30% marks respectively), previous experience (each year 1 mark, up to 5 marks), publications (2 marks per journal paper and 1 mark per conference paper, up to 5 marks), written test (15% marks) and interview (25% marks).</p>
+                                        <h3>Selection weightage at a glance</h3>
+                                        <div class="glance"><div><b>20%</b>UG degree</div><div><b>30%</b>PG degree</div><div><b>5%</b>Experience</div><div><b>5%</b>Publications</div><div><b>15%</b>Written test</div><div><b>25%</b>Interview</div><div><b>100%</b>Total</div></div>
+                                        <ol><li>Eligible candidates have to appear for a written test and interview.</li><li>All candidates are required to qualify in a written test conducted by VFSTR. Candidates who have qualified in GATE / CSIR / NET / CAT are exempted from the written test, but they should appear for the interview.</li><li>Candidates recommended for selection by the concerned department are to be approved by the Dean (R&amp;D) and Chairman, URB respectively. The approved selection list shall be sent to Dean (Admission) for further action.</li><li>Candidates will be admitted into the Ph.D. programme after payment of prescribed fees and completion of all the admission procedures.</li><li>Admitted candidates will report to the concerned department; a committee appointed by HoD will allot a Research Supervisor for each candidate on mutual consent.</li></ol>
                                     </div>
-                                    <div style="font-size: 10px; color: #B25E09; font-weight: 700;">⏰ {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
-                                </div>
-                                @else
-                                <div>
-                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Entrance Examination</div>
-                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
-                                        Exempted / Direct Ph.D
+                                </section>
+
+                                <section class="office" aria-label="For office use only">
+                                    <h2>For office use only – Department verification</h2>
+                                    <div class="tw"><table>
+                                        <thead><tr><th>Component</th><th>Basis of scoring</th><th>Max. marks</th><th>Marks awarded</th></tr></thead>
+                                        <tbody>
+                                        <tr><td class="rl">UG degree details</td><td>Academic performance (% marks) &amp; institution last attended</td><td>20</td><td><input type="number" class="osum" min="0" max="20" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">PG degree details</td><td>Academic performance (% marks) &amp; institution last attended</td><td>30</td><td><input type="number" class="osum" min="0" max="30" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">Experience</td><td>1 mark for each year of experience</td><td>5</td><td><input type="number" class="osum" min="0" max="5" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">Publications</td><td>2 marks / journal paper &amp; 1 mark / conference paper</td><td>5</td><td><input type="number" class="osum" min="0" max="5" placeholder="____" readonly></td></tr>
+                                        <tr class="big"><td colspan="2">Total marks out of 60</td><td>60</td><td><output id="o60">0</output></td></tr>
+                                        <tr><td class="rl">Written test</td><td>Exempted for GATE / CSIR / NET / CAT qualified candidates</td><td>15</td><td><input type="number" class="osum" min="0" max="15" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">Interview</td><td>Conducted by the department</td><td>25</td><td><input type="number" class="osum" min="0" max="25" placeholder="____" readonly></td></tr>
+                                        <tr class="big"><td colspan="2">Grand total (selection score)</td><td>100</td><td><output id="o100">0</output></td></tr>
+                                        </tbody></table></div>
+                                    <div class="opts" style="margin-top:10px">
+                                        <label class="chk"><input type="checkbox" name="sel" value="Selected" disabled><span>Selected</span></label>
+                                        <label class="chk"><input type="checkbox" name="sel" value="Not selected" disabled><span>Not selected</span></label>
+                                        <span class="lbl">Research assistantship:</span>
+                                        <label class="chk"><input type="checkbox" disabled><span>ERA</span></label><label class="chk"><input type="checkbox" disabled><span>TRA</span></label><label class="chk"><input type="checkbox" disabled><span>CAP</span></label><label class="chk"><input type="checkbox" disabled><span>CRA</span></label>
+                                        <label class="chk"><input type="checkbox" name="trk" value="Industry" disabled><span>Industry</span></label><label class="chk"><input type="checkbox" name="trk" value="Academics" disabled><span>Academics</span></label>
                                     </div>
-                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Departmental Evaluation</div>
-                                </div>
+                                    <label class="f" style="margin-top:10px"><span>Remarks (not selected candidates)</span><textarea readonly placeholder="Department remarks..."></textarea></label>
+                                    <div class="grid" style="margin-top:10px">
+                                        <label class="f"><span>Name of the faculty member (department coordinator)</span><input type="text" readonly></label>
+                                        <label class="f"><span>Designation</span><input type="text" readonly></label>
+                                        <label class="f"><span>Signature</span><input type="text" readonly></label>
+                                        <label class="f"><span>Date</span><input type="text" readonly></label>
+                                    </div>
+                                    <p class="note" style="margin-top:8px">Selection committee: BoR (Chairman) · Head of the Department (Member) · School Dean (Member) · Dean R&amp;D (Member)</p>
+                                </section>
                                 @endif
                             </div>
-
-                            <!-- 2-Column: Personal Information & Address Information -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                                <tr>
-                                    <td style="width: 50%; padding-right: 6px; vertical-align: top;">
-                                        <!-- 1. PERSONAL & PARENT INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
-                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                1. Candidate &amp; Parent Details
-                                            </h4>
-                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 3.5px 0;">Candidate Name</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->name ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Father / Parent</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->parent_name ?: ($appStudent->father_name ?: 'N/A') }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Parent Contact</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->parent_phone ?: ($appStudent->father_phone ?: 'N/A') }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Candidate Phone</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->phone ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Email ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0; word-break: break-all;">{{ $appStudent->email ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Date of Birth</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $dobFormatted }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Gender</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->gender ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Category</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->category ?: 'General' }}</td></tr>
-                                            </table>
-                                        </div>
-                                    </td>
-                                    <td style="width: 50%; padding-left: 6px; vertical-align: top;">
-                                        <!-- 2. ADDRESS INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
-                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                2. Permanent &amp; Contact Address
-                                            </h4>
-                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 3.5px 0;">Door / Street</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->street ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Mandal / City</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->city ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">District</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->district ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">State</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->state ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Country</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->country ?: 'India' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">PIN Code</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->pincode ?: 'N/A' }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Admission Ref</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">#{{ $appStudent->id }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Student CRM ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->student_id ?: 'N/A' }}</td></tr>
-                                            </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <!-- 3. QUALIFYING ACADEMIC RECORDS (FULL WIDTH TABLE) -->
-                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; margin-top: 10px;">
-                                <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate{{ !empty($appStudent->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($appStudent->academic->pg_college) ? ' &amp; Postgraduate' : '' }})
-                                </h4>
-                                <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                    <thead>
-                                        <tr style="background: #F8FAFC; border-bottom: 2px solid #E2E8F0; text-align: left; color: #475569; font-weight: 800;">
-                                            <th style="padding: 6px 8px; width: 18%;">Standard / Level</th>
-                                            <th style="padding: 6px 8px; width: 28%;">School / College Name</th>
-                                            <th style="padding: 6px 8px; width: 20%;">Board / University</th>
-                                            <th style="padding: 6px 8px; width: 10%; text-align: center;">Year</th>
-                                            <th style="padding: 6px 8px; width: 12%;">Roll / Hall Ticket</th>
-                                            <th style="padding: 6px 8px; width: 12%; text-align: right;">Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- 10th Standard -->
-                                        <tr style="border-bottom: 1px solid #E3E8EF;">
-                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
-                                                <span style="display: inline-block; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
-                                                    10th Standard (SSC)
-                                                </span>
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ (!empty($appStudent->academic->ssc_school) && $appStudent->academic->ssc_school !== '-') ? $appStudent->academic->ssc_school : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; color: #475569;">
-                                                {{ (!empty($appStudent->academic->ssc_board) && $appStudent->academic->ssc_board !== '-') ? $appStudent->academic->ssc_board : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->ssc_year) && $appStudent->academic->ssc_year !== '-') ? $appStudent->academic->ssc_year : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->ssc_roll) && $appStudent->academic->ssc_roll !== '-') ? $appStudent->academic->ssc_roll : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ (!empty($appStudent->academic->ssc_percentage) && $appStudent->academic->ssc_percentage !== 'N/A' && $appStudent->academic->ssc_percentage !== '-') ? $appStudent->academic->ssc_percentage : '-' }}
-                                            </td>
-                                        </tr>
-                                        <!-- 12th / Intermediate -->
-                                        <tr style="{{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-' || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
-                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
-                                                <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
-                                                    12th / Inter (10+2)
-                                                </span>
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ (!empty($appStudent->academic->inter_college) && $appStudent->academic->inter_college !== '-') ? $appStudent->academic->inter_college : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; color: #475569;">
-                                                {{ (!empty($appStudent->academic->inter_board) && $appStudent->academic->inter_board !== '-') ? $appStudent->academic->inter_board : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->inter_year) && $appStudent->academic->inter_year !== '-') ? $appStudent->academic->inter_year : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->inter_roll) && $appStudent->academic->inter_roll !== '-') ? $appStudent->academic->inter_roll : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ (!empty($appStudent->academic->inter_percentage) && $appStudent->academic->inter_percentage !== 'N/A' && $appStudent->academic->inter_percentage !== '-') ? $appStudent->academic->inter_percentage : '-' }}
-                                            </td>
-                                        </tr>
-
-                                        <!-- Undergraduate (UG / Degree / B.Tech) -->
-                                        @if((!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd')
-                                        <tr style="{{ ((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
-                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
-                                                <span style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
-                                                    Undergraduate (UG)
-                                                </span>
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') ? $appStudent->academic->ug_college : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; color: #475569;">
-                                                {{ (!empty($appStudent->academic->ug_board) && $appStudent->academic->ug_board !== '-') ? $appStudent->academic->ug_board : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->ug_year) && $appStudent->academic->ug_year !== '-') ? $appStudent->academic->ug_year : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->ug_roll) && $appStudent->academic->ug_roll !== '-') ? $appStudent->academic->ug_roll : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ (!empty($appStudent->academic->ug_percentage) && $appStudent->academic->ug_percentage !== 'N/A' && $appStudent->academic->ug_percentage !== '-') ? $appStudent->academic->ug_percentage : '-' }}
-                                            </td>
-                                        </tr>
-                                        @endif
-
-                                        <!-- Postgraduate 1 (PG 1 / Master's / M.Tech) -->
-                                        @if((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
-                                        <tr style="{{ ((!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
-                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
-                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
-                                                    Postgraduate 1
-                                                </span>
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ (!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') ? $appStudent->academic->pg_college : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; color: #475569;">
-                                                {{ (!empty($appStudent->academic->pg_board) && $appStudent->academic->pg_board !== '-') ? $appStudent->academic->pg_board : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->pg_year) && $appStudent->academic->pg_year !== '-') ? $appStudent->academic->pg_year : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->pg_roll) && $appStudent->academic->pg_roll !== '-') ? $appStudent->academic->pg_roll : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ (!empty($appStudent->academic->pg_percentage) && $appStudent->academic->pg_percentage !== 'N/A' && $appStudent->academic->pg_percentage !== '-') ? $appStudent->academic->pg_percentage : '-' }}
-                                            </td>
-                                        </tr>
-                                        @endif
-
-                                        <!-- Postgraduate 2 (PG 2 / Ph.D) -->
-                                        @if((!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
-                                        <tr>
-                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
-                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
-                                                    Postgraduate 2
-                                                </span>
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
-                                                {{ (!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') ? $appStudent->academic->pg2_college : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; color: #475569;">
-                                                {{ (!empty($appStudent->academic->pg2_board) && $appStudent->academic->pg2_board !== '-') ? $appStudent->academic->pg2_board : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->pg2_year) && $appStudent->academic->pg2_year !== '-') ? $appStudent->academic->pg2_year : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
-                                                {{ (!empty($appStudent->academic->pg2_roll) && $appStudent->academic->pg2_roll !== '-') ? $appStudent->academic->pg2_roll : '-' }}
-                                            </td>
-                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
-                                                {{ (!empty($appStudent->academic->pg2_percentage) && $appStudent->academic->pg2_percentage !== 'N/A' && $appStudent->academic->pg2_percentage !== '-') ? $appStudent->academic->pg2_percentage : '-' }}
-                                            </td>
-                                        </tr>
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- 2-Column: 4. Payment Information & 5. Verification Checklist -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                                <tr>
-                                    <td style="width: 50%; padding-right: 6px; vertical-align: top;">
-                                        <!-- 4. PAYMENT INFORMATION -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
-                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                4. Admission Registration Fee
-                                            </h4>
-                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Paid Amount</td><td style="font-weight: 800; border-bottom: 1px solid #E3E8EF; padding: 4px 0; color: #15803d; font-size: 12px;">INR {{ number_format((float) $appStudent->payment_amount) }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Payment Gateway</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->payment_method }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Transaction Ref</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0; font-size: 9.5px; word-break: break-all;">{{ $appStudent->transaction_id }}</td></tr>
-                                                <tr><td style="color: #6B778A; padding: 4px 0;">Accounts Status</td>
-                                                    <td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">
-                                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2px 8px; border-radius: 8px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
-                                                            ✓ {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }} &amp; VERIFIED
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </td>
-                                    <td style="width: 50%; padding-left: 6px; vertical-align: top;">
-                                        <!-- 5. DOCUMENTS UPLOAD SUMMARY -->
-                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
-                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                5. Document Verification Status
-                                            </h4>
-                                            @php
-                                                $onlyUploadedDocs = [];
-                                                foreach($formDocs as $dKey => $dLabel) {
-                                                    $dExt = $formUploaded[$dKey] ?? null;
-                                                    $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
-                                                    if ($isUploaded) {
-                                                        $onlyUploadedDocs[$dKey] = [
-                                                            'label' => $dLabel,
-                                                            'ext' => $dExt ?: 'VERIFIED'
-                                                        ];
-                                                    }
-                                                }
-                                            @endphp
-                                            @if(empty($onlyUploadedDocs))
-                                                <div style="padding: 10px; font-size: 9.5px; color: #64748b; font-style: italic; text-align: center;">
-                                                    No documents uploaded yet.
-                                                </div>
-                                            @else
-                                                <table style="width: 100%; border-collapse: collapse;">
-                                                    @foreach(array_chunk($onlyUploadedDocs, 2, true) as $dRow)
-                                                        <tr>
-                                                            @foreach($dRow as $dKey => $dInfo)
-                                                                <td style="width: 50%; padding: 2.5px;">
-                                                                    <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: #E2F5EC; color: #1B2430; border: 1px solid #a7f3d0;">
-                                                                        <span>{{ $dInfo['label'] }}</span>
-                                                                        <small style="color: #12875B; font-weight: 800;">✓ {{ $dInfo['ext'] }}</small>
-                                                                    </div>
-                                                                </td>
-                                                            @endforeach
-                                                            @if(count($dRow) === 1)
-                                                                <td style="width: 50%; padding: 2.5px;"></td>
-                                                            @endif
-                                                        </tr>
-                                                    @endforeach
-                                                </table>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <!-- Instructions -->
-                            <div style="background: #FFF8EA; border: 1px solid #F2DDB0; border-left: 4px solid #B25E09; border-radius: 10px; padding: 9px 14px; margin-top: 10px; font-size: 9.5px; line-height: 1.5; color: #1B2430;">
-                                <strong style="color: #B25E09; letter-spacing: 0.4px;">INSTRUCTIONS &amp; DECLARATION</strong>
-                                <ul style="margin: 3px 0 0; padding-left: 14px;">
-                                    <li>This is a provisional seat allotment. Original certificates must be presented at the time of campus verification.</li>
-                                    <li>Tuition fee, merit scholarships, and entrance test criteria are governed by university admissions norms.</li>
-                                    <li>I hereby declare that all entries made in this application are authentic and true to the best of my knowledge.</li>
-                                </ul>
-                            </div>
-
-                            <!-- Signatures -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px;">
-                                <tr>
-                                    <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
-                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Signature of Parent / Guardian</div>
-                                    </td>
-                                    <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
-                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Date: {{ date('d/m/Y') }}</div>
-                                    </td>
-                                    <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
-                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Signature of Candidate</div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <!-- For Office Use Only -->
-                            <div style="border: 1px dashed #6B778A; background: #ffffff; border-radius: 8px; padding: 7px 12px; margin-top: 14px; font-size: 9.5px; color: #6B778A;">
-                                <strong style="font-size: 8.5px; letter-spacing: 0.4px; display: block; margin-bottom: 6px;">FOR OFFICE USE ONLY &bull; UNIVERSITY ADMISSIONS DIRECTORATE</strong>
-                                <table style="width: 100%; border-collapse: collapse;">
-                                    <tr>
-                                        <td style="width: 33.33%;">Application No.: <strong>{{ $appStudent->id }}</strong></td>
-                                        <td style="width: 33.33%;">Verification Officer: ________________</td>
-                                        <td style="width: 33.33%;">Approval Seal &amp; Date: _________</td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <!-- Footer -->
-                            <div style="text-align: center; font-size: 8.5px; color: #6B778A; margin-top: 12px;">
-                                Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;|&nbsp; https://admissions.vignan.ac.in
-                            </div>
-
-                        </div>
+                    </div>
                     </div>
 
                     <!-- ================= ATTACHED APPLICATION DOCUMENTS & UPLOADED CERTIFICATES ================= -->
@@ -4483,8 +5194,8 @@
 
                             <div class="embedded-a4-attachment" style="max-width: 820px; margin: 1.25rem auto 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.12); border: 1.5px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif;">
                                 <!-- Document Header -->
-                                <div style="background: linear-gradient(135deg, #0F2A4A 0%, #1e3a8a 100%); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="attachment-header" style="background: linear-gradient(135deg, #0F2A4A 0%, #1e3a8a 100%); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                    <div class="attachment-info" style="display: flex; align-items: center; gap: 12px;">
                                         <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; color: #ffffff;">
                                             @if($isImage) 🖼️ @elseif($isPdf) 📄 @else 📎 @endif
                                         </div>
@@ -4501,7 +5212,7 @@
                                         </div>
                                     </div>
 
-                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                    <div class="attachment-actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                         <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: #22c55e; color: #ffffff; display: inline-flex; align-items: center; gap: 4px;">
                                             <span>✓ Verified &amp; Uploaded</span>
                                         </span>
@@ -4611,15 +5322,18 @@
                     @endphp
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
                         <a href="{{ route('dashboards.index', ['step' => $appPrevStep]) }}" class="btn-step-prev">
-                            &larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot Booking') }}
+                            <span class="btn-label-desktop">&larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot Booking') }}</span>
+                            <span class="btn-label-mobile">&larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot') }}</span>
                         </a>
                         @if(isset($stages[$appNextStep]))
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Proceed to Stage {{ $appNextStep }}: {{ $stages[$appNextStep]['title'] }} &rarr;</span>
+                                <span class="btn-label-desktop">Proceed to Stage {{ $appNextStep }}: {{ $stages[$appNextStep]['title'] }} &rarr;</span>
+                                <span class="btn-label-mobile">Proceed to Stage {{ $appNextStep }} &rarr;</span>
                             </button>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #16a34a;">
-                                <span>✓ Complete Onboarding &amp; Confirm Submission</span>
+                                <span class="btn-label-desktop">✓ Complete Onboarding &amp; Confirm Submission</span>
+                                <span class="btn-label-mobile">✓ Confirm Submission</span>
                             </button>
                         @endif
                     </div>
@@ -4653,10 +5367,10 @@
                     <input type="hidden" name="step" value="{{ $vsatStepNum }}">
 
                     <!-- Candidate Examination Record from DB -->
-                    <div class="section-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                    <div class="section-box stage7-banner-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
+                        <div class="stage7-banner-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <div style="width:44px; height:44px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem;">
+                                <div style="width:44px; height:44px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0;">
                                     🏆
                                 </div>
                                 <div>
@@ -4671,21 +5385,21 @@
 
                         <!-- Dynamic Metrics Grid from Database -->
                         <div class="form-grid-3">
-                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                            <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Registered Program</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#2563eb; margin-top:0.25rem;">
                                     {{ $program?->program_short_name ?: ($crmStudent?->programlevel ?: 'Undergraduate') }}
                                 </div>
                                 <span style="font-size:0.75rem; color:#16a34a; font-weight:700;">{{ $branchName ?: 'General Allotment' }}</span>
                             </div>
-                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                            <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Scheduled Slot</div>
                                 <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-top:0.25rem;">
                                     {{ $examDateFormatted }}
                                 </div>
                                 <span style="font-size:0.75rem; color:#475569;">{{ $slotFormatted }}</span>
                             </div>
-                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                            <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Admission Status</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#16a34a; margin-top:0.25rem;">
                                     {{ ($crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
@@ -4716,7 +5430,7 @@
                         </div>
 
                         <!-- University Notice regarding V-SAT merit rankings -->
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
+                        <div class="stage7-notice-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
                             <strong style="color: #14532d; font-weight: 800; display: block; margin-bottom: 0.3rem;">University Examination &amp; Counseling Notice:</strong>
                             <p style="margin: 0;">
                                 Candidate details for Application <strong>#{{ $appNo }}</strong> have been verified and confirmed across all onboarding stages in accordance with university admissions policy. Official V-SAT entrance scores, rank percentiles, and merit scholarship category allocations are generated and published following examination slot completion.
@@ -4726,10 +5440,12 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => $vsatPrevStep]) }}" class="btn-step-prev">
-                            &larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}
+                            <span class="btn-label-desktop">&larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}</span>
+                            <span class="btn-label-mobile">&larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}</span>
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #15803d;">
-                            <span>✓ Complete Onboarding &amp; Finalize Registration</span>
+                            <span class="btn-label-desktop">✓ Complete Onboarding &amp; Finalize Registration</span>
+                            <span class="btn-label-mobile">✓ Finalize Registration</span>
                         </button>
                     </div>
                 </form>
@@ -4785,6 +5501,159 @@
                     el.addEventListener('change', autoSave);
                 });
             });
+        });
+    </script>
+
+    <!-- Modern Custom Dropdown UI Engine for Dashboard Selects -->
+    <script>
+        function initCustomSelects(selector) {
+            selector = selector || '.mockup-select';
+            document.querySelectorAll(selector).forEach(function(selectEl) {
+                if (selectEl.dataset.customInit === 'true') {
+                    syncCustomSelect(selectEl);
+                    return;
+                }
+                selectEl.dataset.customInit = 'true';
+
+                // Hide native select accessibility-friendly
+                selectEl.style.position = 'absolute';
+                selectEl.style.width = '1px';
+                selectEl.style.height = '1px';
+                selectEl.style.opacity = '0';
+                selectEl.style.pointerEvents = 'none';
+
+                // Container
+                const container = document.createElement('div');
+                container.className = 'custom-select-container';
+                selectEl.parentNode.insertBefore(container, selectEl);
+                container.appendChild(selectEl);
+
+                // Trigger Button
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'custom-select-trigger';
+                trigger.innerHTML = '<span class="custom-select-value"></span><svg class="custom-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+                container.appendChild(trigger);
+
+                // Dropdown Menu Card
+                const dropdown = document.createElement('div');
+                dropdown.className = 'custom-select-dropdown';
+                container.appendChild(dropdown);
+
+                // Handle disabled state
+                if (selectEl.disabled || selectEl.closest('fieldset[disabled]')) {
+                    trigger.disabled = true;
+                    trigger.style.opacity = '0.7';
+                    trigger.style.cursor = 'not-allowed';
+                }
+
+                // Toggle menu on click
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (selectEl.disabled || selectEl.closest('fieldset[disabled]')) return;
+                    const isOpen = container.classList.contains('is-open');
+                    document.querySelectorAll('.custom-select-container.is-open').forEach(function(c) {
+                        c.classList.remove('is-open');
+                    });
+                    if (!isOpen) {
+                        container.classList.add('is-open');
+                        const selectedItem = dropdown.querySelector('.is-selected');
+                        if (selectedItem) {
+                            selectedItem.scrollIntoView({ block: 'nearest' });
+                        }
+                    }
+                });
+
+                // Populate initial options
+                syncCustomSelect(selectEl);
+
+                // Watch for value changes
+                selectEl.addEventListener('change', function() {
+                    updateTriggerLabel(selectEl, container);
+                    syncCustomSelect(selectEl);
+                });
+
+                // Observe DOM option changes (e.g. dynamic state/district filtering)
+                const observer = new MutationObserver(function() {
+                    syncCustomSelect(selectEl);
+                });
+                observer.observe(selectEl, { childList: true });
+            });
+        }
+
+        function updateTriggerLabel(selectEl, container) {
+            const trigger = container.querySelector('.custom-select-trigger');
+            const valueSpan = container.querySelector('.custom-select-value');
+            if (!trigger || !valueSpan) return;
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            if (selectedOption && selectEl.value !== '') {
+                valueSpan.textContent = selectedOption.textContent.trim();
+                valueSpan.classList.remove('is-placeholder');
+            } else {
+                valueSpan.textContent = (selectEl.options[0]?.textContent || 'Select...').trim();
+                valueSpan.classList.add('is-placeholder');
+            }
+        }
+
+        function syncCustomSelect(selectEl) {
+            const container = selectEl.closest('.custom-select-container');
+            if (!container) return;
+            const dropdown = container.querySelector('.custom-select-dropdown');
+            if (!dropdown) return;
+
+            dropdown.innerHTML = '';
+            Array.from(selectEl.options).forEach(function(opt) {
+                const item = document.createElement('div');
+                item.className = 'custom-select-option';
+                item.dataset.value = opt.value;
+                item.textContent = opt.textContent;
+
+                if (opt.value === '') {
+                    item.classList.add('is-placeholder');
+                }
+                if (String(opt.value) === String(selectEl.value) && selectEl.value !== '') {
+                    item.classList.add('is-selected');
+                }
+
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectEl.value = opt.value;
+                    container.classList.remove('is-open');
+                    updateTriggerLabel(selectEl, container);
+
+                    // Dispatch events
+                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Trigger inline onchange if defined
+                    if (typeof selectEl.onchange === 'function') {
+                        selectEl.onchange();
+                    }
+                });
+
+                dropdown.appendChild(item);
+            });
+
+            updateTriggerLabel(selectEl, container);
+        }
+
+        // Close dropdown when clicking outside or pressing Escape
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.custom-select-container.is-open').forEach(function(c) {
+                c.classList.remove('is-open');
+            });
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.custom-select-container.is-open').forEach(function(c) {
+                    c.classList.remove('is-open');
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initCustomSelects('.mockup-select');
         });
     </script>
 
@@ -5097,6 +5966,116 @@
 
             .btn-terms-submit.is-active:active {
                 transform: translateY(0);
+            }
+
+            /* Mobile View Optimization */
+            @media (max-width: 640px) {
+                .terms-modal-overlay {
+                    padding: 0.65rem;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .terms-modal-card {
+                    width: 100%;
+                    max-width: 100%;
+                    border-radius: 16px;
+                    max-height: 94vh;
+                }
+
+                .terms-modal-header {
+                    padding: 0.9rem 1.15rem;
+                    gap: 0.75rem;
+                }
+
+                .terms-header-icon-box {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 10px;
+                }
+
+                .terms-header-icon-box svg {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                .terms-header-title {
+                    font-size: 1.02rem;
+                    line-height: 1.2;
+                }
+
+                .terms-header-subtitle {
+                    font-size: 0.72rem;
+                    margin-top: 0.15rem;
+                }
+
+                .terms-modal-body {
+                    padding: 0.85rem 1.15rem 0.75rem;
+                    font-size: 0.80rem;
+                    max-height: 58vh;
+                }
+
+                .terms-intro-text {
+                    font-size: 0.78rem;
+                    margin-bottom: 0.65rem;
+                    line-height: 1.35;
+                }
+
+                .terms-cards-list {
+                    gap: 0.5rem;
+                }
+
+                .terms-card-row {
+                    padding: 0.6rem 0.75rem;
+                    gap: 0.65rem;
+                    border-radius: 9px;
+                }
+
+                .terms-badge-pill {
+                    width: 22px;
+                    height: 22px;
+                    font-size: 0.72rem;
+                    border-radius: 6px;
+                }
+
+                .terms-row-content {
+                    font-size: 0.78rem;
+                    line-height: 1.45;
+                }
+
+                .terms-agreement-box {
+                    margin-top: 0.7rem;
+                    padding: 0.7rem 0.8rem;
+                    border-radius: 10px;
+                }
+
+                .terms-checkbox-label {
+                    gap: 0.6rem;
+                }
+
+                .terms-checkbox-input {
+                    width: 18px;
+                    height: 18px;
+                }
+
+                .terms-checkbox-text {
+                    font-size: 0.78rem;
+                    line-height: 1.35;
+                }
+
+                .terms-modal-footer {
+                    padding: 0.75rem 1.15rem;
+                    background: #f8fafc;
+                }
+
+                .btn-terms-submit {
+                    width: 100%;
+                    justify-content: center;
+                    padding: 0.75rem 1.25rem;
+                    font-size: 0.92rem;
+                    min-height: 44px;
+                    border-radius: 10px;
+                }
             }
         </style>
 

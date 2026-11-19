@@ -31,6 +31,78 @@
         .pagination .page-item.disabled .page-link, .pagination .page-item.disabled span.page-link { color: #94a3b8 !important; background: #f8fafc !important; border-color: #e2e8f0 !important; cursor: not-allowed !important; pointer-events: none !important; }
         .pagination svg, .pagination-wrapper svg, nav svg, svg.w-5, svg.h-5 { width: 14px !important; height: 14px !important; max-width: 14px !important; max-height: 14px !important; display: inline-block !important; vertical-align: middle !important; }
         .pagination-wrapper nav > div:first-child:not(:only-child) { display: none !important; }
+
+        /* KPI Responsive Layout & Grid Styles */
+        .kpi-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+
+        @media (max-width: 1200px) {
+            .kpi-metrics-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-charts-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .kpi-charts-grid > div {
+                padding: 1rem !important;
+            }
+            .card-header-bar {
+                padding: 0.85rem 1rem !important;
+                gap: 0.65rem !important;
+            }
+            .card-title {
+                font-size: 1rem !important;
+            }
+            .kpi-content-padding {
+                padding: 0.85rem 0.65rem !important;
+            }
+            #kpiFilterForm {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            #kpiFilterForm > div {
+                width: 100% !important;
+                min-width: 100% !important;
+            }
+            #kpiResetBtn {
+                width: 100% !important;
+                text-align: center !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .kpi-metrics-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+            }
+            .kpi-metrics-grid > div {
+                padding: 0.65rem 0.75rem !important;
+            }
+            .kpi-metrics-grid > div > div:first-child {
+                font-size: 0.65rem !important;
+            }
+            .kpi-metrics-grid > div > div:nth-child(2) {
+                font-size: 1.25rem !important;
+            }
+            .kpi-metrics-grid > div > div:nth-child(3) {
+                font-size: 0.65rem !important;
+            }
+        }
     </style>
 
     <!-- Chart.js for High-Impact Analytics -->
@@ -54,6 +126,15 @@
                         <line x1="4" y1="18" x2="20" y2="18"/>
                     </svg>
                 </button>
+                <div class="topbar-page-breadcrumb">
+                    <span class="breadcrumb-item breadcrumb-desktop-only">KPI</span>
+                    <span class="breadcrumb-separator breadcrumb-desktop-only">/</span>
+                    <span class="breadcrumb-active-tag">
+                        <span class="breadcrumb-dot"></span>
+                        <span class="breadcrumb-lead-full">Student KPI &bull; Conversion Analytics</span>
+                        <span class="breadcrumb-lead-mobile">Student KPI</span>
+                    </span>
+                </div>
             </div>
 
             <div class="top-bar-right">
@@ -91,9 +172,9 @@
                     </button>
                 </div>
 
-                <div style="padding: 1.5rem;">
+                <div class="kpi-content-padding" style="padding: 1.5rem;">
                     <!-- 1. TOP EXECUTIVE METRIC CARDS (COMPACT SINGLE ROW, NO ICONS) -->
-                    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <div class="kpi-metrics-grid">
                         <!-- Card 1: Total Registered -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.85rem; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
                             <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Total Applicants</div>
@@ -138,7 +219,7 @@
                     </div>
 
                     <!-- 2. VISUAL CHARTS (5-STAGE CONVERSION FUNNEL & TOP BRANCH DISTRIBUTION) -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
+                    <div class="kpi-charts-grid">
                         <!-- Chart 1: 5-Stage Conversion Funnel -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
@@ -654,11 +735,6 @@ function attachPaginationAjax() {
             });
         });
     });
-}
-
-function toggleSidebarMenu() {
-    const sidebar = document.querySelector('.app-sidebar');
-    if (sidebar) sidebar.classList.toggle('active');
 }
 </script>
 </body>

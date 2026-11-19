@@ -31,6 +31,12 @@
                 grid-template-columns: 1fr !important;
             }
         }
+        .telecaller-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
         .telecaller-filter-wrapper:hover {
             border-color: #94a3b8 !important;
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
@@ -51,6 +57,7 @@
         }
         .crm-table {
             width: 100%;
+            min-width: 840px;
             border-collapse: collapse;
             text-align: left;
             font-size: 0.85rem;
@@ -70,9 +77,107 @@
             padding: 0.85rem 1rem;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
+            white-space: nowrap;
         }
         .crm-table tbody tr:hover {
             background-color: #f8fafc;
+        }
+
+        .call-activity-filters {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.4rem 0.65rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        .call-activity-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .call-activity-filter-item select {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 991px) {
+            .telecaller-metrics-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.65rem !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-header-bar {
+                padding: 0.85rem 1rem !important;
+                gap: 0.65rem !important;
+            }
+            .card-header-bar > div {
+                width: 100% !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.65rem !important;
+            }
+            .card-title {
+                font-size: 1rem !important;
+                white-space: normal !important;
+            }
+            .telecaller-filter-wrapper {
+                width: 100% !important;
+                min-width: 100% !important;
+            }
+            .telecaller-filter-wrapper select {
+                min-width: 0 !important;
+                width: 100% !important;
+            }
+            .btn-theme-export {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            .kpi-content-padding {
+                padding: 0.85rem 0.65rem !important;
+            }
+            .call-activity-filters {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 0.45rem !important;
+                padding: 0.5rem !important;
+            }
+            .call-activity-filter-item {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 2px !important;
+                width: 100% !important;
+            }
+            .call-activity-filter-item select {
+                width: 100% !important;
+                padding: 0.35rem 0.45rem !important;
+                font-size: 0.75rem !important;
+            }
+            #telecallerSearchInput {
+                width: 100% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .telecaller-metrics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+            }
+            .kpi-metric-card {
+                padding: 0.55rem 0.85rem !important;
+            }
         }
     </style>
 </head>
@@ -93,6 +198,15 @@
                         <line x1="4" y1="18" x2="20" y2="18"/>
                     </svg>
                 </button>
+                <div class="topbar-page-breadcrumb">
+                    <span class="breadcrumb-item breadcrumb-desktop-only">KPI</span>
+                    <span class="breadcrumb-separator breadcrumb-desktop-only">/</span>
+                    <span class="breadcrumb-active-tag">
+                        <span class="breadcrumb-dot"></span>
+                        <span class="breadcrumb-lead-full">Telecaller KPI &bull; Outreach Performance</span>
+                        <span class="breadcrumb-lead-mobile">Telecaller KPI</span>
+                    </span>
+                </div>
             </div>
 
             <div class="top-bar-right">
@@ -162,9 +276,9 @@
                     </div>
                 </div>
 
-                <div style="padding: 1.5rem;">
+                <div class="kpi-content-padding" style="padding: 1.5rem;">
                     <!-- 1. TOP EXECUTIVE METRIC CARDS (COMPACT SINGLE-ROW BOXES) -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem;">
+                    <div class="telecaller-metrics-grid">
                         <!-- Card 1: Allotted Leads -->
                         <div class="kpi-metric-card" style="border: 1px solid #e2e8f0; border-radius: 9px; padding: 0.65rem 1.15rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
                             <span style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Total Allotted Leads</span>
@@ -313,19 +427,19 @@
                             </div>
 
                             <!-- Year, Month, Date Filter Dropdowns -->
-                            <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                            <div class="call-activity-filters">
                                 <!-- Year Dropdown -->
-                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <div class="call-activity-filter-item">
                                     <label for="callYearFilter" style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Year:</label>
-                                    <select id="callYearFilter" onchange="onCallFilterChange('year')" style="font-size: 0.75rem; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.18rem 0.45rem; outline: none; cursor: pointer;">
+                                    <select id="callYearFilter" onchange="onCallFilterChange('year')">
                                         <option value="all">All Years</option>
                                     </select>
                                 </div>
 
                                 <!-- Month Dropdown -->
-                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <div class="call-activity-filter-item">
                                     <label for="callMonthFilter" style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Month:</label>
-                                    <select id="callMonthFilter" onchange="onCallFilterChange('month')" style="font-size: 0.75rem; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.18rem 0.45rem; outline: none; cursor: pointer;">
+                                    <select id="callMonthFilter" onchange="onCallFilterChange('month')">
                                         <option value="all">All Months</option>
                                         <option value="1">Jan</option>
                                         <option value="2">Feb</option>
@@ -343,9 +457,9 @@
                                 </div>
 
                                 <!-- Date Dropdown -->
-                                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <div class="call-activity-filter-item">
                                     <label for="callDateFilter" style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Date:</label>
-                                    <select id="callDateFilter" onchange="onCallFilterChange('date')" style="font-size: 0.75rem; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.18rem 0.45rem; outline: none; cursor: pointer;">
+                                    <select id="callDateFilter" onchange="onCallFilterChange('date')">
                                         <option value="all">All Dates</option>
                                     </select>
                                 </div>
@@ -367,13 +481,13 @@
 
                     <!-- 3. COUNSELOR LEAD OUTREACH DIRECTORY TABLE (GENUINE CALL TASKS & REMARKS) -->
                     <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 1rem 1.25rem; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
                             <div>
                                 <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Counselor Lead Outreach Directory</div>
                                 <div style="font-size: 0.75rem; color: #64748b;">Actual allotted leads and logged calling task stages from PostgreSQL</div>
                             </div>
-                            <div style="position: relative;">
-                                <input type="text" id="telecallerSearchInput" placeholder="Search phone, counselor, stage, remark..." onkeyup="filterTelecallerTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 310px; outline: none; background: #ffffff;">
+                            <div style="position: relative; width: 100%; max-width: 320px;">
+                                <input type="text" id="telecallerSearchInput" placeholder="Search phone, counselor, stage, remark..." onkeyup="filterTelecallerTable()" style="padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.825rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; outline: none; background: #ffffff;">
                                 <svg style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -385,52 +499,52 @@
                             <table class="crm-table" id="telecallerTable">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Lead Contact</th>
-                                        <th>Application No</th>
-                                        <th>Assigned Counselor</th>
-                                        <th>Allocation Date</th>
-                                        <th>Latest Call Stage</th>
-                                        <th>Calls Made</th>
-                                        <th>Latest Counselor Remark</th>
+                                        <th style="white-space: nowrap;">#</th>
+                                        <th style="white-space: nowrap;">Lead Contact</th>
+                                        <th style="white-space: nowrap;">Application No</th>
+                                        <th style="white-space: nowrap;">Assigned Counselor</th>
+                                        <th style="white-space: nowrap;">Allocation Date</th>
+                                        <th style="white-space: nowrap;">Latest Call Stage</th>
+                                        <th style="white-space: nowrap;">Calls Made</th>
+                                        <th style="white-space: nowrap;">Latest Counselor Remark</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($telecallerLeadsList as $index => $tLead)
                                         <tr class="telecaller-row" data-empcode="{{ $tLead->empcode }}">
-                                            <td style="color: #64748b; font-weight: 600;">{{ $index + 1 }}</td>
-                                            <td>
-                                                <span style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.86rem;">{{ $tLead->phoneno }}</span>
+                                            <td style="color: #64748b; font-weight: 600; white-space: nowrap;">{{ $index + 1 }}</td>
+                                            <td style="white-space: nowrap;">
+                                                <span style="font-weight: 700; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; white-space: nowrap;">{{ $tLead->phoneno }}</span>
                                             </td>
-                                            <td>
+                                            <td style="white-space: nowrap;">
                                                 @if($tLead->applino && $tLead->applino !== '0')
-                                                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: #1e40af;">{{ $tLead->applino }}</span>
+                                                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: #1e40af; white-space: nowrap;">{{ $tLead->applino }}</span>
                                                 @else
-                                                    <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Not Registered</span>
+                                                    <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic; white-space: nowrap;">Not Registered</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <div style="font-weight: 600; color: #1e293b;">{{ $tLead->emp_name ?? 'Counselor' }}</div>
-                                                <div style="font-size: 0.72rem; color: #0284c7; font-weight: 600;">Emp: {{ $tLead->empcode }}</div>
+                                            <td style="white-space: nowrap;">
+                                                <div style="font-weight: 600; color: #1e293b; white-space: nowrap;">{{ $tLead->emp_name ?? 'Counselor' }}</div>
+                                                <div style="font-size: 0.72rem; color: #0284c7; font-weight: 600; white-space: nowrap;">Emp: {{ $tLead->empcode }}</div>
                                             </td>
-                                            <td>
-                                                <div style="font-size: 0.8rem; color: #334155; font-weight: 600;">{{ $tLead->assigndatetime ? date('d M Y, h:i A', strtotime($tLead->assigndatetime)) : 'N/A' }}</div>
+                                            <td style="white-space: nowrap;">
+                                                <div style="font-size: 0.8rem; color: #334155; font-weight: 600; white-space: nowrap;">{{ $tLead->assigndatetime ? date('d M Y, h:i A', strtotime($tLead->assigndatetime)) : 'N/A' }}</div>
                                             </td>
-                                            <td>
+                                            <td style="white-space: nowrap;">
                                                 @if($tLead->call_count > 0)
-                                                    <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
+                                                    <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; white-space: nowrap;">
                                                         {{ $tLead->latest_stage }}
                                                     </span>
                                                 @else
-                                                    <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                                                    <span style="display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; white-space: nowrap;">
                                                         Pending Call
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b;">{{ $tLead->call_count }} call(s)</span>
+                                            <td style="white-space: nowrap;">
+                                                <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b; white-space: nowrap;">{{ $tLead->call_count }} call(s)</span>
                                             </td>
-                                            <td style="max-width: 280px;">
+                                            <td style="max-width: 280px; white-space: nowrap;">
                                                 <span style="font-size: 0.78rem; color: #475569; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $tLead->latest_remark }}">
                                                     {{ $tLead->latest_remark }}
                                                 </span>
