@@ -368,6 +368,24 @@ class DashboardsController extends Controller
 
         $hasAcceptedTerms = ($personalInfo && $personalInfo->terms_accepted === 'yes');
 
+        // Resolve default registered Country, State, District for forms prefill
+        $defaultCountry = $personalInfo?->country;
+        if (empty($defaultCountry)) {
+            $cId = $crmStudent?->countryid ?? 1;
+            $defaultCountry = Country::where('country_id', $cId)->value('country_name') ?? 'India';
+        }
+
+        $defaultState = $personalInfo?->state;
+        if (empty($defaultState)) {
+            $sId = $crmStudent?->stateid ?? 1;
+            $defaultState = State::where('state_id', $sId)->value('state_name') ?? 'Andhra Pradesh';
+        }
+
+        $defaultDistrict = $personalInfo?->district
+            ?? $academicDetails?->tenth_school_district
+            ?? $academicDetails?->pu2_college_district
+            ?? null;
+
         return view('dashboards::index', compact(
             'hasAcceptedTerms',
             'user',
@@ -375,6 +393,9 @@ class DashboardsController extends Controller
             'crmStudent',
             'personalInfo',
             'academicDetails',
+            'defaultCountry',
+            'defaultState',
+            'defaultDistrict',
             'applicationData',
             'examSchedule',
             'cleanPhone',

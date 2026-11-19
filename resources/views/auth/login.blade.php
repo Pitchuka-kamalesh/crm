@@ -760,6 +760,12 @@
             .hero-desc {
                 font-size: 0.9rem;
             }
+            .login-card-wrapper {
+                justify-content: center;
+            }
+            .login-card {
+                max-width: 440px;
+            }
         }
 
         @media (max-width: 900px) {
