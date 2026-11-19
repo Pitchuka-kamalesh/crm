@@ -824,7 +824,7 @@
                     <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
                 </div>
 
-                <!-- Row 1: fee info 2027, V-SAT brochure, Provisional ID -->
+                <!-- Row 1: fee info 2027 & V-SAT brochure -->
                 <div class="bubbles-grid">
 
                     <!-- Button 1: fee info 2027 -->
@@ -864,26 +864,6 @@
                                 <span class="popover-badge popover-badge-rose">&bull; Official Guide</span>
                             </div>
                             <p class="popover-text">National entrance examination handbook, eligibility criteria, exam slots, syllabus pattern, and admission guidelines.</p>
-                        </div>
-                    </div>
-
-                    <!-- Bubble 5: Provisional ID & Enrollment (Placed beside V-SAT brochure) -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-purple">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Provisional ID</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Provisional ID &amp; Order</span>
-                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
-                            </div>
-                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
                         </div>
                     </div>
 
@@ -941,7 +921,7 @@
                     <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
                 </div>
 
-                <!-- Row 1: Online Application & Document Verification -->
+                <!-- Row 1: Online Application, Document Verification, Provisional ID -->
                 <div class="bubbles-grid">
 
                     <!-- Bubble 1: Online Application -->
@@ -981,6 +961,26 @@
                                 <span class="popover-badge popover-badge-cyan">&bull; Online KYC</span>
                             </div>
                             <p class="popover-text">Upload and verify educational certificates, 10th/12th memos, Transfer Certificate, Migration, and Aadhaar card.</p>
+                        </div>
+                    </div>
+
+                    <!-- Bubble 5: Provisional ID & Enrollment (Placed beside Document Verification) -->
+                    <div class="feature-bubble">
+                        <div class="bubble-icon bubble-purple">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                            </svg>
+                        </div>
+                        <span class="bubble-label">Provisional ID</span>
+                        <span class="bubble-badge-indicator"></span>
+
+                        <!-- Hover Popover -->
+                        <div class="bubble-popover">
+                            <div class="popover-header">
+                                <span class="popover-title">Provisional ID &amp; Order</span>
+                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
+                            </div>
+                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
                         </div>
                     </div>
 
