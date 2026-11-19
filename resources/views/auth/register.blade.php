@@ -865,9 +865,9 @@
         }
 
         .hero-top-logo {
-            height: 75px;
+            height: 115px;
             width: auto;
-            max-width: 320px;
+            max-width: 440px;
             object-fit: contain;
             mix-blend-mode: multiply;
             image-rendering: -webkit-optimize-contrast;
@@ -876,15 +876,15 @@
 
         @media (max-width: 900px) {
             .hero-top-logo {
-                height: 62px;
-                max-width: 260px;
+                height: 90px;
+                max-width: 340px;
             }
         }
 
         @media (max-width: 600px) {
             .hero-top-logo {
-                height: 50px;
-                max-width: 210px;
+                height: 68px;
+                max-width: 250px;
             }
         }
 
