@@ -153,11 +153,13 @@ class DashboardsController extends Controller
         $campusName = $campus ? $campus->campus_short_name : '';
 
         // Determine Degree Level for Step 3 based on registration (UG -> B.Tech, PG -> M.Tech, Doctoral -> PhD)
+        $requestedLevel = strtolower(trim((string)($request->query('degree_level') ?? $request->input('degree_level') ?? session('degree_level') ?? '')));
         $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
         $progShort = strtoupper($program?->program_short_name ?? '');
         $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
 
         if (
+            $requestedLevel === 'phd' ||
             $progLevel === 'PHD' ||
             $progLevel === 'DOCTORAL' ||
             str_contains($progShort, 'PHD') ||
@@ -168,6 +170,7 @@ class DashboardsController extends Controller
         ) {
             $degreeLevel = 'phd';
         } elseif (
+            $requestedLevel === 'mtech' ||
             $progLevel === 'PG' ||
             str_contains($progShort, 'M.TECH') ||
             str_contains($progShort, 'MTECH') ||
@@ -256,7 +259,28 @@ class DashboardsController extends Controller
         }
 
         ksort($stageMeta);
+
+        // PhD candidate: Completely remove Exam Slot Booking stage (EXAM00002) and re-index stages
+        if ($degreeLevel === 'phd') {
+            $filteredMeta = [];
+            foreach ($stageMeta as $meta) {
+                $mCode = $meta['menu_code'] ?? '';
+                $mTitle = strtolower($meta['title'] ?? '');
+                if ($mCode === 'EXAM00002' || str_contains($mTitle, 'exam slot')) {
+                    continue;
+                }
+                $filteredMeta[] = $meta;
+            }
+            $stageMeta = [];
+            foreach ($filteredMeta as $idx => $m) {
+                $stageMeta[$idx + 1] = $m;
+            }
+        }
+
         $totalSteps = count($stageMeta);
+        if ($activeStep > $totalSteps) {
+            $activeStep = $totalSteps;
+        }
 
         // Calculate stage statuses dynamically from crmStudent DB columns and actual completed data
         $stages = [];
@@ -275,6 +299,12 @@ class DashboardsController extends Controller
                 $isCompleted = ($val === 'completed' || $academicDetails !== null);
             } elseif ($mCode === 'CRMM0006') {
                 $isCompleted = ($val === 'completed' || !empty($uploadedDocs));
+            } elseif ($mCode === 'CRMM0010') {
+                // Application download
+                $isCompleted = ($val === 'completed' || ($crmStudent && ($crmStudent->stage5 === 'completed' || $crmStudent->stage6 === 'completed')));
+            } elseif ($mCode === 'CRMM0007') {
+                // V-SAT results
+                $isCompleted = ($val === 'completed' || ($crmStudent && ($crmStudent->stage6 === 'completed' || $crmStudent->stage7 === 'completed')));
             } else {
                 $isCompleted = ($val === 'completed' || $val === 'paid');
             }
@@ -493,8 +523,27 @@ class DashboardsController extends Controller
         $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
         $regNo = $crmStudent?->applinano ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
 
+        $progId = $crmStudent?->programid;
+        $program = $progId ? Program::where('program_id', $progId)->first() : null;
+        $progLevel = strtoupper(trim((string)($crmStudent?->programlevel ?? '')));
+        $progShort = strtoupper($program?->program_short_name ?? '');
+        $progName = strtoupper($program?->program_long_name ?? $program?->program_short_name ?? '');
+        $requestedLevel = strtolower(trim((string)($request->query('degree_level') ?? $request->input('degree_level') ?? session('degree_level') ?? '')));
+
+        $isPhd = (
+            $requestedLevel === 'phd' ||
+            $progLevel === 'PHD' ||
+            $progLevel === 'DOCTORAL' ||
+            str_contains($progShort, 'PHD') ||
+            str_contains($progShort, 'PH.D') ||
+            str_contains($progName, 'DOCTOR') ||
+            str_contains($progName, 'PH.D') ||
+            str_contains($progName, 'PHD')
+        );
+
         $step = (int) $request->input('step', 1);
-        $nextStep = min(7, $step + 1);
+        $maxSteps = $isPhd ? 6 : 7;
+        $nextStep = min($maxSteps, $step + 1);
 
         $hasPaidRecord = false;
         try {
@@ -552,7 +601,7 @@ class DashboardsController extends Controller
         // Security validation: Block saving higher steps if fee payment in Step 4 is not completed
         if ($step > 4 && !$isPaid) {
             return redirect()->route('dashboards.index', ['step' => 4])
-                ->withErrors(['error' => 'Admission fee payment in Step 4 must be completed before booking an exam slot.']);
+                ->withErrors(['error' => 'Admission fee payment in Step 4 must be completed before proceeding.']);
         }
 
         try {
@@ -742,22 +791,44 @@ class DashboardsController extends Controller
                     $request->merge(['eval_type' => $request->input('tenth_marks_type')]);
                 }
 
-                $cityInput = $request->input('city') ?? $request->input('inter_city') ?? $request->input('pu2_college_city');
-                $stateInput = $request->input('jr_state') ?? $request->input('inter_state') ?? $request->input('pu2_college_state');
-                $districtInput = $request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district');
+                $degLvl = strtolower(trim((string)($request->input('degree_level') ?? $request->query('degree_level') ?? 'btech')));
+                $isPhd = ($degLvl === 'phd');
+                $isPg = ($degLvl === 'mtech');
+                $isUg = ($degLvl === 'btech' || (!$isPhd && !$isPg));
 
-                if ($stateInput && is_numeric($stateInput)) {
-                    $matchedState = State::where('state_id', (int)$stateInput)->first();
-                    if ($matchedState) {
-                        $stateInput = $matchedState->state_name;
+                $resolveState = function($input) {
+                    if (!$input) return null;
+                    if (is_numeric($input)) {
+                        $m = State::where('state_id', (int)$input)->first();
+                        return $m ? $m->state_name : (string)$input;
                     }
-                }
-                if ($districtInput && is_numeric($districtInput)) {
-                    $matchedDist = District::where('DISTRICT_ID', (int)$districtInput)->first();
-                    if ($matchedDist) {
-                        $districtInput = $matchedDist->DISTRICT_NAME;
+                    return (string)$input;
+                };
+
+                $resolveDistrict = function($input) {
+                    if (!$input) return null;
+                    if (is_numeric($input)) {
+                        $m = District::where('DISTRICT_ID', (int)$input)->first();
+                        return $m ? $m->DISTRICT_NAME : (string)$input;
                     }
-                }
+                    return (string)$input;
+                };
+
+                $tenthStateVal = $resolveState($request->input('tenth_school_state') ?? $request->input('tenth_state'));
+                $tenthDistrictVal = $resolveDistrict($request->input('tenth_school_district') ?? $request->input('tenth_district'));
+
+                $cityInput = $request->input('city') ?? $request->input('inter_city') ?? $request->input('pu2_college_city');
+                $stateInput = $resolveState($request->input('jr_state') ?? $request->input('inter_state') ?? $request->input('pu2_college_state'));
+                $districtInput = $resolveDistrict($request->input('jr_district') ?? $request->input('inter_district') ?? $request->input('pu2_college_district'));
+
+                $ugStateVal = $resolveState($request->input('ug_college_state') ?? $request->input('ug_state'));
+                $ugDistrictVal = $resolveDistrict($request->input('ug_college_district') ?? $request->input('ug_district'));
+
+                $pgStateVal = $resolveState($request->input('pg_college_state') ?? $request->input('pg_state'));
+                $pgDistrictVal = $resolveDistrict($request->input('pg_college_district') ?? $request->input('pg_district'));
+
+                $pg2StateVal = $resolveState($request->input('pg2_college_state') ?? $request->input('pg2_state'));
+                $pg2DistrictVal = $resolveDistrict($request->input('pg2_college_district') ?? $request->input('pg2_district'));
 
                 $request->merge([
                     'city' => $cityInput,
@@ -767,41 +838,92 @@ class DashboardsController extends Controller
                     'pu2_college_district' => $districtInput,
                 ]);
 
-                $request->validate([
-                    // 10th School / SSC Details are not mandatory
+                $validationRules = [
+                    // 10th School / SSC Details
                     'school_co_name' => ['nullable', 'string', 'max:255'],
                     'boad_of_study' => ['nullable', 'string', 'max:255'],
-                    'roll_no' => ['nullable', 'string', 'max:50'],
+                    'tenth_school_city' => ['nullable', 'string', 'max:100'],
+                    'tenth_school_state' => ['nullable', 'string', 'max:100'],
+                    'tenth_school_district' => ['nullable', 'string', 'max:100'],
                     'passing_year' => ['nullable', 'integer', 'min:2000', 'max:2030'],
-                    'eval_type' => ['nullable', 'string'],
+                    'roll_no' => ['nullable', 'string', 'max:50'],
                     'tenth_marks_type' => ['nullable', 'string'],
+                    'tenth_current_status' => ['nullable', 'string'],
                     'tenth_marks_conducted' => ['nullable', 'numeric'],
                     'tenth_marks_earned' => ['nullable', 'numeric'],
                     'tenth_percentage' => ['nullable', 'numeric'],
+                ];
 
-                    // 12th / Inter fields (all mandatory except hall ticket)
-                    'inter_college' => ['required', 'string', 'max:255'],
-                    'city' => ['required', 'string', 'max:100'],
-                    'jr_state' => ['required', 'string', 'max:100'],
-                    'jr_district' => ['required', 'string', 'max:100'],
-                    'subset_choice' => ['required', 'string'],
-                    'inter_year' => ['required', 'integer', 'min:2000', 'max:2030'],
-                    'inter_hallticket' => ['nullable', 'string', 'max:50'],
-                    'pu2_marks_type' => ['required', 'string'],
-                    'pu2_marks_conducted' => ['required', 'numeric', 'min:1'],
-                    'pu2_marks_earned' => ['required', 'numeric', 'min:0'],
-                    'pu2_percentage' => ['required', 'numeric'],
-                ], [
+                if (!$isPhd) {
+                    $validationRules['inter_college'] = ['required', 'string', 'max:255'];
+                    $validationRules['city'] = ['required', 'string', 'max:100'];
+                    $validationRules['jr_state'] = ['required', 'string', 'max:100'];
+                    $validationRules['jr_district'] = ['required', 'string', 'max:100'];
+                    $validationRules['subset_choice'] = ['required', 'string'];
+                    $validationRules['inter_year'] = ['required', 'integer', 'min:2000', 'max:2030'];
+                    $validationRules['pu2_marks_type'] = ['required', 'string'];
+                    $validationRules['pu2_marks_conducted'] = ['required', 'numeric', 'min:1'];
+                    $validationRules['pu2_marks_earned'] = ['required', 'numeric', 'min:0'];
+                    $validationRules['pu2_percentage'] = ['required', 'numeric'];
+                } else {
+                    $validationRules['inter_college'] = ['nullable', 'string', 'max:255'];
+                    $validationRules['city'] = ['nullable', 'string', 'max:100'];
+                    $validationRules['jr_state'] = ['nullable', 'string', 'max:100'];
+                    $validationRules['jr_district'] = ['nullable', 'string', 'max:100'];
+                    $validationRules['subset_choice'] = ['nullable', 'string'];
+                    $validationRules['inter_year'] = ['nullable', 'integer', 'min:2000', 'max:2030'];
+                    $validationRules['pu2_marks_type'] = ['nullable', 'string'];
+                    $validationRules['pu2_marks_conducted'] = ['nullable', 'numeric'];
+                    $validationRules['pu2_marks_earned'] = ['nullable', 'numeric'];
+                    $validationRules['pu2_percentage'] = ['nullable', 'numeric'];
+                }
+
+                if ($isPg) {
+                    $validationRules['ug_college_name'] = ['required', 'string', 'max:255'];
+                    $validationRules['ug_university_board'] = ['required', 'string', 'max:255'];
+                }
+
+                if ($isPhd) {
+                    $validationRules['pg_college_name'] = ['required', 'string', 'max:255'];
+                    $validationRules['pg_university_board'] = ['required', 'string', 'max:255'];
+                }
+
+                if ($request->filled('tenth_marks_conducted') && $request->filled('tenth_marks_earned')) {
+                    $validationRules['tenth_marks_earned'] = ['nullable', 'numeric', 'lte:tenth_marks_conducted'];
+                }
+                if ($request->filled('pu2_marks_conducted') && $request->filled('pu2_marks_earned')) {
+                    $validationRules['pu2_marks_earned'] = array_merge((array)$validationRules['pu2_marks_earned'], ['lte:pu2_marks_conducted']);
+                }
+                if ($request->filled('ug_marks_conducted') && $request->filled('ug_marks_earned')) {
+                    $validationRules['ug_marks_earned'] = ['nullable', 'numeric', 'lte:ug_marks_conducted'];
+                }
+                if ($request->filled('pg_marks_conducted') && $request->filled('pg_marks_earned')) {
+                    $validationRules['pg_marks_earned'] = ['nullable', 'numeric', 'lte:pg_marks_conducted'];
+                }
+                if ($request->filled('pg2_marks_conducted') && $request->filled('pg2_marks_earned')) {
+                    $validationRules['pg2_marks_earned'] = ['nullable', 'numeric', 'lte:pg2_marks_conducted'];
+                }
+
+                $request->validate($validationRules, [
                     'inter_college.required' => 'College Name / Institute Name is required.',
                     'city.required' => 'College City is required.',
                     'jr_state.required' => 'College State is required.',
                     'jr_district.required' => 'College District is required.',
-                    'subset_choice.required' => 'Please select First Year or Second Year.',
+                    'subset_choice.required' => 'Please select 1st Year or 2nd Year.',
                     'inter_year.required' => 'Year is required.',
                     'pu2_marks_type.required' => 'Marks Type is required.',
                     'pu2_marks_conducted.required' => 'Total Marks (Conducted) is required.',
                     'pu2_marks_earned.required' => 'Marks Earned is required.',
+                    'pu2_marks_earned.lte' => '12th Marks Earned cannot exceed Total Marks Conducted.',
+                    'tenth_marks_earned.lte' => '10th Marks Earned cannot exceed Total Marks Conducted.',
+                    'ug_marks_earned.lte' => 'UG Marks Earned cannot exceed Total Marks Conducted.',
+                    'pg_marks_earned.lte' => 'PG 1 Marks Earned cannot exceed Total Marks Conducted.',
+                    'pg2_marks_earned.lte' => 'PG 2 Marks Earned cannot exceed Total Marks Conducted.',
                     'pu2_percentage.required' => 'Percentage is required.',
+                    'ug_college_name.required' => 'UG College Name / Institute Name is required.',
+                    'ug_university_board.required' => 'UG Board is required.',
+                    'pg_college_name.required' => 'PG 1 College Name / Institute Name is required.',
+                    'pg_university_board.required' => 'PG 1 Board is required.',
                 ]);
 
                 if ($crmStudent) {
@@ -852,7 +974,9 @@ class DashboardsController extends Controller
                     }
 
 
-                    $courseChoice = $request->input('course_choice') ?? $request->input('pu2_study_board');
+                    self::ensureAcademicColumns();
+
+                    $courseChoice = $request->input('inter_board_of_study') ?? $request->input('pu2_board_of_study') ?? $request->input('course_choice') ?? $request->input('pu2_study_board');
                     $subsetChoice = $request->input('subset_choice') ?? $request->input('pu2_current_status') ?? ($isPgOrDoc ? 'Second Year' : 'First Year');
                     if ($isPgOrDoc) {
                         $subsetChoice = 'Second Year';
@@ -915,15 +1039,18 @@ class DashboardsController extends Controller
                         'tenth_school_name' => $tenthSchool ?: null,
                         'tenth_study_board' => $tenthBoard ?: null,
                         'tenth_school_city' => $request->input('tenth_school_city') ?? $request->input('ssc_location'),
-                        'tenth_school_district' => $request->input('tenth_school_district') ?? $request->input('ssc_location'),
+                        'tenth_school_state' => $tenthStateVal,
+                        'tenth_school_district' => $tenthDistrictVal ?: ($request->input('tenth_school_district') ?? $request->input('ssc_location')),
                         'tenth_roll_no' => $tenthRoll ?: null,
                         'tenth_passed_year' => $tenthYear ?: null,
                         'tenth_marks_type' => $request->input('tenth_marks_type') ?? $evalType,
+                        'tenth_current_status' => $request->input('tenth_current_status') ?? 'Completed',
                         'tenth_marks_conducted' => $tenthConducted,
                         'tenth_marks_earned' => $tenthEarned,
                         'tenth_percentage' => $tenthPct,
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
                         'pu2_study_board' => $courseChoice,
+                        'pu2_board_of_study' => $courseChoice,
                         'pu2_college_city' => $cityVal,
                         'pu2_college_state' => $jrStateVal,
                         'pu2_college_district' => $jrDistrictVal,
@@ -942,41 +1069,93 @@ class DashboardsController extends Controller
                     ];
 
                     // If Degree level is M.Tech or PhD, save UG (B.Tech) details
-                    if ($request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd') {
+                    if ($request->input('degree_level') === 'mtech' || $request->input('degree_level') === 'phd' || $isPg || $isPhd) {
                         $ugMarksRaw = is_numeric($request->input('ug_marks')) ? (float) $request->input('ug_marks') : (is_numeric($request->input('ug_cgpa')) ? (float)$request->input('ug_cgpa') : null);
                         $ugPct = ($ugMarksRaw && $ugMarksRaw <= 10) ? round($ugMarksRaw * 9.5, 2) : (($ugMarksRaw && $ugMarksRaw > 100) ? round(($ugMarksRaw / 1000) * 100, 2) : $ugMarksRaw);
+
+                        $ugMarksConducted = is_numeric($request->input('ug_marks_conducted')) ? (float)$request->input('ug_marks_conducted') : 100.0;
+                        $ugMarksEarned = is_numeric($request->input('ug_marks_earned')) ? (float)$request->input('ug_marks_earned') : $ugMarksRaw;
+                        $ugPctInput = is_numeric($request->input('ug_percentage')) ? (float)$request->input('ug_percentage') : $ugPct;
 
                         $academicPayload['ug_college_name'] = $request->input('ug_college_name') ?: null;
                         $academicPayload['ug_university_board'] = $request->input('ug_university_board') ?: null;
                         $academicPayload['ug_college_city'] = $request->input('ug_college_city') ?: null;
-                        $academicPayload['ug_college_district'] = $request->input('ug_college_district') ?: null;
+                        $academicPayload['ug_college_state'] = $ugStateVal;
+                        $academicPayload['ug_college_district'] = $ugDistrictVal;
                         $academicPayload['ug_roll_no'] = $request->input('ug_roll_no') ?: null;
                         $academicPayload['ug_passed_year'] = $request->filled('ug_passed_year') ? (int) $request->input('ug_passed_year') : null;
-                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: null;
-                        $academicPayload['ug_marks'] = $ugMarksRaw;
-                        $academicPayload['ug_marks_conducted'] = 100.0;
-                        $academicPayload['ug_marks_earned'] = $ugMarksRaw;
-                        $academicPayload['ug_percentage'] = $ugPct;
-                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: null;
+                        $academicPayload['ug_marks_type'] = $request->input('ug_marks_type') ?: 'Marks';
+                        $academicPayload['ug_marks'] = $ugMarksEarned;
+                        $academicPayload['ug_marks_conducted'] = $ugMarksConducted;
+                        $academicPayload['ug_marks_earned'] = $ugMarksEarned;
+                        $academicPayload['ug_percentage'] = $ugPctInput;
+                        $academicPayload['ug_current_status'] = $request->input('ug_current_status') ?: ($isPhd ? 'Completed' : 'Final Year Appeared');
                     }
 
-                    // If Degree level is PhD, save PG (M.Tech) details
-                    if ($request->input('degree_level') === 'phd') {
+                    // If Degree level is PhD, save PG 1 and PG 2 details
+                    if ($request->input('degree_level') === 'phd' || $isPhd) {
+                        // Postgraduate 1
                         $pgMarksRaw = is_numeric($request->input('pg_marks')) ? (float) $request->input('pg_marks') : (is_numeric($request->input('pg_cgpa')) ? (float)$request->input('pg_cgpa') : null);
                         $pgPct = ($pgMarksRaw && $pgMarksRaw <= 10) ? round($pgMarksRaw * 9.5, 2) : (($pgMarksRaw && $pgMarksRaw > 100) ? round(($pgMarksRaw / 1000) * 100, 2) : $pgMarksRaw);
+
+                        $pgMarksConducted = is_numeric($request->input('pg_marks_conducted')) ? (float)$request->input('pg_marks_conducted') : 100.0;
+                        $pgMarksEarned = is_numeric($request->input('pg_marks_earned')) ? (float)$request->input('pg_marks_earned') : $pgMarksRaw;
+                        $pgPctInput = is_numeric($request->input('pg_percentage')) ? (float)$request->input('pg_percentage') : $pgPct;
 
                         $academicPayload['pg_college_name'] = $request->input('pg_college_name') ?: null;
                         $academicPayload['pg_university_board'] = $request->input('pg_university_board') ?: null;
                         $academicPayload['pg_college_city'] = $request->input('pg_college_city') ?: null;
-                        $academicPayload['pg_college_district'] = $request->input('pg_college_district') ?: null;
+                        $academicPayload['pg_college_state'] = $pgStateVal;
+                        $academicPayload['pg_college_district'] = $pgDistrictVal;
                         $academicPayload['pg_roll_no'] = $request->input('pg_roll_no') ?: null;
                         $academicPayload['pg_passed_year'] = $request->filled('pg_passed_year') ? (int) $request->input('pg_passed_year') : null;
-                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: null;
-                        $academicPayload['pg_marks'] = $pgMarksRaw;
-                        $academicPayload['pg_marks_conducted'] = 100.0;
-                        $academicPayload['pg_marks_earned'] = $pgMarksRaw;
-                        $academicPayload['pg_percentage'] = $pgPct;
-                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: null;
+                        $academicPayload['pg_marks_type'] = $request->input('pg_marks_type') ?: 'Marks';
+                        $academicPayload['pg_marks'] = $pgMarksEarned;
+                        $academicPayload['pg_marks_conducted'] = $pgMarksConducted;
+                        $academicPayload['pg_marks_earned'] = $pgMarksEarned;
+                        $academicPayload['pg_percentage'] = $pgPctInput;
+                        $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
+
+                        // PG 1 CMM & PC/OD Details (At least one mandatory for PhD)
+                        $pg1DocType = $request->input('pg1_doc_type') ?: 'BOTH';
+                        $academicPayload['pg1_doc_type'] = $pg1DocType;
+                        $academicPayload['pg1_cmm_memo_no'] = $request->input('pg1_cmm_memo_no') ?: null;
+                        $academicPayload['pg1_cmm_cgpa'] = is_numeric($request->input('pg1_cmm_cgpa')) ? (float)$request->input('pg1_cmm_cgpa') : null;
+                        $academicPayload['pg1_cmm_year'] = $request->filled('pg1_cmm_year') ? (int)$request->input('pg1_cmm_year') : null;
+                        $academicPayload['pg1_pc_od_no'] = $request->input('pg1_pc_od_no') ?: null;
+                        $academicPayload['pg1_pc_od_year'] = $request->filled('pg1_pc_od_year') ? (int)$request->input('pg1_pc_od_year') : null;
+                        $academicPayload['pg1_pc_od_status'] = $request->input('pg1_pc_od_status') ?: null;
+
+                        // Postgraduate 2
+                        $pg2MarksRaw = is_numeric($request->input('pg2_marks')) ? (float) $request->input('pg2_marks') : (is_numeric($request->input('pg2_cgpa')) ? (float)$request->input('pg2_cgpa') : null);
+                        $pg2Pct = ($pg2MarksRaw && $pg2MarksRaw <= 10) ? round($pg2MarksRaw * 9.5, 2) : (($pg2MarksRaw && $pg2MarksRaw > 100) ? round(($pg2MarksRaw / 1000) * 100, 2) : $pg2MarksRaw);
+
+                        $pg2MarksConducted = is_numeric($request->input('pg2_marks_conducted')) ? (float)$request->input('pg2_marks_conducted') : 100.0;
+                        $pg2MarksEarned = is_numeric($request->input('pg2_marks_earned')) ? (float)$request->input('pg2_marks_earned') : $pg2MarksRaw;
+                        $pg2PctInput = is_numeric($request->input('pg2_percentage')) ? (float)$request->input('pg2_percentage') : $pg2Pct;
+
+                        $academicPayload['pg2_college_name'] = $request->input('pg2_college_name') ?: null;
+                        $academicPayload['pg2_university_board'] = $request->input('pg2_university_board') ?: null;
+                        $academicPayload['pg2_college_city'] = $request->input('pg2_college_city') ?: null;
+                        $academicPayload['pg2_college_state'] = $pg2StateVal;
+                        $academicPayload['pg2_college_district'] = $pg2DistrictVal;
+                        $academicPayload['pg2_roll_no'] = $request->input('pg2_roll_no') ?: null;
+                        $academicPayload['pg2_passed_year'] = $request->filled('pg2_passed_year') ? (int) $request->input('pg2_passed_year') : null;
+                        $academicPayload['pg2_marks_type'] = $request->input('pg2_marks_type') ?: 'Marks';
+                        $academicPayload['pg2_marks'] = $pg2MarksEarned;
+                        $academicPayload['pg2_marks_conducted'] = $pg2MarksConducted;
+                        $academicPayload['pg2_marks_earned'] = $pg2MarksEarned;
+                        $academicPayload['pg2_percentage'] = $pg2PctInput;
+                        $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: 'Completed';
+
+                        // PG 2 CMM & PC/OD Details (Optional for PhD)
+                        $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'NONE';
+                        $academicPayload['pg2_cmm_memo_no'] = $request->input('pg2_cmm_memo_no') ?: null;
+                        $academicPayload['pg2_cmm_cgpa'] = is_numeric($request->input('pg2_cmm_cgpa')) ? (float)$request->input('pg2_cmm_cgpa') : null;
+                        $academicPayload['pg2_cmm_year'] = $request->filled('pg2_cmm_year') ? (int)$request->input('pg2_cmm_year') : null;
+                        $academicPayload['pg2_pc_od_no'] = $request->input('pg2_pc_od_no') ?: null;
+                        $academicPayload['pg2_pc_od_year'] = $request->filled('pg2_pc_od_year') ? (int)$request->input('pg2_pc_od_year') : null;
+                        $academicPayload['pg2_pc_od_status'] = $request->input('pg2_pc_od_status') ?: null;
                     }
 
                     StudentAcademicDetail::updateOrCreate(
@@ -986,11 +1165,22 @@ class DashboardsController extends Controller
                         $academicPayload
                     );
 
-                    $crmStudent->update([
+                    $crmUpdates = [
                         'stage2' => 'completed',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
-                    ]);
+                    ];
+                    if ($request->filled('degree_level')) {
+                        $lvl = strtolower(trim((string)$request->input('degree_level')));
+                        if ($lvl === 'mtech') {
+                            $crmUpdates['programlevel'] = 'PG';
+                        } elseif ($lvl === 'phd') {
+                            $crmUpdates['programlevel'] = 'Doctoral';
+                        } elseif ($lvl === 'btech') {
+                            $crmUpdates['programlevel'] = 'UG';
+                        }
+                    }
+                    $crmStudent->update($crmUpdates);
                 }
                 $nextStep = 3;
                 $msg = 'Stage 2: Academic Records saved successfully!';
@@ -1008,8 +1198,21 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $allowedDocKeys = [
                         'marksheet10', 'marksheet12', 'btech', 'mtech', 'pg',
+                        'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc', 'experience',
                         'aadhaar', 'photo', 'tc', 'study_conduct'
                     ];
+
+                    $isPhdCandidate = $isPhd || strtolower((string)$request->input('degree_level')) === 'phd' || strtoupper((string)$crmStudent->programlevel) === 'DOCTORAL' || strtoupper((string)$crmStudent->programlevel) === 'PHD';
+                    if ($isPhdCandidate) {
+                        $existingUpload = StudentUpload::where('applino', $crmStudent->applinano)->first();
+                        $hasPg1 = (!empty($existingUpload?->pg1_cmm_file_path) || !empty($existingUpload?->pg1_pc_file_path))
+                            || ($request->hasFile('docs.pg1_cmm') || $request->hasFile('docs.pg1_pc'));
+                        if (!$hasPg1) {
+                            return redirect()->route('dashboards.index', ['step' => 3])
+                                ->withErrors(['pg1_required' => 'Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).']);
+                        }
+                    }
+
                     $appliFolder = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($crmStudent->applinano ?: 'APP'));
                     $destDir = public_path('uploads/documents/' . $appliFolder);
 
@@ -1030,6 +1233,11 @@ class DashboardsController extends Controller
                         'btech' => ['btech_file_name', 'btech_file_path'],
                         'mtech' => ['mtech_file_name', 'mtech_file_path'],
                         'pg' => ['pg_file_name', 'pg_file_path'],
+                        'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
+                        'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
+                        'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
+                        'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
+                        'experience' => ['experience_file_name', 'experience_file_path'],
                         'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
                         'photo' => ['passport_file_name', 'passport_file_path'],
                         'tc' => ['transfer_file_name', 'transfer_file_path'],
@@ -1106,6 +1314,18 @@ class DashboardsController extends Controller
                 }
                 $nextStep = 5;
                 $msg = 'Stage 4: Admission Fee Payment confirmed!';
+            } elseif ($step === 5 && $isPhd) {
+                // Ph.D candidate: Step 5 is Application Download (Exam Slot Booking is skipped)
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage5' => 'completed',
+                        'stage6' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 6;
+                $msg = 'Stage 5: Application Download verified!';
             } elseif ($step === 5) {
                 // Step 5: Exam Slot Booking (finance.exam_schedule)
                 $now = now();
@@ -1178,6 +1398,18 @@ class DashboardsController extends Controller
                 $msg = $existingExamSchedule
                     ? 'Stage 5: Exam slot updated successfully!'
                     : 'Stage 5: Exam Slot confirmed and booked successfully!';
+            } elseif ($step === 6 && $isPhd) {
+                // Ph.D candidate: Step 6 is V-SAT Results (Final Stage)
+                if ($crmStudent) {
+                    $crmStudent->update([
+                        'stage6' => 'completed',
+                        'stage7' => 'completed',
+                        'log_ipaddress' => $request->ip(),
+                        'log_timestamp' => now(),
+                    ]);
+                }
+                $nextStep = 6;
+                $msg = 'Stage 6: Onboarding completed successfully!';
             } elseif ($step === 6) {
                 // Step 6: Application Download
                 if ($crmStudent) {
@@ -1265,9 +1497,68 @@ class DashboardsController extends Controller
 
                 CREATE INDEX IF NOT EXISTS idx_student_uploads_crmid ON crm.student_uploads (crmid);
                 CREATE INDEX IF NOT EXISTS idx_student_uploads_applino ON crm.student_uploads (applino);
+
+                ALTER TABLE crm.student_uploads
+                ADD COLUMN IF NOT EXISTS pg1_cmm_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS pg1_pc_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg1_pc_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS pg2_pc_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pg2_pc_file_path VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS experience_file_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS experience_file_path VARCHAR(500);
             ");
         } catch (\Throwable $e) {
             // Silently continue if table already exists
+        }
+    }
+
+    /**
+     * Ensure academic details columns exist in crm.student_academic_details.
+     */
+    public static function ensureAcademicColumns(): void
+    {
+        try {
+            DB::unprepared("
+                ALTER TABLE crm.student_academic_details
+                ADD COLUMN IF NOT EXISTS tenth_school_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS tenth_current_status VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pu2_board_of_study VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS ug_college_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg_college_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg2_college_state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg1_doc_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_memo_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_cgpa NUMERIC(10,2),
+                ADD COLUMN IF NOT EXISTS pg1_cmm_year INT,
+                ADD COLUMN IF NOT EXISTS pg1_pc_od_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg1_pc_od_year INT,
+                ADD COLUMN IF NOT EXISTS pg1_pc_od_status VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg2_doc_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_memo_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_cgpa NUMERIC(10,2),
+                ADD COLUMN IF NOT EXISTS pg2_cmm_year INT,
+                ADD COLUMN IF NOT EXISTS pg2_pc_od_no VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS pg2_pc_od_year INT,
+                ADD COLUMN IF NOT EXISTS pg2_pc_od_status VARCHAR(50);
+
+                ALTER TABLE crm.student_academic_details
+                ALTER COLUMN tenth_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN tenth_marks_earned TYPE NUMERIC(12,2),
+                ALTER COLUMN pu2_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN pu2_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN pu2_marks_earned TYPE NUMERIC(12,2),
+                ALTER COLUMN ug_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN ug_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN ug_marks_earned TYPE NUMERIC(12,2),
+                ALTER COLUMN pg_marks TYPE NUMERIC(12,2),
+                ALTER COLUMN pg_marks_conducted TYPE NUMERIC(12,2),
+                ALTER COLUMN pg_marks_earned TYPE NUMERIC(12,2);
+            ");
+        } catch (\Throwable $e) {
+            Log::warning('ensureAcademicColumns: ' . $e->getMessage());
         }
     }
 
@@ -1286,7 +1577,7 @@ class DashboardsController extends Controller
         }
 
         $dir = public_path('uploads/documents/' . $cleanAppli);
-        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct', 'btech', 'mtech', 'pg'];
+        $keys = ['marksheet10', 'marksheet12', 'aadhaar', 'photo', 'tc', 'study_conduct', 'btech', 'mtech', 'pg', 'pg1_cmm', 'pg1_pc', 'pg2_cmm', 'pg2_pc', 'experience'];
         $titles = [
             'marksheet10'   => '10th Standard Marksheet / SSC Certificate',
             'marksheet12'   => '12th Standard / Intermediate Marksheet',
@@ -1297,6 +1588,11 @@ class DashboardsController extends Controller
             'btech'         => 'B.Tech / Degree Certificate',
             'mtech'         => 'M.Tech / Post-Graduate Certificate',
             'pg'            => 'Post-Graduate (PG) Certificate',
+            'pg1_cmm'       => 'PG 1 Consolidated Marks Memo (CMM)',
+            'pg1_pc'        => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
+            'pg2_cmm'       => 'PG 2 Consolidated Marks Memo (CMM)',
+            'pg2_pc'        => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
+            'experience'    => 'Work Experience Letter / Certificate',
         ];
         $mimeMap = [
             'pdf' => 'application/pdf',
@@ -1316,6 +1612,11 @@ class DashboardsController extends Controller
                     'btech' => ['btech_file_name', 'btech_file_path'],
                     'mtech' => ['mtech_file_name', 'mtech_file_path'],
                     'pg' => ['pg_file_name', 'pg_file_path'],
+                    'pg1_cmm' => ['pg1_cmm_file_name', 'pg1_cmm_file_path'],
+                    'pg1_pc' => ['pg1_pc_file_name', 'pg1_pc_file_path'],
+                    'pg2_cmm' => ['pg2_cmm_file_name', 'pg2_cmm_file_path'],
+                    'pg2_pc' => ['pg2_pc_file_name', 'pg2_pc_file_path'],
+                    'experience' => ['experience_file_name', 'experience_file_path'],
                     'aadhaar' => ['aadhar_file_name', 'aadhar_file_path'],
                     'photo' => ['passport_file_name', 'passport_file_path'],
                     'tc' => ['transfer_file_name', 'transfer_file_path'],

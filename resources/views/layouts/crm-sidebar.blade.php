@@ -1,8 +1,11 @@
     <!-- Immediate Theme Preloader (Prevents Theme Flash) -->
 <script>
     (function(){
-        document.documentElement.setAttribute('data-theme-color', localStorage.getItem('crm_theme_color') || 'red');
-        document.documentElement.setAttribute('data-theme-mode', localStorage.getItem('crm_theme_mode') || 'light');
+        var color = localStorage.getItem('crm_theme_color') || 'maroon';
+        if (color === 'red') color = 'maroon';
+        var mode = localStorage.getItem('crm_theme_mode') || 'light';
+        document.documentElement.setAttribute('data-theme-color', color);
+        document.documentElement.setAttribute('data-theme-mode', mode);
         if (localStorage.getItem('crm_sidebar_collapsed') === '1') {
             document.documentElement.classList.add('sidebar-is-collapsed');
         }
@@ -121,7 +124,7 @@
         <div class="theme-controls-capsule">
             <!-- 4 Color Dots (Dark Maroon replaced Red) -->
             <div class="theme-color-palette" role="radiogroup" aria-label="Color Palette">
-                <button type="button" class="theme-color-dot dot-maroon is-active" data-color="maroon" onclick="setAppThemeColor('maroon')" title="Dark Maroon Theme" aria-label="Dark Maroon Theme">
+                <button type="button" class="theme-color-dot dot-maroon" data-color="maroon" onclick="setAppThemeColor('maroon')" title="Dark Maroon Theme" aria-label="Dark Maroon Theme">
                     <span class="theme-dot-check">✓</span>
                 </button>
                 <button type="button" class="theme-color-dot dot-blue" data-color="blue" onclick="setAppThemeColor('blue')" title="Blue Theme" aria-label="Blue Theme">
@@ -134,6 +137,14 @@
                     <span class="theme-dot-check">✓</span>
                 </button>
             </div>
+            <script>
+                (function(){
+                    var c = localStorage.getItem('crm_theme_color') || 'maroon';
+                    if (c === 'red') c = 'maroon';
+                    var d = document.querySelector('.theme-color-palette .theme-color-dot[data-color="' + c + '"]');
+                    if (d) d.classList.add('is-active');
+                })();
+            </script>
 
             <!-- Divider Line -->
             <div class="theme-capsule-divider"></div>

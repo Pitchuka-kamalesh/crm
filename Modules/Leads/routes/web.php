@@ -11,6 +11,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/leads/leadsupload', [LeadsController::class, 'index'])->name('leads.upload');
     Route::post('/leads/upload-excel', [LeadsController::class, 'uploadExcel'])->name('leads.uploadExcel');
     Route::get('/leads/download-sample', [LeadsController::class, 'downloadSample'])->name('leads.downloadSample');
+    Route::get('/leads/download', [LeadsController::class, 'downloadReport'])->name('leads.downloadReport');
     
     Route::get('/leads/leads input', [LeadsController::class, 'index'])->name('leads.input');
     Route::get('/leads/leadsinput', [LeadsController::class, 'index']);

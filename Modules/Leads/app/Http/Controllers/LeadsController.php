@@ -592,7 +592,17 @@ class LeadsController extends Controller
         $validationAppli = ($student?->applinano && $student->applinano !== '0')
             ? (string) $student->applinano
             : (string) $tApplino;
-        $allowedStages = TelecallerService::getAllowedStagesForLead($validationAppli);
+        $progText = strtoupper(trim((string)($student?->programlevel ?? $student?->program_name ?? '')));
+        $crmIdText = strtoupper(trim((string)($student?->crmid ?? '')));
+        $isPhd = str_contains($progText, 'PHD') || str_contains($progText, 'PH.D') || str_contains($progText, 'DOCTOR') || str_starts_with($crmIdText, 'PHD');
+
+        $allowedStages = TelecallerService::getAllowedStagesForLead($validationAppli, $isPhd);
+        if ($isPhd && $customStageName === 'Exam Slot Booking completed') {
+            return response()->json([
+                'success' => false,
+                'message' => "Exam Slot Booking is not applicable for PhD students.",
+            ], 422);
+        }
         if (array_key_exists($customStageName, $allowedStages) && !$allowedStages[$customStageName]) {
             return response()->json([
                 'success' => false,
@@ -719,26 +729,41 @@ class LeadsController extends Controller
      */
     public function allocate(Request $request)
     {
-        $res = TelecallerService::allocateLeads([
-            'empcode' => $request->input('empcode'),
-            'crmid' => auth()->user()?->usercode ?? 'SYSTEM',
-            'allot_mode' => $request->input('allot_mode', 'selected'),
-            'applino' => $request->input('applino'),
-            'phoneno' => $request->input('phoneno'),
-            'lead_keys' => $request->input('lead_keys', []),
-            'allot_count' => $request->input('allot_count', 25),
-            'allot_date' => $request->input('allot_date'),
-            'stage_name' => $request->input('stage_name', 'Stage 1: Calling & Verification'),
-            'stage_remark' => $request->input('stage_remark', 'Allocated via Leads Incharge allocation portal'),
-            'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
-            'log_ipaddress' => $request->ip() ?: '127.0.0.1',
-        ]);
+        @ini_set('max_execution_time', '300');
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
 
-        if ($request->wantsJson()) {
-            return response()->json($res, $res['success'] ? 200 : 422);
+        try {
+            $res = TelecallerService::allocateLeads([
+                'empcode' => $request->input('empcode'),
+                'crmid' => auth()->user()?->usercode ?? 'SYSTEM',
+                'allot_mode' => $request->input('allot_mode', 'selected'),
+                'applino' => $request->input('applino'),
+                'phoneno' => $request->input('phoneno'),
+                'lead_keys' => $request->input('lead_keys', []),
+                'allot_count' => $request->input('allot_count', 25),
+                'allot_date' => $request->input('allot_date'),
+                'stage_name' => $request->input('stage_name', 'Stage 1: Calling & Verification'),
+                'stage_remark' => $request->input('stage_remark', 'Allocated via Leads Incharge allocation portal'),
+                'log_userid' => auth()->user()?->usercode ?? 'SYSTEM',
+                'log_ipaddress' => $request->ip() ?: '127.0.0.1',
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json($res, $res['success'] ? 200 : 422);
+            }
+
+            return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('LeadsController allocate error: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Allocation failed: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Allocation failed: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
     }
 
     /**
@@ -746,18 +771,33 @@ class LeadsController extends Controller
      */
     public function autoAllocate(Request $request)
     {
-        $count = (int) $request->input('count', 0);
-        $res = TelecallerService::autoAllocateRoundRobin(
-            $count,
-            auth()->user()?->usercode ?? 'SYSTEM',
-            $request->ip() ?: '127.0.0.1'
-        );
+        @ini_set('max_execution_time', '300');
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
 
-        if ($request->wantsJson()) {
-            return response()->json($res, $res['success'] ? 200 : 422);
+        try {
+            $count = (int) $request->input('count', 0);
+            $res = TelecallerService::autoAllocateRoundRobin(
+                $count,
+                auth()->user()?->usercode ?? 'SYSTEM',
+                $request->ip() ?: '127.0.0.1'
+            );
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json($res, $res['success'] ? 200 : 422);
+            }
+
+            return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('LeadsController autoAllocate error: ' . $e->getMessage());
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Auto allocation failed: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Auto allocation failed: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with($res['success'] ? 'status' : 'error', $res['message']);
     }
 
     /**
@@ -1179,6 +1219,124 @@ class LeadsController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Download Leads Directory Report as Excel (CSV) or PDF.
+     * Supports filtering by: all, allocated, unallocated.
+     */
+    public function downloadReport(Request $request)
+    {
+        @ini_set('memory_limit', '512M');
+        @set_time_limit(300);
+
+        $format = strtolower((string) $request->input('format', 'excel'));
+        $statuses = (array) $request->input('status', ['all']);
+
+        // Flatten any array or comma-separated status strings
+        $selectedStatuses = [];
+        foreach ($statuses as $s) {
+            foreach (explode(',', (string) $s) as $sub) {
+                $sub = trim(strtolower($sub));
+                if ($sub !== '') {
+                    $selectedStatuses[] = $sub;
+                }
+            }
+        }
+
+        $isAll = empty($selectedStatuses) 
+            || in_array('all', $selectedStatuses, true) 
+            || (in_array('allocated', $selectedStatuses, true) && in_array('unallocated', $selectedStatuses, true));
+        $onlyAllocated = !$isAll && in_array('allocated', $selectedStatuses, true);
+        $onlyUnallocated = !$isAll && in_array('unallocated', $selectedStatuses, true);
+
+        $query = Lead::query();
+
+        if ($onlyAllocated) {
+            $query->whereNotNull('empcode')->where('empcode', '<>', '0');
+        } elseif ($onlyUnallocated) {
+            $query->where(function ($q) {
+                $q->whereNull('empcode')->orWhere('empcode', '0');
+            });
+        }
+
+        // Fetch telecaller names from employees table directly without full table scan
+        $employeeMap = [];
+        try {
+            $employeeMap = \App\Models\Employee::pluck('full_name', 'emp_code')->all();
+        } catch (\Throwable $e) {}
+
+        $statusSlug = $onlyAllocated ? 'allocated' : ($onlyUnallocated ? 'unallocated' : 'all');
+        $statusLabel = $onlyAllocated ? 'Allocated Leads' : ($onlyUnallocated ? 'Not Allocated Leads' : 'All Leads');
+        $dateStr = date('Y-m-d_His');
+
+        if ($format === 'pdf') {
+            $totalCount = (clone $query)->count();
+            // DomPDF renders up to 300 rows reliably without hitting memory limits
+            $pdfLeads = (clone $query)->orderBy('log_timestamp', 'desc')->limit(300)->get();
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('leads::reports.leads_pdf', [
+                'leads' => $pdfLeads,
+                'employeeMap' => $employeeMap,
+                'statusLabel' => $statusLabel,
+                'totalCount' => $totalCount,
+                'generatedAt' => date('d-M-Y H:i:s'),
+            ])->setPaper('a4', 'landscape');
+
+            return $pdf->download("leads_{$statusSlug}_{$dateStr}.pdf");
+        }
+
+        // Default: Excel (.csv stream with UTF-8 BOM for Microsoft Excel) via cursor for 0-memory footprint
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"leads_{$statusSlug}_{$dateStr}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($query, $employeeMap) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Excel opens it with proper encoding
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'S.No',
+                'Phone Number',
+                'Upload / Enquiry Timestamp',
+                'Emp Code',
+                'Telecaller Name',
+                'Allocated Timestamp',
+                'Status',
+            ]);
+
+            $sno = 1;
+            foreach ($query->orderBy('log_timestamp', 'desc')->cursor() as $lead) {
+                $isAlloc = !empty($lead->empcode) && (string) $lead->empcode !== '0';
+                $empCodeStr = $isAlloc ? (string) $lead->empcode : '0';
+                $telecallerName = $isAlloc ? ($employeeMap[$lead->empcode] ?? $lead->empcode) : 'Unallocated';
+                $ts = !empty($lead->log_timestamp)
+                    ? ($lead->log_timestamp instanceof \DateTimeInterface ? $lead->log_timestamp->format('Y-m-d H:i:s') : (string) $lead->log_timestamp)
+                    : (!empty($lead->enquirydate) ? (string) $lead->enquirydate : '-');
+                $allocTs = $isAlloc && !empty($lead->allocated_at)
+                    ? ($lead->allocated_at instanceof \DateTimeInterface ? $lead->allocated_at->format('Y-m-d H:i:s') : (string) $lead->allocated_at)
+                    : ($isAlloc ? '-' : '0');
+                $statusStr = $isAlloc ? 'Allocated' : 'Not Allocated';
+
+                fputcsv($handle, [
+                    $sno++,
+                    (string) $lead->phoneno,
+                    $ts,
+                    $empCodeStr,
+                    $telecallerName,
+                    $allocTs,
+                    $statusStr,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function destroy($id) { return response()->json(['success' => true]); }

@@ -7,6 +7,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/vignan-shield-clean.png">
 
+    <!-- Immediate Theme Preloader (Prevents Theme Flash & Syncs Palette across all menus) -->
+    <script>
+        (function(){
+            var color = localStorage.getItem('crm_theme_color') || 'maroon';
+            if (color === 'red') color = 'maroon';
+            var mode = localStorage.getItem('crm_theme_mode') || 'light';
+            document.documentElement.setAttribute('data-theme-color', color);
+            document.documentElement.setAttribute('data-theme-mode', mode);
+        })();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -33,6 +44,107 @@
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --border-hover: #cbd5e1;
+        }
+
+        /* Dynamic Color Themes from Palette (Purple, Blue, Green, Maroon) */
+        [data-theme-color="purple"] {
+            --brand-primary: #5b21b6;
+            --brand-accent: #7c3aed;
+            --brand-sky: #8b5cf6;
+        }
+
+        [data-theme-color="blue"] {
+            --brand-primary: #1e3a8a;
+            --brand-accent: #2563eb;
+            --brand-sky: #0ea5e9;
+        }
+
+        [data-theme-color="green"] {
+            --brand-primary: #065f46;
+            --brand-accent: #059669;
+            --brand-sky: #10b981;
+        }
+
+        [data-theme-color="red"],
+        [data-theme-color="maroon"] {
+            --brand-primary: #4a000e;
+            --brand-accent: #670014;
+            --brand-sky: #9b112c;
+        }
+
+        /* Nav Theme Controls Capsule */
+        .nav-theme-controls-capsule {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 9999px;
+            padding: 4px 8px 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+            margin-right: 0.75rem;
+        }
+
+        .nav-theme-color-palette {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .nav-theme-color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .nav-theme-color-dot:hover {
+            transform: scale(1.12);
+        }
+
+        .nav-theme-color-dot.dot-maroon {
+            background: #670014;
+            --dot-color: #670014;
+        }
+
+        .nav-theme-color-dot.dot-blue {
+            background: #2563eb;
+            --dot-color: #2563eb;
+        }
+
+        .nav-theme-color-dot.dot-green {
+            background: #059669;
+            --dot-color: #059669;
+        }
+
+        .nav-theme-color-dot.dot-purple {
+            background: #7c3aed;
+            --dot-color: #7c3aed;
+        }
+
+        .nav-theme-color-dot .theme-dot-check {
+            display: none;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .nav-theme-color-dot.is-active {
+            box-shadow: 0 0 0 2px #f1f5f9, 0 0 0 4px var(--dot-color);
+        }
+
+        .nav-theme-color-dot.is-active .theme-dot-check {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         body {
@@ -1381,6 +1493,8 @@
             </a>
 
 
+
+
             <div class="user-nav-cluster">
                 <div class="user-info-text">
                     <span class="user-name-title">{{ $displayName }}</span>
@@ -1459,7 +1573,7 @@
             </div>
         @endif
 
-        @if(isset($errors) && $errors->any())
+        @if(isset($errors) && $errors->any() && (int)($activeStep ?? 1) !== 2)
             <div class="alert-box alert-error">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div>
@@ -1772,6 +1886,41 @@
                                 }
                             }
 
+                            function togglePg1DocFields(val) {
+                                const cmm = document.getElementById('pg1_cmm_container');
+                                const pc = document.getElementById('pg1_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                }
+                            }
+
+                            function togglePg2DocFields(val) {
+                                const cmm = document.getElementById('pg2_cmm_container');
+                                const pc = document.getElementById('pg2_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else if (val === 'BOTH') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'none';
+                                }
+                            }
+
                             document.addEventListener('DOMContentLoaded', function() {
                                 const stateSelect = document.getElementById('geo-state-select');
                                 if (stateSelect && stateSelect.value) {
@@ -1813,33 +1962,81 @@
                             <input type="hidden" name="eval_type" id="eval_type" value="{{ $academicDetails?->tenth_marks_type ?? 'Marks' }}">
                             <fieldset @if($isPaid) disabled @endif style="border: none; margin: 0; padding: 0;">
 
-                            <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO ================= -->
+                            <!-- ================= SUBBOX 1: 10th SCHOOL / SSC INFO (OPTIONAL) ================= -->
                             <div class="mockup-subbox" id="sec-10th-details">
-                                <h4 class="mockup-subbox-title">10th School / SSC Details</h4>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <h4 class="mockup-subbox-title">10th / Secondary School Details</h4>
+                                </div>
 
+                                <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">School / College Name:</label>
-                                        <input type="text" name="school_co_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / College Name">
+                                        <label class="mockup-label">College Name / Institute Name:</label>
+                                        <input type="text" name="school_co_name" id="tenth_school_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / Institute Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Board of Study:</label>
-                                        <input type="text" name="boad_of_study" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board of Study (e.g. BSEAP, CBSE, ICSE)">
+                                        <label class="mockup-label">Board:</label>
+                                        <input type="text" name="boad_of_study" id="tenth_study_board" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board (e.g. BSEAP, CBSE, ICSE)">
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-2" style="margin-top: 0.85rem;">
+                                <!-- Row 2: City, State, District (3 Columns) -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Roll No / Hall Ticket No:</label>
-                                        <input type="text" name="roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Roll / Hall Ticket No">
+                                        <label class="mockup-label">City:</label>
+                                        <input type="text" name="tenth_school_city" id="tenth_school_city" class="mockup-input" value="{{ $academicDetails?->tenth_school_city }}" placeholder="Enter City">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year:</label>
-                                        <input type="number" name="passing_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
+                                        <label class="mockup-label">State:</label>
+                                        <select name="tenth_school_state" id="geo-tenth-state-select" class="mockup-select" onchange="onTenthStateChange(this.value)">
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                @php
+                                                    $curState = $academicDetails?->tenth_school_state;
+                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">District:</label>
+                                        <select name="tenth_school_district" id="geo-tenth-district-select" class="mockup-select">
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                @php
+                                                    $curDist = $academicDetails?->tenth_school_district;
+                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- EXACT DATABASE FIELDS: tenth_marks_type, tenth_marks_conducted, tenth_marks_earned, tenth_percentage -->
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Year:</label>
+                                        <input type="number" name="passing_year" id="tenth_passed_year" class="mockup-input" value="{{ $academicDetails?->tenth_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Hall Ticket number:</label>
+                                        <input type="text" name="roll_no" id="tenth_roll_no" class="mockup-input" value="{{ $academicDetails?->tenth_roll_no }}" placeholder="Enter 10th Hall Ticket / Reg No">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Current Status:</label>
+                                        <select name="tenth_current_status" id="tenth_current_status" class="mockup-select">
+                                            <option value="Completed" {{ ($academicDetails?->tenth_current_status === 'Completed' || !$academicDetails?->tenth_current_status) ? 'selected' : '' }}>Completed / Passed</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Row 4: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (%) (4 Columns) -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Marks Type:</label>
@@ -1849,7 +2046,7 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Conducted:</label>
+                                        <label class="mockup-label">Total Marks (Conducted):</label>
                                         <input type="number" step="0.01" name="tenth_marks_conducted" id="tenth_marks_conducted" class="mockup-input" value="{{ $academicDetails?->tenth_marks_conducted }}" placeholder="e.g. 600" oninput="calculateTenthPct()">
                                     </div>
                                     <div class="mockup-field-group">
@@ -1865,30 +2062,38 @@
 
                             <!-- ================= SUBBOX 2: 12th / INTERMEDIATE INFO ================= -->
                             <div class="mockup-subbox" id="sec-inter-details" style="margin-top: 1rem;">
-                                <h4 class="mockup-subbox-title">12th / Intermediate Details</h4>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <h4 class="mockup-subbox-title">12th / Intermediate Details <span style="font-size: 0.76rem; font-weight: 700; color: #2563eb; margin-left: 0.35rem;">(option 1st year/2nd year for UG; default 2nd year for PG &amp; Ph.D)</span></h4>
+                                </div>
                                 <input type="hidden" name="course_choice" value="{{ $academicDetails?->pu2_study_board ?? '' }}">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
-                                <!-- Row 1: College Name / Institute Name (Full Width) -->
-                                <div class="mockup-field-group">
-                                    <label class="mockup-label">College Name / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" name="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name" required>
-                                </div>
-
-                                <!-- Row 2: 3 Separate Distinct Columns for College City, College State, College District -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
+                                <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College City: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City" required>
+                                        <label class="mockup-label">College Name / Institute Name: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_college" id="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College State: <span style="color:#ef4444;">*</span></label>
-                                        <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)" required>
+                                        <label class="mockup-label">Board: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="inter_board_of_study" id="inter_board_of_study" class="mockup-input" value="{{ $academicDetails?->pu2_study_board ?? $academicDetails?->pu2_board_of_study }}" placeholder="Enter Board (e.g. BIEAP, CBSE, TSBIE)">
+                                    </div>
+                                </div>
+
+                                <!-- Row 2: City, State, District (3 Columns) -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">City: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city" id="inter_city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">State: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
                                                 @php
                                                     $curState = $academicDetails?->pu2_college_state;
-                                                    $isStateSel = !empty($curState) && ($curState == $s->state_name || $curState == $s->state_id);
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
                                                 @endphp
                                                 <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
@@ -1897,8 +2102,8 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College District: <span style="color:#ef4444;">*</span></label>
-                                        <select name="jr_district" id="geo-inter-district-select" class="mockup-select" required>
+                                        <label class="mockup-label">District: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <select name="jr_district" id="geo-inter-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
                                                 @php
@@ -1913,10 +2118,18 @@
                                     </div>
                                 </div>
 
-                                <!-- Row 3: Status (First Year / Second Year), Year, Hall Ticket Number (3 Columns) -->
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Current Status: <span style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">Year: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="inter_year" id="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Hall Ticket number:</label>
+                                        <input type="text" name="inter_hallticket" id="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket number">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Current Status: <span class="req-inter" style="color:#ef4444;">*</span></label>
                                         <div class="mockup-radio-row" style="margin-top: 0.45rem;">
                                             @php
                                                 $isPgOrDoc = in_array($degreeLevel ?? '', ['mtech', 'phd']);
@@ -1929,143 +2142,469 @@
                                                 }
                                             @endphp
                                             <label class="mockup-radio-label" id="radio-wrapper-first-year" style="{{ $isPgOrDoc ? 'display: none !important;' : '' }}">
-                                                <input type="radio" name="subset_choice" id="radio-subset-first-year" value="First Year" {{ (!$isPgOrDoc && !$isSecondYr) ? 'checked' : '' }} {{ $isPgOrDoc ? 'disabled' : '' }} required>
-                                                <span>First Year</span>
+                                                <input type="radio" name="subset_choice" id="radio-subset-first-year" value="First Year" {{ (!$isPgOrDoc && !$isSecondYr) ? 'checked' : '' }} {{ $isPgOrDoc ? 'disabled' : '' }}>
+                                                <span>1st Year</span>
                                             </label>
                                             <label class="mockup-radio-label" id="radio-wrapper-second-year">
-                                                <input type="radio" name="subset_choice" id="radio-subset-second-year" value="Second Year" {{ ($isPgOrDoc || $isSecondYr) ? 'checked' : '' }} required>
-                                                <span>Second Year</span>
+                                                <input type="radio" name="subset_choice" id="radio-subset-second-year" value="Second Year" {{ ($isPgOrDoc || $isSecondYr) ? 'checked' : '' }}>
+                                                <span>2nd Year</span>
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="inter_year" class="mockup-input" value="{{ $academicDetails?->pu2_passed_year }}" placeholder="e.g. 2026" min="2000" max="2030" required>
-                                    </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Hall Ticket number:</label>
-                                        <input type="text" name="inter_hallticket" class="mockup-input" value="{{ $academicDetails?->pu2_roll_no }}" placeholder="Enter Hall Ticket Number">
-                                    </div>
                                 </div>
 
-                                <!-- Row 3: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (4 Columns) -->
+                                <!-- Row 4: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (%) (4 Columns) -->
                                 <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Type: <span style="color:#ef4444;">*</span></label>
-                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)" required>
+                                        <label class="mockup-label">Marks Type: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <select name="pu2_marks_type" id="pu2_marks_type" class="mockup-select" onchange="onPu2MarksTypeChange(this.value)">
                                             <option value="Marks" {{ ($academicDetails?->pu2_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
                                             <option value="CGPA" {{ ($academicDetails?->pu2_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Total Marks (Conducted): <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()" required>
+                                        <label class="mockup-label">Total Marks (Conducted): <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pu2_marks_conducted" id="pu2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pu2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePu2Pct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Marks Earned: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()" required>
+                                        <label class="mockup-label">Marks Earned: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pu2_marks_earned" id="pu2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pu2_marks_earned ?? $academicDetails?->pu2_marks }}" placeholder="e.g. 962" oninput="calculatePu2Pct()">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Percentage (%): <span style="color:#ef4444;">*</span> @if(!in_array($degreeLevel ?? '', ['mtech', 'phd']))<span style="font-size:0.75rem; font-weight:700; color:#dc2626;">(&ge; 60%)</span>@endif</label>
-                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;" required>
+                                        <label class="mockup-label">Percentage (%): <span class="req-inter" style="color:#ef4444;">*</span> <span id="span-pu2-cutoff" style="font-size:0.75rem; font-weight:700; color:#dc2626; {{ in_array($degreeLevel ?? '', ['mtech', 'phd']) ? 'display:none;' : '' }}">(&ge; 60%)</span></label>
+                                        <input type="number" step="0.01" name="pu2_percentage" id="pu2_percentage" class="mockup-input" value="{{ $academicDetails?->pu2_percentage }}" placeholder="e.g. 96.20" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
                                         <div id="pu2_pct_warning" style="display: none; font-size: 0.72rem; color: #dc2626; font-weight: 700; margin-top: 3px;">⚠️ 12th percentage must be at least 60% to proceed.</div>
                                     </div>
                                 </div>
                             </div>
 
-                            @if(in_array($degreeLevel ?? '', ['mtech', 'phd']))
-                            <!-- Higher Academic (UG / PG) Option Toggle (Only for PG / Ph.D) -->
-                            <div style="margin-top: 1rem; margin-bottom: 0.5rem; text-align: right;">
-                                <button type="button" id="btn-toggle-ug-pg" onclick="toggleUgPgFields()" style="background: #eff6ff; border: 1.5px dashed #3b82f6; color: #1d4ed8; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                    <span>🎓</span>
-                                    <span>− Toggle Higher Academic Details</span>
-                                </button>
-                            </div>
-
-                            <!-- ================= SUBBOX 3: UNDERGRADUATE (B.TECH / DEGREE) (M.TECH & PHD) ================= -->
-                            <div class="mockup-subbox" id="sec-ug-details" style="display: block; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-                                    <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (B.Tech / Degree) Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #2563eb; color: #fff; font-size: 0.72rem;">Required for M.Tech &amp; Ph.D</span>
+                            <!-- ================= SUBBOX 3: UNDERGRADUATE (B.TECH / DEGREE) ================= -->
+                            <div class="mockup-subbox" id="sec-ug-details" style="display: {{ in_array($degreeLevel ?? '', ['mtech', 'phd']) ? 'block' : 'none' }}; margin-top: 1rem; border-color: #93c5fd; background: #f0f7ff;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <h4 class="mockup-subbox-title" style="color: #1e3a8a;">Undergraduate (UG / B.Tech / Degree) Details</h4>
                                 </div>
 
-                                <div class="mockup-field-row-3">
+                                <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
+                                <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">UG College / Institute Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="ug_college_name" class="mockup-input" value="{{ $academicDetails?->ug_college_name }}" placeholder="UG College / Institute Name">
+                                        <label class="mockup-label">College Name / Institute Name: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_college_name" id="ug_college_name" class="mockup-input" value="{{ $academicDetails?->ug_college_name }}" placeholder="UG College / Institute Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">University / Board: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="ug_university_board" class="mockup-input" value="{{ $academicDetails?->ug_university_board }}" placeholder="University / Board Name">
-                                    </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">UG Registration / Roll NO: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="ug_roll_no" class="mockup-input" value="{{ $academicDetails?->ug_roll_no }}" placeholder="UG Registration / Roll Number">
+                                        <label class="mockup-label">Board: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_university_board" id="ug_university_board" class="mockup-input" value="{{ $academicDetails?->ug_university_board }}" placeholder="University / Board Name">
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+                                <!-- Row 2: City, State, District (3 Columns) -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="ug_passed_year" class="mockup-input" value="{{ $academicDetails?->ug_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
+                                        <label class="mockup-label">City: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_college_city" id="ug_college_city" class="mockup-input" value="{{ $academicDetails?->ug_college_city }}" placeholder="Enter City">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Aggregate CGPA / %: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="ug_cgpa" class="mockup-input" value="{{ $academicDetails?->ug_cgpa }}" placeholder="e.g. 8.75 CGPA or %">
+                                        <label class="mockup-label">State: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <select name="ug_college_state" id="geo-ug-state-select" class="mockup-select" onchange="onUgStateChange(this.value)">
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                @php
+                                                    $curState = $academicDetails?->ug_college_state;
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Degree Status: <span style="color:#ef4444;">*</span></label>
-                                        <select name="ug_current_status" class="mockup-select">
-                                            <option value="Completed" {{ ($academicDetails?->ug_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed (Graduated)</option>
-                                            <option value="Final Year Appeared" {{ ($academicDetails?->ug_current_status === 'Final Year Appeared') ? 'selected' : '' }}>Final Year Appeared / Awaiting Results</option>
+                                        <label class="mockup-label">District: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <select name="ug_college_district" id="geo-ug-district-select" class="mockup-select">
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                @php
+                                                    $curDist = $academicDetails?->ug_college_district;
+                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Year: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="ug_passed_year" id="ug_passed_year" class="mockup-input" value="{{ $academicDetails?->ug_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Registration number: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="ug_roll_no" id="ug_roll_no" class="mockup-input" value="{{ $academicDetails?->ug_roll_no }}" placeholder="Enter UG Roll No / Reg No">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Current Status: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <select name="ug_current_status" id="ug_current_status" class="mockup-select">
+                                            <option value="Completed" {{ ($academicDetails?->ug_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
+                                            <option value="Final Year" id="opt-ug-final-year" {{ ($academicDetails?->ug_current_status === 'Final Year' || $academicDetails?->ug_current_status === 'Final Year Appeared') ? 'selected' : '' }}>Final Year</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Row 4: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (%) (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Type: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <select name="ug_marks_type" id="ug_marks_type" class="mockup-select" onchange="onUgMarksTypeChange(this.value)">
+                                            <option value="Marks" {{ ($academicDetails?->ug_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
+                                            <option value="CGPA" {{ ($academicDetails?->ug_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Total Marks (Conducted): <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="ug_marks_conducted" id="ug_marks_conducted" class="mockup-input" value="{{ $academicDetails?->ug_marks_conducted }}" placeholder="e.g. 1000" oninput="calculateUgPct()">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Earned: <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="ug_marks_earned" id="ug_marks_earned" class="mockup-input" value="{{ $academicDetails?->ug_marks_earned ?? $academicDetails?->ug_marks }}" placeholder="e.g. 850" oninput="calculateUgPct()">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Percentage (%): <span class="req-ug" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="ug_percentage" id="ug_percentage" class="mockup-input" value="{{ $academicDetails?->ug_percentage }}" placeholder="e.g. 85.00" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
+                                    </div>
+                                </div>
                             </div>
 
-                            @if(($degreeLevel ?? '') === 'phd')
-                            <!-- ================= SUBBOX 4: POSTGRADUATE (M.TECH / PG) (PHD ONLY) ================= -->
-                            <div class="mockup-subbox" id="sec-pg-details" style="display: block; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-                                    <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate (M.Tech / PG) Details</h4>
-                                    <span class="mockup-pill-badge" style="background: #9333ea; color: #fff; font-size: 0.72rem;">Required for Ph.D</span>
+                            <!-- ================= SUBBOX 4: POSTGRADUATE 1 (PHD ONLY) ================= -->
+                            <div class="mockup-subbox" id="sec-pg-details" style="display: {{ ($degreeLevel ?? '') === 'phd' ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <h4 class="mockup-subbox-title" style="color: #6b21a8;">
+                                        Postgraduate 1 (PG1) Details <span style="color:#ef4444;">*</span>
+                                    </h4>
                                 </div>
 
-                                <div class="mockup-field-row-3">
+                                <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
+                                <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG College / University Name: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pg_college_name" class="mockup-input" value="{{ $academicDetails?->pg_college_name }}" placeholder="PG College / University Name">
+                                        <label class="mockup-label">College Name / Institute Name: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_college_name" id="pg_college_name" class="mockup-input" value="{{ $academicDetails?->pg_college_name }}" placeholder="PG 1 College / University Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">University / Board: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pg_university_board" class="mockup-input" value="{{ $academicDetails?->pg_university_board }}" placeholder="University / Board Name">
-                                    </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">PG Roll NO / Reg No: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pg_roll_no" class="mockup-input" value="{{ $academicDetails?->pg_roll_no }}" placeholder="PG Roll Number / Reg No">
+                                        <label class="mockup-label">Board: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_university_board" id="pg_university_board" class="mockup-input" value="{{ $academicDetails?->pg_university_board }}" placeholder="University / Board Name">
                                     </div>
                                 </div>
 
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+                                <!-- Row 2: City, State, District (3 Columns) -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Passing Year: <span style="color:#ef4444;">*</span></label>
-                                        <input type="number" name="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year }}" placeholder="Passing Year (e.g. 2026)" min="2000" max="2030">
+                                        <label class="mockup-label">City: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_college_city" id="pg_college_city" class="mockup-input" value="{{ $academicDetails?->pg_college_city }}" placeholder="Enter City">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG CGPA / %: <span style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="pg_cgpa" class="mockup-input" value="{{ $academicDetails?->pg_cgpa }}" placeholder="e.g. 9.10 CGPA or %">
+                                        <label class="mockup-label">State: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <select name="pg_college_state" id="geo-pg-state-select" class="mockup-select" onchange="onPgStateChange(this.value)">
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                @php
+                                                    $curState = $academicDetails?->pg_college_state;
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">PG Status: <span style="color:#ef4444;">*</span></label>
-                                        <select name="pg_current_status" class="mockup-select">
+                                        <label class="mockup-label">District: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <select name="pg_college_district" id="geo-pg-district-select" class="mockup-select">
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                @php
+                                                    $curDist = $academicDetails?->pg_college_district;
+                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Year: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="number" name="pg_passed_year" id="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Registration number: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="pg_roll_no" id="pg_roll_no" class="mockup-input" value="{{ $academicDetails?->pg_roll_no }}" placeholder="PG 1 Roll NO / Reg No">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Current Status: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <select name="pg_current_status" id="pg_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->pg_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
-                                            <option value="Pursuing" {{ ($academicDetails?->pg_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing / Final Semester</option>
+                                            <option value="Pursuing" {{ ($academicDetails?->pg_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing</option>
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Row 4: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (%) (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Type: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <select name="pg_marks_type" id="pg_marks_type" class="mockup-select" onchange="onPgMarksTypeChange(this.value)">
+                                            <option value="Marks" {{ ($academicDetails?->pg_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
+                                            <option value="CGPA" {{ ($academicDetails?->pg_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Total Marks (Conducted): <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pg_marks_conducted" id="pg_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pg_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePgPct()">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Earned: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pg_marks_earned" id="pg_marks_earned" class="mockup-input" value="{{ $academicDetails?->pg_marks_earned ?? $academicDetails?->pg_marks }}" placeholder="e.g. 880" oninput="calculatePgPct()">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Percentage (%): <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <input type="number" step="0.01" name="pg_percentage" id="pg_percentage" class="mockup-input" value="{{ $academicDetails?->pg_percentage }}" placeholder="e.g. 88.00" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
+                                    </div>
+                                </div>
+
+                                <!-- PG 1 Certificate / Memo Type: (pg1(cmm), pg1 (pc/od))* (any one only mandatory) -->
+                                @php
+                                    $pg1Doc = $academicDetails?->pg1_doc_type ?? 'BOTH';
+                                @endphp
+                                <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                                        <label class="mockup-label" style="font-weight: 800; color: #581c87; margin-bottom: 0;">
+                                            Proof of PG 1 Degree / Certificate: <span style="color:#ef4444;">*</span>
+                                            <span style="font-size: 0.75rem; font-weight: 700; color: #7e22ce;">(pg1(cmm), pg1 (pc/od))* &bull; (any one only mandatory)</span>
+                                        </label>
+                                        <span class="mockup-pill-badge" style="background: #f3e8ff; color: #6b21a8; font-size: 0.72rem; border: 1px solid #d8b4fe;">
+                                            Any one mandatory *
+                                        </span>
+                                    </div>
+
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg1_doc_type" value="CMM" {{ $pg1Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <span>PG 1 Consolidated Marks Memo (CMM)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg1_doc_type" value="PC_OD" {{ $pg1Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <span>PG 1 Provisional Certificate / Original Degree (PC/OD)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg1_doc_type" value="BOTH" {{ ($pg1Doc === 'BOTH' || !$academicDetails?->pg1_doc_type) ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <span>Both (CMM &amp; PC/OD)</span>
+                                        </label>
+                                    </div>
+
+                                    <div id="pg1_cmm_container" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 CMM Memo / Serial No:</label>
+                                            <input type="text" name="pg1_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 CMM Marks / CGPA:</label>
+                                            <input type="text" name="pg1_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_cgpa }}" placeholder="e.g. 8.95">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 CMM Issue Year:</label>
+                                            <input type="number" name="pg1_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_year }}" placeholder="e.g. 2024" min="2000" max="2030">
+                                        </div>
+                                    </div>
+
+                                    <div id="pg1_pc_container" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 PC / OD Certificate No:</label>
+                                            <input type="text" name="pg1_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_no }}" placeholder="Enter PC / OD Number">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 PC / OD Issue Year:</label>
+                                            <input type="number" name="pg1_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_year }}" placeholder="e.g. 2024" min="2000" max="2030">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 1 PC / OD Certificate Status:</label>
+                                            <select name="pg1_pc_od_status" class="mockup-select">
+                                                <option value="Provisional" {{ ($academicDetails?->pg1_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
+                                                <option value="Original Degree" {{ ($academicDetails?->pg1_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            @endif
-                            @endif
+
+                            <!-- ================= SUBBOX 5: POSTGRADUATE 2 (PHD ONLY) ================= -->
+                            <div class="mockup-subbox" id="sec-pg2-details" style="display: {{ ($degreeLevel ?? '') === 'phd' ? 'block' : 'none' }}; margin-top: 1rem; border-color: #d8b4fe; background: #faf5ff;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <h4 class="mockup-subbox-title" style="color: #6b21a8;">Postgraduate 2 (PG2) Details</h4>
+                                </div>
+
+                                <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
+                                <div class="mockup-field-row-2">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">College Name / Institute Name:</label>
+                                        <input type="text" name="pg2_college_name" id="pg2_college_name" class="mockup-input" value="{{ $academicDetails?->pg2_college_name }}" placeholder="PG 2 College / University Name">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Board:</label>
+                                        <input type="text" name="pg2_university_board" id="pg2_university_board" class="mockup-input" value="{{ $academicDetails?->pg2_university_board }}" placeholder="University / Board Name">
+                                    </div>
+                                </div>
+
+                                <!-- Row 2: City, State, District (3 Columns) -->
+                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">City:</label>
+                                        <input type="text" name="pg2_college_city" id="pg2_college_city" class="mockup-input" value="{{ $academicDetails?->pg2_college_city }}" placeholder="Enter City">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">State:</label>
+                                        <select name="pg2_college_state" id="geo-pg2-state-select" class="mockup-select" onchange="onPg2StateChange(this.value)">
+                                            <option value="">-- Select State --</option>
+                                            @foreach($states as $s)
+                                                @php
+                                                    $curState = $academicDetails?->pg2_college_state;
+                                                    $isStateSel = !empty($curState) ? ($curState == $s->state_name || $curState == $s->state_id) : ($s->state_name === 'Andhra Pradesh');
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-id="{{ $s->state_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
+                                                    {{ $s->state_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">District:</label>
+                                        <select name="pg2_college_district" id="geo-pg2-district-select" class="mockup-select">
+                                            <option value="">-- Select District --</option>
+                                            @foreach($districts as $d)
+                                                @php
+                                                    $curDist = $academicDetails?->pg2_college_district;
+                                                    $isDistSel = !empty($curDist) && ($curDist == $d->DISTRICT_NAME || $curDist == $d->DISTRICT_ID);
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
+                                                    {{ $d->DISTRICT_NAME }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Year:</label>
+                                        <input type="number" name="pg2_passed_year" id="pg2_passed_year" class="mockup-input" value="{{ $academicDetails?->pg2_passed_year }}" placeholder="Passing Year (e.g. 2026)" min="2000" max="2030">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Registration number:</label>
+                                        <input type="text" name="pg2_roll_no" id="pg2_roll_no" class="mockup-input" value="{{ $academicDetails?->pg2_roll_no }}" placeholder="PG 2 Roll Number / Reg No">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Current Status:</label>
+                                        <select name="pg2_current_status" id="pg2_current_status" class="mockup-select">
+                                            <option value="Completed" {{ ($academicDetails?->pg2_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
+                                            <option value="Pursuing" {{ ($academicDetails?->pg2_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Row 4: Marks Type, Total Marks (Conducted), Marks Earned, Percentage (%) (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Type:</label>
+                                        <select name="pg2_marks_type" id="pg2_marks_type" class="mockup-select" onchange="onPg2MarksTypeChange(this.value)">
+                                            <option value="Marks" {{ ($academicDetails?->pg2_marks_type === 'Marks' || !$academicDetails) ? 'selected' : '' }}>Marks</option>
+                                            <option value="CGPA" {{ ($academicDetails?->pg2_marks_type === 'CGPA') ? 'selected' : '' }}>CGPA</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Total Marks (Conducted):</label>
+                                        <input type="number" step="0.01" name="pg2_marks_conducted" id="pg2_marks_conducted" class="mockup-input" value="{{ $academicDetails?->pg2_marks_conducted }}" placeholder="e.g. 1000" oninput="calculatePg2Pct()">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Marks Earned:</label>
+                                        <input type="number" step="0.01" name="pg2_marks_earned" id="pg2_marks_earned" class="mockup-input" value="{{ $academicDetails?->pg2_marks_earned ?? $academicDetails?->pg2_marks }}" placeholder="e.g. 880" oninput="calculatePg2Pct()">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Percentage (%):</label>
+                                        <input type="number" step="0.01" name="pg2_percentage" id="pg2_percentage" class="mockup-input" value="{{ $academicDetails?->pg2_percentage }}" placeholder="e.g. 88.00" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #0f172a; font-weight: 700;">
+                                    </div>
+                                </div>
+
+                                <!-- PG 2 Certificate / Memo Type: (pg2(cmm), pg2(pc/od)) (Optional) -->
+                                @php
+                                    $pg2Doc = $academicDetails?->pg2_doc_type ?? 'NONE';
+                                @endphp
+                                <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                                        <label class="mockup-label" style="font-weight: 800; color: #581c87; margin-bottom: 0;">
+                                            Proof of PG 2 Degree / Certificate:
+                                            <span style="font-size: 0.75rem; font-weight: 600; color: #7e22ce;">(pg2(cmm), pg2(pc/od))</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="NONE" {{ ($pg2Doc === 'NONE' || !$academicDetails?->pg2_doc_type) ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>Not Applicable</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="CMM" {{ $pg2Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>PG 2 Consolidated Marks Memo (CMM)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="PC_OD" {{ $pg2Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>PG 2 Provisional Certificate / Original Degree (PC/OD)</span>
+                                        </label>
+                                        <label class="mockup-radio-label">
+                                            <input type="radio" name="pg2_doc_type" value="BOTH" {{ $pg2Doc === 'BOTH' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <span>Both (CMM &amp; PC/OD)</span>
+                                        </label>
+                                    </div>
+
+                                    <div id="pg2_cmm_container" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 CMM Memo / Serial No:</label>
+                                            <input type="text" name="pg2_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 CMM Marks / CGPA:</label>
+                                            <input type="text" name="pg2_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_cgpa }}" placeholder="e.g. 9.10">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 CMM Issue Year:</label>
+                                            <input type="number" name="pg2_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_year }}" placeholder="e.g. 2026" min="2000" max="2030">
+                                        </div>
+                                    </div>
+
+                                    <div id="pg2_pc_container" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 PC / OD Certificate No:</label>
+                                            <input type="text" name="pg2_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_no }}" placeholder="Enter PC / OD Number">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 PC / OD Issue Year:</label>
+                                            <input type="number" name="pg2_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_year }}" placeholder="e.g. 2026" min="2000" max="2030">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">PG 2 PC / OD Certificate Status:</label>
+                                            <select name="pg2_pc_od_status" class="mockup-select">
+                                                <option value="Provisional" {{ ($academicDetails?->pg2_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
+                                                <option value="Original Degree" {{ ($academicDetails?->pg2_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             </fieldset>
 
                             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
@@ -2147,143 +2686,13 @@
                         </div>
 
                         <script>
-                            function setDegreeLevel(level) {
-                                const hiddenInput = document.getElementById('degree_level_input');
-                                if (hiddenInput) hiddenInput.value = level;
-
-                                const ugSec = document.getElementById('sec-ug-details');
-                                const pgSec = document.getElementById('sec-pg-details');
-                                const toggleBtn = document.getElementById('btn-toggle-ug-pg');
-                                const toggleDiv = toggleBtn ? toggleBtn.parentElement : null;
-                                const firstYearRadioWrapper = document.getElementById('radio-wrapper-first-year');
-                                const firstYearRadio = document.getElementById('radio-subset-first-year');
-                                const secondYearRadio = document.getElementById('radio-subset-second-year');
-
-                                if (level === 'mtech') {
-                                    if (toggleDiv) toggleDiv.style.display = 'block';
-                                    if (ugSec) ugSec.style.display = 'block';
-                                    if (pgSec) pgSec.style.display = 'none';
-                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
-                                    if (firstYearRadio) {
-                                        firstYearRadio.disabled = true;
-                                        firstYearRadio.checked = false;
-                                        firstYearRadio.removeAttribute('required');
-                                    }
-                                    if (secondYearRadio) {
-                                        secondYearRadio.checked = true;
-                                    }
-                                } else if (level === 'phd') {
-                                    if (toggleDiv) toggleDiv.style.display = 'block';
-                                    if (ugSec) ugSec.style.display = 'block';
-                                    if (pgSec) pgSec.style.display = 'block';
-                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
-                                    if (firstYearRadio) {
-                                        firstYearRadio.disabled = true;
-                                        firstYearRadio.checked = false;
-                                        firstYearRadio.removeAttribute('required');
-                                    }
-                                    if (secondYearRadio) {
-                                        secondYearRadio.checked = true;
-                                    }
-                                } else {
-                                    // UG / btech: higher academic details must never appear, both 1st and 2nd year radio buttons available
-                                    if (toggleDiv) toggleDiv.style.display = 'none';
-                                    if (ugSec) ugSec.style.display = 'none';
-                                    if (pgSec) pgSec.style.display = 'none';
-                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.removeProperty('display');
-                                    if (firstYearRadio) {
-                                        firstYearRadio.disabled = false;
-                                        firstYearRadio.setAttribute('required', 'required');
-                                    }
-                                }
-                            }
-
-                            function toggleUgPgFields() {
-                                const ugSec = document.getElementById('sec-ug-details');
-                                const pgSec = document.getElementById('sec-pg-details');
-                                const btn = document.getElementById('btn-toggle-ug-pg');
-                                if (ugSec) {
-                                    const isHidden = ugSec.style.display === 'none';
-                                    ugSec.style.display = isHidden ? 'block' : 'none';
-                                    if (btn) btn.innerHTML = isHidden ? '<span>🎓</span><span>− Hide Higher Academic (UG / PG) Details</span>' : '<span>🎓</span><span>+ Add / View Higher Academic (UG / PG) Details</span>';
-                                }
-                            }
-
-                            function calculateTenthPct() {
-                                const conducted = parseFloat(document.getElementById('tenth_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('tenth_marks_earned')?.value || 0);
-                                const type = document.getElementById('tenth_marks_type')?.value || 'Marks';
-                                const pctInput = document.getElementById('tenth_percentage');
-                                if (!pctInput) return;
-
-                                let pct = 0;
-                                if (type === 'CGPA') {
-                                    if (earned > 0) {
-                                        pct = earned * 9.5;
-                                    }
-                                } else {
-                                    if (conducted > 0 && earned > 0) {
-                                        pct = (earned / conducted) * 100;
-                                    }
-                                }
-                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
-                            }
-
-                            function onTenthMarksTypeChange(val) {
-                                const evalIn = document.getElementById('eval_type');
-                                if (evalIn) evalIn.value = val;
-                                const conductedIn = document.getElementById('tenth_marks_conducted');
-                                if (val === 'CGPA') {
-                                    if (conductedIn) conductedIn.value = '10';
-                                } else {
-                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '';
-                                }
-                                calculateTenthPct();
-                            }
-
-                            function calculatePu2Pct() {
-                                const conducted = parseFloat(document.getElementById('pu2_marks_conducted')?.value || 0);
-                                const earned = parseFloat(document.getElementById('pu2_marks_earned')?.value || 0);
-                                const type = document.getElementById('pu2_marks_type')?.value || 'Marks';
-                                const pctInput = document.getElementById('pu2_percentage');
-                                const warning = document.getElementById('pu2_pct_warning');
-                                if (!pctInput) return;
-
-                                let pct = 0;
-                                if (type === 'CGPA') {
-                                    if (earned > 0) {
-                                        pct = earned * 9.5;
-                                    }
-                                } else {
-                                    if (conducted > 0 && earned > 0) {
-                                        pct = (earned / conducted) * 100;
-                                    }
-                                }
-                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
-                                if (warning) {
-                                    const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
-                                    const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
-                                    warning.style.display = (!isPgOrDoc && pct > 0 && pct < 60) ? 'block' : 'none';
-                                }
-                            }
-
-                            function onPu2MarksTypeChange(val) {
-                                const conductedIn = document.getElementById('pu2_marks_conducted');
-                                if (val === 'CGPA') {
-                                    if (conductedIn) conductedIn.value = '10';
-                                } else {
-                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '';
-                                }
-                                calculatePu2Pct();
-                            }
-
                             const allStatesData = @json($states);
                             const allDistrictsData = @json($districts);
 
-                            function onInterStateChange(stateId) {
-                                const distSelect = document.getElementById('geo-inter-district-select');
+                            function populateDistrictDropdown(stateId, distSelectId, currentSelectedDist) {
+                                const distSelect = document.getElementById(distSelectId);
                                 if (!distSelect) return;
-                                const currentSelectedDist = distSelect.value;
+                                const previousValue = distSelect.value;
                                 distSelect.innerHTML = '<option value="">-- Select District --</option>';
 
                                 let numericStateId = stateId;
@@ -2304,7 +2713,7 @@
                                             opt.value = dDistId;
                                             opt.textContent = dName;
                                             opt.setAttribute('data-name', dName);
-                                            if (dDistId == currentSelectedDist || dName === '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}') {
+                                            if (dDistId == currentSelectedDist || dName == currentSelectedDist || dDistId == previousValue || dName == previousValue) {
                                                 opt.selected = true;
                                                 foundSelected = true;
                                             }
@@ -2315,6 +2724,297 @@
                                 if (!foundSelected && distSelect.options.length > 1) {
                                     distSelect.options[1].selected = true;
                                 }
+                            }
+
+                            function onTenthStateChange(stateId) {
+                                populateDistrictDropdown(stateId, 'geo-tenth-district-select', '{{ $academicDetails?->tenth_school_district }}');
+                            }
+
+                            function onInterStateChange(stateId) {
+                                populateDistrictDropdown(stateId, 'geo-inter-district-select', '{{ $academicDetails?->pu2_college_district ?: "Guntur" }}');
+                            }
+
+                            function onUgStateChange(stateId) {
+                                populateDistrictDropdown(stateId, 'geo-ug-district-select', '{{ $academicDetails?->ug_college_district }}');
+                            }
+
+                            function onPgStateChange(stateId) {
+                                populateDistrictDropdown(stateId, 'geo-pg-district-select', '{{ $academicDetails?->pg_college_district }}');
+                            }
+
+                            function onPg2StateChange(stateId) {
+                                populateDistrictDropdown(stateId, 'geo-pg2-district-select', '{{ $academicDetails?->pg2_college_district }}');
+                            }
+
+                            const interFields = ['inter_college', 'inter_board_of_study', 'inter_city', 'geo-inter-state-select', 'geo-inter-district-select', 'inter_year', 'pu2_marks_conducted', 'pu2_marks_earned'];
+                            const ugFields = ['ug_college_name', 'ug_university_board', 'ug_college_city', 'geo-ug-state-select', 'geo-ug-district-select', 'ug_passed_year', 'ug_roll_no', 'ug_marks_conducted', 'ug_marks_earned'];
+                            const pg1Fields = ['pg_college_name', 'pg_university_board', 'pg_college_city', 'geo-pg-state-select', 'geo-pg-district-select', 'pg_passed_year', 'pg_roll_no', 'pg_marks_conducted', 'pg_marks_earned'];
+
+                            function setFieldsRequired(fieldIds, isReq) {
+                                fieldIds.forEach(function(id) {
+                                    const el = document.getElementById(id);
+                                    if (el) {
+                                        if (isReq) {
+                                            el.setAttribute('required', 'required');
+                                            el.required = true;
+                                        } else {
+                                            el.removeAttribute('required');
+                                            el.required = false;
+                                            if (typeof el.setCustomValidity === 'function') {
+                                                el.setCustomValidity('');
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            function setDegreeLevel(level) {
+                                const hiddenInput = document.getElementById('degree_level_input');
+                                if (hiddenInput) hiddenInput.value = level;
+
+                                const ugSec = document.getElementById('sec-ug-details');
+                                const pgSec = document.getElementById('sec-pg-details');
+                                const pg2Sec = document.getElementById('sec-pg2-details');
+                                const firstYearRadioWrapper = document.getElementById('radio-wrapper-first-year');
+                                const firstYearRadio = document.getElementById('radio-subset-first-year');
+                                const secondYearRadio = document.getElementById('radio-subset-second-year');
+                                const optUgFinalYear = document.getElementById('opt-ug-final-year');
+                                const spanCutoff = document.getElementById('span-pu2-cutoff');
+
+
+                                if (level === 'mtech') {
+                                    // PG: 10th, Intermediate (default 2nd year), UG (Completed / Final Year)
+                                    if (ugSec) ugSec.style.display = 'block';
+                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (pg2Sec) pg2Sec.style.display = 'none';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = true;
+                                        firstYearRadio.checked = false;
+                                    }
+                                    if (secondYearRadio) {
+                                        secondYearRadio.checked = true;
+                                    }
+                                    if (optUgFinalYear) optUgFinalYear.style.display = '';
+                                    if (spanCutoff) spanCutoff.style.display = 'none';
+
+                                    setFieldsRequired(interFields, true);
+                                    setFieldsRequired(ugFields, true);
+                                    setFieldsRequired(pg1Fields, false);
+                                } else if (level === 'phd') {
+                                    // PhD: 10th, Intermediate (default 2nd year), UG (Completed), PG1 (mandatory), PG2 (optional)
+                                    if (ugSec) ugSec.style.display = 'block';
+                                    if (pgSec) pgSec.style.display = 'block';
+                                    if (pg2Sec) pg2Sec.style.display = 'block';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.setProperty('display', 'none', 'important');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = true;
+                                        firstYearRadio.checked = false;
+                                    }
+                                    if (secondYearRadio) {
+                                        secondYearRadio.checked = true;
+                                    }
+                                    if (optUgFinalYear) optUgFinalYear.style.display = 'none';
+                                    const ugStatusSel = document.getElementById('ug_current_status');
+                                    if (ugStatusSel && ugStatusSel.value === 'Final Year') ugStatusSel.value = 'Completed';
+                                    if (spanCutoff) spanCutoff.style.display = 'none';
+
+                                    setFieldsRequired(interFields, false);
+                                    setFieldsRequired(ugFields, true);
+                                    setFieldsRequired(pg1Fields, true);
+                                } else {
+                                    // UG (btech): 10th, Intermediate (1st year / 2nd year option). UG, PG1, PG2 hidden.
+                                    if (ugSec) ugSec.style.display = 'none';
+                                    if (pgSec) pgSec.style.display = 'none';
+                                    if (pg2Sec) pg2Sec.style.display = 'none';
+                                    if (firstYearRadioWrapper) firstYearRadioWrapper.style.removeProperty('display');
+                                    if (firstYearRadio) {
+                                        firstYearRadio.disabled = false;
+                                    }
+                                    if (spanCutoff) spanCutoff.style.display = '';
+
+                                    setFieldsRequired(interFields, true);
+                                    setFieldsRequired(ugFields, false);
+                                    setFieldsRequired(pg1Fields, false);
+                                }
+                            }
+
+                            function calculateTenthPct() {
+                                const conductedIn = document.getElementById('tenth_marks_conducted');
+                                const earnedIn = document.getElementById('tenth_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
+                                const type = document.getElementById('tenth_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('tenth_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
+                                if (!pctInput) return;
+
+                                let pct = 0;
+                                if (type === 'CGPA') {
+                                    if (earned > 0) pct = earned * 9.5;
+                                } else {
+                                    if (conducted > 0 && earned > 0) pct = (earned / conducted) * 100;
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                            }
+
+                            function onTenthMarksTypeChange(val) {
+                                const evalIn = document.getElementById('eval_type');
+                                if (evalIn) evalIn.value = val;
+                                const conductedIn = document.getElementById('tenth_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (conductedIn) conductedIn.value = '10';
+                                } else {
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '600';
+                                }
+                                calculateTenthPct();
+                            }
+
+                            function calculatePu2Pct() {
+                                const conductedIn = document.getElementById('pu2_marks_conducted');
+                                const earnedIn = document.getElementById('pu2_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
+                                const type = document.getElementById('pu2_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('pu2_percentage');
+                                const warning = document.getElementById('pu2_pct_warning');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
+                                if (!pctInput) return;
+
+                                let pct = 0;
+                                if (type === 'CGPA') {
+                                    if (earned > 0) pct = earned * 9.5;
+                                } else {
+                                    if (conducted > 0 && earned > 0) pct = (earned / conducted) * 100;
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                                if (warning) {
+                                    const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                    const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
+                                    warning.style.display = (!isPgOrDoc && pct > 0 && pct < 60) ? 'block' : 'none';
+                                }
+                            }
+
+                            function onPu2MarksTypeChange(val) {
+                                const conductedIn = document.getElementById('pu2_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (conductedIn) conductedIn.value = '10';
+                                } else {
+                                    if (conductedIn && (conductedIn.value === '10' || conductedIn.value === '10.0')) conductedIn.value = '1000';
+                                }
+                                calculatePu2Pct();
+                            }
+
+                            function calculateUgPct() {
+                                const conductedIn = document.getElementById('ug_marks_conducted');
+                                const earnedIn = document.getElementById('ug_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
+                                const type = document.getElementById('ug_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('ug_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
+                                if (!pctInput) return;
+
+                                let pct = 0;
+                                if (type === 'CGPA') {
+                                    if (earned > 0) pct = earned * 9.5;
+                                } else {
+                                    if (conducted > 0 && earned > 0) pct = (earned / conducted) * 100;
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                            }
+
+                            function onUgMarksTypeChange(val) {
+                                const cond = document.getElementById('ug_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (cond) cond.value = '10';
+                                } else {
+                                    if (cond && (cond.value === '10' || cond.value === '10.0')) cond.value = '1000';
+                                }
+                                calculateUgPct();
+                            }
+
+                            function calculatePgPct() {
+                                const conductedIn = document.getElementById('pg_marks_conducted');
+                                const earnedIn = document.getElementById('pg_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
+                                const type = document.getElementById('pg_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('pg_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
+                                if (!pctInput) return;
+
+                                let pct = 0;
+                                if (type === 'CGPA') {
+                                    if (earned > 0) pct = earned * 9.5;
+                                } else {
+                                    if (conducted > 0 && earned > 0) pct = (earned / conducted) * 100;
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                            }
+
+                            function onPgMarksTypeChange(val) {
+                                const cond = document.getElementById('pg_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (cond) cond.value = '10';
+                                } else {
+                                    if (cond && (cond.value === '10' || cond.value === '10.0')) cond.value = '1000';
+                                }
+                                calculatePgPct();
+                            }
+
+                            function calculatePg2Pct() {
+                                const conductedIn = document.getElementById('pg2_marks_conducted');
+                                const earnedIn = document.getElementById('pg2_marks_earned');
+                                const conducted = parseFloat(conductedIn?.value || 0);
+                                const earned = parseFloat(earnedIn?.value || 0);
+                                const type = document.getElementById('pg2_marks_type')?.value || 'Marks';
+                                const pctInput = document.getElementById('pg2_percentage');
+                                if (earnedIn && conducted > 0 && earned > conducted) {
+                                    earnedIn.setCustomValidity('Marks Earned cannot exceed Total Marks Conducted.');
+                                    if (typeof earnedIn.reportValidity === 'function') earnedIn.reportValidity();
+                                } else if (earnedIn) {
+                                    earnedIn.setCustomValidity('');
+                                }
+                                if (!pctInput) return;
+
+                                let pct = 0;
+                                if (type === 'CGPA') {
+                                    if (earned > 0) pct = earned * 9.5;
+                                } else {
+                                    if (conducted > 0 && earned > 0) pct = (earned / conducted) * 100;
+                                }
+                                pctInput.value = pct > 0 ? pct.toFixed(2) : '';
+                            }
+
+                            function onPg2MarksTypeChange(val) {
+                                const cond = document.getElementById('pg2_marks_conducted');
+                                if (val === 'CGPA') {
+                                    if (cond) cond.value = '10';
+                                } else {
+                                    if (cond && (cond.value === '10' || cond.value === '10.0')) cond.value = '1000';
+                                }
+                                calculatePg2Pct();
                             }
 
                             function getSelectedSubsetChoice() {
@@ -2370,11 +3070,83 @@
                                 if (form) form.submit();
                             }
 
+                            function getActiveRequiredFields() {
+                                const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
+                                const isPhd = (degreeLevel === 'phd');
+                                const isPg = (degreeLevel === 'mtech');
+                                const isUg = (!isPhd && !isPg);
+
+                                let fields = [];
+                                if (isUg || isPg) {
+                                    fields = fields.concat(interFields);
+                                }
+                                if (isPg || isPhd) {
+                                    fields = fields.concat(ugFields);
+                                }
+                                if (isPhd) {
+                                    fields = fields.concat(pg1Fields);
+                                }
+                                return fields;
+                            }
+
                             function validateStep2Form(form) {
                                 calculatePu2Pct();
+                                calculateUgPct();
+                                calculatePgPct();
+                                calculatePg2Pct();
+
                                 const degreeLevel = document.getElementById('degree_level_input')?.value || '{{ $degreeLevel }}';
-                                const isPgOrDoc = (degreeLevel === 'mtech' || degreeLevel === 'phd');
-                                if (isPgOrDoc) {
+                                const isPhd = (degreeLevel === 'phd');
+                                const isPg = (degreeLevel === 'mtech');
+                                const isUg = (!isPhd && !isPg);
+
+                                // Check all active required fields in order: if any empty, scroll, focus, and reportValidity
+                                const fieldsToCheck = getActiveRequiredFields();
+                                for (let i = 0; i < fieldsToCheck.length; i++) {
+                                    const el = document.getElementById(fieldsToCheck[i]);
+                                    if (!el) continue;
+                                    const val = el.value ? el.value.trim() : '';
+                                    if (val === '' || val.startsWith('-- Select')) {
+                                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        el.focus();
+                                        if (typeof el.reportValidity === 'function') {
+                                            el.setCustomValidity('Please fill out this field.');
+                                            el.reportValidity();
+                                            el.oninput = function() { el.setCustomValidity(''); };
+                                            el.onchange = function() { el.setCustomValidity(''); };
+                                        }
+                                        return false;
+                                    }
+                                }
+
+                                // Validate Marks Earned <= Total Marks Conducted for all qualifications
+                                const marksChecks = [
+                                    { earned: 'tenth_marks_earned', cond: 'tenth_marks_conducted', name: '10th' },
+                                    { earned: 'pu2_marks_earned', cond: 'pu2_marks_conducted', name: '12th / Intermediate' },
+                                    { earned: 'ug_marks_earned', cond: 'ug_marks_conducted', name: 'UG' },
+                                    { earned: 'pg_marks_earned', cond: 'pg_marks_conducted', name: 'PG 1' },
+                                    { earned: 'pg2_marks_earned', cond: 'pg2_marks_conducted', name: 'PG 2' },
+                                ];
+                                for (let m = 0; m < marksChecks.length; m++) {
+                                    const eEl = document.getElementById(marksChecks[m].earned);
+                                    const cEl = document.getElementById(marksChecks[m].cond);
+                                    if (eEl && cEl && eEl.value !== '' && cEl.value !== '') {
+                                        const eVal = parseFloat(eEl.value);
+                                        const cVal = parseFloat(cEl.value);
+                                        if (cVal > 0 && eVal > cVal) {
+                                            eEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            eEl.focus();
+                                            if (typeof eEl.reportValidity === 'function') {
+                                                eEl.setCustomValidity('Marks Earned (' + eVal + ') cannot be greater than Total Marks Conducted (' + cVal + ') in ' + marksChecks[m].name + '.');
+                                                eEl.reportValidity();
+                                                eEl.oninput = function() { eEl.setCustomValidity(''); };
+                                            }
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                                if (isPg || isPhd) {
                                     return true;
                                 }
 
@@ -2385,7 +3157,11 @@
                                 if (isSecondYear) {
                                     if (pu2Pct < 60) {
                                         openNotEligibleModal();
-                                        document.getElementById('pu2_marks_earned')?.focus();
+                                        const earnedInput = document.getElementById('pu2_marks_earned');
+                                        if (earnedInput) {
+                                            earnedInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            earnedInput.focus();
+                                        }
                                         return false;
                                     }
                                 } else {
@@ -2401,6 +3177,41 @@
                                 return true;
                             }
 
+                            function togglePg1DocFields(val) {
+                                const cmm = document.getElementById('pg1_cmm_container');
+                                const pc = document.getElementById('pg1_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                }
+                            }
+
+                            function togglePg2DocFields(val) {
+                                const cmm = document.getElementById('pg2_cmm_container');
+                                const pc = document.getElementById('pg2_pc_container');
+                                if (!cmm || !pc) return;
+                                if (val === 'CMM') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'none';
+                                } else if (val === 'PC_OD') {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'grid';
+                                } else if (val === 'BOTH') {
+                                    cmm.style.display = 'grid';
+                                    pc.style.display = 'grid';
+                                } else {
+                                    cmm.style.display = 'none';
+                                    pc.style.display = 'none';
+                                }
+                            }
+
                             document.addEventListener('DOMContentLoaded', function() {
                                 setDegreeLevel('{{ $degreeLevel }}');
                                 if (!document.getElementById('tenth_percentage')?.value) {
@@ -2409,10 +3220,85 @@
                                 if (!document.getElementById('pu2_percentage')?.value) {
                                     calculatePu2Pct();
                                 }
+                                if (!document.getElementById('ug_percentage')?.value) {
+                                    calculateUgPct();
+                                }
+                                if (!document.getElementById('pg_percentage')?.value) {
+                                    calculatePgPct();
+                                }
+                                if (!document.getElementById('pg2_percentage')?.value) {
+                                    calculatePg2Pct();
+                                }
+
+                                const tenthState = document.getElementById('geo-tenth-state-select');
+                                if (tenthState && tenthState.value) {
+                                    onTenthStateChange(tenthState.value);
+                                }
                                 const interStateSelect = document.getElementById('geo-inter-state-select');
                                 if (interStateSelect && interStateSelect.value) {
                                     onInterStateChange(interStateSelect.value);
                                 }
+                                const ugState = document.getElementById('geo-ug-state-select');
+                                if (ugState && ugState.value) {
+                                    onUgStateChange(ugState.value);
+                                }
+                                const pgState = document.getElementById('geo-pg-state-select');
+                                if (pgState && pgState.value) {
+                                    onPgStateChange(pgState.value);
+                                }
+                                const pg2State = document.getElementById('geo-pg2-state-select');
+                                if (pg2State && pg2State.value) {
+                                    onPg2StateChange(pg2State.value);
+                                }
+
+                                @if(isset($errors) && $errors->any())
+                                    @php
+                                        $firstErrorField = array_key_first($errors->toArray());
+                                        $fieldMap = [
+                                            'inter_college' => 'inter_college',
+                                            'inter_board_of_study' => 'inter_board_of_study',
+                                            'city' => 'inter_city',
+                                            'jr_state' => 'geo-inter-state-select',
+                                            'jr_district' => 'geo-inter-district-select',
+                                            'inter_year' => 'inter_year',
+                                            'pu2_marks_conducted' => 'pu2_marks_conducted',
+                                            'pu2_marks_earned' => 'pu2_marks_earned',
+                                            'pu2_percentage' => 'pu2_percentage',
+                                            'ug_college_name' => 'ug_college_name',
+                                            'ug_university_board' => 'ug_university_board',
+                                            'ug_college_city' => 'ug_college_city',
+                                            'ug_college_state' => 'geo-ug-state-select',
+                                            'ug_college_district' => 'geo-ug-district-select',
+                                            'ug_passed_year' => 'ug_passed_year',
+                                            'ug_roll_no' => 'ug_roll_no',
+                                            'ug_marks_conducted' => 'ug_marks_conducted',
+                                            'ug_marks_earned' => 'ug_marks_earned',
+                                            'pg_college_name' => 'pg_college_name',
+                                            'pg_university_board' => 'pg_university_board',
+                                            'pg_college_city' => 'pg_college_city',
+                                            'pg_college_state' => 'geo-pg-state-select',
+                                            'pg_college_district' => 'geo-pg-district-select',
+                                            'pg_passed_year' => 'pg_passed_year',
+                                            'pg_roll_no' => 'pg_roll_no',
+                                            'pg_marks_conducted' => 'pg_marks_conducted',
+                                            'pg_marks_earned' => 'pg_marks_earned',
+                                        ];
+                                        $targetId = $fieldMap[$firstErrorField] ?? $firstErrorField;
+                                    @endphp
+                                    setTimeout(function() {
+                                        const errEl = document.getElementById('{{ $targetId }}');
+                                        if (errEl) {
+                                            errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            errEl.focus();
+                                            if (typeof errEl.reportValidity === 'function') {
+                                                errEl.setCustomValidity('{{ addslashes($errors->first()) }}');
+                                                errEl.reportValidity();
+                                                errEl.oninput = function() { errEl.setCustomValidity(''); };
+                                                errEl.onchange = function() { errEl.setCustomValidity(''); };
+                                            }
+                                        }
+                                    }, 250);
+                                @endif
                             });
                         </script>
                     </div>
@@ -2478,6 +3364,40 @@
                                 'icon' => '📚',
                                 'title' => 'M.Tech / PG Memo',
                                 'sub' => 'Postgraduate Marks Memo or Degree Certificate',
+                                'levels' => 'mtech',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'pg1_cmm' => [
+                                'icon' => '📜',
+                                'title' => 'PG 1 Consolidated Marks Memo (CMM)',
+                                'sub' => 'Consolidated Marks Memo for PG 1 (At least one mandatory with PC/OD)*',
+                                'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                                'is_pg1_group' => true,
+                            ],
+                            'pg1_pc' => [
+                                'icon' => '🎓',
+                                'title' => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (At least one mandatory with CMM)*',
+                                'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                                'is_pg1_group' => true,
+                            ],
+                            'pg2_cmm' => [
+                                'icon' => '📜',
+                                'title' => 'PG 2 Consolidated Marks Memo (CMM)',
+                                'sub' => 'Consolidated Marks Memo for PG 2 (Optional)',
+                                'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'pg2_pc' => [
+                                'icon' => '🎓',
+                                'title' => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 2 (Optional)',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -2487,6 +3407,14 @@
                                 'title' => 'Doctoral / Advanced PG Memo',
                                 'sub' => 'Doctoral coursework or post-master qualification certificate',
                                 'levels' => 'phd',
+                                'is_common' => false,
+                                'is_required' => false,
+                            ],
+                            'experience' => [
+                                'icon' => '💼',
+                                'title' => 'Work Experience Letter / Certificate',
+                                'sub' => 'Service certificate or work experience letter (Optional)',
+                                'levels' => 'btech mtech phd',
                                 'is_common' => false,
                                 'is_required' => false,
                             ],
@@ -2546,6 +3474,11 @@
                                     <div class="kyc-doc-top">
                                         <div class="kyc-doc-icon">{{ $docMeta['icon'] }}</div>
                                         <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                                            @if(!empty($docMeta['is_pg1_group']))
+                                                <span style="font-size: 0.68rem; font-weight: 700; background: #faf5ff; color: #7c3aed; padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid #d8b4fe;">
+                                                    Any 1 Mandatory *
+                                                </span>
+                                            @endif
                                             @if($docMeta['is_common'])
                                                 <span style="font-size: 0.68rem; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid #bfdbfe;">
                                                     Common
@@ -2561,7 +3494,7 @@
                                     <div>
                                         <h4 class="kyc-doc-title">
                                             {{ $docMeta['title'] }}
-                                            @if($docMeta['is_required'])
+                                            @if($docMeta['is_required'] || !empty($docMeta['is_pg1_group']))
                                                 <span style="color: #dc2626;" title="Mandatory field">*</span>
                                             @endif
                                         </h4>
@@ -2664,6 +3597,33 @@
 
                         document.addEventListener('DOMContentLoaded', function() {
                             setStage3DegreeLevel('{{ $degreeLevel ?? 'btech' }}');
+
+                            const form = document.getElementById('stage3-upload-form');
+                            if (form) {
+                                form.addEventListener('submit', function(e) {
+                                    const lvl = document.getElementById('stage3_degree_level_input')?.value || '{{ $degreeLevel ?? "btech" }}';
+                                    if (lvl === 'phd') {
+                                        const hasCmm = Boolean({{ !empty($uploadedDocs['pg1_cmm']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_cmm')?.files?.length > 0);
+                                        const hasPc = Boolean({{ !empty($uploadedDocs['pg1_pc']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_pc')?.files?.length > 0);
+
+                                        if (!hasCmm && !hasPc) {
+                                            e.preventDefault();
+                                            const cmmCard = document.getElementById('doc-card-pg1_cmm');
+                                            if (cmmCard) cmmCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            const input = document.getElementById('file-input-pg1_cmm');
+                                            if (input) {
+                                                input.focus();
+                                                if (typeof input.reportValidity === 'function') {
+                                                    input.setCustomValidity('Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).');
+                                                    input.reportValidity();
+                                                    input.onchange = function() { input.setCustomValidity(''); };
+                                                }
+                                            }
+                                            return false;
+                                        }
+                                    }
+                                });
+                            }
                         });
                     </script>
                 </form>
@@ -2699,7 +3659,7 @@
                                     Admission Registration Fee Paid &amp; Verified
                                 </h3>
                                 <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
-                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to exam slot booking.
+                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to @if(($degreeLevel ?? '') === 'phd') application form preview & download. @else exam slot booking. @endif
                                 </p>
                                 <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                                     <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
@@ -2707,7 +3667,7 @@
                                         <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                     </a>
                                     <a href="{{ route('dashboards.index', ['step' => 5]) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-                                        <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                                        <span>Proceed to Step 5: {{ $stages[5]['title'] ?? (($degreeLevel ?? '') === 'phd' ? 'Application Download' : 'Exam Slot Booking') }} &rarr;</span>
                                     </a>
                                 </div>
                             </div>
@@ -2789,18 +3749,18 @@
                         </div>
                         @if($isPaid)
                             <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-next" style="text-decoration: none; background: #2563eb; color: #ffffff; padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem;">
-                                <span>Proceed to Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} &rarr;</span>
+                                <span>Proceed to Step 5: {{ $stages[5]['title'] ?? (($degreeLevel ?? '') === 'phd' ? 'Application Download' : 'Exam Slot Booking') }} &rarr;</span>
                             </a>
                         @else
                             <button type="button" disabled class="btn-step-prev" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.45rem;" title="Please complete your Admission Fee Payment to unlock Step 5">
-                                <span>🔒 Step 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }} (Locked until Fee Payment)</span>
+                                <span>🔒 Step 5: {{ $stages[5]['title'] ?? (($degreeLevel ?? '') === 'phd' ? 'Application Download' : 'Exam Slot Booking') }} (Locked until Fee Payment)</span>
                             </button>
                         @endif
                     </div>
                 </div>
 
             <!-- ================= STAGE 5: EXAM SLOT BOOKING (master.menus: EXAM00002) ================= -->
-            @elseif($activeStep === 5)
+            @elseif($activeStep === 5 && ($degreeLevel ?? '') !== 'phd')
                 @php
                     $now = \Carbon\Carbon::now();
                     $cutoffHour = 17; // 5:00 PM daily cutoff
@@ -3017,7 +3977,7 @@
                 </form>
 
             <!-- ================= STAGE 6: APPLICATION DOWNLOAD (master.menus: CRMM0010) ================= -->
-            @elseif($activeStep === 6)
+            @elseif(($activeStep === 6 && ($degreeLevel ?? '') !== 'phd') || ($activeStep === 5 && ($degreeLevel ?? '') === 'phd'))
                 @php
                     $appStudent = $applicationData ?? \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) ($appNo ?: ($user?->usercode ?? '0')));
                     $formLogo = asset('images/vignan-logo.png');
@@ -3036,7 +3996,7 @@
 
                 <div class="step-panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                     <div>
-                        <div class="step-panel-kicker">Stage 6 of {{ count($stages) }} &bull; Official Candidate Dossier</div>
+                        <div class="step-panel-kicker">Stage {{ $activeStep }} of {{ count($stages) }} &bull; Official Candidate Dossier</div>
                         <h3>Application Form Preview &amp; Download</h3>
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
@@ -3044,7 +4004,7 @@
                         <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span>🖨️ Print Form</span>
                         </a>
-                        <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" download class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span>📥 Download Application PDF</span>
                         </a>
                     </div>
@@ -3052,7 +4012,7 @@
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
                     @csrf
-                    <input type="hidden" name="step" value="6">
+                    <input type="hidden" name="step" value="{{ $activeStep }}">
 
                     <!-- EMBEDDED A4 ADMISSION APPLICATION FORM -->
                     <div class="embedded-a4-form" style="max-width: 820px; margin: 0 auto; background: #F4F7FB; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1B2430;">
@@ -3130,6 +4090,7 @@
                                     </div>
                                     <div style="font-size: 10px; color: #12875B; font-weight: 700;">Provisional Allotment Confirmed</div>
                                 </div>
+                                @if(($degreeLevel ?? '') !== 'phd')
                                 <div>
                                     <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Booked Entrance Exam Slot</div>
                                     <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
@@ -3137,6 +4098,15 @@
                                     </div>
                                     <div style="font-size: 10px; color: #B25E09; font-weight: 700;">⏰ {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
                                 </div>
+                                @else
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Entrance Examination</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        Exempted / Direct Ph.D
+                                    </div>
+                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Departmental Evaluation</div>
+                                </div>
+                                @endif
                             </div>
 
                             <!-- 2-Column: Personal Information & Address Information -->
@@ -3271,12 +4241,12 @@
                                         </tr>
                                         @endif
 
-                                        <!-- Postgraduate (PG / Master's / M.Tech) -->
+                                        <!-- Postgraduate 1 (PG 1 / Master's / M.Tech) -->
                                         @if((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
-                                        <tr>
+                                        <tr style="{{ ((!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
                                                 <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
-                                                    Postgraduate (PG)
+                                                    Postgraduate 1
                                                 </span>
                                             </td>
                                             <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
@@ -3293,6 +4263,32 @@
                                             </td>
                                             <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
                                                 {{ (!empty($appStudent->academic->pg_percentage) && $appStudent->academic->pg_percentage !== 'N/A' && $appStudent->academic->pg_percentage !== '-') ? $appStudent->academic->pg_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endif
+
+                                        <!-- Postgraduate 2 (PG 2 / Ph.D) -->
+                                        @if((!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr>
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Postgraduate 2
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') ? $appStudent->academic->pg2_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->pg2_board) && $appStudent->academic->pg2_board !== '-') ? $appStudent->academic->pg2_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg2_year) && $appStudent->academic->pg2_year !== '-') ? $appStudent->academic->pg2_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg2_roll) && $appStudent->academic->pg2_roll !== '-') ? $appStudent->academic->pg2_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->pg2_percentage) && $appStudent->academic->pg2_percentage !== 'N/A' && $appStudent->academic->pg2_percentage !== '-') ? $appStudent->academic->pg2_percentage : '-' }}
                                             </td>
                                         </tr>
                                         @endif
@@ -3329,25 +4325,42 @@
                                             <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
                                                 5. Document Verification Status
                                             </h4>
-                                            <table style="width: 100%; border-collapse: collapse;">
-                                                @foreach(array_chunk($formDocs, 2, true) as $dRow)
-                                                    <tr>
-                                                        @foreach($dRow as $dKey => $dLabel)
-                                                            @php
-                                                                $dExt = $formUploaded[$dKey] ?? null;
-                                                                $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
-                                                                $dType = $isUploaded ? ($dExt ?: 'VERIFIED') : 'Pending';
-                                                            @endphp
-                                                            <td style="width: 50%; padding: 2.5px;">
-                                                                <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: {{ $isUploaded ? '#E2F5EC' : '#FDF0DC' }}; color: #1B2430; border: 1px solid {{ $isUploaded ? '#a7f3d0' : '#fde68a' }};">
-                                                                    <span>{{ $dLabel }}</span>
-                                                                    <small style="color: {{ $isUploaded ? '#12875B' : '#B25E09' }}; font-weight: 800;">{{ $isUploaded ? '✓ ' . $dType : 'Pending' }}</small>
-                                                                </div>
-                                                            </td>
-                                                        @endforeach
-                                                    </tr>
-                                                @endforeach
-                                            </table>
+                                            @php
+                                                $onlyUploadedDocs = [];
+                                                foreach($formDocs as $dKey => $dLabel) {
+                                                    $dExt = $formUploaded[$dKey] ?? null;
+                                                    $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
+                                                    if ($isUploaded) {
+                                                        $onlyUploadedDocs[$dKey] = [
+                                                            'label' => $dLabel,
+                                                            'ext' => $dExt ?: 'VERIFIED'
+                                                        ];
+                                                    }
+                                                }
+                                            @endphp
+                                            @if(empty($onlyUploadedDocs))
+                                                <div style="padding: 10px; font-size: 9.5px; color: #64748b; font-style: italic; text-align: center;">
+                                                    No documents uploaded yet.
+                                                </div>
+                                            @else
+                                                <table style="width: 100%; border-collapse: collapse;">
+                                                    @foreach(array_chunk($onlyUploadedDocs, 2, true) as $dRow)
+                                                        <tr>
+                                                            @foreach($dRow as $dKey => $dInfo)
+                                                                <td style="width: 50%; padding: 2.5px;">
+                                                                    <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: #E2F5EC; color: #1B2430; border: 1px solid #a7f3d0;">
+                                                                        <span>{{ $dInfo['label'] }}</span>
+                                                                        <small style="color: #12875B; font-weight: 800;">✓ {{ $dInfo['ext'] }}</small>
+                                                                    </div>
+                                                                </td>
+                                                            @endforeach
+                                                            @if(count($dRow) === 1)
+                                                                <td style="width: 50%; padding: 2.5px;"></td>
+                                                            @endif
+                                                        </tr>
+                                                    @endforeach
+                                                </table>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -3452,9 +4465,6 @@
                             <span style="display: inline-block; font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px; background: #16a34a; color: #ffffff;">
                                 ✓ {{ $uploadedCount }} File(s) Attached
                             </span>
-                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.74rem; font-weight: 700; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 10px; text-decoration: none;">
-                                <span>📤 Add / Update Documents (Step 4)</span>
-                            </a>
                         </div>
                     </div>
 
@@ -3546,12 +4556,9 @@
                         <div style="max-width: 820px; margin: 1.25rem auto 0 auto; background: #ffffff; border-radius: 10px; padding: 2rem; border: 1.5px dashed #cbd5e1; text-align: center;">
                             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
                             <h4 style="margin: 0 0 0.5rem 0; color: #0f172a; font-weight: 800;">No Documents Attached Yet</h4>
-                            <p style="margin: 0 0 1rem 0; color: #64748b; font-size: 0.85rem;">
-                                Please upload your 10th marksheet, 12th marksheet, Aadhaar card, and photo in Stage 4 so they appear here under your application form.
+                            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">
+                                No document attachments found for this candidate.
                             </p>
-                            <a href="{{ route('dashboards.index', ['step' => 4]) }}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.84rem; padding: 0.55rem 1.2rem; border-radius: 6px;">
-                                <span>📤 Go to Stage 4: Document Upload &rarr;</span>
-                            </a>
                         </div>
                     @endif
 
@@ -3559,7 +4566,7 @@
                     <div style="max-width: 820px; margin: 1.5rem auto 0 auto; background: #ffffff; border-radius: 10px; border: 1px solid #cbd5e1; overflow: hidden; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);">
                         <div style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                             <div style="font-size: 11px; font-weight: 800; color: #0F2A4A; text-transform: uppercase; letter-spacing: 0.4px;">
-                                📋 Candidate Document Dossier Checklist
+                                Candidate Document Dossier Checklist
                             </div>
                             <div style="font-size: 10.5px; color: #64748b;">
                                 {{ $uploadedCount }} attached &bull; {{ count($standardSlots) - $uploadedCount }} pending / optional
@@ -3597,13 +4604,18 @@
                         </div>
                     </div>
 
+                    @php
+                        $isPhd = (($degreeLevel ?? '') === 'phd');
+                        $appPrevStep = $isPhd ? 4 : 5;
+                        $appNextStep = $isPhd ? 6 : 7;
+                    @endphp
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
-                        <a href="{{ route('dashboards.index', ['step' => 5]) }}" class="btn-step-prev">
-                            &larr; Stage 5: {{ $stages[5]['title'] ?? 'Exam Slot Booking' }}
+                        <a href="{{ route('dashboards.index', ['step' => $appPrevStep]) }}" class="btn-step-prev">
+                            &larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot Booking') }}
                         </a>
-                        @if(isset($stages[7]))
+                        @if(isset($stages[$appNextStep]))
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Proceed to Stage 7: {{ $stages[7]['title'] }} &rarr;</span>
+                                <span>Proceed to Stage {{ $appNextStep }}: {{ $stages[$appNextStep]['title'] }} &rarr;</span>
                             </button>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #16a34a;">
@@ -3614,17 +4626,20 @@
                 </form>
 
             <!-- ================= STAGE 7: V-SAT RESULTS (master.menus: CRMM0007) ================= -->
-            @elseif($activeStep === 7 && isset($stages[7]))
+            @elseif((($degreeLevel ?? '') !== 'phd' && $activeStep === 7 && isset($stages[7])) || (($degreeLevel ?? '') === 'phd' && $activeStep === 6 && isset($stages[6])))
                 @php
-                    $isStage7Done = ($stages[7]['status'] ?? 'pending') === 'completed';
+                    $isPhd = (($degreeLevel ?? '') === 'phd');
+                    $vsatStepNum = $isPhd ? 6 : 7;
+                    $vsatPrevStep = $isPhd ? 5 : 6;
+                    $isStage7Done = ($stages[$vsatStepNum]['status'] ?? 'pending') === 'completed';
                     $examDateFormatted = $examSchedule?->examdate ? \Carbon\Carbon::parse($examSchedule->examdate)->format('d M Y') : 'Booked in Stage 5';
                     $slotFormatted = $examSchedule?->exam_slot ?? 'Session Scheduled';
                 @endphp
                 <div class="step-panel-header">
                     <div>
-                        <div class="step-panel-kicker">Stage 7 of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
-                        <h3>{{ $stages[7]['title'] ?? 'V-SAT Results' }}</h3>
-                        <p>{{ $stages[7]['subtitle'] ?? 'Official V-SAT examination scorecard and admission merit records.' }}</p>
+                        <div class="step-panel-kicker">Stage {{ $vsatStepNum }} of {{ count($stages) }} &bull; V-SAT 2026 Examination</div>
+                        <h3>{{ $stages[$vsatStepNum]['title'] ?? 'V-SAT Results' }}</h3>
+                        <p>{{ $stages[$vsatStepNum]['subtitle'] ?? 'Official V-SAT examination scorecard and admission merit records.' }}</p>
                     </div>
                     @if($isStage7Done)
                         <span class="step-header-tag tag-success">✓ Onboarding Completed</span>
@@ -3635,7 +4650,7 @@
 
                 <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body">
                     @csrf
-                    <input type="hidden" name="step" value="7">
+                    <input type="hidden" name="step" value="{{ $vsatStepNum }}">
 
                     <!-- Candidate Examination Record from DB -->
                     <div class="section-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
@@ -3710,8 +4725,8 @@
                     </div>
 
                     <div class="step-footer-actions">
-                        <a href="{{ route('dashboards.index', ['step' => 6]) }}" class="btn-step-prev">
-                            &larr; Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }}
+                        <a href="{{ route('dashboards.index', ['step' => $vsatPrevStep]) }}" class="btn-step-prev">
+                            &larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #15803d;">
                             <span>✓ Complete Onboarding &amp; Finalize Registration</span>
@@ -3775,71 +4790,420 @@
 
     @if(!$hasAcceptedTerms)
         <!-- ================= TERMS & CONDITIONS POPUP MODAL ================= -->
-        <div id="termsConditionsModalOverlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1.25rem;">
-            <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 18px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+        <style>
+            .terms-modal-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.72);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                z-index: 99999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1.25rem;
+                animation: termsFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes termsFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            .terms-modal-card {
+                background: #ffffff;
+                width: 100%;
+                max-width: 590px;
+                border-radius: 20px;
+                box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+                overflow: hidden;
+                border: 1px solid #e2e8f0;
+                display: flex;
+                flex-direction: column;
+                animation: termsSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes termsSlideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(18px) scale(0.98);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            /* Header */
+            .terms-modal-header {
+                background: linear-gradient(135deg, #091e3a 0%, #1e3a8a 100%);
+                color: #ffffff;
+                padding: 1.35rem 1.65rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .terms-modal-header::after {
+                content: '';
+                position: absolute;
+                top: -30px;
+                right: -30px;
+                width: 120px;
+                height: 120px;
+                background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            .terms-header-icon-box {
+                width: 46px;
+                height: 46px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                color: #93c5fd;
+            }
+
+            .terms-header-title {
+                margin: 0;
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: #ffffff;
+                letter-spacing: -0.2px;
+                line-height: 1.25;
+            }
+
+            .terms-header-subtitle {
+                margin: 0.25rem 0 0 0;
+                font-size: 0.78rem;
+                color: #93c5fd;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+            }
+
+            .terms-header-subtitle-dot {
+                width: 4px;
+                height: 4px;
+                border-radius: 50%;
+                background: #60a5fa;
+            }
+
+            /* Body */
+            .terms-modal-body {
+                padding: 1.45rem 1.65rem 1.25rem;
+                color: #334155;
+                font-size: 0.88rem;
+                line-height: 1.6;
+                max-height: 65vh;
+                overflow-y: auto;
+            }
+
+            .terms-intro-text {
+                font-weight: 700;
+                color: #0f172a;
+                margin-top: 0;
+                margin-bottom: 1rem;
+                font-size: 0.88rem;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+            }
+
+            .terms-cards-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.85rem;
+            }
+
+            .terms-card-row {
+                display: flex;
+                gap: 0.85rem;
+                align-items: flex-start;
+                padding: 0.85rem 1rem;
+                border-radius: 12px;
+                transition: all 0.2s ease;
+                border: 1px solid transparent;
+            }
+
+            /* 1. Authenticity Row - Blue */
+            .terms-card-row.row-blue {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+                border-left: 4px solid #2563eb;
+            }
+            .terms-card-row.row-blue:hover {
+                background: #f0f7ff;
+                border-color: #bfdbfe;
+                border-left-color: #1d4ed8;
+            }
+
+            /* 2. Code of Conduct - Green */
+            .terms-card-row.row-green {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+                border-left: 4px solid #16a34a;
+            }
+            .terms-card-row.row-green:hover {
+                background: #f0fdf4;
+                border-color: #bbf7d0;
+                border-left-color: #15803d;
+            }
+
+            /* 3. Forfeiture Policy - Amber */
+            .terms-card-row.row-amber {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+                border-left: 4px solid #d97706;
+            }
+            .terms-card-row.row-amber:hover {
+                background: #fffbeb;
+                border-color: #fde68a;
+                border-left-color: #b45309;
+            }
+
+            .terms-badge-pill {
+                width: 26px;
+                height: 26px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.78rem;
+                font-weight: 800;
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
+
+            .terms-badge-pill.badge-blue {
+                background: #eff6ff;
+                color: #1d4ed8;
+                border: 1.5px solid #bfdbfe;
+            }
+
+            .terms-badge-pill.badge-green {
+                background: #f0fdf4;
+                color: #15803d;
+                border: 1.5px solid #bbf7d0;
+            }
+
+            .terms-badge-pill.badge-amber {
+                background: #fffbeb;
+                color: #b45309;
+                border: 1.5px solid #fde68a;
+            }
+
+            .terms-row-content {
+                flex: 1;
+                font-size: 0.84rem;
+                color: #334155;
+                line-height: 1.55;
+            }
+
+            /* Checkbox Agreement Card */
+            .terms-agreement-box {
+                margin-top: 1.15rem;
+                padding: 0.95rem 1.15rem;
+                background: #f8fafc;
+                border: 1.5px solid #cbd5e1;
+                border-radius: 12px;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+
+            .terms-agreement-box:hover {
+                background: #eff6ff;
+                border-color: #93c5fd;
+            }
+
+            .terms-agreement-box.is-agreed {
+                background: #eff6ff;
+                border-color: #2563eb;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+            }
+
+            .terms-checkbox-label {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                cursor: pointer;
+                user-select: none;
+                margin: 0;
+            }
+
+            .terms-checkbox-input {
+                width: 19px;
+                height: 19px;
+                accent-color: #2563eb;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .terms-checkbox-text {
+                font-size: 0.86rem;
+                font-weight: 700;
+                color: #1e3a8a;
+                line-height: 1.4;
+            }
+
+            /* Footer */
+            .terms-modal-footer {
+                padding: 1rem 1.65rem;
+                background: #f8fafc;
+                border-top: 1px solid #e2e8f0;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .btn-terms-submit {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.55rem;
+                background: #cbd5e1;
+                color: #64748b;
+                padding: 0.7rem 1.65rem;
+                border-radius: 10px;
+                font-size: 0.88rem;
+                font-weight: 700;
+                border: none;
+                cursor: not-allowed;
+                transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: none;
+            }
+
+            .btn-terms-submit.is-active {
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                color: #ffffff;
+                cursor: pointer;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+                transform: translateY(0);
+            }
+
+            .btn-terms-submit.is-active:hover {
+                background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+                box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+                transform: translateY(-1px);
+            }
+
+            .btn-terms-submit.is-active:active {
+                transform: translateY(0);
+            }
+        </style>
+
+        <div id="termsConditionsModalOverlay" class="terms-modal-overlay">
+            <div class="terms-modal-card">
 
                 <!-- Modal Header -->
-                <div style="background: linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 0.85rem;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-                        📜
+                <div class="terms-modal-header">
+                    <div class="terms-header-icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <path d="M9 15l2 2 4-4"></path>
+                        </svg>
                     </div>
                     <div>
-                        <h3 style="margin: 0; font-size: 1.12rem; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;">Terms &amp; Conditions Agreement</h3>
-                        <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #cbd5e1;">VFSTR Vignan University &bull; Admissions Onboarding</p>
+                        <h3 class="terms-header-title">Terms &amp; Conditions Agreement</h3>
+                        <p class="terms-header-subtitle">
+                            <span>VFSTR Vignan University</span>
+                            <span class="terms-header-subtitle-dot"></span>
+                            <span>Admissions Onboarding</span>
+                        </p>
                     </div>
                 </div>
 
-                <!-- Modal Body with 3 Sample Lines -->
-                <div style="padding: 1.5rem 1.65rem; color: #334155; font-size: 0.88rem; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
-                    <p style="font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 0.85rem;">Please review and confirm your acceptance of the admission terms before proceeding:</p>
+                <!-- Modal Body with 3 Terms Lines -->
+                <div class="terms-modal-body">
+                    <p class="terms-intro-text">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>Please review and confirm your acceptance of the admission terms before proceeding:</span>
+                    </p>
 
-                    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #3b82f6;">
-                            <span style="font-weight: 800; color: #2563eb; font-size: 0.85rem; line-height: 1.4;">1.</span>
-                            <span style="color: #334155; font-size: 0.84rem;">I confirm that all personal, contact, academic, and category details provided by me in this application are accurate and authentic to the best of my knowledge.</span>
+                    <div class="terms-cards-list">
+                        <!-- 1. Personal & Academic Details Authenticity -->
+                        <div class="terms-card-row row-blue">
+                            <div class="terms-badge-pill badge-blue">1</div>
+                            <div class="terms-row-content">
+                                I confirm that all personal, contact, academic, and category details provided by me in this application are accurate and authentic to the best of my knowledge.
+                            </div>
                         </div>
 
-                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #10b981;">
-                            <span style="font-weight: 800; color: #059669; font-size: 0.85rem; line-height: 1.4;">2.</span>
-                            <span style="color: #334155; font-size: 0.84rem;">I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.</span>
+                        <!-- 2. Academic & Conduct Compliance -->
+                        <div class="terms-card-row row-green">
+                            <div class="terms-badge-pill badge-green">2</div>
+                            <div class="terms-row-content">
+                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.
+                            </div>
                         </div>
 
-                        <div style="display: flex; gap: 0.65rem; align-items: flex-start; background: #f8fafc; padding: 0.75rem 0.95rem; border-radius: 10px; border-left: 3px solid #f59e0b;">
-                            <span style="font-weight: 800; color: #d97706; font-size: 0.85rem; line-height: 1.4;">3.</span>
-                            <span style="color: #334155; font-size: 0.84rem;">I understand that providing any false, incomplete, or misleading information will result in immediate cancellation of my admission and forfeiture of fees.</span>
+                        <!-- 3. Legal Undertaking & Forfeiture Policy -->
+                        <div class="terms-card-row row-amber">
+                            <div class="terms-badge-pill badge-amber">3</div>
+                            <div class="terms-row-content">
+                                I understand that providing any false, incomplete, or misleading information will result in immediate cancellation of my admission and forfeiture of fees.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Checkbox (Unticked by default) -->
-                    <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px;">
-                        <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none; margin: 0;">
-                            <input type="checkbox" id="termsAgreementCheckbox" onchange="toggleTermsSubmitBtn(this)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
-                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a;">I have read, understood, and accept all the terms and conditions stated above.</span>
+                    <div id="termsAgreementBox" class="terms-agreement-box" onclick="toggleCheckboxFromBox(event)">
+                        <label class="terms-checkbox-label">
+                            <input type="checkbox" id="termsAgreementCheckbox" onchange="toggleTermsSubmitBtn(this)" class="terms-checkbox-input">
+                            <span class="terms-checkbox-text">I have read, understood, and accept all the terms and conditions stated above.</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Footer Actions -->
-                <div style="padding: 1rem 1.65rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
-                    <button type="button" id="btnAcceptTermsModal" onclick="submitTermsAgreement()" disabled style="display: inline-flex; align-items: center; gap: 0.5rem; background: #2563eb; color: #ffffff; padding: 0.65rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: none; cursor: not-allowed; opacity: 0.5; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.2s;">
-                        <span>I Agree &amp; Continue &rarr;</span>
+                <div class="terms-modal-footer">
+                    <button type="button" id="btnAcceptTermsModal" class="btn-terms-submit" onclick="submitTermsAgreement()" disabled>
+                        <span>I Agree &amp; Continue</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
                     </button>
                 </div>
             </div>
         </div>
 
         <script>
+            function toggleCheckboxFromBox(e) {
+                if (e.target && e.target.id === 'termsAgreementCheckbox') {
+                    return; // native checkbox handles itself
+                }
+                const chk = document.getElementById('termsAgreementCheckbox');
+                if (chk) {
+                    chk.checked = !chk.checked;
+                    toggleTermsSubmitBtn(chk);
+                }
+            }
+
             function toggleTermsSubmitBtn(chk) {
                 const btn = document.getElementById('btnAcceptTermsModal');
+                const box = document.getElementById('termsAgreementBox');
                 if (!btn) return;
                 if (chk.checked) {
                     btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.style.cursor = 'pointer';
+                    btn.classList.add('is-active');
+                    if (box) box.classList.add('is-agreed');
                 } else {
                     btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.style.cursor = 'not-allowed';
+                    btn.classList.remove('is-active');
+                    if (box) box.classList.remove('is-agreed');
                 }
             }
 
@@ -3852,7 +5216,8 @@
                 const btn = document.getElementById('btnAcceptTermsModal');
                 if (btn) {
                     btn.disabled = true;
-                    btn.textContent = 'Saving agreement...';
+                    btn.classList.remove('is-active');
+                    btn.innerHTML = '<span>Saving agreement...</span>';
                 }
 
                 fetch('{{ route("dashboards.accept-terms") }}', {
@@ -3880,5 +5245,26 @@
             }
         </script>
     @endif
+    <script>
+        function setAppThemeColor(color) {
+            localStorage.setItem('crm_theme_color', color);
+            document.documentElement.setAttribute('data-theme-color', color);
+            document.querySelectorAll('.nav-theme-color-dot').forEach(function(dot) {
+                var dotColor = dot.getAttribute('data-color');
+                if (dotColor === color || (color === 'maroon' && dotColor === 'red')) {
+                    dot.classList.add('is-active');
+                } else {
+                    dot.classList.remove('is-active');
+                }
+            });
+        }
+
+        (function() {
+            var c = localStorage.getItem('crm_theme_color') || 'maroon';
+            if (c === 'red') c = 'maroon';
+            var d = document.querySelector('.nav-theme-color-dot[data-color="' + c + '"]');
+            if (d) d.classList.add('is-active');
+        })();
+    </script>
 </body>
 </html>

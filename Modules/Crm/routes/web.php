@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kpi', [StudentKpiController::class, 'index'])->name('kpi.index');
     Route::get('/kpi/index', [StudentKpiController::class, 'index']);
     Route::get('/kpi/studentkpi', [StudentKpiController::class, 'index'])->name('kpi.studentkpi');
+    Route::get('/kpi/studentkpi/export', [StudentKpiController::class, 'export'])->name('kpi.studentkpi.export');
     Route::get('/kpi/telecallerkpi', [TelecallerKpiController::class, 'index'])->name('kpi.telecallerkpi');
     Route::get('/kpi/leadskpi', [LeadsKpiController::class, 'index'])->name('kpi.leadskpi');
 });

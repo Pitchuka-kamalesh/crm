@@ -215,4 +215,117 @@ class ApplicationDownloadTest extends TestCase
         $this->assertNotEquals($existingId, $generatedId);
         $this->assertFalse(\Modules\Crm\Services\CrmIdService::isCrmIdInUse($generatedId, '9999999999'));
     }
+
+    public function test_stage2_doctoral_saves_and_renders_postgraduate_1_and_2(): void
+    {
+        $suffix = (string) rand(100000, 999999);
+        $phdPhone = '9988' . $suffix;
+        $phdApplino = 'VU2026' . $suffix;
+
+        User::where('phnno', $phdPhone)->orWhere('usercode', $phdApplino)->delete();
+        CrmStudentRegistration::where('phoneno', $phdPhone)->orWhere('applinano', $phdApplino)->delete();
+
+        $user = User::create([
+            'phnno' => $phdPhone,
+            'name' => 'Doctoral Candidate',
+            'pwd' => bcrypt('secret'),
+            'role_id' => 5,
+            'user_type' => 1,
+            'usercode' => $phdApplino,
+        ]);
+
+        $student = CrmStudentRegistration::create([
+            'phoneno' => $phdPhone,
+            'applinano' => $phdApplino,
+            'name' => 'Doctoral Candidate',
+            'programlevel' => 'DOCTORAL',
+            'stage1' => 'completed',
+            'stage2' => 'pending',
+            'stage4' => 'pending',
+        ]);
+
+        $payload = [
+            'step' => 2,
+            'degree_level' => 'phd',
+            'school_co_name' => 'ZPH School',
+            'boad_of_study' => 'State Board',
+            'roll_no' => '10TH9988',
+            'passing_year' => 2016,
+            'tenth_marks_conducted' => 600,
+            'tenth_marks_earned' => 550,
+            'tenth_percentage' => 91.67,
+            'tenth_marks_type' => 'Marks',
+
+            'inter_college' => 'Junior College',
+            'city' => 'Guntur',
+            'jr_state' => 'Andhra Pradesh',
+            'jr_district' => 'Guntur',
+            'subset_choice' => 'Second Year',
+            'inter_year' => 2018,
+            'inter_hallticket' => 'INTER9988',
+            'pu2_marks_type' => 'Marks',
+            'pu2_marks_conducted' => 1000,
+            'pu2_marks_earned' => 920,
+            'pu2_percentage' => 92.00,
+
+            // UG
+            'ug_college_name' => 'University College of Eng',
+            'ug_university_board' => 'JNTUK',
+            'ug_roll_no' => '18UG1001',
+            'ug_passed_year' => 2022,
+            'ug_cgpa' => '8.80',
+            'ug_current_status' => 'Completed',
+
+            // PG 1
+            'pg_college_name' => 'National Institute of Tech PG1',
+            'pg_university_board' => 'NIT',
+            'pg_roll_no' => '22PG1001',
+            'pg_passed_year' => 2024,
+            'pg_cgpa' => '9.20',
+            'pg_current_status' => 'Completed',
+
+            // PG 2
+            'pg2_college_name' => 'Indian Institute of Tech PG2',
+            'pg2_university_board' => 'IIT',
+            'pg2_roll_no' => '24PG2001',
+            'pg2_passed_year' => 2026,
+            'pg2_cgpa' => '9.50',
+            'pg2_current_status' => 'Completed',
+        ];
+
+        $saveResponse = $this->actingAs($user)->post('/dashboards/save-step', $payload);
+        $saveResponse->assertRedirect();
+
+        // Verify database records
+        $savedDetail = \Modules\Dashboards\Models\StudentAcademicDetail::where('applino', $phdApplino)->first();
+        $this->assertNotNull($savedDetail);
+        $this->assertEquals('National Institute of Tech PG1', $savedDetail->pg_college_name);
+        $this->assertEquals('Indian Institute of Tech PG2', $savedDetail->pg2_college_name);
+        $this->assertEquals('24PG2001', $savedDetail->pg2_roll_no);
+        $this->assertEquals(2026, $savedDetail->pg2_passed_year);
+
+        // Verify ApplicationController builds PG 1 and PG 2
+        $controller = new ApplicationController();
+        $reflection = new \ReflectionClass($controller);
+        $method = $reflection->getMethod('buildStudentApplicationData');
+        $method->setAccessible(true);
+        $appData = $method->invoke($controller, $phdApplino);
+
+        $this->assertEquals('phd', $appData->degree_level);
+        $this->assertEquals('National Institute of Tech PG1', $appData->academic->pg_college);
+        $this->assertEquals('Indian Institute of Tech PG2', $appData->academic->pg2_college);
+
+        // Verify blade views render Postgraduate 1 and Postgraduate 2
+        $view1 = view('dashboards::application-form', ['student' => $appData])->render();
+        $this->assertStringContainsString('Postgraduate 1', $view1);
+        $this->assertStringContainsString('National Institute of Tech PG1', $view1);
+        $this->assertStringContainsString('Postgraduate 2', $view1);
+        $this->assertStringContainsString('Indian Institute of Tech PG2', $view1);
+
+        $view2 = view('application-form', ['student' => $appData])->render();
+        $this->assertStringContainsString('Postgraduate 1', $view2);
+        $this->assertStringContainsString('National Institute of Tech PG1', $view2);
+        $this->assertStringContainsString('Postgraduate 2', $view2);
+        $this->assertStringContainsString('Indian Institute of Tech PG2', $view2);
+    }
 }

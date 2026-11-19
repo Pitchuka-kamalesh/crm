@@ -168,12 +168,12 @@
                 <!-- TAB: ENQUIRY LIST -->
                 <div class="content-card">
                     <!-- LIVE SINGLE SEARCH: APPLICATION NO, PHONE NUMBER, STUDENT NAME -->
-                    <div class="enquiry-filter-toolbar">
-                        <div class="filter-inputs-row">
+                    <div class="enquiry-filter-toolbar" style="display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.85rem 1.25rem;">
+                        <div class="filter-inputs-row" style="flex: 1; margin: 0; min-width: 260px;">
                             <!-- Unified Search Filter -->
-                            <div class="filter-control-group filter-control-search">
+                            <div class="filter-control-group filter-control-search" style="margin: 0; width: 100%; max-width: 420px;">
                                 <label for="liveFilterSearch" class="filter-label">
-                                    <span class="filter-icon">🔍</span> Search Enquiries
+                                    Search Enquiries
                                 </label>
                                 <div class="input-with-icon">
                                     <input type="text" 
@@ -189,9 +189,9 @@
                             </div>
                         </div>
 
-                        <!-- Record Count Badge -->
-                        <div class="filter-meta-bar" style="display: flex; align-items: center; justify-content: flex-end; padding-top: 0.5rem; border-top: 1px dashed #e2e8f0;">
-                            <div id="filterCountBadge" class="filter-count-badge" style="font-size: 0.85rem; font-weight: 700; color: #334155; background: #f8fafc; padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <!-- Record Count Badge (Single Row Alignment) -->
+                        <div class="filter-meta-bar" style="display: flex; align-items: center; justify-content: flex-end; margin: 0; padding: 0; border: none;">
+                            <div id="filterCountBadge" class="filter-count-badge" style="font-size: 0.85rem; font-weight: 700; color: #334155; background: #ffffff; padding: 7px 14px; border-radius: 8px; border: 1px solid #cbd5e1; white-space: nowrap; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);">
                                 Total Records: {{ $allStudents->count() }}
                             </div>
                         </div>
@@ -274,7 +274,6 @@
                                 <!-- LIVE FILTER NO RESULTS PLACEHOLDER -->
                                 <tr id="noFilterMatchesRow" style="display: none;">
                                     <td colspan="6" style="text-align: center; padding: 2.5rem 1rem; background: #fafafa;">
-                                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔍</div>
                                         <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">No enquiries match the selected filters</div>
                                         <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;" id="noMatchesDetailText">No records match search.</div>
                                         <button type="button" onclick="window.clearFilterInput('liveFilterSearch')" class="btn-action-sm btn-verify" style="margin: 0 auto; display: inline-flex;">
@@ -411,7 +410,7 @@
                                    placeholder="Search by Application No, Student Name, or Mobile..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="submit" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem; border-radius: 8px;">
-                                🔍 Search
+                                Search
                             </button>
                         </form>
 
@@ -422,10 +421,8 @@
                             <button type="button" 
                                     id="btnDownloadRegisterCsv" 
                                     onclick="downloadRegisterListCsv()" 
-                                    class="btn-action-sm" 
-                                    style="height: 42px; padding: 0 1.35rem; background: #059669; color: #ffffff; border: none; border-radius: 8px; font-size: 0.86rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.06); transition: all 0.15s ease;"
-                                    onmouseover="this.style.background='#047857'"
-                                    onmouseout="this.style.background='#059669'"
+                                    class="btn-action-sm btn-theme-export" 
+                                    style="height: 42px; padding: 0 1.35rem; background: var(--theme-accent, #059669); color: #ffffff; border: none; border-radius: 8px; font-size: 0.86rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; box-shadow: 0 1px 2px var(--theme-accent-ring, rgba(0,0,0,0.06)); transition: all 0.15s ease;"
                                     title="Download Register List data as CSV file">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -453,6 +450,20 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $renderStagePill = function(string $pillClass, string $text, string $type, string $appliNo, string $stageKey, bool $isTracking): string {
+                                        if ($type === 'done') {
+                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"/></svg>';
+                                        } elseif ($type === 'due') {
+                                            $iconSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+                                        } else {
+                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+                                        }
+                                        $cursorStyle = $isTracking ? 'cursor: pointer; transition: transform 0.15s ease;' : '';
+                                        $hoverAttr = $isTracking ? 'onmouseover="this.style.transform=\'scale(1.06)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="openStudentStageModal(\'' . e($appliNo) . '\', \'' . e($stageKey) . '\')" title="Click to view details"' : '';
+                                        return '<span class="tracking-pill ' . e($pillClass) . '" style="' . $cursorStyle . '" ' . $hoverAttr . '>' . $iconSvg . '<span>' . e($text) . '</span></span>';
+                                    };
+                                @endphp
                                 @forelse($allStudents as $std)
                                     @php
                                         $phone = $std->mobile ?? $std->phoneno ?? '';
@@ -471,47 +482,47 @@
                                         $hasAppli = (!empty($appliNo) && $appliNo !== 'N/A');
                                         $stdStatus = strtolower(trim((string)($std->std_status ?? '')));
                                         if ($hasAppli || in_array($stdStatus, ['applied', 'registered', 'verified', 'admitted', 'enrolled', 'completed'])) {
-                                            $st1Pill = 'pill-done'; $st1Icon = '✓'; $st1Text = 'Done';
+                                            $st1Pill = 'pill-done'; $st1Type = 'done'; $st1Icon = '✓'; $st1Text = 'Done';
                                         } else {
-                                            $st1Pill = 'pill-awaiting'; $st1Icon = '⏳'; $st1Text = 'Pending';
+                                            $st1Pill = 'pill-pending'; $st1Type = 'pending'; $st1Icon = '⏳'; $st1Text = 'Pending';
                                         }
 
                                         // 2. Payment (stage1 fee payment)
                                         if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
-                                            $st2Pill = 'pill-done'; $st2Icon = '✓'; $st2Text = 'Done';
+                                            $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Icon = '✓'; $st2Text = 'Done';
                                         } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st2Pill = 'pill-danger'; $st2Icon = '❌'; $st2Text = 'Fee Due';
+                                            $st2Pill = 'pill-danger'; $st2Type = 'due'; $st2Icon = '✕'; $st2Text = 'Fee Due';
                                         } else {
-                                            $st2Pill = 'pill-awaiting'; $st2Icon = '⏳'; $st2Text = 'Pending';
+                                            $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Icon = '⏳'; $st2Text = 'Pending';
                                         }
 
                                         // 3. Personal Details (stage2)
                                         if (in_array($s2, ['completed', 'approved', 'done'])) {
-                                            $st3Pill = 'pill-done'; $st3Icon = '✓'; $st3Text = 'Done';
+                                            $st3Pill = 'pill-done'; $st3Type = 'done'; $st3Icon = '✓'; $st3Text = 'Done';
                                         } else {
-                                            $st3Pill = 'pill-awaiting'; $st3Icon = '⏳'; $st3Text = 'Pending';
+                                            $st3Pill = 'pill-pending'; $st3Type = 'pending'; $st3Icon = '⏳'; $st3Text = 'Pending';
                                         }
 
                                         // 4. Academic Details (stage3)
                                         if (in_array($s3, ['completed', 'approved', 'done'])) {
-                                            $st4Pill = 'pill-done'; $st4Icon = '✓'; $st4Text = 'Done';
+                                            $st4Pill = 'pill-done'; $st4Type = 'done'; $st4Icon = '✓'; $st4Text = 'Done';
                                         } else {
-                                            $st4Pill = 'pill-awaiting'; $st4Icon = '⏳'; $st4Text = 'Pending';
+                                            $st4Pill = 'pill-pending'; $st4Type = 'pending'; $st4Icon = '⏳'; $st4Text = 'Pending';
                                         }
 
                                         // 5. Application Download (stage4)
                                         if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
-                                            $st5Pill = 'pill-done'; $st5Icon = '✓'; $st5Text = 'Done';
+                                            $st5Pill = 'pill-done'; $st5Type = 'done'; $st5Icon = '✓'; $st5Text = 'Done';
                                         } else {
-                                            $st5Pill = 'pill-awaiting'; $st5Icon = '⏳'; $st5Text = 'Pending';
+                                            $st5Pill = 'pill-pending'; $st5Type = 'pending'; $st5Icon = '⏳'; $st5Text = 'Pending';
                                         }
 
                                         // 6. VSAT Result (stage5)
                                         $isVsatDone = in_array($s5, ['completed', 'approved', 'done', 'qualified']);
                                         if ($isVsatDone) {
-                                            $st6Pill = 'pill-done'; $st6Icon = '✓'; $st6Text = 'Done';
+                                            $st6Pill = 'pill-done'; $st6Type = 'done'; $st6Icon = '✓'; $st6Text = 'Done';
                                         } else {
-                                            $st6Pill = 'pill-awaiting'; $st6Icon = '⏳'; $st6Text = 'Pending';
+                                            $st6Pill = 'pill-pending'; $st6Type = 'pending'; $st6Icon = '⏳'; $st6Text = 'Pending';
                                         }
 
                                         // Detailed student payload for instant interactive stage popup
@@ -611,110 +622,32 @@
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st1Pill }}" 
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'registration')"
-                                                          title="Click to view Registration Form details">
-                                                        {{ $st1Icon }} {{ $st1Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st1Pill }}">
-                                                        {{ $st1Icon }} {{ $st1Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st1Pill, $st1Text, $st1Type, $appliNo, 'registration', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st2Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'payment')"
-                                                          title="Click to view Payment details">
-                                                        {{ $st2Icon }} {{ $st2Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st2Pill }}">
-                                                        {{ $st2Icon }} {{ $st2Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st2Pill, $st2Text, $st2Type, $appliNo, 'payment', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st3Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'personal')"
-                                                          title="Click to view Personal details">
-                                                        {{ $st3Icon }} {{ $st3Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st3Pill }}">
-                                                        {{ $st3Icon }} {{ $st3Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st3Pill, $st3Text, $st3Type, $appliNo, 'personal', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st4Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'academic')"
-                                                          title="Click to view Academic details">
-                                                        {{ $st4Icon }} {{ $st4Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st4Pill }}">
-                                                        {{ $st4Icon }} {{ $st4Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliNo, 'academic', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st5Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'application')"
-                                                          title="Click to view Application Download details">
-                                                        {{ $st5Icon }} {{ $st5Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st5Pill }}">
-                                                        {{ $st5Icon }} {{ $st5Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st5Pill, $st5Text, $st5Type, $appliNo, 'application', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($isTrackingPage)
-                                                    <span class="tracking-pill {{ $st6Pill }}"
-                                                          style="cursor: pointer; transition: transform 0.15s ease;"
-                                                          onmouseover="this.style.transform='scale(1.06)'" 
-                                                          onmouseout="this.style.transform='scale(1)'"
-                                                          onclick="openStudentStageModal('{{ $appliNo }}', 'vsat')"
-                                                          title="Click to view VSAT Result details">
-                                                        {{ $st6Icon }} {{ $st6Text }}
-                                                    </span>
-                                                @else
-                                                    <span class="tracking-pill {{ $st6Pill }}">
-                                                        {{ $st6Icon }} {{ $st6Text }}
-                                                    </span>
-                                                @endif
+                                                {!! $renderStagePill($st6Pill, $st6Text, $st6Type, $appliNo, 'vsat', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                     </tr>
@@ -1707,11 +1640,16 @@
                 <div class="content-card">
                     <div class="card-header-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div>
-                            <div class="card-title">🎟️ Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</div>
+                            <div class="card-title" style="display: flex; align-items: center; gap: 7px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #2563eb);"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                                <span>Coupon Management &amp; Fee Concessions Ledger (finance.couponinfo)</span>
+                            </div>
                             <div class="card-subtitle">Manage Default Early Bird Tiers (up to 800 members) and Personal Coupons (Derived from 8 Digits of Application No + P1 Suffix, e.g. 27000005P1)</div>
                         </div>
-                        <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; cursor: pointer;">
-                            + 🎟️ Generate Personal Coupon (e.g. 27000005P1)
+                        <button type="button" class="btn-action-sm btn-verify" onclick="openPersonalCouponModal()" style="height: 40px; padding: 0 1.25rem; font-size: 0.85rem; font-weight: 700; color: #ffffff; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                            <span>Generate Personal Coupon (e.g. 27000005P1)</span>
                         </button>
                     </div>
                     <!-- Search Toolbar with Live Search -->
@@ -1722,7 +1660,7 @@
                                    placeholder="Search by Application Number, Candidate Name, or Coupon Code..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="button" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
-                                🔍 Search
+                                Search
                             </button>
                         </div>
 
@@ -1857,15 +1795,16 @@
                                                         data-payload="{{ base64_encode(json_encode($paymentPayload)) }}"
                                                         title="View Official Payment Receipt"
                                                         style="height: 32px; padding: 0 12px; font-size: 0.82rem; font-weight: 700; background: #1e40af; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);">
-                                                    <span>💳</span> Receipt
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                                    <span>Receipt</span>
                                                 </button>
                                                 @if(!$personalCoupon)
                                                     <button type="button" 
                                                             class="btn-action-sm" 
                                                             onclick="openPersonalCouponModal('{{ $appliNo }}', '{{ $expectedPersonalCode }}', '{{ $std->crmid ?? \App\Services\CrmIdService::getOrGenerateByAppli($appliNo) }}', '{{ addslashes($candidateName) }}', '{{ $programName }}')"
-                                                            style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe;"
+                                                            style="height: 32px; width: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; cursor: pointer;"
                                                             title="Generate Personal Coupon">
-                                                        🎟️
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
                                                     </button>
                                                 @endif
                                             </div>
@@ -1888,7 +1827,8 @@
                     <div style="background: #ffffff; border-radius: 16px; max-width: 520px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; overflow: hidden;">
                         <div style="padding: 1.25rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                             <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                <span>🎟️</span> Generate Personal Coupon (CRM Incharge)
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #2563eb);"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg>
+                                <span>Generate Personal Coupon (CRM Incharge)</span>
                             </div>
                             <button type="button" onclick="closePersonalCouponModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
                         </div>
@@ -2182,7 +2122,7 @@
                                    placeholder="Search by Employee Name, Code, Email, Phone, or Designation..." 
                                    style="flex: 1; height: 42px; padding: 0.55rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; outline: none;">
                             <button type="button" class="btn-action-sm btn-verify" style="padding: 0 1.25rem; height: 42px; font-size: 0.84rem;">
-                                🔍 Search
+                                Search
                             </button>
                         </div>
 
@@ -2382,34 +2322,34 @@
                                 <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👥</div>
                             </div>
 
-                            <!-- Card 2: Fee Payment (Stage 1) -->
-                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Payment Conversion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage1Paid / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage1Paid }} Fee Paid</div>
-                                </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
-                            </div>
-
-                            <!-- Card 3: Personal Profile (Stage 2) -->
+                            <!-- Card 2: Personal Profile (Stage 1) -->
                             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 <div>
                                     <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Profile Completion</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage2Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage2Done }} Submitted</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #2563eb; margin: 0.2rem 0;">{{ round(($kpiStage1Profile / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #2563eb; font-weight: 600;">{{ $kpiStage1Profile }} Completed</div>
                                 </div>
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📋</div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">👤</div>
                             </div>
 
-                            <!-- Card 4: Academic Records (Stage 3) -->
+                            <!-- Card 3: Academic Records (Stage 2) -->
                             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Verified</div>
-                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage3Done / $kpiTotal) * 100, 1) }}%</div>
-                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage3Done }} Completed</div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Academic Records</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #7c3aed; margin: 0.2rem 0;">{{ round(($kpiStage2Academic / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #7c3aed; font-weight: 600;">{{ $kpiStage2Academic }} Verified</div>
                                 </div>
                                 <div style="width: 44px; height: 44px; border-radius: 10px; background: #f5f3ff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🎓</div>
+                            </div>
+
+                            <!-- Card 4: Fee Payment (Stage 4) -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem 1.25rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Fee Payment</div>
+                                    <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin: 0.2rem 0;">{{ round(($kpiStage4Fee / $kpiTotal) * 100, 1) }}%</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">{{ $kpiStage4Fee }} Fee Paid</div>
+                                </div>
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">💳</div>
                             </div>
                         </div>
 
@@ -2594,7 +2534,6 @@
                                         <!-- Empty match state when search yields zero rows -->
                                         <tr id="kpiNoResultsRow" style="display: none;">
                                             <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: #64748b;">
-                                                <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
                                                 <div style="font-size: 0.9rem; font-weight: 600; color: #334155;">No matching student records found</div>
                                             </td>
                                         </tr>
@@ -2692,17 +2631,17 @@
 
                 function initKpiVisualCharts() {
                     const funnelLabels = [
-                        ['Registration'],
-                        ['Fee', 'Payment'],
-                        ['Personal', 'Details'],
-                        ['Academic', 'Records'],
-                        ['Application', 'Form'],
-                        ['Seat', 'Allotment']
+                        ['Total', 'Registered'],
+                        ['Stage 1:', 'Profile'],
+                        ['Stage 2:', 'Academic'],
+                        ['Stage 3:', 'Documents'],
+                        ['Stage 4:', 'Fee Paid'],
+                        ['Stage 5:', 'Slot Booking']
                     ];
-                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Paid }}, {{ (int)$kpiStage2Done }}, {{ (int)$kpiStage3Done }}, {{ (int)$kpiStage4Done }}, {{ (int)$kpiStage5Done }}];
+                    const funnelCounts = [{{ (int)$kpiTotal }}, {{ (int)$kpiStage1Profile }}, {{ (int)$kpiStage2Academic }}, {{ (int)$kpiStage3Docs }}, {{ (int)$kpiStage4Fee }}, {{ (int)$kpiStage5Slot }}];
                     const totalApplicants = {{ (int)$kpiTotal }};
-                    const paidCount = {{ (int)$kpiStage1Paid }};
-                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage1Paid) }};
+                    const paidCount = {{ (int)$kpiStage4Fee }};
+                    const dueCount = {{ (int)max(0, $kpiTotal - $kpiStage4Fee) }};
                     const branchLabels = {!! json_encode(array_keys($kpiBranchDistribution->toArray())) !!};
                     const branchCounts = {!! json_encode(array_values($kpiBranchDistribution->toArray())) !!};
 

@@ -29,6 +29,12 @@
             --bg-body: #f8fafc;
         }
 
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #ffffff;
@@ -37,6 +43,9 @@
             display: flex;
             flex-direction: column;
             line-height: 1.5;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
         }
 
         /* Top Header Bar */
@@ -114,11 +123,12 @@
         .page-wrapper {
             max-width: 1320px;
             width: 100%;
+            box-sizing: border-box;
             margin: 0 auto;
             padding: 3rem 1.5rem 4rem 1.5rem;
             display: grid;
             grid-template-columns: 1.05fr 0.95fr;
-            gap: 3.5rem;
+            gap: 3rem;
             align-items: start;
             flex: 1;
         }
@@ -214,10 +224,22 @@
             }
         }
 
+        .form-row-single {
+            width: 100%;
+        }
+
         .form-row-3col {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 0.75rem;
+        }
+
+        .form-row-3col .select-field {
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.74rem 1.85rem 0.74rem 0.75rem;
+            background-position: right 0.55rem center;
+            background-size: 0.88rem;
         }
 
         @media (max-width: 600px) {
@@ -448,7 +470,30 @@
             transform: rotate(180deg);
         }
 
-        /* 4-column compact triggers */
+        /* 3-column & 4-column compact triggers */
+        .form-row-3col .custom-select-trigger {
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.74rem 0.65rem;
+            letter-spacing: -0.01em;
+        }
+
+        .form-row-3col .custom-select-arrow {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row-3col .custom-select-trigger {
+                font-size: 0.85rem;
+                padding: 0.76rem 0.95rem;
+            }
+            .form-row-3col .custom-select-arrow {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
         .form-row-4col .custom-select-trigger {
             font-size: 0.80rem;
             font-weight: 600;
@@ -582,33 +627,99 @@
         }
 
         .level-pills-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.4rem;
+            display: flex;
+            align-items: center;
             background: #f1f5f9;
-            padding: 0.35rem;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            padding: 5px 6px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         .level-pill-btn {
-            padding: 0.55rem 0.5rem;
-            border: none;
+            flex: 1;
+            height: 40px;
+            padding: 0 0.5rem;
+            border: 1.5px solid transparent;
             background: transparent;
             border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 0.84rem;
             font-weight: 700;
-            color: #64748b;
+            color: #334155;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            user-select: none;
+            white-space: nowrap;
+            position: relative;
         }
 
-        .level-pill-btn.pill-active {
+        .level-pill-btn:hover:not(.pill-active):not(.pill-doctoral) {
+            background: rgba(255, 255, 255, 0.85);
+            color: #0f172a;
+        }
+
+        .level-pill-btn.pill-active:not(.pill-doctoral) {
             background: #2563eb;
             color: #ffffff;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            border-color: #2563eb;
+        }
+
+        /* Visible, crisp vertical separation line */
+        .level-pill-divider {
+            width: 1.5px;
+            height: 22px;
+            background: #94a3b8;
+            flex-shrink: 0;
+            border-radius: 1px;
+            margin: 0 6px;
+        }
+
+        /* Properly highlighted Doctoral Pill */
+        .level-pill-btn.pill-doctoral {
+            color: #6d28d9;
+            background: #f5f3ff;
+            border: 1.5px solid #8b5cf6;
+            font-weight: 750;
+            box-shadow: 0 1px 3px rgba(139, 92, 246, 0.15);
+        }
+
+        .level-pill-btn.pill-doctoral:hover:not(.pill-active) {
+            background: #ede9fe;
+            color: #5b21b6;
+            border-color: #7c3aed;
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+        }
+
+        .level-pill-btn.pill-doctoral.pill-active {
+            background: #7c3aed;
+            color: #ffffff;
+            border-color: #7c3aed;
+            box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
+        }
+
+        .level-pill-btn.pill-doctoral .doc-badge {
+            background: #7c3aed;
+            color: #ffffff;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+            font-weight: 800;
+            box-shadow: 0 1px 2px rgba(124, 58, 237, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .level-pill-btn.pill-doctoral.pill-active .doc-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: none;
         }
 
         /* Captcha Card */
@@ -714,11 +825,11 @@
             margin-bottom: 1rem;
         }
 
-        @media (max-width: 960px) {
+        @media (max-width: 1080px) {
             .page-wrapper {
                 grid-template-columns: 1fr;
                 gap: 2rem;
-                padding-top: 1.5rem;
+                padding: 1.5rem 1rem 3rem 1rem;
             }
             .hero-headline {
                 font-size: 2.2rem;
@@ -907,8 +1018,8 @@
                     </span>
                 </div>
 
-                <!-- 2. select campus | select country | State | District (dynamically populated from DB) -->
-                <div class="form-row-4col">
+                <!-- 2a. select campus (Single Row) -->
+                <div class="form-row-single">
                     <select name="campus_id" required class="select-field">
                         <option value="">select campus</option>
                         @foreach($campuses as $campus)
@@ -917,7 +1028,10 @@
                             </option>
                         @endforeach
                     </select>
+                </div>
 
+                <!-- 2b. select country | State | District (3 Fields Row) -->
+                <div class="form-row-3col">
                     <select name="country_id" id="country_select" required class="select-field" onchange="filterStates(this.value)">
                         <option value="">select country</option>
                         @foreach($countries as $country)
@@ -946,12 +1060,21 @@
                     </select>
                 </div>
 
-                <!-- 3. Undergrade | PG | Doctoral (from wireframe) -->
+                <!-- 3. Undergraduate | PG | Doctoral -->
                 <div class="level-section">
                     <div class="level-pills-row">
-                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">Undergrade</button>
-                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">PG</button>
-                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('Doctoral', this)">Doctoral</button>
+                        <button type="button" class="level-pill-btn pill-active" onclick="selectProgramLevel('UG', this)">
+                            <span>Undergraduate</span>
+                        </button>
+                        <div class="level-pill-divider"></div>
+                        <button type="button" class="level-pill-btn" onclick="selectProgramLevel('PG', this)">
+                            <span>PG</span>
+                        </button>
+                        <div class="level-pill-divider"></div>
+                        <button type="button" class="level-pill-btn pill-doctoral" onclick="selectProgramLevel('Doctoral', this)">
+                            <span>Doctoral</span>
+                            <span class="doc-badge">Ph.D</span>
+                        </button>
                     </div>
                 </div>
 
@@ -1030,7 +1153,8 @@
 
         function selectProgramLevel(level, btnEl, preserveVal = false) {
             document.querySelectorAll('.level-pill-btn').forEach(b => b.classList.remove('pill-active'));
-            if (btnEl) btnEl.classList.add('pill-active');
+            const targetBtn = btnEl ? (btnEl.closest('.level-pill-btn') || btnEl) : Array.from(document.querySelectorAll('.level-pill-btn')).find(b => b.textContent.toLowerCase().includes(level.toLowerCase()));
+            if (targetBtn) targetBtn.classList.add('pill-active');
             document.getElementById('input_program_level').value = level;
 
             const courseSelect = document.getElementById('course_select');

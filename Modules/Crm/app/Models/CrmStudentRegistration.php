@@ -143,8 +143,9 @@ class CrmStudentRegistration extends Model
     public function scopePaid(Builder $query): Builder
     {
         return $query->where(function ($q) {
-            $q->where('stage1', 'paid')
-              ->orWhereHas('payDetail', fn($p) => $p->where('txnstatus', 'success'))
+            $q->whereIn(DB::raw('LOWER(TRIM(stage4))'), ['paid', 'completed'])
+              ->orWhere('stage1', 'paid')
+              ->orWhereHas('payDetail', fn($p) => $p->where('txnstatus', 'success')->orWhere('paidamount', '>', 0))
               ->orWhereHas('receipt');
         });
     }
