@@ -1221,10 +1221,16 @@
                 <div class="form-row-2col">
                     <select name="progid" id="course_select" required class="select-field" onchange="updateBranches(this.value)">
                         <option value="">select program</option>
+                        @php
+                            $defaultLevel = old('program_level', 'UG');
+                            $initFilterLevels = ($defaultLevel === 'Doctoral') ? ['PhD', 'Doctoral'] : [$defaultLevel];
+                        @endphp
                         @foreach($programs as $prog)
-                            <option value="{{ $prog->program_id }}" data-level="{{ $prog->program_level }}" {{ old('progid') == $prog->program_id ? 'selected' : '' }}>
-                                {{ $prog->program_short_name }} - {{ $prog->program_long_name }}
-                            </option>
+                            @if(in_array($prog->program_level, $initFilterLevels))
+                                <option value="{{ $prog->program_id }}" data-level="{{ $prog->program_level }}" {{ old('progid') == $prog->program_id ? 'selected' : '' }}>
+                                    {{ $prog->program_short_name }} - {{ $prog->program_long_name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
 
@@ -1416,17 +1422,15 @@
             }
 
             const currentLevel = document.getElementById('input_program_level')?.value || 'UG';
-            const activeBtn = Array.from(document.querySelectorAll('.level-pill-btn'))
-                .find(b => b.textContent.toLowerCase().includes(currentLevel.toLowerCase()) || (currentLevel === 'UG' && b.textContent.toLowerCase().includes('undergrade')));
+            const activeBtn = document.querySelector('.level-pill-btn.pill-active') ||
+                Array.from(document.querySelectorAll('.level-pill-btn')).find(b => {
+                    const txt = (b.textContent || '').toLowerCase();
+                    if (currentLevel === 'UG') return txt.includes('undergrad');
+                    if (currentLevel === 'PG') return txt.includes('pg');
+                    return txt.includes('ph') || txt.includes('doc');
+                });
             const oldProgId = '{{ old("progid", "") }}';
-            if (activeBtn) {
-                selectProgramLevel(currentLevel, activeBtn, Boolean(oldProgId));
-            } else {
-                const courseSelect = document.getElementById('course_select');
-                if (courseSelect && courseSelect.value) {
-                    updateBranches(courseSelect.value, Boolean(oldProgId));
-                }
-            }
+            selectProgramLevel(currentLevel, activeBtn, Boolean(oldProgId));
 
             // Initialize Modern Custom Dropdown UI
             initCustomSelects();
