@@ -857,41 +857,34 @@
             transition: opacity 0.3s ease, filter 0.3s ease;
         }
 
-        /* Hero Headline with Side Logo (Parallely Matched to Full 3 Rows) */
-        .hero-headline-wrap {
+        /* Hero Top Logo (Above Headline) */
+        .hero-logo-wrap {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            margin-bottom: -0.25rem;
         }
 
-        .hero-side-logo {
-            height: 176px;
+        .hero-top-logo {
+            height: 84px;
             width: auto;
-            max-width: 160px;
+            max-width: 350px;
             object-fit: contain;
-            flex-shrink: 0;
+            mix-blend-mode: multiply;
             image-rendering: -webkit-optimize-contrast;
-            filter: drop-shadow(0 6px 20px rgba(37, 99, 235, 0.25));
             transition: all 0.3s ease;
         }
 
         @media (max-width: 900px) {
-            .hero-headline-wrap {
-                gap: 1.15rem;
-            }
-            .hero-side-logo {
-                height: 130px;
-                max-width: 120px;
+            .hero-top-logo {
+                height: 70px;
+                max-width: 280px;
             }
         }
 
         @media (max-width: 600px) {
-            .hero-headline-wrap {
-                gap: 0.85rem;
-            }
-            .hero-side-logo {
-                height: 95px;
-                max-width: 85px;
+            .hero-top-logo {
+                height: 56px;
+                max-width: 220px;
             }
         }
 
@@ -956,12 +949,13 @@
 
         <!-- Left Hero Area -->
         <section class="hero-left">
-            <div class="hero-headline-wrap">
-                <img src="/images/vignan_logo.jpeg" alt="Vignan's University" class="hero-side-logo">
-                <h1 class="hero-headline">
-                    Empower as <br>leader at <br><span>Vignan's University</span>
-                </h1>
+            <div class="hero-logo-wrap">
+                <img src="/images/vignan_logo.jpeg" alt="Vignan's University" class="hero-top-logo">
             </div>
+
+            <h1 class="hero-headline">
+                Empower as <br>leader at <br><span>Vignan's University</span>
+            </h1>
 
             <p class="hero-subtitle">
                 Join a legacy of academic excellence, cutting-edge research, state-of-the-art innovation centers, and top-tier placements across multinational leaders.
@@ -1600,22 +1594,7 @@
             }
         });
 
-        // Synchronize side logo height to precisely match the 3 rows of headline text
-        function syncLogoHeight() {
-            const headline = document.querySelector('.hero-headline');
-            const logo = document.querySelector('.hero-side-logo');
-            if (headline && logo) {
-                const h = headline.offsetHeight;
-                if (h > 60) {
-                    logo.style.height = h + 'px';
-                }
-            }
-        }
-        window.addEventListener('resize', syncLogoHeight);
-        window.addEventListener('load', syncLogoHeight);
-        document.addEventListener('DOMContentLoaded', syncLogoHeight);
-        setTimeout(syncLogoHeight, 50);
-        setTimeout(syncLogoHeight, 300);
+
     </script>
 </body>
 </html>
