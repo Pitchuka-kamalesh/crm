@@ -121,13 +121,14 @@
         .hero-section {
             display: flex;
             flex-direction: column;
-            gap: 1.75rem;
+            gap: 1.05rem;
+            margin-top: -4.5rem;
         }
 
         .hero-title-area {
             display: flex;
             flex-direction: column;
-            gap: 0.65rem;
+            gap: 0.45rem;
         }
 
         .tag-label {
@@ -148,10 +149,10 @@
         }
 
         .hero-title {
-            font-size: 2.9rem;
+            font-size: 2.75rem;
             font-weight: 800;
             letter-spacing: -0.025em;
-            line-height: 1.15;
+            line-height: 1.12;
             color: #ffffff;
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
         }
@@ -164,10 +165,10 @@
         }
 
         .hero-desc {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             color: #e2e8f0;
             max-width: 580px;
-            line-height: 1.6;
+            line-height: 1.5;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
 
@@ -183,16 +184,22 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #94a3b8;
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
 
+        .bubbles-cluster-title span {
+            color: #38bdf8;
+            font-weight: 800;
+        }
+
         .bubbles-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.85rem;
+            gap: 0.9rem;
         }
 
         /* Individual Feature Bubble */
@@ -242,6 +249,8 @@
         .bubble-emerald { background: #059669; color: #ffffff; }
         .bubble-amber { background: #d97706; color: #ffffff; }
         .bubble-purple { background: #7c3aed; color: #ffffff; }
+        .bubble-teal { background: #0d9488; color: #ffffff; }
+        .bubble-rose { background: #e11d48; color: #ffffff; }
 
         .bubble-label {
             font-size: 0.85rem;
@@ -324,6 +333,8 @@
         .popover-badge-emerald { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; border: 1px solid rgba(110, 231, 183, 0.3); }
         .popover-badge-amber { background: rgba(245, 158, 11, 0.3); color: #fde68a; border: 1px solid rgba(253, 230, 138, 0.3); }
         .popover-badge-purple { background: rgba(168, 85, 247, 0.3); color: #e9d5ff; border: 1px solid rgba(233, 213, 255, 0.3); }
+        .popover-badge-teal { background: rgba(20, 184, 166, 0.3); color: #99f6e4; border: 1px solid rgba(153, 246, 228, 0.3); }
+        .popover-badge-rose { background: rgba(244, 63, 94, 0.3); color: #fecdd3; border: 1px solid rgba(254, 205, 211, 0.3); }
 
         .popover-text {
             font-size: 0.78rem;
@@ -728,6 +739,10 @@
                 gap: 2rem;
                 margin: auto 0;
             }
+            .hero-section {
+                margin-top: 0;
+                gap: 1.5rem;
+            }
             .hero-title {
                 font-size: 2.1rem;
             }
@@ -804,53 +819,79 @@
                 </p>
             </div>
 
-            <!-- 5 Interactive Admission Bubbles (Hover reveals full details) -->
-            <div class="bubbles-cluster-wrap">
+            <!-- Admission Information & Brochures -->
+            <div class="bubbles-cluster-wrap" style="margin-top: 1.75rem;">
                 <div class="bubbles-cluster-title">
-                    <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
+                    <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
                 </div>
 
+                <!-- Row 1: FEE - INFO 2027, V-SAT brochure, Provisional ID -->
                 <div class="bubbles-grid">
 
-                    <!-- Bubble 1: Online Application -->
+                    <!-- Button 1: FEE - INFO 2027 -->
                     <div class="feature-bubble">
-                        <div class="bubble-icon bubble-blue">
+                        <div class="bubble-icon bubble-teal">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <span class="bubble-label">Online Application</span>
+                        <span class="bubble-label">FEE - INFO 2027</span>
                         <span class="bubble-badge-indicator"></span>
 
                         <!-- Hover Popover -->
                         <div class="bubble-popover">
                             <div class="popover-header">
-                                <span class="popover-title">Online Application</span>
-                                <span class="popover-badge popover-badge-blue">&bull; Batch 2026-27</span>
+                                <span class="popover-title">FEE - INFO 2027</span>
+                                <span class="popover-badge popover-badge-teal">&bull; Batch 2027-28</span>
                             </div>
-                            <p class="popover-text">Track application status, chosen program tracks (MBA, MCA, BBA, BCA), personal profile, and category reservation.</p>
+                            <p class="popover-text">Complete tuition fee structure, merit scholarships, branch concessions, hostel and examination fee guidelines.</p>
                         </div>
                     </div>
 
-                    <!-- Bubble 2: Document Verification -->
+                    <!-- Button 2: V-SAT brochure -->
                     <div class="feature-bubble">
-                        <div class="bubble-icon bubble-cyan">
+                        <div class="bubble-icon bubble-rose">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
                         </div>
-                        <span class="bubble-label">Document Verification</span>
+                        <span class="bubble-label">V-SAT brochure</span>
                         <span class="bubble-badge-indicator"></span>
 
                         <!-- Hover Popover -->
                         <div class="bubble-popover">
                             <div class="popover-header">
-                                <span class="popover-title">Certificate &amp; KYC</span>
-                                <span class="popover-badge popover-badge-cyan">&bull; Online KYC</span>
+                                <span class="popover-title">V-SAT Brochure</span>
+                                <span class="popover-badge popover-badge-rose">&bull; Official Guide</span>
                             </div>
-                            <p class="popover-text">Upload and verify educational certificates, 10th/12th memos, Transfer Certificate, Migration, and Aadhaar card.</p>
+                            <p class="popover-text">National entrance examination handbook, eligibility criteria, exam slots, syllabus pattern, and admission guidelines.</p>
                         </div>
                     </div>
+
+                    <!-- Bubble 5: Provisional ID & Enrollment (Placed beside V-SAT brochure) -->
+                    <div class="feature-bubble">
+                        <div class="bubble-icon bubble-purple">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                            </svg>
+                        </div>
+                        <span class="bubble-label">Provisional ID</span>
+                        <span class="bubble-badge-indicator"></span>
+
+                        <!-- Hover Popover -->
+                        <div class="bubble-popover">
+                            <div class="popover-header">
+                                <span class="popover-title">Provisional ID &amp; Order</span>
+                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
+                            </div>
+                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Row 2: Fee & Receipts and Seat Allotment (Placed below with clear gap) -->
+                <div class="bubbles-grid" style="margin-top: 1.05rem;">
 
                     <!-- Bubble 3: Fee Payment & Receipts -->
                     <div class="feature-bubble">
@@ -892,23 +933,55 @@
                         </div>
                     </div>
 
-                    <!-- Bubble 5: Provisional ID & Enrollment -->
+                </div>
+            </div>
+
+            <!-- 5 Interactive Admission Bubbles (Hover reveals full details) -->
+            <div class="bubbles-cluster-wrap" style="margin-top: 3.5rem;">
+                <div class="bubbles-cluster-title">
+                    <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
+                </div>
+
+                <!-- Row 1: Online Application & Document Verification -->
+                <div class="bubbles-grid">
+
+                    <!-- Bubble 1: Online Application -->
                     <div class="feature-bubble">
-                        <div class="bubble-icon bubble-purple">
+                        <div class="bubble-icon bubble-blue">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </div>
-                        <span class="bubble-label">Provisional ID</span>
+                        <span class="bubble-label">Online Application</span>
                         <span class="bubble-badge-indicator"></span>
 
                         <!-- Hover Popover -->
                         <div class="bubble-popover">
                             <div class="popover-header">
-                                <span class="popover-title">Provisional ID &amp; Order</span>
-                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
+                                <span class="popover-title">Online Application</span>
+                                <span class="popover-badge popover-badge-blue">&bull; Batch 2026-27</span>
                             </div>
-                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
+                            <p class="popover-text">Track application status, chosen program tracks (MBA, MCA, BBA, BCA), personal profile, and category reservation.</p>
+                        </div>
+                    </div>
+
+                    <!-- Bubble 2: Document Verification -->
+                    <div class="feature-bubble">
+                        <div class="bubble-icon bubble-cyan">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <span class="bubble-label">Document Verification</span>
+                        <span class="bubble-badge-indicator"></span>
+
+                        <!-- Hover Popover -->
+                        <div class="bubble-popover">
+                            <div class="popover-header">
+                                <span class="popover-title">Certificate &amp; KYC</span>
+                                <span class="popover-badge popover-badge-cyan">&bull; Online KYC</span>
+                            </div>
+                            <p class="popover-text">Upload and verify educational certificates, 10th/12th memos, Transfer Certificate, Migration, and Aadhaar card.</p>
                         </div>
                     </div>
 
