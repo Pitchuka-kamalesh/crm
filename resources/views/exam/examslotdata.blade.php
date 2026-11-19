@@ -121,6 +121,45 @@
             color: #0f172a;
         }
 
+        @media (max-width: 768px) {
+            .btn-header-action {
+                display: none !important;
+            }
+            .metrics-compact-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 0.5rem !important;
+            }
+            .metrics-compact-row > div {
+                padding: 0.35rem 0.65rem !important;
+                height: auto !important;
+                min-height: 38px !important;
+            }
+            .filter-panel {
+                padding: 0.65rem 0.75rem !important;
+            }
+            .filter-separator {
+                display: none !important;
+            }
+            .filter-item-search {
+                width: 100% !important;
+                flex: 1 1 100% !important;
+            }
+            #examSearchInput {
+                width: 100% !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .metrics-compact-row {
+                grid-template-columns: 1fr 1fr !important;
+            }
+            .metrics-compact-row span:first-child {
+                font-size: 0.68rem !important;
+            }
+            .metrics-compact-row span:last-child {
+                font-size: 0.95rem !important;
+            }
+        }
+
         /* Proper Print Stylesheet */
         @media print {
             @page {
@@ -206,10 +245,13 @@
                         <line x1="4" y1="18" x2="20" y2="18"/>
                     </svg>
                 </button>
-                <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>Exams Slot Data Ledger</span>
-                    <span style="font-size: 0.74rem; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                        finance.exam_schedule
+                <div class="topbar-page-breadcrumb">
+                    <span class="breadcrumb-item breadcrumb-desktop-only">Exams</span>
+                    <span class="breadcrumb-separator breadcrumb-desktop-only">/</span>
+                    <span class="breadcrumb-active-tag">
+                        <span class="breadcrumb-dot"></span>
+                        <span class="breadcrumb-lead-full">Slot Data Ledger</span>
+                        <span class="breadcrumb-lead-mobile">Slot Data</span>
                     </span>
                 </div>
             </div>
@@ -321,7 +363,7 @@
                             </div>
 
                             <!-- Some Gap / Visual Separator -->
-                            <div style="width: 1px; height: 24px; background: #cbd5e1; margin: 0 0.2rem; align-self: flex-end; margin-bottom: 4px;"></div>
+                            <div class="filter-separator" style="width: 1px; height: 24px; background: #cbd5e1; margin: 0 0.2rem; align-self: flex-end; margin-bottom: 4px;"></div>
 
                             <!-- 4. Start Date -->
                             <div class="filter-item">
@@ -336,7 +378,7 @@
                             </div>
 
                             <!-- 6. Live Search Input -->
-                            <div class="filter-item">
+                            <div class="filter-item filter-item-search">
                                 <label class="filter-field-label">Search</label>
                                 <input type="text"
                                        id="examSearchInput"

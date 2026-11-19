@@ -159,25 +159,36 @@
         /* PayU Official Submit Button */
         .btn-pay-now {
             width: 100%;
-            height: 52px;
+            min-height: 52px;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: #ffffff;
             border: none;
             border-radius: 12px;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
             cursor: pointer;
             box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.65rem;
+            flex-wrap: wrap;
+            gap: 0.35rem 0.5rem;
+            padding: 0.75rem 1.25rem;
+            line-height: 1.25;
             transition: all 0.2s ease;
         }
         .btn-pay-now:hover {
             background: linear-gradient(135deg, #059669 0%, #047857 100%);
             box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.55);
             transform: translateY(-1px);
+        }
+        .btn-pay-main {
+            font-weight: 800;
+        }
+        .btn-pay-sub {
+            font-weight: 600;
+            font-size: 0.82rem;
+            opacity: 0.95;
         }
 
         /* Test Simulator Button (Dev Only) */
@@ -247,6 +258,157 @@
             width: 54px; height: 54px; border: 4px solid rgba(16, 185, 129, 0.25); border-top-color: #10b981; border-radius: 50%; animation: spin 0.75s linear infinite; margin-bottom: 1.25rem;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                padding: 0.75rem 0.65rem 2.5rem;
+                min-height: 100vh;
+            }
+            .payu-single-card {
+                border-radius: 18px;
+                box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+                margin: 0 auto;
+            }
+            .payu-card-header {
+                padding: 0.95rem 1rem 0.85rem;
+                gap: 0.65rem;
+            }
+            .brand-info {
+                gap: 8px;
+            }
+            .brand-info img {
+                height: 36px;
+                padding: 3px;
+                border-radius: 8px;
+            }
+            .brand-title {
+                font-size: 0.9rem;
+                line-height: 1.2;
+            }
+            .brand-sub {
+                font-size: 0.64rem;
+                letter-spacing: 0.3px;
+            }
+            .txn-chip {
+                font-size: 0.65rem;
+                padding: 3px 7px;
+                letter-spacing: 0.2px;
+            }
+            .payu-card-body {
+                padding: 1rem 0.85rem 1.25rem;
+            }
+            .amount-hero {
+                padding: 0.85rem 0.75rem;
+                margin-bottom: 0.9rem;
+                border-radius: 13px;
+            }
+            .amount-hero-label {
+                font-size: 0.68rem;
+                letter-spacing: 0.04em;
+            }
+            .amount-hero-val {
+                font-size: 1.95rem;
+                margin: 2px 0;
+            }
+            .amount-hero-sub {
+                font-size: 0.72rem;
+            }
+            .summary-box {
+                padding: 0.75rem 0.85rem;
+                margin-bottom: 0.9rem;
+                border-radius: 12px;
+                font-size: 0.78rem;
+            }
+            .summary-row {
+                padding: 0.4rem 0;
+                gap: 0.5rem;
+            }
+            .sr-label {
+                font-size: 0.78rem;
+                flex: 1;
+                min-width: 0;
+                word-break: break-word;
+            }
+            .sr-val {
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+            .code-pill {
+                font-size: 0.65rem;
+                padding: 1px 5px;
+            }
+            .receipt-notice {
+                padding: 0.65rem 0.75rem;
+                margin-bottom: 1rem;
+                border-radius: 10px;
+                font-size: 0.74rem;
+                line-height: 1.35;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+            .receipt-notice-icon {
+                font-size: 1.15rem;
+                line-height: 1;
+                margin-top: 1px;
+            }
+            .btn-pay-now {
+                min-height: 48px;
+                padding: 0.7rem 0.85rem;
+                font-size: 0.92rem;
+                border-radius: 10px;
+                gap: 0.25rem 0.4rem;
+            }
+            .btn-pay-main {
+                font-size: 0.94rem;
+            }
+            .btn-pay-sub {
+                font-size: 0.75rem;
+            }
+            .simulator-box {
+                margin-top: 0.75rem;
+                padding-top: 0.65rem;
+            }
+            .btn-simulator {
+                font-size: 0.72rem;
+                padding: 8px 10px;
+                line-height: 1.3;
+                text-align: center;
+            }
+            .card-footer {
+                margin-top: 0.85rem;
+                font-size: 0.76rem;
+            }
+            .card-footer a, .card-footer button {
+                padding: 4px 0;
+            }
+            .security-badge-strip {
+                margin-top: 0.85rem;
+                padding-top: 0.75rem;
+                flex-wrap: wrap;
+                gap: 0.35rem 0.65rem;
+                font-size: 0.68rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            body {
+                padding: 0.5rem 0.4rem 2rem;
+            }
+            .payu-card-header {
+                padding: 0.85rem 0.75rem 0.75rem;
+            }
+            .payu-card-body {
+                padding: 0.85rem 0.75rem 1rem;
+            }
+            .amount-hero-val {
+                font-size: 1.75rem;
+            }
+            .btn-pay-main {
+                font-size: 0.88rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -337,7 +499,8 @@
             <input type="hidden" name="email" value="{{ $email }}">
 
             <button type="submit" id="btnPayNow" class="btn-pay-now">
-                <span>💳 Confirm & Pay ₹{{ number_format($amount, 2) }} (Generate Official Receipt) &rarr;</span>
+                <span class="btn-pay-main">💳 Confirm & Pay ₹{{ number_format($amount, 2) }}</span>
+                <span class="btn-pay-sub">(Generate Official Receipt) &rarr;</span>
             </button>
         </form>
 

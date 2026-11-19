@@ -187,8 +187,8 @@
         .nav-inner {
             max-width: 1320px;
             margin: 0 auto;
-            padding: 0 1.25rem;
-            height: 58px;
+            padding: 0 1.5rem;
+            height: 66px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -197,13 +197,13 @@
         .brand-cluster {
             display: flex;
             align-items: center;
-            gap: 0.7rem;
+            gap: 0.75rem;
             text-decoration: none;
         }
 
         .brand-logo-img {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             transition: transform 0.2s ease;
         }
@@ -243,6 +243,7 @@
             border: 1px solid #dbeafe;
             text-transform: uppercase;
             letter-spacing: 0.04em;
+            white-space: nowrap;
         }
 
         /* Center Nav Links - Clean Understated Style */
@@ -305,6 +306,7 @@
             align-items: center;
             justify-content: flex-end;
             gap: 0.3rem;
+            white-space: nowrap;
         }
 
         .user-avatar-circle {
@@ -1089,7 +1091,7 @@
         /* Footer */
         .dash-footer {
             background: #ffffff;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid #e2e8f0;
             padding: 1.25rem 1.5rem;
             margin-top: auto;
             position: relative;
@@ -1104,6 +1106,7 @@
             justify-content: space-between;
             font-size: 0.78rem;
             color: #64748b;
+            gap: 1rem;
         }
 
         .footer-inner a {
@@ -1150,6 +1153,517 @@
             }
             .dash-container {
                 padding: 1rem;
+            }
+            .dash-footer {
+                padding: 1.15rem 1rem;
+                text-align: center;
+                margin-top: 1.25rem;
+            }
+            .footer-inner {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 0.45rem;
+                font-size: 0.75rem;
+                line-height: 1.5;
+            }
+            .footer-inner > div {
+                text-align: center;
+            }
+        }
+
+        /* Dedicated Stage Form Wrapper for consistent mobile padding */
+        .stage-form-wrapper {
+            padding: 1.5rem 2rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .embedded-a4-form-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+        }
+
+        .mobile-a4-scroll-hint {
+            display: none;
+        }
+
+        .btn-label-mobile {
+            display: none;
+        }
+        .btn-label-desktop {
+            display: inline;
+        }
+
+        .stage-action-row {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        @media (max-width: 640px) {
+            .stage-form-wrapper {
+                padding: 0.65rem 0.5rem !important;
+            }
+            .dash-container {
+                padding: 0.5rem 0.5rem 2rem !important;
+                gap: 0.5rem;
+            }
+            .dash-nav {
+                position: sticky;
+                top: 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            }
+            .nav-inner {
+                padding: 0.6rem 0.75rem !important;
+                height: auto !important;
+                min-height: 60px !important;
+            }
+            .brand-cluster {
+                gap: 0.45rem !important;
+            }
+            .brand-logo-img {
+                width: 34px !important;
+                height: 34px !important;
+                flex-shrink: 0 !important;
+            }
+            .brand-name-main {
+                font-size: 0.98rem !important;
+                font-weight: 800 !important;
+                white-space: nowrap !important;
+            }
+            .brand-tag {
+                font-size: 0.62rem !important;
+                padding: 0.1rem 0.4rem !important;
+                white-space: nowrap !important;
+            }
+            .brand-accred-sub {
+                display: none !important;
+            }
+            .user-nav-cluster {
+                gap: 0.4rem !important;
+            }
+            .user-name-title {
+                max-width: 90px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                font-size: 0.8rem !important;
+                font-weight: 700 !important;
+            }
+            .user-meta-sub {
+                font-size: 0.64rem !important;
+                font-weight: 600 !important;
+                white-space: nowrap !important;
+            }
+            .user-avatar-circle {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.8rem !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-nav-action {
+                padding: 0.3rem 0.45rem !important;
+                font-size: 0.72rem !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-signout svg {
+                width: 15px !important;
+                height: 15px !important;
+            }
+            .btn-signout span {
+                display: none;
+            }
+
+            .welcome-hero {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0.85rem 1rem !important;
+                gap: 0.55rem !important;
+                border-radius: 12px !important;
+            }
+            .welcome-hero-left {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            .welcome-heading {
+                font-size: 1.1rem !important;
+                line-height: 1.3 !important;
+                margin: 0;
+            }
+            .welcome-subtitle {
+                font-size: 0.76rem !important;
+                line-height: 1.4 !important;
+                color: #475569 !important;
+            }
+            .meta-badges-cluster {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+            }
+            .meta-badge {
+                font-size: 0.7rem !important;
+                padding: 0.22rem 0.6rem !important;
+                border-radius: 9999px;
+            }
+
+            .stepper-card {
+                padding: 0.75rem 0.85rem !important;
+                border-radius: 12px !important;
+            }
+            .stepper-header {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.45rem !important;
+                margin-bottom: 0.65rem !important;
+            }
+            .stepper-title-box {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+            }
+            .stepper-title-box h2 {
+                font-size: 0.88rem !important;
+                font-weight: 700;
+                color: #0f172a;
+                margin: 0;
+            }
+            .stepper-step-indicator {
+                font-size: 0.68rem !important;
+                padding: 0.12rem 0.5rem !important;
+                font-weight: 600;
+            }
+            .stepper-progress-box {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+                gap: 0.65rem !important;
+            }
+            .progress-bar-track {
+                flex: 1 !important;
+                width: auto !important;
+                height: 6px !important;
+                background: #f1f5f9;
+                border-radius: 9999px;
+            }
+            .progress-percent-label {
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
+                color: #475569 !important;
+                white-space: nowrap !important;
+            }
+            .stepper-nav-bar {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+                gap: 0.5rem !important;
+                padding: 0.5rem 0.2rem 0.25rem !important;
+                border-top: 1px solid #f1f5f9;
+            }
+            .stepper-nav-bar::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+            .stepper-nav-bar .step-nav-btn {
+                min-width: 82px !important;
+                max-width: 95px !important;
+                padding: 0.35rem 0.15rem !important;
+                flex: 0 0 auto !important;
+            }
+            .step-circle {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.75rem !important;
+            }
+            .step-nav-name {
+                font-size: 0.7rem !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                word-break: normal !important;
+                text-overflow: clip !important;
+                max-width: 100% !important;
+                text-align: center !important;
+                margin-top: 0.25rem !important;
+            }
+            .step-nav-status-sub {
+                font-size: 0.62rem !important;
+                margin-top: 0.1rem !important;
+            }
+
+            .step-panel-card {
+                border-radius: 10px;
+            }
+            .step-panel-header {
+                padding: 0.75rem 0.85rem !important;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.45rem;
+            }
+            .step-panel-header h3 {
+                font-size: 0.98rem !important;
+            }
+            .step-panel-body {
+                padding: 0.85rem 0.75rem !important;
+            }
+
+            .mockup-card {
+                padding: 1rem 0.85rem 1.35rem !important;
+                border-radius: 14px !important;
+            }
+            .mockup-card-title {
+                font-size: 0.98rem !important;
+            }
+            .mockup-subbox {
+                padding: 0.75rem 0.65rem !important;
+                border-radius: 10px !important;
+                gap: 0.6rem;
+            }
+            .mockup-subbox-title {
+                font-size: 0.88rem !important;
+            }
+
+            .mockup-input, .mockup-select, .field-input, .field-select, .field-textarea {
+                font-size: 16px !important; /* Prevents auto zoom in iOS Safari */
+                padding: 0.55rem 0.75rem !important;
+            }
+
+            .mockup-radio-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.4rem;
+            }
+            .mockup-radio-row {
+                flex-wrap: wrap;
+                gap: 0.4rem 0.75rem;
+            }
+
+            .kyc-docs-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem;
+            }
+            .kyc-doc-card, .download-doc-card {
+                padding: 0.85rem 0.75rem !important;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .step-footer-actions {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 0.65rem;
+                padding-top: 0.85rem;
+            }
+            .step-footer-actions .btn-step-prev,
+            .step-footer-actions .btn-step-next,
+            .step-footer-actions .btn-save-step,
+            .step-footer-actions button[type="submit"] {
+                width: 100%;
+                justify-content: center;
+                min-height: 44px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            #payuSubmitForm {
+                width: 100%;
+                display: block;
+            }
+            #btnPayUGateway {
+                width: 100% !important;
+                justify-content: center !important;
+                min-height: 44px !important;
+                box-sizing: border-box;
+            }
+
+            .fee-table {
+                font-size: 0.8rem;
+            }
+            .fee-table th, .fee-table td {
+                padding: 0.65rem 0.5rem;
+            }
+
+            .embedded-a4-form {
+                min-width: 680px;
+            }
+
+            .mobile-a4-scroll-hint {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4rem;
+                background: #e0f2fe;
+                color: #0369a1;
+                font-size: 0.74rem;
+                font-weight: 700;
+                padding: 6px 10px;
+                border-radius: 8px;
+                margin-bottom: 0.75rem;
+                border: 1px solid #bae6fd;
+                text-align: center;
+            }
+
+            .stage6-header-actions {
+                width: 100%;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+            .stage6-header-actions a {
+                width: 100%;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 0.55rem 0.5rem !important;
+                font-size: 0.78rem !important;
+                border-radius: 8px !important;
+                box-sizing: border-box !important;
+            }
+
+            .stage6-panel-body {
+                padding: 0.75rem 0.5rem !important;
+            }
+
+            .embedded-a4-attachment {
+                border-radius: 8px !important;
+                margin-top: 0.85rem !important;
+            }
+            .attachment-header {
+                padding: 10px 12px !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+            }
+            .attachment-actions {
+                width: 100% !important;
+                display: flex !important;
+                gap: 6px !important;
+                flex-wrap: wrap !important;
+            }
+            .attachment-actions a, .attachment-actions span {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                flex: 1 !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            .embedded-a4-attachment iframe {
+                height: 420px !important;
+            }
+
+            /* Stage 7 Mobile Refinements */
+            .stage7-banner-box {
+                padding: 0.95rem 0.85rem !important;
+                border-radius: 10px !important;
+            }
+            .stage7-banner-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.65rem !important;
+                margin-bottom: 0.85rem !important;
+            }
+            .stage7-banner-header h4 {
+                font-size: 0.92rem !important;
+                line-height: 1.25 !important;
+            }
+            .stage7-banner-header span {
+                font-size: 0.74rem !important;
+            }
+            .stage7-banner-header .meta-badge {
+                align-self: flex-start !important;
+                font-size: 0.76rem !important;
+                padding: 0.35rem 0.75rem !important;
+            }
+            .stage7-metric-card {
+                padding: 0.75rem 0.85rem !important;
+            }
+            .stage7-notice-box {
+                padding: 0.75rem 0.85rem !important;
+                font-size: 0.78rem !important;
+                line-height: 1.45 !important;
+            }
+
+            .dash-footer {
+                padding: 1rem 0.85rem !important;
+                margin-top: 1rem !important;
+                background: #ffffff !important;
+                border-top: 1px solid #e2e8f0 !important;
+            }
+            .footer-inner {
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                gap: 0.4rem !important;
+                font-size: 0.72rem !important;
+                line-height: 1.45 !important;
+            }
+            .footer-inner > div {
+                text-align: center !important;
+            }
+
+            .btn-label-desktop {
+                display: none !important;
+            }
+            .btn-label-mobile {
+                display: inline !important;
+            }
+
+            .stage-action-row {
+                margin-top: 1.5rem !important;
+                margin-bottom: 0.25rem !important;
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                gap: 0.75rem !important;
+            }
+            .stage-action-row .btn-step-prev,
+            .stage-action-row .btn-step-next,
+            .stage-action-row button,
+            .stage-action-row a {
+                width: 100% !important;
+                justify-content: center !important;
+                text-align: center !important;
+                min-height: 48px !important;
+                padding: 0.75rem 1rem !important;
+                font-size: 0.92rem !important;
+                font-weight: 700 !important;
+                border-radius: 10px !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                align-items: center !important;
+                line-height: 1.25 !important;
+            }
+            .stage-action-row .btn-step-next {
+                background: #2563eb !important;
+                color: #ffffff !important;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
+            }
+            .stage-action-row .btn-step-next:hover {
+                background: #1d4ed8 !important;
+            }
+            .stage-action-row .btn-step-prev {
+                background: #f8fafc !important;
+                color: #475569 !important;
+                border: 1.5px solid #cbd5e1 !important;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            }
+            .stage-action-row .btn-step-prev:hover {
+                background: #f1f5f9 !important;
+                color: #0f172a !important;
+                border-color: #94a3b8 !important;
             }
         }
 
@@ -1322,8 +1836,14 @@
             .mockup-field-row-2 {
                 grid-template-columns: 1fr;
             }
+            .mockup-field-row-3 {
+                grid-template-columns: 1fr !important;
+            }
             .mockup-field-row-4 {
                 grid-template-columns: 1fr;
+            }
+            .mockup-subgrid-3 {
+                grid-template-columns: 1fr !important;
             }
         }
 
@@ -1358,6 +1878,183 @@
             border-color: #0f2744;
             background: #ffffff;
             box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
+        }
+
+        .mockup-select {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.85rem;
+            padding-right: 2rem !important;
+        }
+
+        .mockup-select option {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.88rem;
+        }
+
+        /* ========================================================
+           CUSTOM DROPDOWN UI (Floating Styled Dropdown Card)
+           ======================================================== */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-container.is-open {
+            z-index: 1001;
+        }
+
+        .custom-select-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            padding: 0.6rem 0.85rem;
+            min-height: 40px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+            font-family: inherit;
+            background-color: #eef3f7;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .custom-select-trigger:hover {
+            border-color: #94a3b8;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+        }
+
+        .custom-select-container.is-open .custom-select-trigger,
+        .custom-select-trigger:focus {
+            outline: none;
+            border-color: #0f2744;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
+        }
+
+        .custom-select-trigger:disabled,
+        fieldset[disabled] .custom-select-trigger {
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+            border-color: #cbd5e1 !important;
+            cursor: not-allowed !important;
+            opacity: 0.85;
+            box-shadow: none !important;
+        }
+
+        .custom-select-value {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-select-value.is-placeholder {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .custom-select-arrow {
+            width: 0.85rem;
+            height: 0.85rem;
+            flex-shrink: 0;
+            color: #2563eb;
+            transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-select-container.is-open .custom-select-arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-select-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.16), 0 6px 14px -3px rgba(15, 23, 42, 0.08);
+            padding: 0.35rem;
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 1002;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+            box-sizing: border-box;
+        }
+
+        .custom-select-container.is-open .custom-select-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .custom-select-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-select-dropdown::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        .custom-select-dropdown::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
+        .custom-select-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .custom-select-option {
+            padding: 0.55rem 0.75rem;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #1e293b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .custom-select-option:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        .custom-select-option.is-selected {
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .custom-select-option.is-placeholder {
+            color: #94a3b8;
+            font-style: italic;
+            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 0.25rem;
         }
 
         fieldset[disabled] .mockup-input,
@@ -1484,7 +2181,7 @@
             <a href="{{ route('dashboards.index') }}" class="brand-cluster">
                 <img src="/images/vignan-shield-clean.png" alt="Vignan's University" class="brand-logo-img">
                 <div class="brand-title-wrap">
-                    <div style="display:flex; align-items:center; gap:0.45rem;">
+                    <div style="display:flex; align-items:center; gap:0.45rem; flex-wrap:nowrap;">
                         <span class="brand-name-main">VIGNAN'S</span>
                         <span class="brand-tag">Student Portal</span>
                     </div>
@@ -1499,7 +2196,7 @@
                 <div class="user-info-text">
                     <span class="user-name-title">{{ $displayName }}</span>
                     @if($appNo)
-                        <span class="user-meta-sub">ID: {{ $appNo }}</span>
+                        <span class="user-meta-sub" style="white-space:nowrap;">ID: {{ $appNo }}</span>
                     @endif
                 </div>
 
@@ -1613,12 +2310,14 @@
                     @endphp
                     @if($isLocked)
                         <div class="step-nav-btn is-locked"
-                             style="opacity: 0.45; cursor: not-allowed; pointer-events: none;"
+                             style="opacity: 0.65; cursor: not-allowed; pointer-events: none;"
                              title="Step {{ $num }}: {{ $stg['title'] }} (Locked until previous steps are completed)">
-                            <div class="step-circle" style="background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1;">
-                                🔒
+                            <div class="step-circle" style="background: #f8fafc; color: #64748b; border: 1.5px solid #cbd5e1;">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #64748b;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
                             </div>
-                            <span class="step-nav-name" style="color: #94a3b8;">{{ $stg['title'] }}</span>
+                            <span class="step-nav-name" style="color: #64748b;">{{ $stg['title'] }}</span>
                             <span class="step-nav-status-sub" style="color: #94a3b8;">Locked</span>
                         </div>
                     @else
@@ -1649,7 +2348,7 @@
 
             <!-- ================= STAGE 1: PERSONAL PROFILE ================= -->
             @if($activeStep === 1)
-                <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
+                <div class="stage-form-wrapper">
                     <!-- CARD 1: 2. PERSONAL DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
@@ -1776,7 +2475,11 @@
                                         <label class="mockup-label">Country: <span style="color:#ef4444;">*</span></label>
                                         <select name="country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
                                             @foreach($countries as $c)
-                                                <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ ($personalInfo?->country == $c->country_name || (!$personalInfo && $c->country_code === 'IN')) ? 'selected' : '' }}>
+                                                @php
+                                                    $isCountrySel = ($personalInfo?->country == $c->country_name)
+                                                        || (!$personalInfo && ($c->country_name === 'India' || $c->country_id == 1 || strtoupper($c->country_code ?? '') === 'IN'));
+                                                @endphp
+                                                <option value="{{ $c->country_id }}" data-name="{{ $c->country_name }}" {{ $isCountrySel ? 'selected' : '' }}>
                                                     {{ $c->country_name }}
                                                 </option>
                                             @endforeach
@@ -1787,7 +2490,11 @@
                                         <select name="state" id="geo-state-select" class="mockup-select" onchange="onStateChange(this.value)" required>
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
-                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ ($personalInfo?->state == $s->state_name || (!$personalInfo && $s->state_name === 'Andhra Pradesh')) ? 'selected' : '' }}>
+                                                @php
+                                                    $isStateSel = ($personalInfo?->state == $s->state_name)
+                                                        || (!$personalInfo && ($s->state_name === 'Andhra Pradesh' || $s->state_id == 1));
+                                                @endphp
+                                                <option value="{{ $s->state_id }}" data-country="{{ $s->country_id }}" data-name="{{ $s->state_name }}" {{ $isStateSel ? 'selected' : '' }}>
                                                     {{ $s->state_name }}
                                                 </option>
                                             @endforeach
@@ -1798,7 +2505,11 @@
                                         <select name="district" id="geo-district-select" class="mockup-select" required>
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
-                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ ($personalInfo?->district == $d->DISTRICT_NAME || (!$personalInfo && $d->DISTRICT_NAME === 'Guntur')) ? 'selected' : '' }}>
+                                                @php
+                                                    $isDistSel = ($personalInfo?->district == $d->DISTRICT_NAME)
+                                                        || (!$personalInfo && ($d->DISTRICT_NAME === 'Guntur' || $d->DISTRICT_ID == 1));
+                                                @endphp
+                                                <option value="{{ $d->DISTRICT_ID }}" data-state="{{ $d->STATE_ID }}" data-name="{{ $d->DISTRICT_NAME }}" {{ $isDistSel ? 'selected' : '' }}>
                                                     {{ $d->DISTRICT_NAME }}
                                                 </option>
                                             @endforeach
@@ -1822,14 +2533,16 @@
                             </div>
                             </fieldset>
 
-                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+                            <div class="stage-action-row">
                                 @if($isPaid)
                                     <a href="{{ route('dashboards.index', ['step' => 2]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
-                                        <span>Next: Stage 2 - {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-desktop">Next: Stage 2 - {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Next: Stage 2 &rarr;</span>
                                     </a>
                                 @else
                                     <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                        <span>Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-desktop">Save Personal Info &amp; Proceed to Stage 2: {{ $stages[2]['title'] ?? 'Academic Info' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Save &amp; Proceed to Stage 2 &rarr;</span>
                                     </button>
                                 @endif
                             </div>
@@ -1933,7 +2646,7 @@
 
             <!-- ================= STAGE 2: ACADEMIC DETAILS ================= -->
             @elseif($activeStep === 2)
-                <div style="padding: 1.5rem 2rem; width: 100%; box-sizing: border-box;">
+                <div class="stage-form-wrapper">
                     <!-- CARD 2: 3. EDUCATION DETAILS (FULL WIDTH) -->
                     <div class="mockup-card card-active-step" style="width: 100%; box-sizing: border-box; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1981,7 +2694,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City:</label>
                                         <input type="text" name="tenth_school_city" id="tenth_school_city" class="mockup-input" value="{{ $academicDetails?->tenth_school_city }}" placeholder="Enter City">
@@ -2081,7 +2794,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City: <span class="req-inter" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="city" id="inter_city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City">
@@ -2197,7 +2910,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City: <span class="req-ug" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="ug_college_city" id="ug_college_city" class="mockup-input" value="{{ $academicDetails?->ug_college_city }}" placeholder="Enter City">
@@ -2298,7 +3011,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <input type="text" name="pg_college_city" id="pg_college_city" class="mockup-input" value="{{ $academicDetails?->pg_college_city }}" placeholder="Enter City">
@@ -2407,7 +3120,7 @@
                                         </label>
                                     </div>
 
-                                    <div id="pg1_cmm_container" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg1_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 1 CMM Memo / Serial No:</label>
                                             <input type="text" name="pg1_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
@@ -2422,7 +3135,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="pg1_pc_container" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg1_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 1 PC / OD Certificate No:</label>
                                             <input type="text" name="pg1_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_no }}" placeholder="Enter PC / OD Number">
@@ -2461,7 +3174,7 @@
                                 </div>
 
                                 <!-- Row 2: City, State, District (3 Columns) -->
-                                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 1rem; margin-top: 0.85rem;">
+                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">City:</label>
                                         <input type="text" name="pg2_college_city" id="pg2_college_city" class="mockup-input" value="{{ $academicDetails?->pg2_college_city }}" placeholder="Enter City">
@@ -2571,7 +3284,7 @@
                                         </label>
                                     </div>
 
-                                    <div id="pg2_cmm_container" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg2_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 2 CMM Memo / Serial No:</label>
                                             <input type="text" name="pg2_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
@@ -2586,7 +3299,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="pg2_pc_container" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
+                                    <div id="pg2_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
                                         <div class="mockup-field-group">
                                             <label class="mockup-label">PG 2 PC / OD Certificate No:</label>
                                             <input type="text" name="pg2_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_no }}" placeholder="Enter PC / OD Number">
@@ -2607,17 +3320,19 @@
                             </div>
                             </fieldset>
 
-                            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                            <div class="stage-action-row" style="justify-content: space-between;">
                                 <a href="{{ route('dashboards.index', ['step' => 1]) }}" class="btn-step-prev" style="text-decoration: none;">
                                     &larr; Stage 1: {{ $stages[1]['title'] ?? 'Personal Profile' }}
                                 </a>
                                 @if($isPaid)
-                                    <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-next" style="background: #0f2744; text-decoration: none;">
-                                        <span>Next: Stage 3 - {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    <a href="{{ route('dashboards.index', ['step' => 3]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
+                                        <span class="btn-label-desktop">Next: Stage 3 - {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Next: Stage 3 &rarr;</span>
                                     </a>
                                 @else
-                                    <button type="submit" class="btn-step-next" style="background: #0f2744;">
-                                        <span>Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                    <button type="submit" class="btn-step-next" style="background: #2563eb;">
+                                        <span class="btn-label-desktop">Save Academic Info &amp; Proceed to Stage 3: {{ $stages[3]['title'] ?? 'Document upload' }} &rarr;</span>
+                                        <span class="btn-label-mobile">Save &amp; Proceed to Stage 3 &rarr;</span>
                                     </button>
                                 @endif
                             </div>
@@ -3531,11 +4246,13 @@
                         </a>
                         @if($isPaid)
                             <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-next" style="background: #2563eb; text-decoration: none;">
-                                <span>Next: Stage 4 - {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-desktop">Next: Stage 4 - {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-mobile">Next: Stage 4 &rarr;</span>
                             </a>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-desktop">Save Documents &amp; Proceed to Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }} &rarr;</span>
+                                <span class="btn-label-mobile">Save &amp; Proceed to Stage 4 &rarr;</span>
                             </button>
                         @endif
                     </div>
@@ -3902,7 +4619,7 @@
                                         </span>
                                     @endif
                                 </label>
-                                <select id="stage5ExamSlotSelect" name="exam_slot" class="field-input" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
+                                <select id="stage5ExamSlotSelect" name="exam_slot" class="mockup-select" {{ $isSlotLocked ? 'disabled style=background-color:#f1f5f9;cursor:not-allowed;pointer-events:none;color:#475569;' : '' }} required>
                                     <option value="Slot 1 11:00 AM to 1:00 PM" {{ (str_contains($currentSlot, '11') || str_contains($currentSlot, 'Slot 1') || str_contains($currentSlot, 'S1')) && !str_contains($currentSlot, 'Slot 2') && !str_contains($currentSlot, 'S2') ? 'selected' : '' }}>
                                         Slot 1 11:00 AM to 1:00 PM (Morning Session)
                                     </option>
@@ -3932,15 +4649,19 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => 4]) }}" class="btn-step-prev">
-                            &larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}
+                            <span class="btn-label-desktop">&larr; Stage 4: {{ $stages[4]['title'] ?? 'Fee Payment' }}</span>
+                            <span class="btn-label-mobile">&larr; Stage 4: Fee Payment</span>
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #2563eb;">
                             @if($isSlotLocked)
-                                <span>Proceed to Stage 6: Application Download &rarr;</span>
+                                <span class="btn-label-desktop">Proceed to Stage 6: Application Download &rarr;</span>
+                                <span class="btn-label-mobile">Proceed to Stage 6 &rarr;</span>
                             @elseif($hasBookedSlot)
-                                <span>Update Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-desktop">Update Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-mobile">Update &amp; Proceed to Stage 6 &rarr;</span>
                             @else
-                                <span>Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-desktop">Confirm Slot &amp; Proceed to Stage 6: {{ $stages[6]['title'] ?? 'Application Download' }} &rarr;</span>
+                                <span class="btn-label-mobile">Confirm &amp; Proceed to Stage 6 &rarr;</span>
                             @endif
                         </button>
                     </div>
@@ -4000,21 +4721,26 @@
                         <h3>Application Form Preview &amp; Download</h3>
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
-                    <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
+                    <div class="stage6-header-actions" style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
                         <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span>🖨️ Print Form</span>
                         </a>
                         <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" download class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
-                            <span>📥 Download Application PDF</span>
+                            <span>📥 Download PDF</span>
                         </a>
                     </div>
                 </div>
 
-                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
+                <form action="{{ route('dashboards.save-step') }}" method="POST" class="step-panel-body stage6-panel-body" style="padding: 1.25rem; background: #f1f5f9;">
                     @csrf
                     <input type="hidden" name="step" value="{{ $activeStep }}">
 
+                    <div class="mobile-a4-scroll-hint">
+                        <span>↔️ Swipe horizontally to view full official A4 sheet</span>
+                    </div>
+
                     <!-- EMBEDDED A4 ADMISSION APPLICATION FORM -->
+                    <div class="embedded-a4-form-wrapper">
                     <div class="embedded-a4-form" style="max-width: 820px; margin: 0 auto; background: #F4F7FB; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1B2430;">
 
                         <!-- Form Header Banner -->
@@ -4410,6 +5136,7 @@
 
                         </div>
                     </div>
+                    </div>
 
                     <!-- ================= ATTACHED APPLICATION DOCUMENTS & UPLOADED CERTIFICATES ================= -->
                     @php
@@ -4483,8 +5210,8 @@
 
                             <div class="embedded-a4-attachment" style="max-width: 820px; margin: 1.25rem auto 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.12); border: 1.5px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif;">
                                 <!-- Document Header -->
-                                <div style="background: linear-gradient(135deg, #0F2A4A 0%, #1e3a8a 100%); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="attachment-header" style="background: linear-gradient(135deg, #0F2A4A 0%, #1e3a8a 100%); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                    <div class="attachment-info" style="display: flex; align-items: center; gap: 12px;">
                                         <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; color: #ffffff;">
                                             @if($isImage) 🖼️ @elseif($isPdf) 📄 @else 📎 @endif
                                         </div>
@@ -4501,7 +5228,7 @@
                                         </div>
                                     </div>
 
-                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                    <div class="attachment-actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                         <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: #22c55e; color: #ffffff; display: inline-flex; align-items: center; gap: 4px;">
                                             <span>✓ Verified &amp; Uploaded</span>
                                         </span>
@@ -4611,15 +5338,18 @@
                     @endphp
                     <div class="step-footer-actions" style="margin-top: 1.5rem;">
                         <a href="{{ route('dashboards.index', ['step' => $appPrevStep]) }}" class="btn-step-prev">
-                            &larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot Booking') }}
+                            <span class="btn-label-desktop">&larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot Booking') }}</span>
+                            <span class="btn-label-mobile">&larr; Stage {{ $appPrevStep }}: {{ $stages[$appPrevStep]['title'] ?? ($isPhd ? 'Fee Payment' : 'Exam Slot') }}</span>
                         </a>
                         @if(isset($stages[$appNextStep]))
                             <button type="submit" class="btn-step-next" style="background: #2563eb;">
-                                <span>Proceed to Stage {{ $appNextStep }}: {{ $stages[$appNextStep]['title'] }} &rarr;</span>
+                                <span class="btn-label-desktop">Proceed to Stage {{ $appNextStep }}: {{ $stages[$appNextStep]['title'] }} &rarr;</span>
+                                <span class="btn-label-mobile">Proceed to Stage {{ $appNextStep }} &rarr;</span>
                             </button>
                         @else
                             <button type="submit" class="btn-step-next" style="background: #16a34a;">
-                                <span>✓ Complete Onboarding &amp; Confirm Submission</span>
+                                <span class="btn-label-desktop">✓ Complete Onboarding &amp; Confirm Submission</span>
+                                <span class="btn-label-mobile">✓ Confirm Submission</span>
                             </button>
                         @endif
                     </div>
@@ -4653,10 +5383,10 @@
                     <input type="hidden" name="step" value="{{ $vsatStepNum }}">
 
                     <!-- Candidate Examination Record from DB -->
-                    <div class="section-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                    <div class="section-box stage7-banner-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
+                        <div class="stage7-banner-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <div style="width:44px; height:44px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem;">
+                                <div style="width:44px; height:44px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0;">
                                     🏆
                                 </div>
                                 <div>
@@ -4671,21 +5401,21 @@
 
                         <!-- Dynamic Metrics Grid from Database -->
                         <div class="form-grid-3">
-                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                            <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Registered Program</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#2563eb; margin-top:0.25rem;">
                                     {{ $program?->program_short_name ?: ($crmStudent?->programlevel ?: 'Undergraduate') }}
                                 </div>
                                 <span style="font-size:0.75rem; color:#16a34a; font-weight:700;">{{ $branchName ?: 'General Allotment' }}</span>
                             </div>
-                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                            <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Scheduled Slot</div>
                                 <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-top:0.25rem;">
                                     {{ $examDateFormatted }}
                                 </div>
                                 <span style="font-size:0.75rem; color:#475569;">{{ $slotFormatted }}</span>
                             </div>
-                            <div style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
+                            <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Admission Status</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#16a34a; margin-top:0.25rem;">
                                     {{ ($crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
@@ -4716,7 +5446,7 @@
                         </div>
 
                         <!-- University Notice regarding V-SAT merit rankings -->
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
+                        <div class="stage7-notice-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
                             <strong style="color: #14532d; font-weight: 800; display: block; margin-bottom: 0.3rem;">University Examination &amp; Counseling Notice:</strong>
                             <p style="margin: 0;">
                                 Candidate details for Application <strong>#{{ $appNo }}</strong> have been verified and confirmed across all onboarding stages in accordance with university admissions policy. Official V-SAT entrance scores, rank percentiles, and merit scholarship category allocations are generated and published following examination slot completion.
@@ -4726,10 +5456,12 @@
 
                     <div class="step-footer-actions">
                         <a href="{{ route('dashboards.index', ['step' => $vsatPrevStep]) }}" class="btn-step-prev">
-                            &larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}
+                            <span class="btn-label-desktop">&larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}</span>
+                            <span class="btn-label-mobile">&larr; Stage {{ $vsatPrevStep }}: {{ $stages[$vsatPrevStep]['title'] ?? 'Application Download' }}</span>
                         </a>
                         <button type="submit" class="btn-step-next" style="background: #15803d;">
-                            <span>✓ Complete Onboarding &amp; Finalize Registration</span>
+                            <span class="btn-label-desktop">✓ Complete Onboarding &amp; Finalize Registration</span>
+                            <span class="btn-label-mobile">✓ Finalize Registration</span>
                         </button>
                     </div>
                 </form>
@@ -4785,6 +5517,159 @@
                     el.addEventListener('change', autoSave);
                 });
             });
+        });
+    </script>
+
+    <!-- Modern Custom Dropdown UI Engine for Dashboard Selects -->
+    <script>
+        function initCustomSelects(selector) {
+            selector = selector || '.mockup-select';
+            document.querySelectorAll(selector).forEach(function(selectEl) {
+                if (selectEl.dataset.customInit === 'true') {
+                    syncCustomSelect(selectEl);
+                    return;
+                }
+                selectEl.dataset.customInit = 'true';
+
+                // Hide native select accessibility-friendly
+                selectEl.style.position = 'absolute';
+                selectEl.style.width = '1px';
+                selectEl.style.height = '1px';
+                selectEl.style.opacity = '0';
+                selectEl.style.pointerEvents = 'none';
+
+                // Container
+                const container = document.createElement('div');
+                container.className = 'custom-select-container';
+                selectEl.parentNode.insertBefore(container, selectEl);
+                container.appendChild(selectEl);
+
+                // Trigger Button
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'custom-select-trigger';
+                trigger.innerHTML = '<span class="custom-select-value"></span><svg class="custom-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+                container.appendChild(trigger);
+
+                // Dropdown Menu Card
+                const dropdown = document.createElement('div');
+                dropdown.className = 'custom-select-dropdown';
+                container.appendChild(dropdown);
+
+                // Handle disabled state
+                if (selectEl.disabled || selectEl.closest('fieldset[disabled]')) {
+                    trigger.disabled = true;
+                    trigger.style.opacity = '0.7';
+                    trigger.style.cursor = 'not-allowed';
+                }
+
+                // Toggle menu on click
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (selectEl.disabled || selectEl.closest('fieldset[disabled]')) return;
+                    const isOpen = container.classList.contains('is-open');
+                    document.querySelectorAll('.custom-select-container.is-open').forEach(function(c) {
+                        c.classList.remove('is-open');
+                    });
+                    if (!isOpen) {
+                        container.classList.add('is-open');
+                        const selectedItem = dropdown.querySelector('.is-selected');
+                        if (selectedItem) {
+                            selectedItem.scrollIntoView({ block: 'nearest' });
+                        }
+                    }
+                });
+
+                // Populate initial options
+                syncCustomSelect(selectEl);
+
+                // Watch for value changes
+                selectEl.addEventListener('change', function() {
+                    updateTriggerLabel(selectEl, container);
+                    syncCustomSelect(selectEl);
+                });
+
+                // Observe DOM option changes (e.g. dynamic state/district filtering)
+                const observer = new MutationObserver(function() {
+                    syncCustomSelect(selectEl);
+                });
+                observer.observe(selectEl, { childList: true });
+            });
+        }
+
+        function updateTriggerLabel(selectEl, container) {
+            const trigger = container.querySelector('.custom-select-trigger');
+            const valueSpan = container.querySelector('.custom-select-value');
+            if (!trigger || !valueSpan) return;
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            if (selectedOption && selectEl.value !== '') {
+                valueSpan.textContent = selectedOption.textContent.trim();
+                valueSpan.classList.remove('is-placeholder');
+            } else {
+                valueSpan.textContent = (selectEl.options[0]?.textContent || 'Select...').trim();
+                valueSpan.classList.add('is-placeholder');
+            }
+        }
+
+        function syncCustomSelect(selectEl) {
+            const container = selectEl.closest('.custom-select-container');
+            if (!container) return;
+            const dropdown = container.querySelector('.custom-select-dropdown');
+            if (!dropdown) return;
+
+            dropdown.innerHTML = '';
+            Array.from(selectEl.options).forEach(function(opt) {
+                const item = document.createElement('div');
+                item.className = 'custom-select-option';
+                item.dataset.value = opt.value;
+                item.textContent = opt.textContent;
+
+                if (opt.value === '') {
+                    item.classList.add('is-placeholder');
+                }
+                if (String(opt.value) === String(selectEl.value) && selectEl.value !== '') {
+                    item.classList.add('is-selected');
+                }
+
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectEl.value = opt.value;
+                    container.classList.remove('is-open');
+                    updateTriggerLabel(selectEl, container);
+
+                    // Dispatch events
+                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Trigger inline onchange if defined
+                    if (typeof selectEl.onchange === 'function') {
+                        selectEl.onchange();
+                    }
+                });
+
+                dropdown.appendChild(item);
+            });
+
+            updateTriggerLabel(selectEl, container);
+        }
+
+        // Close dropdown when clicking outside or pressing Escape
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.custom-select-container.is-open').forEach(function(c) {
+                c.classList.remove('is-open');
+            });
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.custom-select-container.is-open').forEach(function(c) {
+                    c.classList.remove('is-open');
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initCustomSelects('.mockup-select');
         });
     </script>
 
@@ -5097,6 +5982,116 @@
 
             .btn-terms-submit.is-active:active {
                 transform: translateY(0);
+            }
+
+            /* Mobile View Optimization */
+            @media (max-width: 640px) {
+                .terms-modal-overlay {
+                    padding: 0.65rem;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .terms-modal-card {
+                    width: 100%;
+                    max-width: 100%;
+                    border-radius: 16px;
+                    max-height: 94vh;
+                }
+
+                .terms-modal-header {
+                    padding: 0.9rem 1.15rem;
+                    gap: 0.75rem;
+                }
+
+                .terms-header-icon-box {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 10px;
+                }
+
+                .terms-header-icon-box svg {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                .terms-header-title {
+                    font-size: 1.02rem;
+                    line-height: 1.2;
+                }
+
+                .terms-header-subtitle {
+                    font-size: 0.72rem;
+                    margin-top: 0.15rem;
+                }
+
+                .terms-modal-body {
+                    padding: 0.85rem 1.15rem 0.75rem;
+                    font-size: 0.80rem;
+                    max-height: 58vh;
+                }
+
+                .terms-intro-text {
+                    font-size: 0.78rem;
+                    margin-bottom: 0.65rem;
+                    line-height: 1.35;
+                }
+
+                .terms-cards-list {
+                    gap: 0.5rem;
+                }
+
+                .terms-card-row {
+                    padding: 0.6rem 0.75rem;
+                    gap: 0.65rem;
+                    border-radius: 9px;
+                }
+
+                .terms-badge-pill {
+                    width: 22px;
+                    height: 22px;
+                    font-size: 0.72rem;
+                    border-radius: 6px;
+                }
+
+                .terms-row-content {
+                    font-size: 0.78rem;
+                    line-height: 1.45;
+                }
+
+                .terms-agreement-box {
+                    margin-top: 0.7rem;
+                    padding: 0.7rem 0.8rem;
+                    border-radius: 10px;
+                }
+
+                .terms-checkbox-label {
+                    gap: 0.6rem;
+                }
+
+                .terms-checkbox-input {
+                    width: 18px;
+                    height: 18px;
+                }
+
+                .terms-checkbox-text {
+                    font-size: 0.78rem;
+                    line-height: 1.35;
+                }
+
+                .terms-modal-footer {
+                    padding: 0.75rem 1.15rem;
+                    background: #f8fafc;
+                }
+
+                .btn-terms-submit {
+                    width: 100%;
+                    justify-content: center;
+                    padding: 0.75rem 1.25rem;
+                    font-size: 0.92rem;
+                    min-height: 44px;
+                    border-radius: 10px;
+                }
             }
         </style>
 

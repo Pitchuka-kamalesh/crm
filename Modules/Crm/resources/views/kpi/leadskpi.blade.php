@@ -31,6 +31,76 @@
         .pagination .page-item.disabled .page-link, .pagination .page-item.disabled span.page-link { color: #94a3b8 !important; background: #f8fafc !important; border-color: #e2e8f0 !important; cursor: not-allowed !important; pointer-events: none !important; }
         .pagination svg, .pagination-wrapper svg, nav svg, svg.w-5, svg.h-5 { width: 14px !important; height: 14px !important; max-width: 14px !important; max-height: 14px !important; display: inline-block !important; vertical-align: middle !important; }
         .pagination-wrapper nav > div:first-child:not(:only-child) { display: none !important; }
+
+        /* KPI Responsive Layout & Grid Styles */
+        .kpi-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+
+        @media (max-width: 991px) {
+            .kpi-metrics-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.65rem !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-charts-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .kpi-charts-grid > div {
+                padding: 1rem !important;
+            }
+            .card-header-bar {
+                padding: 0.85rem 1rem !important;
+                gap: 0.65rem !important;
+            }
+            .card-title {
+                font-size: 1rem !important;
+            }
+            .kpi-content-padding {
+                padding: 0.85rem 0.65rem !important;
+            }
+            #leadsFilterForm {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            #leadsFilterForm > div {
+                width: 100% !important;
+                min-width: 100% !important;
+            }
+            #leadsResetBtn {
+                width: 100% !important;
+                text-align: center !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-metrics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+            }
+            .kpi-metrics-grid > div {
+                padding: 0.65rem 0.75rem !important;
+            }
+            .kpi-metrics-grid > div > div:first-child {
+                font-size: 0.68rem !important;
+            }
+            .kpi-metrics-grid > div > div:nth-child(2) {
+                font-size: 1.35rem !important;
+            }
+        }
     </style>
 
     <!-- Chart.js for High-Impact Analytics -->
@@ -54,6 +124,15 @@
                         <line x1="4" y1="18" x2="20" y2="18"/>
                     </svg>
                 </button>
+                <div class="topbar-page-breadcrumb">
+                    <span class="breadcrumb-item breadcrumb-desktop-only">KPI</span>
+                    <span class="breadcrumb-separator breadcrumb-desktop-only">/</span>
+                    <span class="breadcrumb-active-tag">
+                        <span class="breadcrumb-dot"></span>
+                        <span class="breadcrumb-lead-full">Leads KPI &bull; Acquisition Analytics</span>
+                        <span class="breadcrumb-lead-mobile">Leads KPI</span>
+                    </span>
+                </div>
             </div>
 
             <div class="top-bar-right">
@@ -78,9 +157,9 @@
                     </div>
                 </div>
 
-                <div style="padding: 1.5rem;">
+                <div class="kpi-content-padding" style="padding: 1.5rem;">
                     <!-- 1. TOP EXECUTIVE METRIC CARDS (NO ICONS, COMPACT SINGLE LINE ROW) -->
-                    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem;">
+                    <div class="kpi-metrics-grid">
                         <!-- Card 1: Total Raw Lead Volume -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Total Lead Volume</div>
@@ -107,7 +186,7 @@
                     </div>
 
                     <!-- 2. VISUAL CHARTS (CHRONOLOGICAL INFLOW TRENDS & BULK VS NORMAL BREAKDOWN) -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
+                    <div class="kpi-charts-grid">
                         <!-- Chart 1: Chronological Lead Inflow Trends (Chart.js Area Graph) -->
                         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
@@ -614,11 +693,6 @@ function attachLeadsPaginationAjax() {
             });
         });
     });
-}
-
-function toggleSidebarMenu() {
-    const sidebar = document.querySelector('.app-sidebar');
-    if (sidebar) sidebar.classList.toggle('active');
 }
 </script>
 </body>
