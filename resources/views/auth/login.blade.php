@@ -121,8 +121,8 @@
         .hero-section {
             display: flex;
             flex-direction: column;
-            gap: 1.15rem;
-            margin-top: -2.75rem;
+            gap: 1.05rem;
+            margin-top: -4.5rem;
         }
 
         .hero-title-area {
@@ -925,7 +925,7 @@
             </div>
 
             <!-- Admission Information & Brochures (Separately Below) -->
-            <div class="bubbles-cluster-wrap" style="margin-top: 0.25rem;">
+            <div class="bubbles-cluster-wrap" style="margin-top: 1.35rem;">
                 <div class="bubbles-cluster-title">
                     <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
                 </div>
