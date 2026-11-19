@@ -957,7 +957,7 @@
         <!-- Left Hero Area -->
         <section class="hero-left">
             <div class="hero-headline-wrap">
-                <img src="/images/vignan-shield-clean.png" alt="Vignan's University" class="hero-side-logo">
+                <img src="/images/vignan_logo.jpeg" alt="Vignan's University" class="hero-side-logo">
                 <h1 class="hero-headline">
                     Empower as <br>leader at <br><span>Vignan's University</span>
                 </h1>
