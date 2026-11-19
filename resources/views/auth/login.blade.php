@@ -184,10 +184,16 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #94a3b8;
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             gap: 0.4rem;
+        }
+
+        .bubbles-cluster-title span {
+            color: #38bdf8;
+            font-weight: 800;
         }
 
         .bubbles-grid {
@@ -813,8 +819,59 @@
                 </p>
             </div>
 
-            <!-- 5 Interactive Admission Bubbles (Hover reveals full details) -->
+            <!-- Admission Information & Brochures -->
             <div class="bubbles-cluster-wrap">
+                <div class="bubbles-cluster-title">
+                    <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
+                </div>
+
+                <div class="bubbles-grid">
+
+                    <!-- Button 1: fee info 2027 -->
+                    <div class="feature-bubble">
+                        <div class="bubble-icon bubble-teal">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="bubble-label">fee info 2027</span>
+                        <span class="bubble-badge-indicator"></span>
+
+                        <!-- Hover Popover -->
+                        <div class="bubble-popover">
+                            <div class="popover-header">
+                                <span class="popover-title">Fee Info 2027</span>
+                                <span class="popover-badge popover-badge-teal">&bull; Batch 2027-28</span>
+                            </div>
+                            <p class="popover-text">Complete tuition fee structure, merit scholarships, branch concessions, hostel and examination fee guidelines.</p>
+                        </div>
+                    </div>
+
+                    <!-- Button 2: V-SAT brochure -->
+                    <div class="feature-bubble">
+                        <div class="bubble-icon bubble-rose">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <span class="bubble-label">V-SAT brochure</span>
+                        <span class="bubble-badge-indicator"></span>
+
+                        <!-- Hover Popover -->
+                        <div class="bubble-popover">
+                            <div class="popover-header">
+                                <span class="popover-title">V-SAT Brochure</span>
+                                <span class="popover-badge popover-badge-rose">&bull; Official Guide</span>
+                            </div>
+                            <p class="popover-text">National entrance examination handbook, eligibility criteria, exam slots, syllabus pattern, and admission guidelines.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 5 Interactive Admission Bubbles (Hover reveals full details) -->
+            <div class="bubbles-cluster-wrap" style="margin-top: 2rem;">
                 <div class="bubbles-cluster-title">
                     <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
                 </div>
@@ -918,57 +975,6 @@
                                 <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
                             </div>
                             <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Admission Information & Brochures (Separately Below) -->
-            <div class="bubbles-cluster-wrap" style="margin-top: 1.35rem;">
-                <div class="bubbles-cluster-title">
-                    <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
-                </div>
-
-                <div class="bubbles-grid">
-
-                    <!-- Button 1: fee info 2027 -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-teal">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">fee info 2027</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Fee Info 2027</span>
-                                <span class="popover-badge popover-badge-teal">&bull; Batch 2027-28</span>
-                            </div>
-                            <p class="popover-text">Complete tuition fee structure, merit scholarships, branch concessions, hostel and examination fee guidelines.</p>
-                        </div>
-                    </div>
-
-                    <!-- Button 2: V-SAT brochure -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-rose">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">V-SAT brochure</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">V-SAT Brochure</span>
-                                <span class="popover-badge popover-badge-rose">&bull; Official Guide</span>
-                            </div>
-                            <p class="popover-text">National entrance examination handbook, eligibility criteria, exam slots, syllabus pattern, and admission guidelines.</p>
                         </div>
                     </div>
 
