@@ -176,7 +176,7 @@
         .bubbles-cluster-wrap {
             display: flex;
             flex-direction: column;
-            gap: 0.55rem;
+            gap: 0.75rem;
         }
 
         .bubbles-cluster-title {
@@ -199,7 +199,7 @@
         .bubbles-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.85rem;
+            gap: 0.9rem;
         }
 
         /* Individual Feature Bubble */
@@ -870,8 +870,8 @@
 
                 </div>
 
-                <!-- Row 2: Fee & Receipts, Seat Allotment, Provisional ID (Placed below) -->
-                <div class="bubbles-grid" style="margin-top: 0.2rem;">
+                <!-- Row 2: Fee & Receipts, Seat Allotment, Provisional ID (Placed below with clear gap) -->
+                <div class="bubbles-grid" style="margin-top: 1.05rem;">
 
                     <!-- Bubble 3: Fee Payment & Receipts -->
                     <div class="feature-bubble">
