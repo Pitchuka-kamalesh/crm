@@ -36,7 +36,8 @@
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: url('/images/vignan-campus-real.jpg') center/cover no-repeat fixed;
+            background: linear-gradient(135deg, rgba(6, 14, 28, 0.76) 0%, rgba(10, 22, 42, 0.65) 45%, rgba(13, 27, 51, 0.78) 100%),
+                        url('/images/vignan-campus-real.jpg') center/cover no-repeat fixed;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -63,10 +64,10 @@
             align-items: center;
             gap: 0.6rem;
             padding: 0.4rem 1.1rem;
-            background: rgba(15, 23, 42, 0.55);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 9999px;
             font-size: 0.76rem;
             font-weight: 700;
@@ -88,11 +89,11 @@
             gap: 0.45rem;
             font-size: 0.76rem;
             color: #e2e8f0;
-            background: rgba(15, 23, 42, 0.55);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(12px);
             padding: 0.35rem 0.9rem;
             border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .pulse-dot {
@@ -135,8 +136,8 @@
             align-items: center;
             gap: 0.4rem;
             padding: 0.28rem 0.8rem;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(56, 189, 248, 0.45);
+            background: rgba(37, 99, 235, 0.25);
+            border: 1px solid rgba(56, 189, 248, 0.35);
             border-radius: 8px;
             font-size: 0.74rem;
             font-weight: 700;
@@ -153,7 +154,7 @@
             letter-spacing: -0.025em;
             line-height: 1.12;
             color: #ffffff;
-            text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
         }
 
         .hero-title-gradient {
@@ -165,10 +166,10 @@
 
         .hero-desc {
             font-size: 0.92rem;
-            color: #ffffff;
+            color: #e2e8f0;
             max-width: 580px;
             line-height: 1.5;
-            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.9);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
 
         /* Interactive Floating Bubbles Section */
@@ -184,7 +185,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: #ffffff;
-            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 1);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             gap: 0.4rem;
@@ -204,10 +205,10 @@
         /* Individual Feature Bubble */
         .feature-bubble {
             position: relative;
-            background: rgba(15, 23, 42, 0.55);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 9999px;
             padding: 0.55rem 1.1rem 0.55rem 0.65rem;
             display: inline-flex;
@@ -216,14 +217,14 @@
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .feature-bubble:hover {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(255, 255, 255, 0.2);
             border-color: rgba(56, 189, 248, 0.6);
             transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 20px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 0 20px rgba(56, 189, 248, 0.3);
             z-index: 30;
         }
 
