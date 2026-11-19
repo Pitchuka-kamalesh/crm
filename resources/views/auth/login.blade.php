@@ -825,7 +825,7 @@
                     <span>&bull;</span> Admission Information &amp; Brochures (Hover to view details):
                 </div>
 
-                <!-- Row 1: fee info 2027 & V-SAT brochure -->
+                <!-- Row 1: fee info 2027, V-SAT brochure, Provisional ID -->
                 <div class="bubbles-grid">
 
                     <!-- Button 1: fee info 2027 -->
@@ -868,9 +868,29 @@
                         </div>
                     </div>
 
+                    <!-- Bubble 5: Provisional ID & Enrollment (Placed beside V-SAT brochure) -->
+                    <div class="feature-bubble">
+                        <div class="bubble-icon bubble-purple">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                            </svg>
+                        </div>
+                        <span class="bubble-label">Provisional ID</span>
+                        <span class="bubble-badge-indicator"></span>
+
+                        <!-- Hover Popover -->
+                        <div class="bubble-popover">
+                            <div class="popover-header">
+                                <span class="popover-title">Provisional ID &amp; Order</span>
+                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
+                            </div>
+                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Row 2: Fee & Receipts, Seat Allotment, Provisional ID (Placed below with clear gap) -->
+                <!-- Row 2: Fee & Receipts and Seat Allotment (Placed below with clear gap) -->
                 <div class="bubbles-grid" style="margin-top: 1.05rem;">
 
                     <!-- Bubble 3: Fee Payment & Receipts -->
@@ -913,31 +933,11 @@
                         </div>
                     </div>
 
-                    <!-- Bubble 5: Provisional ID & Enrollment -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-purple">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Provisional ID</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Provisional ID &amp; Order</span>
-                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
-                            </div>
-                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
             <!-- 5 Interactive Admission Bubbles (Hover reveals full details) -->
-            <div class="bubbles-cluster-wrap" style="margin-top: 2rem;">
+            <div class="bubbles-cluster-wrap" style="margin-top: 3.5rem;">
                 <div class="bubbles-cluster-title">
                     <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
                 </div>
