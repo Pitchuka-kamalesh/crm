@@ -133,7 +133,6 @@
     $isPhd = $levelUpper === 'PHD' || str_contains($progUpper, 'PHD') || str_contains($progUpper, 'PH.D') || str_contains($progUpper, 'DOCTOR') || str_starts_with($crmUpper, 'PHD');
 @endphp
 
-@if($isPhd)
 @php
     $uploadedKeys = array_keys((array)($student->uploaded_files ?? []));
     $hasTenth = in_array('marksheet10', $uploadedKeys);
@@ -231,7 +230,7 @@
             <div>
                 <p class="brand">Vignan’s Foundation for Science, Technology &amp; Research<small>(Deemed to be University)</small></p>
                 <h1>Admission Information Form</h1>
-                <div>Doctor of Philosophy (Ph.D.) Programme</div>
+                <div>{{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}</div>
                 <div class="meta">
                     <label>Academic year <input type="text" id="ay" value="2026–2027" size="10" readonly></label>
                     <label>Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly></label>
@@ -282,9 +281,9 @@
 
         <h2>2 &nbsp;Programme details</h2>
         <div class="grid">
-            <label class="f full"><span class="req">Name of the specialization in Ph.D. programme</span><input type="text" name="spec" value="{{ $student->branch !== '-' ? $student->branch : ($student->program !== '-' ? $student->program : '-') }}" readonly></label>
+            <label class="f full"><span class="req">{{ $isPhd ? 'Name of the specialization in Ph.D. programme' : 'Programme & Specialization / Branch' }}</span><input type="text" name="spec" value="{{ $student->branch !== '-' ? $student->branch : ($student->program !== '-' ? $student->program : '-') }}" readonly></label>
             <label class="f"><span>VSAT ID</span><input type="text" name="vsat" value="{{ $student->student_id ?: '-' }}" readonly></label>
-            <label class="f"><span>Research area</span><input type="text" name="area" value="{{ $student->branch !== '-' ? $student->branch : ($student->program !== '-' ? $student->program : '-') }}" readonly></label>
+            <label class="f"><span>{{ $isPhd ? 'Research area' : 'Allotted Program' }}</span><input type="text" name="area" value="{{ $student->branch !== '-' ? $student->branch : ($student->program !== '-' ? $student->program : '-') }}" readonly></label>
             <div class="f full">
                 <span class="lbl req">Campus preference</span>
                 <div class="opts">
@@ -433,215 +432,6 @@
         </div>
     </div>
 </div>
-@else
-<div class="page">
-
-    {{-- Header --}}
-    <table class="header">
-        <tr>
-            <td style="width:50%">
-                <span class="logo-box"><img src="{{ $logo }}" alt="Vignan's"></span>
-                <div class="meta">Application date: {{ $student->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in</div>
-            </td>
-            <td style="width:50%">
-                <div class="title">APPLICATION FORM</div>
-                <div class="subtitle">University Admission Application<br>Please read all details carefully before signing</div>
-            </td>
-        </tr>
-    </table>
-
-    <div class="wrap">
-
-        {{-- Profile strip --}}
-        <table class="profile">
-            <tr>
-                <td style="width:70px">
-                    @if (!empty($student->photo_path))
-                        <div class="photo-filled"><img src="{{ $student->photo_path }}" width="58" height="72" style="display:block; width:58px; height:72px; object-fit:cover;" alt=""></div>
-                    @else
-                        <div class="photo">AFFIX<br>PASSPORT<br>PHOTO</div>
-                    @endif
-                </td>
-                <td>
-                    <div class="pname">{{ $student->name }}</div>
-                    <div class="pmeta">
-                        {{ $student->email }} &nbsp;|&nbsp; {{ $student->phone }}<br>
-                        Applicant ID: {{ !empty($student->student_id) ? $student->student_id : '____________________' }} (App #: {{ $student->id }})
-                    </div>
-                </td>
-                <td style="text-align:right">
-                    <span class="pill {{ $paid ? 'ok' : 'warn' }}">PAYMENT {{ strtoupper($student->payment_status ?? 'PENDING') }}</span><br>
-                    <span class="pill warn">PROVISIONAL SEAT ALLOTMENT</span>
-                </td>
-            </tr>
-        </table>
-
-        {{-- Cards --}}
-        <table class="grid">
-            <tr>
-                <td class="gap-r">
-                    <div class="card">
-                        <h3>1. Candidate &amp; Parent Details</h3>
-                        <table class="fields">
-                            <tr><td class="l">Full name</td><td class="v">{{ $student->name }}</td></tr>
-                            <tr><td class="l">Father / Parent</td><td class="v">{{ $student->parent_name ?: ($student->father_name ?: 'N/A') }}</td></tr>
-                            <tr><td class="l">Parent Contact</td><td class="v">{{ $student->parent_phone ?: ($student->father_phone ?: 'N/A') }}</td></tr>
-                            <tr><td class="l">Candidate Phone</td><td class="v">{{ $student->phone }}</td></tr>
-                            <tr><td class="l">Email ID</td><td class="v">{{ $student->email }}</td></tr>
-                            <tr><td class="l">Date of birth</td><td class="v">{{ $dob }}</td></tr>
-                            <tr><td class="l">Gender</td><td class="v">{{ $student->gender ?: 'N/A' }}</td></tr>
-                            <tr><td class="l">Category</td><td class="v">{{ $student->category ?: 'General' }}</td></tr>
-                        </table>
-                    </div>
-                </td>
-                <td class="gap-l">
-                    <div class="card">
-                        <h3>2. Address Information</h3>
-                        <table class="fields">
-                            <tr><td class="l">Door / Street</td><td class="v">{{ $student->street ?: 'N/A' }}</td></tr>
-                            <tr><td class="l">City / Mandal</td><td class="v">{{ $student->city ?: 'N/A' }}</td></tr>
-                            <tr><td class="l">District</td><td class="v">{{ $student->district ?: 'N/A' }}</td></tr>
-                            <tr><td class="l">State</td><td class="v">{{ $student->state ?: 'N/A' }}</td></tr>
-                            <tr><td class="l">Country</td><td class="v">{{ $student->country ?: 'India' }}</td></tr>
-                            <tr><td class="l">Pincode</td><td class="v">{{ $student->pincode ?: 'N/A' }}</td></tr>
-                            <tr><td class="l">Exam Slot</td><td class="v">{{ $student->exam_date ?: 'Stage 5' }} ({{ $student->exam_slot ?: 'Assigned' }})</td></tr>
-                            <tr><td class="l">Program</td><td class="v">{{ $student->program ?: 'Undergraduate' }}</td></tr>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        {{-- Educational Information (10th SSC, 12th Inter, UG & PG) --}}
-        <div class="card" style="margin-top:12px">
-            <h3>3. Qualifying Academic Records (10th SSC &amp; 12th Intermediate{{ !empty($student->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($student->academic->pg_college) ? ' &amp; Postgraduate' : '' }})</h3>
-            <table class="fields" style="width:100%; border-collapse:collapse;">
-                <tr style="background:#F8FAFC; font-weight:bold; color:#475569;">
-                    <td style="padding:4px 6px; width:18%;">Standard</td>
-                    <td style="padding:4px 6px; width:30%;">School / College</td>
-                    <td style="padding:4px 6px; width:22%;">Board</td>
-                    <td style="padding:4px 6px; width:10%;">Year</td>
-                    <td style="padding:4px 6px; width:10%;">Roll No</td>
-                    <td style="padding:4px 6px; width:10%; text-align:right;">% Marks</td>
-                </tr>
-                <tr>
-                    <td style="padding:4px 6px; font-weight:bold;">10th Standard (SSC)</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_school) && $student->academic->ssc_school !== '-') ? $student->academic->ssc_school : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_board) && $student->academic->ssc_board !== '-') ? $student->academic->ssc_board : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_year) && $student->academic->ssc_year !== '-') ? $student->academic->ssc_year : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ssc_roll) && $student->academic->ssc_roll !== '-') ? $student->academic->ssc_roll : '-' }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->ssc_percentage) && $student->academic->ssc_percentage !== 'N/A' && $student->academic->ssc_percentage !== '-') ? $student->academic->ssc_percentage : '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding:4px 6px; font-weight:bold;">12th / Inter (10+2)</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_college) && $student->academic->inter_college !== '-') ? $student->academic->inter_college : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_board) && $student->academic->inter_board !== '-') ? $student->academic->inter_board : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_year) && $student->academic->inter_year !== '-') ? $student->academic->inter_year : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->inter_roll) && $student->academic->inter_roll !== '-') ? $student->academic->inter_roll : '-' }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->inter_percentage) && $student->academic->inter_percentage !== 'N/A' && $student->academic->inter_percentage !== '-') ? $student->academic->inter_percentage : '-' }}</td>
-                </tr>
-                @if((!empty($student->academic->ug_college) && $student->academic->ug_college !== '-') || ($student->degree_level ?? '') === 'mtech' || ($student->degree_level ?? '') === 'phd')
-                <tr>
-                    <td style="padding:4px 6px; font-weight:bold;">Undergraduate (UG)</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ug_college) && $student->academic->ug_college !== '-') ? $student->academic->ug_college : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ug_board) && $student->academic->ug_board !== '-') ? $student->academic->ug_board : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ug_year) && $student->academic->ug_year !== '-') ? $student->academic->ug_year : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->ug_roll) && $student->academic->ug_roll !== '-') ? $student->academic->ug_roll : '-' }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->ug_percentage) && $student->academic->ug_percentage !== 'N/A' && $student->academic->ug_percentage !== '-') ? $student->academic->ug_percentage : '-' }}</td>
-                </tr>
-                @endif
-                @if((!empty($student->academic->pg_college) && $student->academic->pg_college !== '-') || ($student->degree_level ?? '') === 'phd')
-                <tr>
-                    <td style="padding:4px 6px; font-weight:bold;">Postgraduate 1</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_college) && $student->academic->pg_college !== '-') ? $student->academic->pg_college : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_board) && $student->academic->pg_board !== '-') ? $student->academic->pg_board : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_year) && $student->academic->pg_year !== '-') ? $student->academic->pg_year : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg_roll) && $student->academic->pg_roll !== '-') ? $student->academic->pg_roll : '-' }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->pg_percentage) && $student->academic->pg_percentage !== 'N/A' && $student->academic->pg_percentage !== '-') ? $student->academic->pg_percentage : '-' }}</td>
-                </tr>
-                @endif
-                @if((!empty($student->academic->pg2_college) && $student->academic->pg2_college !== '-') || ($student->degree_level ?? '') === 'phd')
-                <tr>
-                    <td style="padding:4px 6px; font-weight:bold;">Postgraduate 2</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_college) && $student->academic->pg2_college !== '-') ? $student->academic->pg2_college : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_board) && $student->academic->pg2_board !== '-') ? $student->academic->pg2_board : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_year) && $student->academic->pg2_year !== '-') ? $student->academic->pg2_year : '-' }}</td>
-                    <td style="padding:4px 6px;">{{ (!empty($student->academic->pg2_roll) && $student->academic->pg2_roll !== '-') ? $student->academic->pg2_roll : '-' }}</td>
-                    <td style="padding:4px 6px; text-align:right; font-weight:bold; color:#12875B;">{{ (!empty($student->academic->pg2_percentage) && $student->academic->pg2_percentage !== 'N/A' && $student->academic->pg2_percentage !== '-') ? $student->academic->pg2_percentage : '-' }}</td>
-                </tr>
-                @endif
-            </table>
-        </div>
-
-        <table class="grid" style="margin-top:12px;">
-            <tr>
-                <td class="gap-r">
-                    <div class="card">
-                        <h3>4. Payment Information</h3>
-                        <table class="fields">
-                            <tr><td class="l">Amount</td><td class="v">INR {{ number_format((float) $student->payment_amount) }}</td></tr>
-                            <tr><td class="l">Method</td><td class="v">{{ $student->payment_method }}</td></tr>
-                            <tr><td class="l">Transaction ID</td><td class="v" style="font-size:9px">{{ $student->transaction_id }}</td></tr>
-                            <tr><td class="l">Status</td>
-                                <td class="v"><span class="pill {{ $paid ? 'ok' : 'warn' }}" style="margin:0">{{ strtoupper($student->payment_status ?? 'PENDING') }}</span></td></tr>
-                        </table>
-                    </div>
-                </td>
-                <td class="gap-l">
-                    <div class="card">
-                        <h3>5. Documents Verification</h3>
-                        <table class="docs">
-                            @foreach (array_chunk($docs, 2, true) as $row)
-                                <tr>
-                                    @foreach ($row as $key => $label)
-                                        @php
-                                            $mime = $uploaded[$key] ?? null;
-                                            $has  = !empty($mime);
-                                            $type = $has ? strtoupper(str_replace(['image/', 'application/'], '', $mime)) : 'Pending';
-                                        @endphp
-                                        <td><div class="chip {{ $has ? 'ok' : 'warn' }}">{{ $label }} <small>{{ $type }}</small></div></td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        {{-- Instructions --}}
-        <div class="note">
-            <b>INSTRUCTIONS</b>
-            <ul>
-                <li>This is a provisional seat allotment. Original documents must be submitted at the time of joining.</li>
-                <li>Tuition fee and scholarship eligibility are subject to university norms.</li>
-                <li>All information is valid as of the approval date.</li>
-            </ul>
-        </div>
-
-        {{-- Signatures --}}
-        <table class="sign">
-            <tr>
-                <td><div class="line">Signature of Parent</div></td>
-                <td><div class="line">Date</div></td>
-                <td><div class="line">Signature of Student</div></td>
-            </tr>
-        </table>
-
-        {{-- Office use --}}
-        <div class="office">
-            <b>FOR OFFICE USE ONLY</b>
-            <table><tr>
-                <td>Application No.: {{ $student->id }}</td>
-                <td>Verified by: ____________</td>
-                <td>Date: ____________</td>
-            </tr></table>
-        </div>
-    </div>
-
-    <div class="footer">Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;|&nbsp; https://admissions.vignan.ac.in</div>
-</div>
-@endif
 
 {{-- ATTACHED APPLICATION DOCUMENTS (CONSECUTIVE PAGES IN DOSSIER) --}}
 @php
