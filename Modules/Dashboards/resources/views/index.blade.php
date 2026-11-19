@@ -4755,14 +4755,36 @@
 
                         @php
                             $uploadedKeys = array_keys((array)($student->uploaded_files ?? []));
-                                $hasTenth = in_array('marksheet10', $uploadedKeys);
-                                $hasInter = in_array('marksheet12', $uploadedKeys);
-                                $hasUg = in_array('btech', $uploadedKeys) || in_array('ug_cmm', $uploadedKeys);
-                                $hasPg = in_array('pg1_cmm', $uploadedKeys) || in_array('pg1_pc', $uploadedKeys) || in_array('pg', $uploadedKeys) || in_array('mtech', $uploadedKeys);
-                                $hasExp = in_array('experience', $uploadedKeys);
-                                $hasId = in_array('aadhaar', $uploadedKeys) || in_array('passport', $uploadedKeys);
-                                $hasPhoto = in_array('photo', $uploadedKeys) || !empty($student->photo_path);
-                            @endphp
+                            $hasTenth = in_array('marksheet10', $uploadedKeys);
+                            $hasInter = in_array('marksheet12', $uploadedKeys);
+                            $hasUg = in_array('btech', $uploadedKeys) || in_array('ug_cmm', $uploadedKeys);
+                            $hasPg = in_array('pg1_cmm', $uploadedKeys) || in_array('pg1_pc', $uploadedKeys) || in_array('pg', $uploadedKeys) || in_array('mtech', $uploadedKeys);
+                            $hasExp = in_array('experience', $uploadedKeys);
+                            $hasId = in_array('aadhaar', $uploadedKeys) || in_array('passport', $uploadedKeys);
+                            $hasPhoto = in_array('photo', $uploadedKeys) || !empty($student->photo_path);
+
+                            $progUpper = strtoupper(trim((string)($student->program ?? '')));
+                            $levelUpper = strtoupper(trim((string)($student->degree_level ?? '')));
+                            $crmUpper = strtoupper(trim((string)($student->student_id ?? '')));
+                            $isPhd = $levelUpper === 'PHD'
+                                || $levelUpper === 'DOCTORAL'
+                                || str_contains($progUpper, 'PHD')
+                                || str_contains($progUpper, 'PH.D')
+                                || str_contains($progUpper, 'DOCTOR')
+                                || str_starts_with($crmUpper, 'PHD');
+
+                            $isPg = !$isPhd && (
+                                $levelUpper === 'MTECH'
+                                || $levelUpper === 'PG'
+                                || str_contains($progUpper, 'M.TECH')
+                                || str_contains($progUpper, 'MTECH')
+                                || str_contains($progUpper, 'MASTER')
+                                || str_contains($progUpper, 'MBA')
+                                || str_contains($progUpper, 'MCA')
+                            );
+
+                            $isUg = !$isPhd && !$isPg;
+                        @endphp
                             <div class="phd-form-wrap">
                                 <style>
                                     .phd-form-wrap {
@@ -4837,21 +4859,28 @@
                                     }
                                 </style>
 
-                                <header>
-                                    <div class="logo-box">
-                                        <img src="{{ $formLogo }}" alt="Vignan's Logo">
-                                    </div>
+                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid var(--ink); padding-bottom: 12px;">
                                     <div>
-                                        <p class="brand">Vignan’s Foundation for Science, Technology &amp; Research<small>(Deemed to be University)</small></p>
-                                        <h1>Admission Information Form</h1>
-                                        <div>{{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}</div>
-                                        <div class="meta">
-                                            <label>Academic year <input type="text" id="ay" value="2026–2027" size="10" readonly></label>
-                                            <label>Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly></label>
-                                            <label>CRM ID <input type="text" value="{{ $student->student_id }}" size="10" readonly></label>
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 48px; object-fit: contain;">
+                                            <div>
+                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15;">
+                                                    Vignan’s Foundation for Science, Technology &amp; Research
+                                                    <small style="display: block; font-size: 11.5px; color: var(--mute); margin-top: 2px;">(Deemed to be University)</small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <h1 style="margin: 6px 0 2px 0; font-size: 16px; color: var(--accent); font-weight: 700;">Admission Information Form</h1>
+                                        <div style="font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
+                                            {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
+                                        </div>
+                                        <div class="meta" style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 16px;">
+                                            <label style="font-size: 12px; font-weight: 600;">Academic year <input type="text" id="ay" value="2026–2027" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                            <label style="font-size: 12px; font-weight: 600;">Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                            <label style="font-size: 12px; font-weight: 600;">CRM ID <input type="text" value="{{ $student->student_id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
                                         </div>
                                     </div>
-                                    <label class="photo" id="ph">
+                                    <label class="photo" id="ph" style="margin: 0; align-self: start;">
                                         @if(!empty($student->photo_path))
                                             <img src="{{ $student->photo_path }}" alt="Candidate Photo">
                                         @else
@@ -4859,8 +4888,6 @@
                                         @endif
                                     </label>
                                 </header>
-
-                                <p class="note">Please fill in BLOCK LETTERS. Fields marked * are mandatory. Attach self-attested copies of all certificates listed in Section 4.</p>
 
                                 <h2>1 &nbsp;Personal details</h2>
                                 <div class="grid">
@@ -4935,45 +4962,53 @@
                                     </table>
                                 </div>
 
-                                <div class="lbl" style="margin:16px 0 6px">UG &amp; PG programme details</div>
-                                <div class="tw">
-                                    <table id="deg">
-                                        <thead>
-                                            <tr><th>Programme</th><th>Programme with specialization</th><th>College / University</th><th>Year</th><th>Division / grade points</th><th>% of marks</th><th>Mode of study</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="rl">UG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 20%)</small></td>
-                                                <td><input type="text" value="B.Tech / Degree" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->ug_college !== '-' ? $student->academic->ug_college : ($student->academic->ug_board !== '-' ? $student->academic->ug_board : '-') }}" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->ug_year ?: '-' }}" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->ug_status ?: '-' }}" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->ug_percentage ?: '-' }}" readonly></td>
-                                                <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="rl">PG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 30%)</small></td>
-                                                <td><input type="text" value="M.Tech / Master’s" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->pg_college !== '-' ? $student->academic->pg_college : ($student->academic->pg_board !== '-' ? $student->academic->pg_board : '-') }}" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->pg_year ?: '-' }}" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->pg_status ?: '-' }}" readonly></td>
-                                                <td><input type="text" value="{{ $student->academic->pg_percentage ?: '-' }}" readonly></td>
-                                                <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                @if(!$isUg)
+                                    <div class="lbl" style="margin:16px 0 6px">{{ $isPhd ? 'UG & PG programme details' : 'UG programme details' }}</div>
+                                    <div class="tw">
+                                        <table id="deg">
+                                            <thead>
+                                                <tr><th>Programme</th><th>Programme with specialization</th><th>College / University</th><th>Year</th><th>Division / grade points</th><th>% of marks</th><th>Mode of study</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="rl">UG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 20%)</small></td>
+                                                    <td><input type="text" value="B.Tech / Degree" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_college !== '-' ? $student->academic->ug_college : ($student->academic->ug_board !== '-' ? $student->academic->ug_board : '-') }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_year ?: '-' }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_status ?: '-' }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_percentage ?: '-' }}" readonly></td>
+                                                    <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
+                                                </tr>
+                                                @if($isPhd)
+                                                    <tr>
+                                                        <td class="rl">PG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 30%)</small></td>
+                                                        <td><input type="text" value="M.Tech / Master’s" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_college !== '-' ? $student->academic->pg_college : ($student->academic->pg_board !== '-' ? $student->academic->pg_board : '-') }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_year ?: '-' }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_status ?: '-' }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_percentage ?: '-' }}" readonly></td>
+                                                        <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
 
                                 <h2>4 &nbsp;Enclosures checklist</h2>
                                 <p class="note" style="margin-top:0">Tick the documents enclosed with this form.</p>
                                 <div class="grid" id="enc">
                                     <label class="chk"><input type="checkbox" name="enc" value="SSC / 10th marks memo" {{ $hasTenth ? 'checked' : '' }} disabled><span>SSC / 10th marks memo</span></label>
                                     <label class="chk"><input type="checkbox" name="enc" value="Intermediate / 10+2 marks memo" {{ $hasInter ? 'checked' : '' }} disabled><span>Intermediate / 10+2 marks memo</span></label>
-                                    <label class="chk"><input type="checkbox" name="enc" value="UG degree certificate & marks memos" {{ $hasUg ? 'checked' : '' }} disabled><span>UG degree certificate &amp; marks memos</span></label>
-                                    <label class="chk"><input type="checkbox" name="enc" value="PG degree certificate & marks memos" {{ $hasPg ? 'checked' : '' }} disabled><span>PG degree certificate &amp; marks memos</span></label>
-                                    <label class="chk"><input type="checkbox" name="enc" value="GATE / CSIR / NET / CAT score card (if any)" disabled><span>GATE / CSIR / NET / CAT score card (if any)</span></label>
-                                    <label class="chk"><input type="checkbox" name="enc" value="Experience certificate(s) (if any)" {{ $hasExp ? 'checked' : '' }} disabled><span>Experience certificate(s) (if any)</span></label>
-                                    <label class="chk"><input type="checkbox" name="enc" value="Publication proofs (if any)" disabled><span>Publication proofs (if any)</span></label>
+                                    @if(!$isUg)
+                                        <label class="chk"><input type="checkbox" name="enc" value="UG degree certificate & marks memos" {{ $hasUg ? 'checked' : '' }} disabled><span>UG degree certificate &amp; marks memos</span></label>
+                                        @if($isPhd)
+                                            <label class="chk"><input type="checkbox" name="enc" value="PG degree certificate & marks memos" {{ $hasPg ? 'checked' : '' }} disabled><span>PG degree certificate &amp; marks memos</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="GATE / CSIR / NET / CAT score card (if any)" disabled><span>GATE / CSIR / NET / CAT score card (if any)</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="Experience certificate(s) (if any)" {{ $hasExp ? 'checked' : '' }} disabled><span>Experience certificate(s) (if any)</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="Publication proofs (if any)" disabled><span>Publication proofs (if any)</span></label>
+                                        @endif
+                                    @endif
                                     <label class="chk"><input type="checkbox" name="enc" value="Caste / category certificate (if applicable)" {{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? 'checked' : '' }} disabled><span>Caste / category certificate (if applicable)</span></label>
                                     <label class="chk"><input type="checkbox" name="enc" value="Photo ID proof (Aadhaar / Passport etc.)" {{ $hasId ? 'checked' : '' }} disabled><span>Photo ID proof (Aadhaar / Passport etc.)</span></label>
                                     <label class="chk"><input type="checkbox" name="enc" value="Passport-size photographs" {{ $hasPhoto ? 'checked' : '' }} disabled><span>Passport-size photographs</span></label>
@@ -4990,6 +5025,33 @@
                                     <label class="f"><span>Signature of the candidate (type full name)</span><input type="text" name="sign" value="{{ $student->name }}" readonly></label>
                                 </div>
 
+                                @if(!$isPhd)
+                                    <section class="office" aria-label="For office use only" style="margin-top: 20px;">
+                                        <h2>6 &nbsp;For office use only – Admission &amp; Verification</h2>
+                                        <div class="tw">
+                                            <table>
+                                                <thead>
+                                                    <tr><th>Admission status</th><th>Fee payment status</th><th>Allotted programme &amp; branch</th><th>Campus &amp; quota</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="color: var(--ok); font-weight: 700;">Provisional Admission Confirmed</td>
+                                                        <td style="color: var(--ok); font-weight: 700;">Verified &amp; Accounted</td>
+                                                        <td>{{ $student->program ?: '-' }} ({{ $student->branch ?: '-' }})</td>
+                                                        <td>{{ $isHydCampus ? 'Off-Campus, Hyderabad' : 'VFSTR, Guntur' }} &bull; {{ $student->category ?: 'General' }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="grid" style="margin-top: 14px;">
+                                            <label class="f"><span>Scrutiny Officer</span><input type="text" value="Verified &amp; Approved" readonly></label>
+                                            <label class="f"><span>Finance / Accounts Officer</span><input type="text" value="Fee Receipt Verified" readonly></label>
+                                            <label class="f"><span>Dean – Admissions</span><input type="text" value="Authorized Signatory" readonly></label>
+                                        </div>
+                                    </section>
+                                @endif
+
+                                @if($isPhd)
                                 <section class="rules" aria-label="Eligibility criteria">
                                     <h2>Eligibility criteria</h2>
                                     <div class="in">
@@ -5040,6 +5102,7 @@
                                     </div>
                                     <p class="note" style="margin-top:8px">Selection committee: BoR (Chairman) · Head of the Department (Member) · School Dean (Member) · Dean R&amp;D (Member)</p>
                                 </section>
+                                @endif
                             </div>
                     </div>
                     </div>

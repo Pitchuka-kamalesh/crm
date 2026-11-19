@@ -1,7 +1,7 @@
 {{--
     resources/views/application-form.blade.php
     Official Vignan University Admission Information Form.
-    Designed for pixel-perfect browser printing and DomPDF engine compatibility.
+    Engineered for pixel-perfect browser printing and DomPDF download engine.
 --}}
 @php
     $logo = $logo ?? asset('images/vignan-logo.png');
@@ -10,16 +10,30 @@
     $levelUpper = strtoupper(trim((string)($student->degree_level ?? '')));
     $crmUpper = strtoupper(trim((string)($student->student_id ?? '')));
     $isPhd = $levelUpper === 'PHD'
+        || $levelUpper === 'DOCTORAL'
         || str_contains($progUpper, 'PHD')
         || str_contains($progUpper, 'PH.D')
         || str_contains($progUpper, 'DOCTOR')
         || str_starts_with($crmUpper, 'PHD');
+
+    $isPg = !$isPhd && (
+        $levelUpper === 'MTECH'
+        || $levelUpper === 'PG'
+        || str_contains($progUpper, 'M.TECH')
+        || str_contains($progUpper, 'MTECH')
+        || str_contains($progUpper, 'MASTER')
+        || str_contains($progUpper, 'MBA')
+        || str_contains($progUpper, 'MCA')
+    );
+
+    $isUg = !$isPhd && !$isPg;
 
     $uploadedKeys = array_keys((array)($student->uploaded_files ?? []));
     $hasTenth = in_array('marksheet10', $uploadedKeys);
     $hasInter = in_array('marksheet12', $uploadedKeys);
     $hasUg = in_array('btech', $uploadedKeys) || in_array('ug_cmm', $uploadedKeys);
     $hasPg = in_array('pg1_cmm', $uploadedKeys) || in_array('pg1_pc', $uploadedKeys) || in_array('pg', $uploadedKeys) || in_array('mtech', $uploadedKeys);
+    $hasTc = in_array('tc', $uploadedKeys);
     $hasExp = in_array('experience', $uploadedKeys);
     $hasId = in_array('aadhaar', $uploadedKeys) || in_array('passport', $uploadedKeys);
     $hasPhoto = in_array('photo', $uploadedKeys) || !empty($student->photo_path);
@@ -36,6 +50,12 @@
     $isPwd = in_array($catUpper, ['PWD', 'PH', 'OTHER']);
 
     $isHydCampus = str_contains(strtolower($student->campus ?? ''), 'hyderabad');
+
+    // Base64 PNG radio and checkbox icons (100% compatible with DomPDF and print)
+    $radioChecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAvklEQVRIicWW2xWDIBBEF+rQFkxxUoYpTloIfZgvEwLs7IAnyXzKMJeHsIh8WY41btNylN9CimZ/aGiFatJgKqAMXx975bnPNxPSBOThrWAEKiEVoDfcgnwARsMR5AVgwvMAxhNSdBWA2cxcyB9SdF7tSYQz7V4Ej35EZ842LQecgTU6xmcu0VX9F8DuCfJ5kfehYNfcUtdvas3Cav/dSWYhSPAuugqhbtNRSFc9aEE00HBF0yBI3TWZgTGviidwFIAgG/qibQAAAABJRU5ErkJggg==';
+    $radioUnchecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAoUlEQVRIie2WyRGAIAxFg7VqB1AFdKC96gnFbOye/Ecm+Q/CkAAwWaY0cLX+xGtHcNl8NYAzlSTBRAA2370lMZsLWQgLSM05Yw2EIQRQa56DvACt5hrkBvSaS5AFB/SYc/kEMFoG4ClP7+5TxVJNP8EPyIq8gxEXHS+YfQejRQC4Q9YK53/Xi3ohRd20FVI1DziIBGqeaBJEU/VMLoGV/CouZJ1hgo2pIy8AAAAASUVORK5CYII=';
+    $checkboxChecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAm0lEQVRIiWNgoDFgZGBgYBBb7PWfFoa/it3GyEQLg5EBC7rAmaBFFBlosi4OhU9zHwx9CzDigByAHu7IgGIfIBuOLYFQZAEhwym2gBhAtgXEuJ6BAUckE9JMrOEMDDh8gKwJPYWQYjhOC3BZQqrheC2gFsBrAa6gIqVAJOgDdMNILW2JKiooKcIHb0YjFmAEEb6SkRxAcx/QHAAAI/wutvZyBE4AAAAASUVORK5CYII=';
+    $checkboxUnchecked = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAATUlEQVRIiWNgoDFgZGBgYJiyeMd/WhieE+vByEQLg5EBC7pAdow7RQZOXbIThU9zH4xaMGrBqAWjFoxaMGoBAwOWGg29RqIU0NwHNAcAibkJIuKcYLAAAAAASUVORK5CYII=';
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +65,7 @@
 <style>
     @page {
         size: A4 portrait;
-        margin: 10mm 12mm 10mm 12mm;
+        margin: 8mm 10mm 8mm 10mm;
     }
     * {
         box-sizing: border-box;
@@ -57,20 +77,15 @@
         color: #1d1d1f;
         font-size: 11px;
         line-height: 1.35;
-        background: #f1f5f9;
+        background: {{ !empty($isPdf) ? '#ffffff' : '#f1f5f9' }};
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
     .page {
         width: 100%;
-        max-width: 210mm;
-        margin: 0 auto 16px auto;
+        margin: 0;
+        padding: 0;
         background: #ffffff;
-        padding: 10mm 12mm;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        box-sizing: border-box;
-        page-break-after: always;
-        break-after: page;
         position: relative;
     }
     .page-break {
@@ -91,7 +106,7 @@
         font-size: 11.5px;
         font-weight: bold;
         padding: 4px 8px;
-        margin: 10px 0 6px 0;
+        margin: 9px 0 5px 0;
         border-radius: 2px;
         letter-spacing: 0.3px;
     }
@@ -112,43 +127,7 @@
         font-size: 11px;
         font-weight: bold;
         color: #1d1d1f;
-        min-height: 15px;
-    }
-    .radio-dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border: 1.5px solid #64748b;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 8px;
-        font-size: 8px;
-        font-weight: bold;
-        margin-right: 3px;
-        vertical-align: middle;
-    }
-    .radio-dot.checked {
-        border-color: #8c1c2e;
-        background: #8c1c2e;
-        color: #ffffff;
-    }
-    .chk-sq {
-        display: inline-block;
-        width: 11px;
-        height: 11px;
-        border: 1.5px solid #64748b;
-        border-radius: 2px;
-        text-align: center;
-        line-height: 10px;
-        font-size: 9px;
-        font-weight: bold;
-        margin-right: 4px;
-        vertical-align: middle;
-    }
-    .chk-sq.checked {
-        border-color: #16a34a;
-        background: #e2f5ec;
-        color: #16a34a;
+        min-height: 16px;
     }
     .tbl-data {
         width: 100%;
@@ -180,8 +159,8 @@
         font-size: 8.5px;
         color: #64748b;
         border-top: 1px solid #e2e8f0;
-        padding-top: 6px;
-        margin-top: 12px;
+        padding-top: 5px;
+        margin-top: 10px;
     }
     .mini-header {
         border-bottom: 1px solid #cbd5e1;
@@ -189,6 +168,12 @@
         margin-bottom: 8px;
         font-size: 9.5px;
         color: #64748b;
+    }
+    .icon-symbol {
+        width: 12px;
+        height: 12px;
+        vertical-align: -1px;
+        margin-right: 3px;
     }
     .toolbar {
         width: 100%;
@@ -215,6 +200,21 @@
     .btn-back { background: #fff; color: #0F2A4A; border: 1px solid #cbd5e1; }
     .btn-back:hover { background: #e2e8f0; }
 
+@if(empty($isPdf))
+    @media screen {
+        body {
+            padding: 16px 0;
+        }
+        .page {
+            max-width: 210mm;
+            margin: 0 auto 16px auto;
+            padding: 8mm 10mm;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+        }
+    }
+@endif
+
     @media print {
         body {
             background: #ffffff !important;
@@ -222,13 +222,11 @@
             margin: 0 !important;
         }
         .page {
-            max-width: 100% !important;
-            width: 100% !important;
             box-shadow: none !important;
-            margin: 0 !important;
+            border-radius: 0 !important;
             padding: 0 !important;
-            page-break-after: always !important;
-            break-after: page !important;
+            margin: 0 !important;
+            width: 100% !important;
         }
         .toolbar {
             display: none !important;
@@ -256,31 +254,42 @@
 <!-- PAGE 1: HEADER + SECTION 1 (PERSONAL) + SECTION 2 (PROGRAMME)            -->
 <!-- ========================================================================= -->
 <div class="page">
-    {{-- Header with 3 Columns: Logo | University Info | Photo Box --}}
+    {{-- Header: Logo beside Vignan text, Details on left, Photo box on right --}}
     <table style="width: 100%; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; margin-bottom: 8px;">
         <tr>
-            <td style="width: 58px; vertical-align: middle; padding-right: 10px;">
-                <img src="{{ $logo }}" alt="Logo" style="height: 50px; display: block;">
-            </td>
-            <td style="vertical-align: middle;">
-                <div style="font-size: 16px; font-weight: bold; color: #1d1d1f; line-height: 1.15;">
-                    Vignan’s Foundation for Science, Technology &amp; Research
-                </div>
-                <div style="font-size: 10px; color: #5d5d63; margin-top: 1px;">
-                    (Deemed to be University)
-                </div>
-                <div style="font-size: 14px; font-weight: bold; color: #8c1c2e; margin-top: 4px;">
+            <td style="vertical-align: top;">
+                {{-- Top University Name with Logo Beside It --}}
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2px;">
+                    <tr>
+                        <td style="width: 44px; vertical-align: middle; padding-right: 8px;">
+                            <img src="{{ $logo }}" alt="Logo" style="height: 42px; display: block;">
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <div style="font-size: 15.5px; font-weight: bold; color: #1d1d1f; line-height: 1.15;">
+                                Vignan’s Foundation for Science, Technology &amp; Research
+                            </div>
+                            <div style="font-size: 9.5px; color: #5d5d63; margin-top: 1px;">
+                                (Deemed to be University)
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                {{-- Form Title & Programme Name (Left Aligned) --}}
+                <div style="font-size: 13.5px; font-weight: bold; color: #8c1c2e; margin-top: 4px; margin-bottom: 1px;">
                     Admission Information Form
                 </div>
-                <div style="font-size: 11px; font-weight: bold; color: #1d1d1f; margin-top: 2px;">
+                <div style="font-size: 11px; font-weight: bold; color: #1d1d1f; margin-bottom: 5px;">
                     {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
                 </div>
-                <table style="margin-top: 5px; width: 100%;">
+
+                {{-- Metadata Row (Academic year, Application No., CRM ID) --}}
+                <table style="border-collapse: collapse;">
                     <tr>
-                        <td style="font-size: 10.5px; font-weight: bold; padding-right: 10px;">
+                        <td style="font-size: 10.5px; font-weight: bold; padding-right: 14px;">
                             Academic year: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">2026–2027</span>
                         </td>
-                        <td style="font-size: 10.5px; font-weight: bold; padding-right: 10px;">
+                        <td style="font-size: 10.5px; font-weight: bold; padding-right: 14px;">
                             Application No.: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">{{ $student->id ?: '-' }}</span>
                         </td>
                         <td style="font-size: 10.5px; font-weight: bold;">
@@ -289,12 +298,14 @@
                     </tr>
                 </table>
             </td>
+
+            {{-- Right Column: Passport Photograph --}}
             <td style="width: 95px; vertical-align: top; text-align: right;">
-                <div style="width: 92px; height: 115px; border: 1px dashed #5d5d63; background: #fafaf8; border-radius: 3px; text-align: center; overflow: hidden; display: inline-block;">
+                <div style="width: 90px; height: 112px; border: 1px dashed #5d5d63; background: #fafaf8; border-radius: 3px; text-align: center; overflow: hidden; display: inline-block;">
                     @if(!empty($student->photo_path))
-                        <img src="{{ $student->photo_path }}" alt="Photo" style="width: 92px; height: 115px; object-fit: cover; display: block;">
+                        <img src="{{ $student->photo_path }}" alt="Photo" style="width: 90px; height: 112px; object-fit: cover; display: block;">
                     @else
-                        <div style="padding-top: 36px; font-size: 8.5px; color: #64748b; line-height: 1.3;">
+                        <div style="padding-top: 36px; font-size: 8px; color: #64748b; line-height: 1.3;">
                             Passport-size<br>colour photograph
                         </div>
                     @endif
@@ -302,10 +313,6 @@
             </td>
         </tr>
     </table>
-
-    <div style="font-size: 9.5px; color: #5d5d63; margin-bottom: 8px; background: #fafaf8; border-left: 3px solid #8c1c2e; padding: 4px 8px;">
-        Please fill in BLOCK LETTERS. Fields marked * are mandatory. Attach self-attested copies of all certificates listed in Section 4.
-    </div>
 
     {{-- SECTION 1: PERSONAL DETAILS --}}
     <div class="sec-head">1 &nbsp;Personal details</div>
@@ -326,9 +333,9 @@
             <td style="width: 50%; padding-right: 6px; padding-bottom: 5px;">
                 <div class="lbl">Gender <span class="lbl-req">*</span></div>
                 <div class="box-val" style="font-weight: normal;">
-                    <span class="radio-dot {{ $isMale ? 'checked' : '' }}">{{ $isMale ? '●' : '' }}</span> Male &nbsp;&nbsp;
-                    <span class="radio-dot {{ $isFemale ? 'checked' : '' }}">{{ $isFemale ? '●' : '' }}</span> Female &nbsp;&nbsp;
-                    <span class="radio-dot {{ $isOtherGender ? 'checked' : '' }}">{{ $isOtherGender ? '●' : '' }}</span> Other
+                    <img src="{{ $isMale ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Male &nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isFemale ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Female &nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isOtherGender ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Other
                 </div>
             </td>
             <td style="width: 50%; padding-left: 6px; padding-bottom: 5px;">
@@ -340,11 +347,11 @@
             <td colspan="2" style="padding-bottom: 5px;">
                 <div class="lbl">Category</div>
                 <div class="box-val" style="font-weight: normal;">
-                    <span class="radio-dot {{ $isGen ? 'checked' : '' }}">{{ $isGen ? '●' : '' }}</span> General &nbsp;&nbsp;&nbsp;
-                    <span class="radio-dot {{ $isObc ? 'checked' : '' }}">{{ $isObc ? '●' : '' }}</span> OBC &nbsp;&nbsp;&nbsp;
-                    <span class="radio-dot {{ $isSc ? 'checked' : '' }}">{{ $isSc ? '●' : '' }}</span> SC &nbsp;&nbsp;&nbsp;
-                    <span class="radio-dot {{ $isSt ? 'checked' : '' }}">{{ $isSt ? '●' : '' }}</span> ST &nbsp;&nbsp;&nbsp;
-                    <span class="radio-dot {{ $isPwd ? 'checked' : '' }}">{{ $isPwd ? '●' : '' }}</span> PwD / Other
+                    <img src="{{ $isGen ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> General &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isObc ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> OBC &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isSc ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> SC &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isSt ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> ST &nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isPwd ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> PwD / Other
                 </div>
             </td>
         </tr>
@@ -405,15 +412,15 @@
             <td colspan="2" style="padding-bottom: 5px;">
                 <div class="lbl">Campus preference <span class="lbl-req">*</span></div>
                 <div class="box-val" style="font-weight: normal;">
-                    <span class="radio-dot {{ !$isHydCampus ? 'checked' : '' }}">{{ !$isHydCampus ? '●' : '' }}</span> VFSTR, Guntur &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="radio-dot {{ $isHydCampus ? 'checked' : '' }}">{{ $isHydCampus ? '●' : '' }}</span> Off-Campus, Hyderabad
+                    <img src="{{ !$isHydCampus ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> VFSTR, Guntur &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <img src="{{ $isHydCampus ? $radioChecked : $radioUnchecked }}" class="icon-symbol"> Off-Campus, Hyderabad
                 </div>
             </td>
         </tr>
     </table>
 
     <div class="page-footer">
-        Vignan’s Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;&bull;&nbsp; Application Dossier &nbsp;&bull;&nbsp; Page 1 of 3
+        Vignan’s Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;&bull;&nbsp; Application Dossier &nbsp;&bull;&nbsp; Page 1 of {{ $isPhd ? 3 : 2 }}
     </div>
 </div>
 
@@ -428,17 +435,17 @@
         </tr>
     </table>
 
-    {{-- SECTION 3: ACADEMIC QUALIFICATIONS --}}
+    {{-- SECTION 3: ACADEMIC QUALIFICATIONS (HIERARCHY SENSITIVE) --}}
     <div class="sec-head">3 &nbsp;Academic qualifications</div>
     <div style="font-size: 10px; font-weight: bold; color: #1d1d1f; margin: 4px 0 3px 0;">School education</div>
     <table class="tbl-data">
         <thead>
             <tr>
-                <th style="width: 20%;">Examination</th>
+                <th style="width: 22%;">Examination</th>
                 <th style="width: 32%;">Board / School</th>
-                <th style="width: 12%;">Year</th>
+                <th style="width: 11%;">Year</th>
                 <th style="width: 12%;">Total marks</th>
-                <th style="width: 12%;">Marks obt.</th>
+                <th style="width: 11%;">Marks obt.</th>
                 <th style="width: 12%;">Percentage</th>
             </tr>
         </thead>
@@ -449,7 +456,7 @@
                 <td>{{ $student->academic->ssc_year ?: '-' }}</td>
                 <td>{{ $student->academic->ssc_marks_conducted ?: '-' }}</td>
                 <td>{{ $student->academic->ssc_marks_earned ?: '-' }}</td>
-                <td class="bold">{{ $student->academic->ssc_percentage ?: '-' }}</td>
+                <td style="font-weight: bold;">{{ $student->academic->ssc_percentage ?: '-' }}</td>
             </tr>
             <tr>
                 <td class="rl">Intermediate / 10+2</td>
@@ -457,97 +464,124 @@
                 <td>{{ $student->academic->inter_year ?: '-' }}</td>
                 <td>{{ $student->academic->inter_marks_conducted ?: '-' }}</td>
                 <td>{{ $student->academic->inter_marks_earned ?: '-' }}</td>
-                <td class="bold">{{ $student->academic->inter_percentage ?: '-' }}</td>
+                <td style="font-weight: bold;">{{ $student->academic->inter_percentage ?: '-' }}</td>
             </tr>
         </tbody>
     </table>
 
-    <div style="font-size: 10px; font-weight: bold; color: #1d1d1f; margin: 8px 0 3px 0;">UG &amp; PG programme details</div>
-    <table class="tbl-data">
-        <thead>
-            <tr>
-                <th style="width: 18%;">Programme</th>
-                <th style="width: 22%;">Specialization</th>
-                <th style="width: 24%;">College / University</th>
-                <th style="width: 10%;">Year</th>
-                <th style="width: 10%;">Grade</th>
-                <th style="width: 8%;">%</th>
-                <th style="width: 8%;">Mode</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="rl">UG programme<br><small style="color: #64748b; font-weight: normal;">(weightage: 20%)</small></td>
-                <td>B.Tech / Degree</td>
-                <td>{{ $student->academic->ug_college !== '-' ? $student->academic->ug_college : ($student->academic->ug_board !== '-' ? $student->academic->ug_board : '-') }}</td>
-                <td>{{ $student->academic->ug_year ?: '-' }}</td>
-                <td>{{ $student->academic->ug_status ?: '-' }}</td>
-                <td class="bold">{{ $student->academic->ug_percentage ?: '-' }}</td>
-                <td>Regular</td>
-            </tr>
-            <tr>
-                <td class="rl">PG programme<br><small style="color: #64748b; font-weight: normal;">(weightage: 30%)</small></td>
-                <td>M.Tech / Master’s</td>
-                <td>{{ $student->academic->pg_college !== '-' ? $student->academic->pg_college : ($student->academic->pg_board !== '-' ? $student->academic->pg_board : '-') }}</td>
-                <td>{{ $student->academic->pg_year ?: '-' }}</td>
-                <td>{{ $student->academic->pg_status ?: '-' }}</td>
-                <td class="bold">{{ $student->academic->pg_percentage ?: '-' }}</td>
-                <td>Regular</td>
-            </tr>
-        </tbody>
-    </table>
+    {{-- Only show Degree / PG details for applicants whose degree level requires them (PG and PhD applicants) --}}
+    @if(!$isUg)
+        <div style="font-size: 10px; font-weight: bold; color: #1d1d1f; margin: 8px 0 3px 0;">
+            {{ $isPhd ? 'UG & PG programme details' : 'UG programme details' }}
+        </div>
+        <table class="tbl-data">
+            <thead>
+                <tr>
+                    <th style="width: 18%;">Programme</th>
+                    <th style="width: 22%;">Specialization</th>
+                    <th style="width: 24%;">College / University</th>
+                    <th style="width: 10%;">Year</th>
+                    <th style="width: 10%;">Grade</th>
+                    <th style="width: 8%;">%</th>
+                    <th style="width: 8%;">Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="rl">UG programme<br><small style="color: #64748b; font-weight: normal;">(weightage: 20%)</small></td>
+                    <td>B.Tech / Degree</td>
+                    <td>{{ $student->academic->ug_college !== '-' ? $student->academic->ug_college : ($student->academic->ug_board !== '-' ? $student->academic->ug_board : '-') }}</td>
+                    <td>{{ $student->academic->ug_year ?: '-' }}</td>
+                    <td>{{ $student->academic->ug_status ?: '-' }}</td>
+                    <td style="font-weight: bold;">{{ $student->academic->ug_percentage ?: '-' }}</td>
+                    <td>Regular</td>
+                </tr>
+                @if($isPhd)
+                    <tr>
+                        <td class="rl">PG programme<br><small style="color: #64748b; font-weight: normal;">(weightage: 30%)</small></td>
+                        <td>M.Tech / Master’s</td>
+                        <td>{{ $student->academic->pg_college !== '-' ? $student->academic->pg_college : ($student->academic->pg_board !== '-' ? $student->academic->pg_board : '-') }}</td>
+                        <td>{{ $student->academic->pg_year ?: '-' }}</td>
+                        <td>{{ $student->academic->pg_status ?: '-' }}</td>
+                        <td style="font-weight: bold;">{{ $student->academic->pg_percentage ?: '-' }}</td>
+                        <td>Regular</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    @endif
 
-    {{-- SECTION 4: ENCLOSURES CHECKLIST --}}
+    {{-- SECTION 4: ENCLOSURES CHECKLIST (HIERARCHY SENSITIVE) --}}
     <div class="sec-head">4 &nbsp;Enclosures checklist</div>
     <div style="font-size: 9px; color: #64748b; margin-bottom: 4px;">Tick the documents enclosed with this form.</div>
     <table style="width: 100%;">
         <tr>
             <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasTenth ? 'checked' : '' }}">{{ $hasTenth ? '✔' : '' }}</span>
+                <img src="{{ $hasTenth ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
                 <span>SSC / 10th marks memo</span>
             </td>
             <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasInter ? 'checked' : '' }}">{{ $hasInter ? '✔' : '' }}</span>
+                <img src="{{ $hasInter ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
                 <span>Intermediate / 10+2 marks memo</span>
             </td>
         </tr>
+        @if(!$isUg)
+            <tr>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ $hasUg ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                    <span>UG degree certificate &amp; marks memos</span>
+                </td>
+                <td style="width: 50%; padding: 2px 0;">
+                    @if($isPhd)
+                        <img src="{{ $hasPg ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                        <span>PG degree certificate &amp; marks memos</span>
+                    @else
+                        <img src="{{ $hasTc ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                        <span>Transfer Certificate (T.C.)</span>
+                    @endif
+                </td>
+            </tr>
+        @endif
+        @if($isPhd)
+            <tr>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ $checkboxUnchecked }}" class="icon-symbol">
+                    <span>GATE / CSIR / NET / CAT score card (if any)</span>
+                </td>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ $hasExp ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                    <span>Experience certificate(s) (if any)</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ $checkboxUnchecked }}" class="icon-symbol">
+                    <span>Publication proofs (if any)</span>
+                </td>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                    <span>Caste / category certificate (if applicable)</span>
+                </td>
+            </tr>
+        @else
+            <tr>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ $hasTc ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                    <span>Transfer Certificate (T.C.)</span>
+                </td>
+                <td style="width: 50%; padding: 2px 0;">
+                    <img src="{{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
+                    <span>Caste / category certificate (if applicable)</span>
+                </td>
+            </tr>
+        @endif
         <tr>
             <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasUg ? 'checked' : '' }}">{{ $hasUg ? '✔' : '' }}</span>
-                <span>UG degree certificate &amp; marks memos</span>
-            </td>
-            <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasPg ? 'checked' : '' }}">{{ $hasPg ? '✔' : '' }}</span>
-                <span>PG degree certificate &amp; marks memos</span>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq"></span>
-                <span>GATE / CSIR / NET / CAT score card (if any)</span>
-            </td>
-            <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasExp ? 'checked' : '' }}">{{ $hasExp ? '✔' : '' }}</span>
-                <span>Experience certificate(s) (if any)</span>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq"></span>
-                <span>Publication proofs (if any)</span>
-            </td>
-            <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? 'checked' : '' }}">{{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? '✔' : '' }}</span>
-                <span>Caste / category certificate (if applicable)</span>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasId ? 'checked' : '' }}">{{ $hasId ? '✔' : '' }}</span>
+                <img src="{{ $hasId ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
                 <span>Photo ID proof (Aadhaar / Passport etc.)</span>
             </td>
             <td style="width: 50%; padding: 2px 0;">
-                <span class="chk-sq {{ $hasPhoto ? 'checked' : '' }}">{{ $hasPhoto ? '✔' : '' }}</span>
+                <img src="{{ $hasPhoto ? $checkboxChecked : $checkboxUnchecked }}" class="icon-symbol">
                 <span>Passport-size photographs</span>
             </td>
         </tr>
@@ -558,7 +592,7 @@
     <div style="background: #fafaf8; border: 1px solid #cfcdc7; padding: 6px 8px; font-size: 10px; line-height: 1.45; border-radius: 2px;">
         I hereby declare that all the information furnished in this form is true and correct to the best of my knowledge and belief. I understand that any false information or suppression of facts will lead to the cancellation of my candidature / admission. I have read the eligibility criteria and admission procedure given at the end of this form and agree to abide by the rules and regulations of VFSTR.
         <div style="margin-top: 5px; font-weight: bold;">
-            <span class="chk-sq checked">✔</span> <b>I agree to the declaration</b>
+            <img src="{{ $checkboxChecked }}" class="icon-symbol"> <b>I agree to the declaration</b>
         </div>
     </div>
 
@@ -579,11 +613,54 @@
         </tr>
     </table>
 
+    {{-- SECTION 6: FOR OFFICE USE ONLY (ADMISSIONS & VERIFICATION) --}}
+    @if(!$isPhd)
+        <div class="sec-head" style="margin-top: 12px;">6 &nbsp;For office use only – Admission &amp; Verification</div>
+        <table class="tbl-data" style="margin-top: 4px;">
+            <tr>
+                <td class="rl" style="width: 22%;">Admission Status</td>
+                <td style="width: 28%; color: #15803d; font-weight: bold;">Provisional Admission Confirmed</td>
+                <td class="rl" style="width: 22%;">Fee Payment Status</td>
+                <td style="width: 28%; color: #15803d; font-weight: bold;">Verified &amp; Accounted</td>
+            </tr>
+            <tr>
+                <td class="rl">Allotted Program</td>
+                <td>{{ $student->program ?: '-' }}</td>
+                <td class="rl">Branch / Stream</td>
+                <td>{{ $student->branch ?: '-' }}</td>
+            </tr>
+            <tr>
+                <td class="rl">Campus Allotted</td>
+                <td>{{ $isHydCampus ? 'Off-Campus, Hyderabad' : 'VFSTR, Vadlamudi (Guntur)' }}</td>
+                <td class="rl">Quota / Category</td>
+                <td>{{ $student->category ?: 'General' }}</td>
+            </tr>
+        </table>
+
+        <table style="width: 100%; margin-top: 16px;">
+            <tr>
+                <td style="width: 33%; text-align: center;">
+                    <div style="border-bottom: 1px solid #1d1d1f; height: 26px;"></div>
+                    <div style="font-size: 9.5px; font-weight: bold; margin-top: 4px; color: #475569;">Scrutiny Officer</div>
+                </td>
+                <td style="width: 33%; text-align: center; padding: 0 12px;">
+                    <div style="border-bottom: 1px solid #1d1d1f; height: 26px;"></div>
+                    <div style="font-size: 9.5px; font-weight: bold; margin-top: 4px; color: #475569;">Finance / Accounts Officer</div>
+                </td>
+                <td style="width: 34%; text-align: center;">
+                    <div style="border-bottom: 1px solid #1d1d1f; height: 26px;"></div>
+                    <div style="font-size: 9.5px; font-weight: bold; margin-top: 4px; color: #475569;">Dean – Admissions</div>
+                </td>
+            </tr>
+        </table>
+    @endif
+
     <div class="page-footer">
-        Vignan’s Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;&bull;&nbsp; Application Dossier &nbsp;&bull;&nbsp; Page 2 of 3
+        Vignan’s Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;&bull;&nbsp; Application Dossier &nbsp;&bull;&nbsp; Page 2 of {{ $isPhd ? 3 : 2 }}
     </div>
 </div>
 
+@if($isPhd)
 <!-- ========================================================================= -->
 <!-- PAGE 3: ELIGIBILITY CRITERIA + ADMISSION PROCEDURE + OFFICE VERIFICATION  -->
 <!-- ========================================================================= -->
@@ -669,7 +746,7 @@
                 <td style="text-align:center;">____</td>
             </tr>
             <tr style="background:#fafaf8; font-weight:bold;">
-                <td colspan="2" class="bold">Total marks out of 60</td>
+                <td colspan="2" style="font-weight:bold;">Total marks out of 60</td>
                 <td style="text-align:center;">60</td>
                 <td style="text-align:center;">____</td>
             </tr>
@@ -686,7 +763,7 @@
                 <td style="text-align:center;">____</td>
             </tr>
             <tr style="background:#fafaf8; font-weight:bold;">
-                <td colspan="2" class="bold">Grand total (selection score)</td>
+                <td colspan="2" style="font-weight:bold;">Grand total (selection score)</td>
                 <td style="text-align:center;">100</td>
                 <td style="text-align:center;">____</td>
             </tr>
@@ -696,15 +773,15 @@
     <table style="width: 100%; margin-top: 6px;">
         <tr>
             <td style="width: 50%;">
-                <span class="radio-dot"></span> Selected &nbsp;&nbsp;&nbsp;
-                <span class="radio-dot"></span> Not selected
+                <img src="{{ $radioUnchecked }}" class="icon-symbol"> Selected &nbsp;&nbsp;&nbsp;
+                <img src="{{ $radioUnchecked }}" class="icon-symbol"> Not selected
             </td>
             <td style="width: 50%;">
                 <b>Research assistantship:</b> &nbsp;
-                <span class="chk-sq"></span> ERA &nbsp;
-                <span class="chk-sq"></span> TRA &nbsp;
-                <span class="chk-sq"></span> CAP &nbsp;
-                <span class="chk-sq"></span> CRA
+                <img src="{{ $checkboxUnchecked }}" class="icon-symbol"> ERA &nbsp;
+                <img src="{{ $checkboxUnchecked }}" class="icon-symbol"> TRA &nbsp;
+                <img src="{{ $checkboxUnchecked }}" class="icon-symbol"> CAP &nbsp;
+                <img src="{{ $checkboxUnchecked }}" class="icon-symbol"> CRA
             </td>
         </tr>
     </table>
@@ -743,6 +820,7 @@
         Vignan’s Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;&bull;&nbsp; Application Dossier &nbsp;&bull;&nbsp; Page 3 of 3
     </div>
 </div>
+@endif
 
 <!-- ========================================================================= -->
 <!-- PAGES 4+: ATTACHED DOSSIER DOCUMENTS                                     -->
@@ -838,7 +916,7 @@
             </div>
 
             <div class="page-footer">
-                Vignan’s Foundation for Science, Technology &amp; Research &nbsp;&bull;&nbsp; Application Dossier Attachment &nbsp;&bull;&nbsp; Page {{ 3 + $attachIdx }}
+                Vignan’s Foundation for Science, Technology &amp; Research &nbsp;&bull;&nbsp; Application Dossier Attachment &nbsp;&bull;&nbsp; Page {{ ($isPhd ? 3 : 2) + $attachIdx }}
             </div>
         </div>
     @endforeach
