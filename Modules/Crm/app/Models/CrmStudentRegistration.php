@@ -212,22 +212,62 @@ class CrmStudentRegistration extends Model
     }
 
     /**
-     * Generate the next 10-digit application number starting from 2027000001.
-     * Guarantees absolute uniqueness across both crm.student_registration and master.login.
+     * Calculate academic year details and application number prefix based on timestamp.
+     *
+     * Academic cycle:
+     * - June to December (months 6–12): Academic Year is Y–(Y+1) (e.g. Nov 2026 => 2026–2027, prefix 2027)
+     * - January to May (months 1–5): Academic Year is (Y-1)–Y (e.g. Feb 2027 => 2026–2027, prefix 2027)
+     *
+     * @param \DateTimeInterface|null $date
+     * @return array{start_year: int, end_year: int, prefix: string, academic_year_short: string, academic_year_full: string}
      */
-    public static function generateNextApplicationNumber(): string
+    public static function getAcademicYearInfo(?\DateTimeInterface $date = null): array
+    {
+        $date = $date ?? now();
+        $month = (int) $date->format('n');
+        $year = (int) $date->format('Y');
+
+        $startYear = ($month >= 6) ? $year : ($year - 1);
+        $endYear = $startYear + 1;
+
+        return [
+            'start_year'          => $startYear,
+            'end_year'            => $endYear,
+            'prefix'              => (string) $endYear,
+            'academic_year_short' => $startYear . '–' . substr((string) $endYear, -2),
+            'academic_year_full'  => $startYear . '–' . $endYear,
+        ];
+    }
+
+    /**
+     * Generate the next 10-digit application number based on timestamp (e.g. starting with 2027 for AY 2026-2027).
+     * Guarantees absolute uniqueness across both crm.student_registration and master.login.
+     *
+     * @param \DateTimeInterface|null $date
+     * @return string
+     */
+    public static function generateNextApplicationNumber(?\DateTimeInterface $date = null): string
     {
         try {
-            $maxAppInCrm = (int) self::where('applinano', 'like', '2027%')
+            $ay = self::getAcademicYearInfo($date);
+            $prefix = $ay['prefix']; // e.g. "2027"
+            $minRange = (int) ($prefix . '000000');
+            $maxRange = (int) ($prefix . '899999'); // Exclude test/sentinel 900000+ numbers
+
+            $maxAppInCrm = (int) self::where('applinano', 'like', $prefix . '%')
                 ->whereRaw('length(applinano) = 10')
+                ->whereRaw("applinano ~ '^[0-9]+$'")
+                ->whereRaw("applinano::bigint between ? and ?", [$minRange, $maxRange])
                 ->max('applinano');
 
             $maxUserInLogin = (int) DB::table('master.login')
-                ->where('usercode', 'like', '2027%')
+                ->where('usercode', 'like', $prefix . '%')
                 ->whereRaw('length(usercode) = 10')
+                ->whereRaw("usercode ~ '^[0-9]+$'")
+                ->whereRaw("usercode::bigint between ? and ?", [$minRange, $maxRange])
                 ->max('usercode');
 
-            $next = max($maxAppInCrm, $maxUserInLogin, 2027000000) + 1;
+            $next = max($maxAppInCrm, $maxUserInLogin, $minRange) + 1;
 
             // Ensure strictly unique against both master.login and crm.student_registration
             while (
@@ -235,6 +275,9 @@ class CrmStudentRegistration extends Model
                 DB::table('master.login')->where('usercode', (string) $next)->exists()
             ) {
                 $next++;
+                if ($next > $maxRange) {
+                    break;
+                }
             }
 
             return (string) $next;
@@ -242,7 +285,8 @@ class CrmStudentRegistration extends Model
             Log::error('[CrmStudentRegistration] generateNextApplicationNumber error: ' . $e->getMessage());
         }
 
-        return '2027000001';
+        $fallbackPrefix = self::getAcademicYearInfo($date)['prefix'];
+        return $fallbackPrefix . '000001';
     }
 }
 

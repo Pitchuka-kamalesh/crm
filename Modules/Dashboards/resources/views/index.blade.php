@@ -2232,7 +2232,7 @@
                     </h1>
                     <span class="welcome-pill">
                         <span class="welcome-dot"></span>
-                        <span>Academic Year 2026–27</span>
+                        <span>Academic Year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}</span>
                     </span>
                 </div>
                 <p class="welcome-subtitle">
@@ -2417,19 +2417,19 @@
                                     <label class="mockup-label">Category: <span style="color:#ef4444;">*</span></label>
                                     <div class="mockup-radio-row" style="margin-top: 0.5rem;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC') ? 'checked' : '' }} required>
                                             <span>OC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }} required>
                                             <span>BC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }} required>
                                             <span>SC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }} required>
                                             <span>ST</span>
                                         </label>
                                     </div>
@@ -3049,8 +3049,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status, Study Type (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Year: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <input type="number" name="pg_passed_year" id="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
@@ -3064,6 +3064,14 @@
                                         <select name="pg_current_status" id="pg_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->pg_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
                                             <option value="Pursuing" {{ ($academicDetails?->pg_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Study Type: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <select name="pg_study_type" id="pg_study_type" class="mockup-select">
+                                            <option value="Regular" {{ ($academicDetails?->pg_study_type === 'Regular' || !$academicDetails?->pg_study_type) ? 'selected' : '' }}>Regular</option>
+                                            <option value="Distance" {{ ($academicDetails?->pg_study_type === 'Distance') ? 'selected' : '' }}>Distance</option>
+                                            <option value="Online" {{ ($academicDetails?->pg_study_type === 'Online') ? 'selected' : '' }}>Online</option>
                                         </select>
                                     </div>
                                 </div>
@@ -3106,52 +3114,19 @@
                                         </span>
                                     </div>
 
-                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg1_doc_type" value="CMM" {{ $pg1Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <input type="radio" name="pg1_doc_type" value="CMM" {{ $pg1Doc === 'CMM' ? 'checked' : '' }}>
                                             <span>PG 1 Consolidated Marks Memo (CMM)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg1_doc_type" value="PC_OD" {{ $pg1Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <input type="radio" name="pg1_doc_type" value="PC_OD" {{ $pg1Doc === 'PC_OD' ? 'checked' : '' }}>
                                             <span>PG 1 Provisional Certificate / Original Degree (PC/OD)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg1_doc_type" value="BOTH" {{ ($pg1Doc === 'BOTH' || !$academicDetails?->pg1_doc_type) ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <input type="radio" name="pg1_doc_type" value="BOTH" {{ ($pg1Doc === 'BOTH' || !$academicDetails?->pg1_doc_type) ? 'checked' : '' }}>
                                             <span>Both (CMM &amp; PC/OD)</span>
                                         </label>
-                                    </div>
-
-                                    <div id="pg1_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 CMM Memo / Serial No:</label>
-                                            <input type="text" name="pg1_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 CMM Marks / CGPA:</label>
-                                            <input type="text" name="pg1_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_cgpa }}" placeholder="e.g. 8.95">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 CMM Issue Year:</label>
-                                            <input type="number" name="pg1_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_year }}" placeholder="e.g. 2024" min="2000" max="2030">
-                                        </div>
-                                    </div>
-
-                                    <div id="pg1_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 PC / OD Certificate No:</label>
-                                            <input type="text" name="pg1_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_no }}" placeholder="Enter PC / OD Number">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 PC / OD Issue Year:</label>
-                                            <input type="number" name="pg1_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_year }}" placeholder="e.g. 2024" min="2000" max="2030">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 PC / OD Certificate Status:</label>
-                                            <select name="pg1_pc_od_status" class="mockup-select">
-                                                <option value="Provisional" {{ ($academicDetails?->pg1_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
-                                                <option value="Original Degree" {{ ($academicDetails?->pg1_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
-                                            </select>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -3212,8 +3187,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status, Study Type (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Year:</label>
                                         <input type="number" name="pg2_passed_year" id="pg2_passed_year" class="mockup-input" value="{{ $academicDetails?->pg2_passed_year }}" placeholder="Passing Year (e.g. 2026)" min="2000" max="2030">
@@ -3227,6 +3202,14 @@
                                         <select name="pg2_current_status" id="pg2_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->pg2_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
                                             <option value="Pursuing" {{ ($academicDetails?->pg2_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Study Type:</label>
+                                        <select name="pg2_study_type" id="pg2_study_type" class="mockup-select">
+                                            <option value="Regular" {{ ($academicDetails?->pg2_study_type === 'Regular' || !$academicDetails?->pg2_study_type) ? 'selected' : '' }}>Regular</option>
+                                            <option value="Distance" {{ ($academicDetails?->pg2_study_type === 'Distance') ? 'selected' : '' }}>Distance</option>
+                                            <option value="Online" {{ ($academicDetails?->pg2_study_type === 'Online') ? 'selected' : '' }}>Online</option>
                                         </select>
                                     </div>
                                 </div>
@@ -3254,9 +3237,10 @@
                                     </div>
                                 </div>
 
-                                <!-- PG 2 Certificate / Memo Type: (pg2(cmm), pg2(pc/od)) (Optional) -->
+                                <!-- PG 2 Certificate / Memo Type: (pg2(cmm), pg2(pc/od)) -->
                                 @php
-                                    $pg2Doc = $academicDetails?->pg2_doc_type ?? 'NONE';
+                                    $pg2Doc = $academicDetails?->pg2_doc_type ?? 'BOTH';
+                                    if ($pg2Doc === 'NONE') { $pg2Doc = 'BOTH'; }
                                 @endphp
                                 <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -3266,56 +3250,19 @@
                                         </label>
                                     </div>
 
-                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="NONE" {{ ($pg2Doc === 'NONE' || !$academicDetails?->pg2_doc_type) ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
-                                            <span>Not Applicable</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="CMM" {{ $pg2Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <input type="radio" name="pg2_doc_type" value="CMM" {{ $pg2Doc === 'CMM' ? 'checked' : '' }}>
                                             <span>PG 2 Consolidated Marks Memo (CMM)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="PC_OD" {{ $pg2Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <input type="radio" name="pg2_doc_type" value="PC_OD" {{ $pg2Doc === 'PC_OD' ? 'checked' : '' }}>
                                             <span>PG 2 Provisional Certificate / Original Degree (PC/OD)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="BOTH" {{ $pg2Doc === 'BOTH' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <input type="radio" name="pg2_doc_type" value="BOTH" {{ ($pg2Doc === 'BOTH' || !$academicDetails?->pg2_doc_type) ? 'checked' : '' }}>
                                             <span>Both (CMM &amp; PC/OD)</span>
                                         </label>
-                                    </div>
-
-                                    <div id="pg2_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 CMM Memo / Serial No:</label>
-                                            <input type="text" name="pg2_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 CMM Marks / CGPA:</label>
-                                            <input type="text" name="pg2_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_cgpa }}" placeholder="e.g. 9.10">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 CMM Issue Year:</label>
-                                            <input type="number" name="pg2_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_year }}" placeholder="e.g. 2026" min="2000" max="2030">
-                                        </div>
-                                    </div>
-
-                                    <div id="pg2_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 PC / OD Certificate No:</label>
-                                            <input type="text" name="pg2_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_no }}" placeholder="Enter PC / OD Number">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 PC / OD Issue Year:</label>
-                                            <input type="number" name="pg2_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_year }}" placeholder="e.g. 2026" min="2000" max="2030">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 PC / OD Certificate Status:</label>
-                                            <select name="pg2_pc_od_status" class="mockup-select">
-                                                <option value="Provisional" {{ ($academicDetails?->pg2_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
-                                                <option value="Original Degree" {{ ($academicDetails?->pg2_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
-                                            </select>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -4087,7 +4034,7 @@
                             'pg1_cmm' => [
                                 'icon' => '📜',
                                 'title' => 'PG 1 Consolidated Marks Memo (CMM)',
-                                'sub' => 'Consolidated Marks Memo for PG 1 (At least one mandatory with PC/OD)*',
+                                'sub' => 'Consolidated Marks Memo for PG 1 (Mandatory)*',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4096,7 +4043,7 @@
                             'pg1_pc' => [
                                 'icon' => '🎓',
                                 'title' => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
-                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (At least one mandatory with CMM)*',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (Mandatory)*',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4105,7 +4052,7 @@
                             'pg2_cmm' => [
                                 'icon' => '📜',
                                 'title' => 'PG 2 Consolidated Marks Memo (CMM)',
-                                'sub' => 'Consolidated Marks Memo for PG 2 (Optional)',
+                                'sub' => 'Consolidated Marks Memo for PG 2',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4113,7 +4060,7 @@
                             'pg2_pc' => [
                                 'icon' => '🎓',
                                 'title' => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
-                                'sub' => 'Provisional Certificate / Original Degree for PG 2 (Optional)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 2',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4180,6 +4127,20 @@
                                     $docFile = $uploadedDocs[$docKey] ?? null;
                                     $cardLevels = explode(' ', $docMeta['levels']);
                                     $isLevelMatch = in_array($degreeLevel ?? 'btech', $cardLevels);
+
+                                    $pg1DocType = $academicDetails?->pg1_doc_type ?? 'BOTH';
+                                    $pg2DocType = $academicDetails?->pg2_doc_type ?? 'BOTH';
+                                    if (($degreeLevel ?? '') === 'phd') {
+                                        if ($docKey === 'pg1_cmm' && $pg1DocType === 'PC_OD') {
+                                            $isLevelMatch = false;
+                                        } elseif ($docKey === 'pg1_pc' && $pg1DocType === 'CMM') {
+                                            $isLevelMatch = false;
+                                        } elseif ($docKey === 'pg2_cmm' && $pg2DocType === 'PC_OD') {
+                                            $isLevelMatch = false;
+                                        } elseif ($docKey === 'pg2_pc' && $pg2DocType === 'CMM') {
+                                            $isLevelMatch = false;
+                                        }
+                                    }
                                 @endphp
                                 <div class="kyc-doc-card doc-stream-item"
                                      data-doc-key="{{ $docKey }}"
@@ -4192,7 +4153,7 @@
                                         <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
                                             @if(!empty($docMeta['is_pg1_group']))
                                                 <span style="font-size: 0.68rem; font-weight: 700; background: #faf5ff; color: #7c3aed; padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid #d8b4fe;">
-                                                    Any 1 Mandatory *
+                                                    Mandatory *
                                                 </span>
                                             @endif
                                             @if($docMeta['is_common'])
@@ -4263,10 +4224,32 @@
                             const hiddenInput = document.getElementById('stage3_degree_level_input');
                             if (hiddenInput) hiddenInput.value = level;
 
+                            const pg1DocType = '{{ $academicDetails?->pg1_doc_type ?? "BOTH" }}';
+                            const pg2DocType = '{{ $academicDetails?->pg2_doc_type ?? "BOTH" }}';
+
                             // Filter cards: B.Tech shows only 10th, Inter, Aadhaar, Photo, TC, Conduct
                             document.querySelectorAll('.doc-stream-item').forEach(card => {
                                 const levels = (card.getAttribute('data-levels') || '').split(' ');
+                                const docKey = card.getAttribute('data-doc-key');
                                 if (levels.includes(level)) {
+                                    if (level === 'phd') {
+                                        if (docKey === 'pg1_cmm' && pg1DocType === 'PC_OD') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                        if (docKey === 'pg1_pc' && pg1DocType === 'CMM') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                        if (docKey === 'pg2_cmm' && pg2DocType === 'PC_OD') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                        if (docKey === 'pg2_pc' && pg2DocType === 'CMM') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                    }
                                     card.style.display = 'flex';
                                 } else {
                                     card.style.display = 'none';
@@ -4321,10 +4304,11 @@
                                 form.addEventListener('submit', function(e) {
                                     const lvl = document.getElementById('stage3_degree_level_input')?.value || '{{ $degreeLevel ?? "btech" }}';
                                     if (lvl === 'phd') {
+                                        const pg1DocType = '{{ $academicDetails?->pg1_doc_type ?? "BOTH" }}';
                                         const hasCmm = Boolean({{ !empty($uploadedDocs['pg1_cmm']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_cmm')?.files?.length > 0);
                                         const hasPc = Boolean({{ !empty($uploadedDocs['pg1_pc']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_pc')?.files?.length > 0);
 
-                                        if (!hasCmm && !hasPc) {
+                                        if ((pg1DocType === 'CMM' || pg1DocType === 'BOTH') && !hasCmm) {
                                             e.preventDefault();
                                             const cmmCard = document.getElementById('doc-card-pg1_cmm');
                                             if (cmmCard) cmmCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -4332,7 +4316,23 @@
                                             if (input) {
                                                 input.focus();
                                                 if (typeof input.reportValidity === 'function') {
-                                                    input.setCustomValidity('Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).');
+                                                    input.setCustomValidity('Please upload PG 1 Consolidated Marks Memo (CMM).');
+                                                    input.reportValidity();
+                                                    input.onchange = function() { input.setCustomValidity(''); };
+                                                }
+                                            }
+                                            return false;
+                                        }
+
+                                        if ((pg1DocType === 'PC_OD' || pg1DocType === 'BOTH') && !hasPc) {
+                                            e.preventDefault();
+                                            const pcCard = document.getElementById('doc-card-pg1_pc');
+                                            if (pcCard) pcCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            const input = document.getElementById('file-input-pg1_pc');
+                                            if (input) {
+                                                input.focus();
+                                                if (typeof input.reportValidity === 'function') {
+                                                    input.setCustomValidity('Please upload PG 1 Provisional Certificate / Original Degree (PC/OD).');
                                                     input.reportValidity();
                                                     input.onchange = function() { input.setCustomValidity(''); };
                                                 }
@@ -4793,17 +4793,18 @@
                                 ]);
                             }
                         @endphp
-                            <div class="phd-form-wrap">
+                            @if($isPhd)
+<div class="phd-form-wrap">
                                 <style>
                                     .phd-form-wrap {
                                         --bg: #f3f2ef; --paper: #fff; --ink: #1d1d1f; --mute: #5d5d63; --line: #cfcdc7;
-                                        --bar: #4a4a4f; --bar-ink: #fff; --accent: #8c1c2e; --accent-ink: #fff; --field: #fafaf8; --ok: #1f6b3a;
+                                        --bar: #1e3a8a; --bar-ink: #fff; --accent: #8c1c2e; --accent-ink: #fff; --field: #fafaf8; --ok: #1f6b3a;
                                         background: var(--paper); border: 1px solid var(--line); padding: 24px 28px;
                                         font: 400 14px/1.5 "Source Sans 3", system-ui, -apple-system, sans-serif; color: var(--ink); border-radius: 4px;
                                     }
                                     .phd-form-wrap header {
                                         display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
-                                        border-bottom: 2px solid var(--ink); padding-bottom: 14px;
+                                        border-bottom: 2px solid #1e3a8a; padding-bottom: 14px;
                                     }
                                     .phd-form-wrap .logo-box { display: flex; align-items: center; justify-content: center; }
                                     .phd-form-wrap .logo-box img { height: 56px; display: block; }
@@ -4867,12 +4868,12 @@
                                     }
                                 </style>
 
-                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid var(--ink); padding-bottom: 12px;">
+                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px;">
                                     <div>
-                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 48px; object-fit: contain;">
+                                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 4px;">
+                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 74px; max-width: 86px; object-fit: contain;">
                                             <div>
-                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15;">
+                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15; color: #1e3a8a;">
                                                     Vignan’s Foundation for Science, Technology &amp; Research
                                                     <small style="display: block; font-size: 11.5px; color: var(--mute); margin-top: 2px;">(Deemed to be University)</small>
                                                 </p>
@@ -4882,10 +4883,10 @@
                                         <div style="font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
                                             {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
                                         </div>
-                                        <div class="meta" style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 16px;">
-                                            <label style="font-size: 12px; font-weight: 600;">Academic year <input type="text" id="ay" value="2026–2027" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
-                                            <label style="font-size: 12px; font-weight: 600;">Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
-                                            <label style="font-size: 12px; font-weight: 600;">CRM ID <input type="text" value="{{ $student->student_id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                        <div class="meta" style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;">
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Admission year:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Application No.:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->id }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">CRM ID:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->student_id }}</span></div>
                                         </div>
                                     </div>
                                     <label class="photo" id="ph" style="margin: 0; align-self: start;">
@@ -5119,6 +5120,400 @@
                                 </section>
                                 @endif
                             </div>
+@else
+<!-- Form Header Banner -->
+                            <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
+                            <tr>
+                                <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
+                                    <div style="background: #ffffff; border-radius: 8px; padding: 6px 10px; display: inline-block;">
+                                        <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 42px; display: block;">
+                                    </div>
+                                    <div style="color: #A9BCD6; font-size: 9px; padding-top: 8px;">
+                                        Application date: {{ $appStudent->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
+                                    </div>
+                                </td>
+                                <td style="padding: 18px 24px; vertical-align: top; width: 50%; text-align: right;">
+                                    <div style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">APPLICATION FORM</div>
+                                    <div style="color: #A9BCD6; font-size: 11px; line-height: 1.5; margin-top: 4px;">
+                                        University Admission Application<br>
+                                        Please read all details carefully before signing
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="padding: 0 24px 20px 24px;">
+
+                            <!-- Profile Strip -->
+                            <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                                <tr>
+                                    <td style="padding: 10px 14px; width: 68px; vertical-align: middle;">
+                                        @if(!empty($appStudent->photo_path))
+                                            <div style="width: 58px; height: 72px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: #ffffff;">
+                                                <img src="{{ $appStudent->photo_path }}" alt="Photo" style="width: 58px; height: 72px; object-fit: cover; display: block;">
+                                            </div>
+                                        @else
+                                            <div style="width: 58px; height: 72px; border: 1px dashed #6B778A; background: #F4F7FB; text-align: center; font-size: 7.5px; color: #6B778A; line-height: 1.4; padding-top: 20px; font-weight: 700; border-radius: 4px;">
+                                                AFFIX<br>PASSPORT<br>PHOTO
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td style="padding: 10px 14px; vertical-align: middle;">
+                                        <div style="font-size: 17px; font-weight: 800; color: #0F2A4A; line-height: 1.2;">{{ $appStudent->name }}</div>
+                                        <div style="color: #6B778A; font-size: 11px; line-height: 1.6; margin-top: 3px;">
+                                            {{ $appStudent->email }} &nbsp;|&nbsp; {{ $appStudent->phone }}<br>
+                                            Applicant ID: <strong style="color: #0F2A4A;">{{ $appStudent->student_id }}</strong> (App #: {{ $appStudent->id }})
+                                        </div>
+                                    </td>
+                                    <td style="padding: 10px 14px; vertical-align: middle; text-align: right;">
+                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 10px; margin-bottom: 4px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
+                                            PAYMENT {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }}
+                                        </span><br>
+                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 10px; color: #B25E09; background: #FDF0DC; border: 1px solid #fde68a;">
+                                            PROVISIONAL SEAT ALLOTMENT
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Allotment & Examination Schedule Bar -->
+                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 10px 14px; margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Allotted Program</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        {{ $appStudent->program ?: ($programName ?: 'B.Tech - Bachelor of Technology') }}
+                                    </div>
+                                    @if(!empty($appStudent->branch) || !empty($branchName))
+                                        <div style="font-size: 10px; color: #1E7BD8; font-weight: 700;">{{ $appStudent->branch ?: $branchName }}</div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Allotted Campus</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        {{ $appStudent->campus ?: ($campusName ?: 'Vignan Main Campus (Vadlamudi)') }}
+                                    </div>
+                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Provisional Allotment Confirmed</div>
+                                </div>
+                                @if(($degreeLevel ?? '') !== 'phd')
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Booked Entrance Exam Slot</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        📅 {{ $appStudent->exam_date ?: 'Stage 5 Scheduled' }}
+                                    </div>
+                                    <div style="font-size: 10px; color: #B25E09; font-weight: 700;">⏰ {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
+                                </div>
+                                @else
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Entrance Examination</div>
+                                    <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
+                                        Exempted / Direct Ph.D
+                                    </div>
+                                    <div style="font-size: 10px; color: #12875B; font-weight: 700;">Departmental Evaluation</div>
+                                </div>
+                                @endif
+                            </div>
+
+                            <!-- 2-Column: Personal Information & Address Information -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                <tr>
+                                    <td style="width: 50%; padding-right: 6px; vertical-align: top;">
+                                        <!-- 1. PERSONAL & PARENT INFORMATION -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
+                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                                1. Candidate &amp; Parent Details
+                                            </h4>
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
+                                                <tr><td style="width: 38%; color: #6B778A; padding: 3.5px 0;">Candidate Name</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->name ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Father / Parent</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->parent_name ?: ($appStudent->father_name ?: 'N/A') }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Parent Contact</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->parent_phone ?: ($appStudent->father_phone ?: 'N/A') }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Candidate Phone</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->phone ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Email ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0; word-break: break-all;">{{ $appStudent->email ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Date of Birth</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $dobFormatted }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Gender</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->gender ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Category</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->category ?: 'General' }}</td></tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; padding-left: 6px; vertical-align: top;">
+                                        <!-- 2. ADDRESS INFORMATION -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
+                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                                2. Permanent &amp; Contact Address
+                                            </h4>
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
+                                                <tr><td style="width: 38%; color: #6B778A; padding: 3.5px 0;">Door / Street</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->street ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Mandal / City</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->city ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">District</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->district ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">State</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->state ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Country</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->country ?: 'India' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">PIN Code</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->pincode ?: 'N/A' }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Admission Ref</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">#{{ $appStudent->id }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 3.5px 0;">Student CRM ID</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 3.5px 0;">{{ $appStudent->student_id ?: 'N/A' }}</td></tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- 3. QUALIFYING ACADEMIC RECORDS (FULL WIDTH TABLE) -->
+                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; margin-top: 10px;">
+                                <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                    3. Qualifying Academic Qualifications (10th SSC &amp; 12th Intermediate{{ !empty($appStudent->academic->ug_college) ? ', Undergraduate' : '' }}{{ !empty($appStudent->academic->pg_college) ? ' &amp; Postgraduate' : '' }})
+                                </h4>
+                                <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
+                                    <thead>
+                                        <tr style="background: #F8FAFC; border-bottom: 2px solid #E2E8F0; text-align: left; color: #475569; font-weight: 800;">
+                                            <th style="padding: 6px 8px; width: 18%;">Standard / Level</th>
+                                            <th style="padding: 6px 8px; width: 28%;">School / College Name</th>
+                                            <th style="padding: 6px 8px; width: 20%;">Board / University</th>
+                                            <th style="padding: 6px 8px; width: 10%; text-align: center;">Year</th>
+                                            <th style="padding: 6px 8px; width: 12%;">Roll / Hall Ticket</th>
+                                            <th style="padding: 6px 8px; width: 12%; text-align: right;">Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- 10th Standard -->
+                                        <tr style="border-bottom: 1px solid #E3E8EF;">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    10th Standard (SSC)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->ssc_school) && $appStudent->academic->ssc_school !== '-') ? $appStudent->academic->ssc_school : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->ssc_board) && $appStudent->academic->ssc_board !== '-') ? $appStudent->academic->ssc_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->ssc_year) && $appStudent->academic->ssc_year !== '-') ? $appStudent->academic->ssc_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->ssc_roll) && $appStudent->academic->ssc_roll !== '-') ? $appStudent->academic->ssc_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->ssc_percentage) && $appStudent->academic->ssc_percentage !== 'N/A' && $appStudent->academic->ssc_percentage !== '-') ? $appStudent->academic->ssc_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        <!-- 12th / Intermediate -->
+                                        <tr style="{{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-' || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    12th / Inter (10+2)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->inter_college) && $appStudent->academic->inter_college !== '-') ? $appStudent->academic->inter_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->inter_board) && $appStudent->academic->inter_board !== '-') ? $appStudent->academic->inter_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->inter_year) && $appStudent->academic->inter_year !== '-') ? $appStudent->academic->inter_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->inter_roll) && $appStudent->academic->inter_roll !== '-') ? $appStudent->academic->inter_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->inter_percentage) && $appStudent->academic->inter_percentage !== 'N/A' && $appStudent->academic->inter_percentage !== '-') ? $appStudent->academic->inter_percentage : '-' }}
+                                            </td>
+                                        </tr>
+
+                                        <!-- Undergraduate (UG / Degree / B.Tech) -->
+                                        @if((!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr style="{{ ((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Undergraduate (UG)
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-') ? $appStudent->academic->ug_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->ug_board) && $appStudent->academic->ug_board !== '-') ? $appStudent->academic->ug_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->ug_year) && $appStudent->academic->ug_year !== '-') ? $appStudent->academic->ug_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->ug_roll) && $appStudent->academic->ug_roll !== '-') ? $appStudent->academic->ug_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->ug_percentage) && $appStudent->academic->ug_percentage !== 'N/A' && $appStudent->academic->ug_percentage !== '-') ? $appStudent->academic->ug_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endif
+
+                                        <!-- Postgraduate 1 (PG 1 / Master's / M.Tech) -->
+                                        @if((!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr style="{{ ((!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Postgraduate 1
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->pg_college) && $appStudent->academic->pg_college !== '-') ? $appStudent->academic->pg_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->pg_board) && $appStudent->academic->pg_board !== '-') ? $appStudent->academic->pg_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg_year) && $appStudent->academic->pg_year !== '-') ? $appStudent->academic->pg_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg_roll) && $appStudent->academic->pg_roll !== '-') ? $appStudent->academic->pg_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->pg_percentage) && $appStudent->academic->pg_percentage !== 'N/A' && $appStudent->academic->pg_percentage !== '-') ? $appStudent->academic->pg_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endif
+
+                                        <!-- Postgraduate 2 (PG 2 / Ph.D) -->
+                                        @if((!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') || ($appStudent->degree_level ?? '') === 'phd')
+                                        <tr>
+                                            <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
+                                                <span style="display: inline-block; background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; border-radius: 4px; padding: 2px 6px; font-size: 9.5px;">
+                                                    Postgraduate 2
+                                                </span>
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">
+                                                {{ (!empty($appStudent->academic->pg2_college) && $appStudent->academic->pg2_college !== '-') ? $appStudent->academic->pg2_college : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; color: #475569;">
+                                                {{ (!empty($appStudent->academic->pg2_board) && $appStudent->academic->pg2_board !== '-') ? $appStudent->academic->pg2_board : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg2_year) && $appStudent->academic->pg2_year !== '-') ? $appStudent->academic->pg2_year : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; font-weight: 700; color: #0F2A4A;">
+                                                {{ (!empty($appStudent->academic->pg2_roll) && $appStudent->academic->pg2_roll !== '-') ? $appStudent->academic->pg2_roll : '-' }}
+                                            </td>
+                                            <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: #16a34a;">
+                                                {{ (!empty($appStudent->academic->pg2_percentage) && $appStudent->academic->pg2_percentage !== 'N/A' && $appStudent->academic->pg2_percentage !== '-') ? $appStudent->academic->pg2_percentage : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 2-Column: 4. Payment Information & 5. Verification Checklist -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                <tr>
+                                    <td style="width: 50%; padding-right: 6px; vertical-align: top;">
+                                        <!-- 4. PAYMENT INFORMATION -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
+                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                                4. Admission Registration Fee
+                                            </h4>
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
+                                                <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Paid Amount</td><td style="font-weight: 800; border-bottom: 1px solid #E3E8EF; padding: 4px 0; color: #15803d; font-size: 12px;">INR {{ number_format((float) $appStudent->payment_amount) }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 4px 0;">Payment Gateway</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">{{ $appStudent->payment_method }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 4px 0;">Transaction Ref</td><td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0; font-size: 9.5px; word-break: break-all;">{{ $appStudent->transaction_id }}</td></tr>
+                                                <tr><td style="color: #6B778A; padding: 4px 0;">Accounts Status</td>
+                                                    <td style="font-weight: 700; border-bottom: 1px solid #E3E8EF; padding: 4px 0;">
+                                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2px 8px; border-radius: 8px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
+                                                            ✓ {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }} &amp; VERIFIED
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; padding-left: 6px; vertical-align: top;">
+                                        <!-- 5. DOCUMENTS UPLOAD SUMMARY -->
+                                        <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
+                                            <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
+                                                5. Document Verification Status
+                                            </h4>
+                                            @php
+                                                $onlyUploadedDocs = [];
+                                                foreach($formDocs as $dKey => $dLabel) {
+                                                    $dExt = $formUploaded[$dKey] ?? null;
+                                                    $isUploaded = !empty($dExt) || !empty($uploadedDocs[$dKey]);
+                                                    if ($isUploaded) {
+                                                        $onlyUploadedDocs[$dKey] = [
+                                                            'label' => $dLabel,
+                                                            'ext' => $dExt ?: 'VERIFIED'
+                                                        ];
+                                                    }
+                                                }
+                                            @endphp
+                                            @if(empty($onlyUploadedDocs))
+                                                <div style="padding: 10px; font-size: 9.5px; color: #64748b; font-style: italic; text-align: center;">
+                                                    No documents uploaded yet.
+                                                </div>
+                                            @else
+                                                <table style="width: 100%; border-collapse: collapse;">
+                                                    @foreach(array_chunk($onlyUploadedDocs, 2, true) as $dRow)
+                                                        <tr>
+                                                            @foreach($dRow as $dKey => $dInfo)
+                                                                <td style="width: 50%; padding: 2.5px;">
+                                                                    <div style="border-radius: 6px; padding: 5px 7px; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: #E2F5EC; color: #1B2430; border: 1px solid #a7f3d0;">
+                                                                        <span>{{ $dInfo['label'] }}</span>
+                                                                        <small style="color: #12875B; font-weight: 800;">✓ {{ $dInfo['ext'] }}</small>
+                                                                    </div>
+                                                                </td>
+                                                            @endforeach
+                                                            @if(count($dRow) === 1)
+                                                                <td style="width: 50%; padding: 2.5px;"></td>
+                                                            @endif
+                                                        </tr>
+                                                    @endforeach
+                                                </table>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Instructions -->
+                            <div style="background: #FFF8EA; border: 1px solid #F2DDB0; border-left: 4px solid #B25E09; border-radius: 10px; padding: 9px 14px; margin-top: 10px; font-size: 9.5px; line-height: 1.5; color: #1B2430;">
+                                <strong style="color: #B25E09; letter-spacing: 0.4px;">INSTRUCTIONS &amp; DECLARATION</strong>
+                                <ul style="margin: 3px 0 0; padding-left: 14px;">
+                                    <li>This is a provisional seat allotment. Original certificates must be presented at the time of campus verification.</li>
+                                    <li>Tuition fee, merit scholarships, and entrance test criteria are governed by university admissions norms.</li>
+                                    <li>I hereby declare that all entries made in this application are authentic and true to the best of my knowledge.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Signatures -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px;">
+                                <tr>
+                                    <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
+                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Signature of Parent / Guardian</div>
+                                    </td>
+                                    <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
+                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Date: {{ date('d/m/Y') }}</div>
+                                    </td>
+                                    <td style="width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px;">
+                                        <div style="border-top: 1px solid #6B778A; padding-top: 5px; font-weight: 700;">Signature of Candidate</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- For Office Use Only -->
+                            <div style="border: 1px dashed #6B778A; background: #ffffff; border-radius: 8px; padding: 7px 12px; margin-top: 14px; font-size: 9.5px; color: #6B778A;">
+                                <strong style="font-size: 8.5px; letter-spacing: 0.4px; display: block; margin-bottom: 6px;">FOR OFFICE USE ONLY &bull; UNIVERSITY ADMISSIONS DIRECTORATE</strong>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="width: 33.33%;">Application No.: <strong>{{ $appStudent->id }}</strong></td>
+                                        <td style="width: 33.33%;">Verification Officer: ________________</td>
+                                        <td style="width: 33.33%;">Approval Seal &amp; Date: _________</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="text-align: center; font-size: 8.5px; color: #6B778A; margin-top: 12px;">
+                                Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;|&nbsp; https://admissions.vignan.ac.in
+                            </div>
+
+                        </div>
+@endif
                     </div>
                     </div>
 
@@ -6125,7 +6520,7 @@
                         <div class="terms-card-row row-green">
                             <div class="terms-badge-pill badge-green">2</div>
                             <div class="terms-row-content">
-                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.
+                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}.
                             </div>
                         </div>
 

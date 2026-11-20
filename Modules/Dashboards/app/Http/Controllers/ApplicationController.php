@@ -408,6 +408,8 @@ class ApplicationController extends Controller
                 'pg_marks_earned' => !empty($academicDetails?->pg_marks_earned) ? $academicDetails->pg_marks_earned : '-',
                 'pg_percentage' => ($pgPercentage && $pgPercentage > 0) ? number_format($pgPercentage, 2) . ' %' : ($academicDetails?->pg_cgpa ? $academicDetails->pg_cgpa . ' CGPA' : '-'),
                 'pg_status' => !empty($academicDetails?->pg_current_status) ? $academicDetails->pg_current_status : '-',
+                'pg_study_type' => !empty($academicDetails?->pg_study_type) ? $academicDetails->pg_study_type : 'Regular',
+                'pg1_doc_type' => !empty($academicDetails?->pg1_doc_type) ? $academicDetails->pg1_doc_type : 'BOTH',
 
                 // Postgraduate 2 (PG 2 / Ph.D)
                 'pg2_college' => !empty($academicDetails?->pg2_college_name) ? $academicDetails->pg2_college_name : '-',
@@ -418,7 +420,11 @@ class ApplicationController extends Controller
                 'pg2_marks_earned' => !empty($academicDetails?->pg2_marks_earned) ? $academicDetails->pg2_marks_earned : '-',
                 'pg2_percentage' => ($pg2Percentage && $pg2Percentage > 0) ? number_format($pg2Percentage, 2) . ' %' : ($academicDetails?->pg2_cgpa ? $academicDetails->pg2_cgpa . ' CGPA' : '-'),
                 'pg2_status' => !empty($academicDetails?->pg2_current_status) ? $academicDetails->pg2_current_status : '-',
+                'pg2_study_type' => !empty($academicDetails?->pg2_study_type) ? $academicDetails->pg2_study_type : 'Regular',
+                'pg2_doc_type' => !empty($academicDetails?->pg2_doc_type) ? $academicDetails->pg2_doc_type : 'BOTH',
             ],
+            'academic_year' => \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'],
+            'academic_year_short' => \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'],
             'degree_level' => $degreeLevel,
             'street' => $villageVal ?: ($personalInfo?->village ?: ''),
             'address' => $villageVal ?: ($personalInfo?->village ?: ''),

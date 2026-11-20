@@ -88,9 +88,10 @@ class DashboardsController extends Controller
         // Ensure CRM student registration record exists for this student candidate
         if (!$crmStudent && $cleanPhone) {
             try {
-                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                $ayPrefix = CrmStudentRegistration::getAcademicYearInfo()['prefix'];
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU' . $ayPrefix . '-') && !str_starts_with($appNo, 'VU2026-'))
                     ? $appNo
-                    : ('VU2026' . substr($cleanPhone, -6));
+                    : ('VU' . $ayPrefix . substr($cleanPhone, -6));
                 $crmStudent = CrmStudentRegistration::firstOrCreate(
                     ['phoneno' => $cleanPhone],
                     [
@@ -296,7 +297,17 @@ class DashboardsController extends Controller
             } elseif ($mCode === 'CRMM0004') {
                 $isCompleted = ($val === 'completed' || ($personalInfo !== null && !empty($personalInfo->gender)));
             } elseif ($mCode === 'CRMM0005') {
-                $isCompleted = ($val === 'completed' || $academicDetails !== null);
+                $hasAcademicFilled = false;
+                if ($academicDetails) {
+                    if ($degreeLevel === 'phd') {
+                        $hasAcademicFilled = !empty($academicDetails->pg_college_name) || !empty($academicDetails->pg_passed_year);
+                    } elseif ($degreeLevel === 'mtech') {
+                        $hasAcademicFilled = !empty($academicDetails->ug_college_name) || !empty($academicDetails->ug_passed_year);
+                    } else {
+                        $hasAcademicFilled = !empty($academicDetails->tenth_school_name) && !empty($academicDetails->pu2_college_name);
+                    }
+                }
+                $isCompleted = ($val === 'completed' || $hasAcademicFilled);
             } elseif ($mCode === 'CRMM0006') {
                 $isCompleted = ($val === 'completed' || !empty($uploadedDocs));
             } elseif ($mCode === 'CRMM0010') {
@@ -456,13 +467,14 @@ class DashboardsController extends Controller
                 ->first();
         } catch (\Throwable $e) {}
 
-        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
+        $ayPrefix = CrmStudentRegistration::getAcademicYearInfo()['prefix'];
+        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU' . $ayPrefix . '-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
 
         if (!$crmStudent && $cleanPhone) {
             try {
-                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU' . $ayPrefix . '-') && !str_starts_with($appNo, 'VU2026-'))
                     ? $appNo
-                    : ('VU2026' . substr($cleanPhone, -6));
+                    : ('VU' . $ayPrefix . substr($cleanPhone, -6));
                 $crmStudent = CrmStudentRegistration::firstOrCreate(
                     ['phoneno' => $cleanPhone],
                     [
@@ -541,8 +553,9 @@ class DashboardsController extends Controller
                 ->first();
         } catch (\Throwable $e) {}
 
-        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
-        $regNo = $crmStudent?->applinano ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
+        $ayPrefix = CrmStudentRegistration::getAcademicYearInfo()['prefix'];
+        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU' . $ayPrefix . '-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
+        $regNo = $crmStudent?->applinano ?? ($usercode ?: (substr($ayPrefix, -2) . '1FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
 
         $progId = $crmStudent?->programid;
         $program = $progId ? Program::where('program_id', $progId)->first() : null;
@@ -582,9 +595,9 @@ class DashboardsController extends Controller
         // Ensure crmStudent exists before processing step save
         if (!$crmStudent && $cleanPhone) {
             try {
-                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU' . $ayPrefix . '-') && !str_starts_with($appNo, 'VU2026-'))
                     ? $appNo
-                    : ('VU2026' . substr($cleanPhone, -6));
+                    : ('VU' . $ayPrefix . substr($cleanPhone, -6));
                 $crmStudent = CrmStudentRegistration::firstOrCreate(
                     ['phoneno' => $cleanPhone],
                     [
@@ -1136,6 +1149,7 @@ class DashboardsController extends Controller
                         $academicPayload['pg_marks_earned'] = $pgMarksEarned;
                         $academicPayload['pg_percentage'] = $pgPctInput;
                         $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
+                        $academicPayload['pg_study_type'] = $request->input('pg_study_type') ?: 'Regular';
 
                         // PG 1 CMM & PC/OD Details (At least one mandatory for PhD)
                         $pg1DocType = $request->input('pg1_doc_type') ?: 'BOTH';
@@ -1168,9 +1182,10 @@ class DashboardsController extends Controller
                         $academicPayload['pg2_marks_earned'] = $pg2MarksEarned;
                         $academicPayload['pg2_percentage'] = $pg2PctInput;
                         $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: 'Completed';
+                        $academicPayload['pg2_study_type'] = $request->input('pg2_study_type') ?: 'Regular';
 
                         // PG 2 CMM & PC/OD Details (Optional for PhD)
-                        $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'NONE';
+                        $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'BOTH';
                         $academicPayload['pg2_cmm_memo_no'] = $request->input('pg2_cmm_memo_no') ?: null;
                         $academicPayload['pg2_cmm_cgpa'] = is_numeric($request->input('pg2_cmm_cgpa')) ? (float)$request->input('pg2_cmm_cgpa') : null;
                         $academicPayload['pg2_cmm_year'] = $request->filled('pg2_cmm_year') ? (int)$request->input('pg2_cmm_year') : null;
@@ -1225,12 +1240,19 @@ class DashboardsController extends Controller
 
                     $isPhdCandidate = $isPhd || strtolower((string)$request->input('degree_level')) === 'phd' || strtoupper((string)$crmStudent->programlevel) === 'DOCTORAL' || strtoupper((string)$crmStudent->programlevel) === 'PHD';
                     if ($isPhdCandidate) {
+                        $acad = StudentAcademicDetail::where('applino', $crmStudent->applinano)->first();
+                        $pg1DocType = $acad?->pg1_doc_type ?? 'BOTH';
                         $existingUpload = StudentUpload::where('applino', $crmStudent->applinano)->first();
-                        $hasPg1 = (!empty($existingUpload?->pg1_cmm_file_path) || !empty($existingUpload?->pg1_pc_file_path))
-                            || ($request->hasFile('docs.pg1_cmm') || $request->hasFile('docs.pg1_pc'));
-                        if (!$hasPg1) {
+                        $hasCmm = !empty($existingUpload?->pg1_cmm_file_path) || $request->hasFile('docs.pg1_cmm');
+                        $hasPc = !empty($existingUpload?->pg1_pc_file_path) || $request->hasFile('docs.pg1_pc');
+
+                        if (($pg1DocType === 'CMM' || $pg1DocType === 'BOTH') && !$hasCmm) {
                             return redirect()->route('dashboards.index', ['step' => 3])
-                                ->withErrors(['pg1_required' => 'Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).']);
+                                ->withErrors(['pg1_required' => 'Please upload PG 1 Consolidated Marks Memo (CMM).']);
+                        }
+                        if (($pg1DocType === 'PC_OD' || $pg1DocType === 'BOTH') && !$hasPc) {
+                            return redirect()->route('dashboards.index', ['step' => 3])
+                                ->withErrors(['pg1_required' => 'Please upload PG 1 Provisional Certificate / Original Degree (PC/OD).']);
                         }
                     }
 
@@ -1563,6 +1585,8 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS pg2_cmm_year INT,
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_no VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_year INT,
+                ADD COLUMN IF NOT EXISTS pg_study_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg2_study_type VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_status VARCHAR(50);
 
                 ALTER TABLE crm.student_academic_details
