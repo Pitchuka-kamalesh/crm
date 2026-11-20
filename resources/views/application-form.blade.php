@@ -1,4 +1,4 @@
-﻿{{--
+{{--
     resources/views/application-form.blade.php
     Official Vignan University Admission Information Form.
     Engineered for pixel-perfect browser printing and DomPDF download engine.
@@ -127,11 +127,11 @@
         vertical-align: top;
     }
     .sec-head {
-        background: #4a4a4f;
+        background: #1e3a8a;
         color: #ffffff;
         font-size: 11.5px;
         font-weight: bold;
-        padding: 4px 8px;
+        padding: 4.5px 8px;
         margin: 9px 0 5px 0;
         border-radius: 2px;
         letter-spacing: 0.3px;
@@ -281,20 +281,20 @@
 <!-- ========================================================================= -->
 <div class="page">
     {{-- Header: Logo beside Vignan text, Details on left, Photo box on right --}}
-    <table style="width: 100%; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; margin-bottom: 8px;">
+    <table style="width: 100%; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 8px;">
         <tr>
             <td style="vertical-align: top;">
                 {{-- Top University Name with Logo Beside It --}}
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2px;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 3px;">
                     <tr>
-                        <td style="width: 44px; vertical-align: middle; padding-right: 8px;">
-                            <img src="{{ $logo }}" alt="Logo" style="height: 42px; display: block;">
+                        <td style="width: 68px; vertical-align: middle; padding-right: 12px;">
+                            <img src="{{ $logo }}" alt="Logo" style="height: 56px; max-width: 68px; object-fit: contain; display: block;">
                         </td>
                         <td style="vertical-align: middle;">
-                            <div style="font-size: 15.5px; font-weight: bold; color: #1d1d1f; line-height: 1.15;">
+                            <div style="font-size: 16.5px; font-weight: 800; color: #1e3a8a; line-height: 1.15; letter-spacing: 0.2px;">
                                 Vignan’s Foundation for Science, Technology &amp; Research
                             </div>
-                            <div style="font-size: 9.5px; color: #5d5d63; margin-top: 1px;">
+                            <div style="font-size: 10px; color: #475569; font-weight: 600; margin-top: 2px;">
                                 (Deemed to be University)
                             </div>
                         </td>
@@ -310,16 +310,19 @@
                 </div>
 
                 {{-- Metadata Row (Academic year, Application No., CRM ID) --}}
-                <table style="border-collapse: collapse;">
+                <table style="border-collapse: collapse; margin-top: 4px;">
                     <tr>
-                        <td style="font-size: 10.5px; font-weight: bold; padding-right: 14px;">
-                            Academic year: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">{{ ($student->academic_year ?? null) ?: \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span>
+                        <td style="font-size: 11px; vertical-align: middle; padding-right: 22px; white-space: nowrap;">
+                            <span style="color: #475569; font-weight: 600;">Academic year:</span>
+                            <span style="color: #0f172a; font-weight: 700; margin-left: 5px;">{{ ($student->academic_year ?? null) ?: \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span>
                         </td>
-                        <td style="font-size: 10.5px; font-weight: bold; padding-right: 14px;">
-                            Application No.: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">{{ ($student->id ?? null) ?: '-' }}</span>
+                        <td style="font-size: 11px; vertical-align: middle; padding-right: 22px; white-space: nowrap;">
+                            <span style="color: #475569; font-weight: 600;">Application No.:</span>
+                            <span style="color: #0f172a; font-weight: 700; margin-left: 5px;">{{ ($student->id ?? null) ?: '-' }}</span>
                         </td>
-                        <td style="font-size: 10.5px; font-weight: bold;">
-                            CRM ID: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">{{ ($student->student_id ?? null) ?: '-' }}</span>
+                        <td style="font-size: 11px; vertical-align: middle; white-space: nowrap;">
+                            <span style="color: #475569; font-weight: 600;">CRM ID:</span>
+                            <span style="color: #0f172a; font-weight: 700; margin-left: 5px;">{{ ($student->student_id ?? null) ?: '-' }}</span>
                         </td>
                     </tr>
                 </table>

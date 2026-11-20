@@ -4798,13 +4798,13 @@
                                 <style>
                                     .phd-form-wrap {
                                         --bg: #f3f2ef; --paper: #fff; --ink: #1d1d1f; --mute: #5d5d63; --line: #cfcdc7;
-                                        --bar: #4a4a4f; --bar-ink: #fff; --accent: #8c1c2e; --accent-ink: #fff; --field: #fafaf8; --ok: #1f6b3a;
+                                        --bar: #1e3a8a; --bar-ink: #fff; --accent: #8c1c2e; --accent-ink: #fff; --field: #fafaf8; --ok: #1f6b3a;
                                         background: var(--paper); border: 1px solid var(--line); padding: 24px 28px;
                                         font: 400 14px/1.5 "Source Sans 3", system-ui, -apple-system, sans-serif; color: var(--ink); border-radius: 4px;
                                     }
                                     .phd-form-wrap header {
                                         display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
-                                        border-bottom: 2px solid var(--ink); padding-bottom: 14px;
+                                        border-bottom: 2px solid #1e3a8a; padding-bottom: 14px;
                                     }
                                     .phd-form-wrap .logo-box { display: flex; align-items: center; justify-content: center; }
                                     .phd-form-wrap .logo-box img { height: 56px; display: block; }
@@ -4868,12 +4868,12 @@
                                     }
                                 </style>
 
-                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid var(--ink); padding-bottom: 12px;">
+                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px;">
                                     <div>
-                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 48px; object-fit: contain;">
+                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 56px; max-width: 68px; object-fit: contain;">
                                             <div>
-                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15;">
+                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15; color: #1e3a8a;">
                                                     Vignan’s Foundation for Science, Technology &amp; Research
                                                     <small style="display: block; font-size: 11.5px; color: var(--mute); margin-top: 2px;">(Deemed to be University)</small>
                                                 </p>
@@ -4883,10 +4883,10 @@
                                         <div style="font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
                                             {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
                                         </div>
-                                        <div class="meta" style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 16px;">
-                                            <label style="font-size: 12px; font-weight: 600;">Academic year <input type="text" id="ay" value="{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
-                                            <label style="font-size: 12px; font-weight: 600;">Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
-                                            <label style="font-size: 12px; font-weight: 600;">CRM ID <input type="text" value="{{ $student->student_id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                        <div class="meta" style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;">
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Academic year:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Application No.:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->id }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">CRM ID:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->student_id }}</span></div>
                                         </div>
                                     </div>
                                     <label class="photo" id="ph" style="margin: 0; align-self: start;">
