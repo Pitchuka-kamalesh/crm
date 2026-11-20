@@ -2417,19 +2417,19 @@
                                     <label class="mockup-label">Category: <span style="color:#ef4444;">*</span></label>
                                     <div class="mockup-radio-row" style="margin-top: 0.5rem;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC') ? 'checked' : '' }} required>
                                             <span>OC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }} required>
                                             <span>BC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }} required>
                                             <span>SC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }} required>
                                             <span>ST</span>
                                         </label>
                                     </div>
