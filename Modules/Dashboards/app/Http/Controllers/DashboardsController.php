@@ -38,6 +38,8 @@ class DashboardsController extends Controller
     {
         $user = Auth::user();
         $usercode = $user?->usercode ?? '';
+        // error_log("$user->role_id");
+        Log::info('User Role ID Debug', ['role_id' => $user?->role_id]);
         $cleanPhone = preg_replace('/\D/', '', $user?->phnno ?? $user?->phone ?? $user?->mobile ?? '');
         if (strlen($cleanPhone) > 10) {
             $cleanPhone = substr($cleanPhone, -10);

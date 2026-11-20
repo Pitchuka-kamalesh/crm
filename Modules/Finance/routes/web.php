@@ -5,18 +5,27 @@ use Modules\Finance\Http\Controllers\FinanceController;
 use Modules\Finance\Http\Controllers\CoupounController;
 use Modules\Finance\Http\Controllers\PayUController;
 
-Route::middleware(['auth'])->group(function () {
-    // Finance Overview & Fee Verification
+// ── 1. PUBLIC: PayU Callback (surl & furl) ──
+Route::post('/payu/response', [PayUController::class, 'handleResponse'])->name('payu.response');
+
+// ── 2. PUBLIC: Signed URL Receipt (for post-payment redirect) ──
+Route::get('/payu/receipt', [PayUController::class, 'receipt'])
+    ->middleware('signed')
+    ->name('payu.receipt');
+
+// ── 3. AUTHENTICATED: Dashboard routes ──
+Route::middleware(['auth','role:3'])->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/finance/index', [FinanceController::class, 'index']);
     Route::get('/finance/paiddetails', [FinanceController::class, 'index'])->name('finance.paiddetails');
 
-    // Coupon Actions
     Route::post('/crm/coupons/generate-personal', [CoupounController::class, 'generatePersonalCoupon'])->name('crm.coupons.generate-personal');
     Route::post('/crm/percoupongen', [CoupounController::class, 'generatePersonalCoupon']);
-
-    // PayU Payment Gateway
+});
+Route::middleware(['auth','role:5'])->group(function () {
     Route::post('/payu/initiate', [PayUController::class, 'initiate'])->name('payu.initiate');
-    Route::match(['get', 'post'], '/payu/response', [PayUController::class, 'handleResponse'])->name('payu.response');
-    Route::get('/payu/receipt', [PayUController::class, 'receipt'])->name('payu.receipt');
+    // Route::post('/payu/cancel',   [PayUController::class, 'cancel'])->name('payu.cancel');
+    
+    // Authenticated receipt view
+    Route::get('/payu/payu_receipt', [PayUController::class, 'payu_receipt'])->name('payu.payu_receipt');
 });

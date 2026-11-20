@@ -4380,7 +4380,7 @@
                                     Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to @if(($degreeLevel ?? '') === 'phd') application form preview & download. @else exam slot booking. @endif
                                 </p>
                                 <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
+                                    <a href="{{ route('payu.payu_receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
                                         <span>📥 Download / View Official Receipt</span>
                                         <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                     </a>
