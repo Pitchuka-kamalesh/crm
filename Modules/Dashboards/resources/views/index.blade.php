@@ -2232,7 +2232,7 @@
                     </h1>
                     <span class="welcome-pill">
                         <span class="welcome-dot"></span>
-                        <span>Academic Year 2026–27</span>
+                        <span>Academic Year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}</span>
                     </span>
                 </div>
                 <p class="welcome-subtitle">
@@ -4884,7 +4884,7 @@
                                             {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
                                         </div>
                                         <div class="meta" style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px 16px;">
-                                            <label style="font-size: 12px; font-weight: 600;">Academic year <input type="text" id="ay" value="2026–2027" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
+                                            <label style="font-size: 12px; font-weight: 600;">Academic year <input type="text" id="ay" value="{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
                                             <label style="font-size: 12px; font-weight: 600;">Application No. <input type="text" id="appno" value="{{ $student->id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
                                             <label style="font-size: 12px; font-weight: 600;">CRM ID <input type="text" value="{{ $student->student_id }}" size="10" readonly style="padding: 2px 6px; font-size: 12px; font-weight: 600;"></label>
                                         </div>
@@ -6520,7 +6520,7 @@
                         <div class="terms-card-row row-green">
                             <div class="terms-badge-pill badge-green">2</div>
                             <div class="terms-row-content">
-                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.
+                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}.
                             </div>
                         </div>
 

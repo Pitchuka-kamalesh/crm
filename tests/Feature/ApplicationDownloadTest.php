@@ -44,11 +44,11 @@ class ApplicationDownloadTest extends TestCase
     {
         $user = User::firstOrCreate(
             ['phnno' => '9999900001'],
-            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => 'VU2027TEST99']
         );
         CrmStudentRegistration::updateOrCreate(
             ['phoneno' => '9999900001'],
-            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+            ['applinano' => 'VU2027TEST99', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
         );
 
         // Date of birth in the future
@@ -86,11 +86,11 @@ class ApplicationDownloadTest extends TestCase
     {
         $user = User::firstOrCreate(
             ['phnno' => '9999900001'],
-            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => 'VU2027TEST99']
         );
         CrmStudentRegistration::updateOrCreate(
             ['phoneno' => '9999900001'],
-            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+            ['applinano' => 'VU2027TEST99', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
         );
 
         // Make sure user's student record allows step 2
@@ -117,11 +117,11 @@ class ApplicationDownloadTest extends TestCase
     {
         $user = User::firstOrCreate(
             ['phnno' => '9999900001'],
-            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => 'VU2027TEST99']
         );
         CrmStudentRegistration::updateOrCreate(
             ['phoneno' => '9999900001'],
-            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+            ['applinano' => 'VU2027TEST99', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
         );
 
         $student = CrmStudentRegistration::where('phoneno', $user->phnno)->first()

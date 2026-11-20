@@ -423,6 +423,8 @@ class ApplicationController extends Controller
                 'pg2_study_type' => !empty($academicDetails?->pg2_study_type) ? $academicDetails->pg2_study_type : 'Regular',
                 'pg2_doc_type' => !empty($academicDetails?->pg2_doc_type) ? $academicDetails->pg2_doc_type : 'BOTH',
             ],
+            'academic_year' => \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'],
+            'academic_year_short' => \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'],
             'degree_level' => $degreeLevel,
             'street' => $villageVal ?: ($personalInfo?->village ?: ''),
             'address' => $villageVal ?: ($personalInfo?->village ?: ''),

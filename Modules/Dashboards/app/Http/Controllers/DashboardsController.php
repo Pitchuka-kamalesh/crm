@@ -88,9 +88,10 @@ class DashboardsController extends Controller
         // Ensure CRM student registration record exists for this student candidate
         if (!$crmStudent && $cleanPhone) {
             try {
-                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                $ayPrefix = CrmStudentRegistration::getAcademicYearInfo()['prefix'];
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU' . $ayPrefix . '-') && !str_starts_with($appNo, 'VU2026-'))
                     ? $appNo
-                    : ('VU2026' . substr($cleanPhone, -6));
+                    : ('VU' . $ayPrefix . substr($cleanPhone, -6));
                 $crmStudent = CrmStudentRegistration::firstOrCreate(
                     ['phoneno' => $cleanPhone],
                     [
@@ -456,13 +457,14 @@ class DashboardsController extends Controller
                 ->first();
         } catch (\Throwable $e) {}
 
-        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
+        $ayPrefix = CrmStudentRegistration::getAcademicYearInfo()['prefix'];
+        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU' . $ayPrefix . '-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
 
         if (!$crmStudent && $cleanPhone) {
             try {
-                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU' . $ayPrefix . '-') && !str_starts_with($appNo, 'VU2026-'))
                     ? $appNo
-                    : ('VU2026' . substr($cleanPhone, -6));
+                    : ('VU' . $ayPrefix . substr($cleanPhone, -6));
                 $crmStudent = CrmStudentRegistration::firstOrCreate(
                     ['phoneno' => $cleanPhone],
                     [
@@ -541,8 +543,9 @@ class DashboardsController extends Controller
                 ->first();
         } catch (\Throwable $e) {}
 
-        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU2026-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
-        $regNo = $crmStudent?->applinano ?? ($usercode ?: ('261FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
+        $ayPrefix = CrmStudentRegistration::getAcademicYearInfo()['prefix'];
+        $appNo = $crmStudent?->applinano ?? ($usercode ?: ('VU' . $ayPrefix . '-' . ($cleanPhone ? substr($cleanPhone, -6) : 'APP')));
+        $regNo = $crmStudent?->applinano ?? ($usercode ?: (substr($ayPrefix, -2) . '1FA' . ($cleanPhone ? substr($cleanPhone, -5) : '00001')));
 
         $progId = $crmStudent?->programid;
         $program = $progId ? Program::where('program_id', $progId)->first() : null;
@@ -582,9 +585,9 @@ class DashboardsController extends Controller
         // Ensure crmStudent exists before processing step save
         if (!$crmStudent && $cleanPhone) {
             try {
-                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU2026-'))
+                $appliCandidate = ($appNo && $appNo !== '0' && !str_starts_with($appNo, 'VU' . $ayPrefix . '-') && !str_starts_with($appNo, 'VU2026-'))
                     ? $appNo
-                    : ('VU2026' . substr($cleanPhone, -6));
+                    : ('VU' . $ayPrefix . substr($cleanPhone, -6));
                 $crmStudent = CrmStudentRegistration::firstOrCreate(
                     ['phoneno' => $cleanPhone],
                     [

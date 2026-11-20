@@ -313,7 +313,7 @@
                 <table style="border-collapse: collapse;">
                     <tr>
                         <td style="font-size: 10.5px; font-weight: bold; padding-right: 14px;">
-                            Academic year: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">2026–2027</span>
+                            Academic year: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">{{ ($student->academic_year ?? null) ?: \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span>
                         </td>
                         <td style="font-size: 10.5px; font-weight: bold; padding-right: 14px;">
                             Application No.: <span style="display:inline-block; padding: 2px 6px; background: #fafaf8; border: 1px solid #cfcdc7; border-radius: 2px;">{{ ($student->id ?? null) ?: '-' }}</span>
