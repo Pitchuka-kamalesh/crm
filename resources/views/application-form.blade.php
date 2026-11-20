@@ -71,7 +71,14 @@
         'study_conduct' => 'Study & Conduct',
     ];
     $uploaded = (array) ($student->documents ?? []);
-    $dob = !empty($student->dob) ? \Carbon\Carbon::parse($student->dob)->format('d M Y') : 'N/A';
+    $dob = 'N/A';
+    if (!empty($student->dob) && $student->dob !== '-') {
+        try {
+            $dob = \Carbon\Carbon::parse($student->dob)->format('d M Y');
+        } catch (\Throwable $e) {
+            $dob = (string) $student->dob;
+        }
+    }
     $paid = strtolower($student->payment_status ?? '') === 'completed';
 @endphp
 
@@ -359,7 +366,7 @@
             </td>
             <td style="width: 50%; padding-left: 6px; padding-bottom: 5px;">
                 <div class="lbl">Date of birth <span class="lbl-req">*</span></div>
-                <div class="box-val">{{ !empty(($student->dob ?? null)) && ($student->dob ?? null) !== '-' ? \Carbon\Carbon::parse(($student->dob ?? null))->format('d M Y') : '-' }}</div>
+                <div class="box-val">{{ (!empty(($student->dob ?? null)) && ($student->dob ?? null) !== '-' && strtotime(($student->dob ?? null)) !== false) ? \Carbon\Carbon::parse(($student->dob ?? null))->format('d M Y') : (($student->dob ?? null) ?: '-') }}</div>
             </td>
         </tr>
         <tr>
@@ -530,8 +537,19 @@
                         <td>{{ (($student->academic ?? null)->pg_year ?? null) ?: '-' }}</td>
                         <td>{{ (($student->academic ?? null)->pg_status ?? null) ?: '-' }}</td>
                         <td style="font-weight: bold;">{{ (($student->academic ?? null)->pg_percentage ?? null) ?: '-' }}</td>
-                        <td>Regular</td>
+                        <td>{{ (($student->academic ?? null)->pg_study_type ?? null) ?: 'Regular' }}</td>
                     </tr>
+                    @if(!empty((($student->academic ?? null)->pg2_college ?? null)) && (($student->academic ?? null)->pg2_college ?? null) !== '-')
+                    <tr>
+                        <td class="rl">PG 2 programme<br><small style="color: #64748b; font-weight: normal;">(additional PG)</small></td>
+                        <td>Postgraduate 2</td>
+                        <td>{{ (($student->academic ?? null)->pg2_college ?? null) !== '-' ? (($student->academic ?? null)->pg2_college ?? null) : ((($student->academic ?? null)->pg2_board ?? null) !== '-' ? (($student->academic ?? null)->pg2_board ?? null) : '-') }}</td>
+                        <td>{{ (($student->academic ?? null)->pg2_year ?? null) ?: '-' }}</td>
+                        <td>{{ (($student->academic ?? null)->pg2_status ?? null) ?: '-' }}</td>
+                        <td style="font-weight: bold;">{{ (($student->academic ?? null)->pg2_percentage ?? null) ?: '-' }}</td>
+                        <td>{{ (($student->academic ?? null)->pg2_study_type ?? null) ?: 'Regular' }}</td>
+                    </tr>
+                    @endif
                 @endif
             </tbody>
         </table>

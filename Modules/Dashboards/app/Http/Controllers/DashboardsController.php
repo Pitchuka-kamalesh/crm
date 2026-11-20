@@ -1136,6 +1136,7 @@ class DashboardsController extends Controller
                         $academicPayload['pg_marks_earned'] = $pgMarksEarned;
                         $academicPayload['pg_percentage'] = $pgPctInput;
                         $academicPayload['pg_current_status'] = $request->input('pg_current_status') ?: 'Completed';
+                        $academicPayload['pg_study_type'] = $request->input('pg_study_type') ?: 'Regular';
 
                         // PG 1 CMM & PC/OD Details (At least one mandatory for PhD)
                         $pg1DocType = $request->input('pg1_doc_type') ?: 'BOTH';
@@ -1168,9 +1169,10 @@ class DashboardsController extends Controller
                         $academicPayload['pg2_marks_earned'] = $pg2MarksEarned;
                         $academicPayload['pg2_percentage'] = $pg2PctInput;
                         $academicPayload['pg2_current_status'] = $request->input('pg2_current_status') ?: 'Completed';
+                        $academicPayload['pg2_study_type'] = $request->input('pg2_study_type') ?: 'Regular';
 
                         // PG 2 CMM & PC/OD Details (Optional for PhD)
-                        $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'NONE';
+                        $academicPayload['pg2_doc_type'] = $request->input('pg2_doc_type') ?: 'BOTH';
                         $academicPayload['pg2_cmm_memo_no'] = $request->input('pg2_cmm_memo_no') ?: null;
                         $academicPayload['pg2_cmm_cgpa'] = is_numeric($request->input('pg2_cmm_cgpa')) ? (float)$request->input('pg2_cmm_cgpa') : null;
                         $academicPayload['pg2_cmm_year'] = $request->filled('pg2_cmm_year') ? (int)$request->input('pg2_cmm_year') : null;
@@ -1225,12 +1227,19 @@ class DashboardsController extends Controller
 
                     $isPhdCandidate = $isPhd || strtolower((string)$request->input('degree_level')) === 'phd' || strtoupper((string)$crmStudent->programlevel) === 'DOCTORAL' || strtoupper((string)$crmStudent->programlevel) === 'PHD';
                     if ($isPhdCandidate) {
+                        $acad = StudentAcademicDetail::where('applino', $crmStudent->applinano)->first();
+                        $pg1DocType = $acad?->pg1_doc_type ?? 'BOTH';
                         $existingUpload = StudentUpload::where('applino', $crmStudent->applinano)->first();
-                        $hasPg1 = (!empty($existingUpload?->pg1_cmm_file_path) || !empty($existingUpload?->pg1_pc_file_path))
-                            || ($request->hasFile('docs.pg1_cmm') || $request->hasFile('docs.pg1_pc'));
-                        if (!$hasPg1) {
+                        $hasCmm = !empty($existingUpload?->pg1_cmm_file_path) || $request->hasFile('docs.pg1_cmm');
+                        $hasPc = !empty($existingUpload?->pg1_pc_file_path) || $request->hasFile('docs.pg1_pc');
+
+                        if (($pg1DocType === 'CMM' || $pg1DocType === 'BOTH') && !$hasCmm) {
                             return redirect()->route('dashboards.index', ['step' => 3])
-                                ->withErrors(['pg1_required' => 'Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).']);
+                                ->withErrors(['pg1_required' => 'Please upload PG 1 Consolidated Marks Memo (CMM).']);
+                        }
+                        if (($pg1DocType === 'PC_OD' || $pg1DocType === 'BOTH') && !$hasPc) {
+                            return redirect()->route('dashboards.index', ['step' => 3])
+                                ->withErrors(['pg1_required' => 'Please upload PG 1 Provisional Certificate / Original Degree (PC/OD).']);
                         }
                     }
 
@@ -1563,6 +1572,8 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS pg2_cmm_year INT,
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_no VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_year INT,
+                ADD COLUMN IF NOT EXISTS pg_study_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS pg2_study_type VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS pg2_pc_od_status VARCHAR(50);
 
                 ALTER TABLE crm.student_academic_details
