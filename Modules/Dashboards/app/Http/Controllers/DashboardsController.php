@@ -297,7 +297,17 @@ class DashboardsController extends Controller
             } elseif ($mCode === 'CRMM0004') {
                 $isCompleted = ($val === 'completed' || ($personalInfo !== null && !empty($personalInfo->gender)));
             } elseif ($mCode === 'CRMM0005') {
-                $isCompleted = ($val === 'completed' || $academicDetails !== null);
+                $hasAcademicFilled = false;
+                if ($academicDetails) {
+                    if ($degreeLevel === 'phd') {
+                        $hasAcademicFilled = !empty($academicDetails->pg_college_name) || !empty($academicDetails->pg_passed_year);
+                    } elseif ($degreeLevel === 'mtech') {
+                        $hasAcademicFilled = !empty($academicDetails->ug_college_name) || !empty($academicDetails->ug_passed_year);
+                    } else {
+                        $hasAcademicFilled = !empty($academicDetails->tenth_school_name) && !empty($academicDetails->pu2_college_name);
+                    }
+                }
+                $isCompleted = ($val === 'completed' || $hasAcademicFilled);
             } elseif ($mCode === 'CRMM0006') {
                 $isCompleted = ($val === 'completed' || !empty($uploadedDocs));
             } elseif ($mCode === 'CRMM0010') {

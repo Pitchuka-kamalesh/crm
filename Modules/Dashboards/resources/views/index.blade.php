@@ -4870,8 +4870,8 @@
 
                                 <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px;">
                                     <div>
-                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
-                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 56px; max-width: 68px; object-fit: contain;">
+                                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 4px;">
+                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 74px; max-width: 86px; object-fit: contain;">
                                             <div>
                                                 <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15; color: #1e3a8a;">
                                                     Vignan’s Foundation for Science, Technology &amp; Research
@@ -4884,7 +4884,7 @@
                                             {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
                                         </div>
                                         <div class="meta" style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;">
-                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Academic year:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Admission year:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span></div>
                                             <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Application No.:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->id }}</span></div>
                                             <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">CRM ID:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->student_id }}</span></div>
                                         </div>

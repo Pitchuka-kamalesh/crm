@@ -287,8 +287,8 @@
                 {{-- Top University Name with Logo Beside It --}}
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 3px;">
                     <tr>
-                        <td style="width: 68px; vertical-align: middle; padding-right: 12px;">
-                            <img src="{{ $logo }}" alt="Logo" style="height: 56px; max-width: 68px; object-fit: contain; display: block;">
+                        <td style="width: 86px; vertical-align: middle; padding-right: 14px;">
+                            <img src="{{ $logo }}" alt="Logo" style="height: 74px; max-width: 86px; object-fit: contain; display: block;">
                         </td>
                         <td style="vertical-align: middle;">
                             <div style="font-size: 16.5px; font-weight: 800; color: #1e3a8a; line-height: 1.15; letter-spacing: 0.2px;">
@@ -309,11 +309,11 @@
                     {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : (($student->program ?? null) ?: 'Undergraduate / Postgraduate Programme') }}
                 </div>
 
-                {{-- Metadata Row (Academic year, Application No., CRM ID) --}}
+                {{-- Metadata Row (Admission year, Application No., CRM ID) --}}
                 <table style="border-collapse: collapse; margin-top: 4px;">
                     <tr>
                         <td style="font-size: 11px; vertical-align: middle; padding-right: 22px; white-space: nowrap;">
-                            <span style="color: #475569; font-weight: 600;">Academic year:</span>
+                            <span style="color: #475569; font-weight: 600;">Admission year:</span>
                             <span style="color: #0f172a; font-weight: 700; margin-left: 5px;">{{ ($student->academic_year ?? null) ?: \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span>
                         </td>
                         <td style="font-size: 11px; vertical-align: middle; padding-right: 22px; white-space: nowrap;">
