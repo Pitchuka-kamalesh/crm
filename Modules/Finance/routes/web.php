@@ -13,7 +13,7 @@ Route::post('/payu/response', [PayUController::class, 'handleResponse'])
 
 
 // ── 3. AUTHENTICATED: Dashboard routes ──
-Route::middleware(['auth','role:3'])->group(function () {
+Route::middleware(['auth', 'role:1,3'])->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/finance/index', [FinanceController::class, 'index']);
     Route::get('/finance/paiddetails', [FinanceController::class, 'index'])->name('finance.paiddetails');

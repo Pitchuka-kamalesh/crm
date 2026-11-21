@@ -2600,6 +2600,18 @@
                                 }
                             }
 
+                            window.addEventListener('DOMContentLoaded', function() {
+                                const cSelect = document.getElementById('geo-country-select');
+                                const sSelect = document.getElementById('geo-state-select');
+                                const dSelect = document.getElementById('geo-district-select');
+                                if (cSelect && (!cSelect.value || cSelect.value === '')) {
+                                    cSelect.value = '1';
+                                }
+                                if (cSelect && sSelect && (!sSelect.value || sSelect.value === '')) {
+                                    onCountryChange(cSelect.value);
+                                }
+                            });
+
                             function togglePg1DocFields(val) {
                                 const cmm = document.getElementById('pg1_cmm_container');
                                 const pc = document.getElementById('pg1_pc_container');
@@ -3840,6 +3852,18 @@
                                 return true;
                             }
 
+                            window.addEventListener('DOMContentLoaded', function() {
+                                const cSelect = document.getElementById('geo-country-select');
+                                const sSelect = document.getElementById('geo-state-select');
+                                const dSelect = document.getElementById('geo-district-select');
+                                if (cSelect && (!cSelect.value || cSelect.value === '')) {
+                                    cSelect.value = '1';
+                                }
+                                if (cSelect && sSelect && (!sSelect.value || sSelect.value === '')) {
+                                    onCountryChange(cSelect.value);
+                                }
+                            });
+
                             function togglePg1DocFields(val) {
                                 const cmm = document.getElementById('pg1_cmm_container');
                                 const pc = document.getElementById('pg1_pc_container');
@@ -4709,11 +4733,23 @@
                     $formDocs = [
                         'marksheet10'   => '10th Marksheet',
                         'marksheet12'   => '12th Marksheet',
+                        'btech'         => 'B.Tech / UG Degree Memo',
+                        'mtech'         => 'M.Tech / PG Memo',
+                        'pg1_cmm'       => 'PG 1 CMM Memo',
+                        'pg1_pc'        => 'PG 1 PC / OD',
+                        'pg2_cmm'       => 'PG 2 CMM Memo',
+                        'pg2_pc'        => 'PG 2 PC / OD',
+                        'experience'    => 'Work Experience',
                         'aadhaar'       => 'Aadhaar Card',
                         'photo'         => 'Photo',
                         'tc'            => 'Transfer Cert.',
                         'study_conduct' => 'Study & Conduct',
                     ];
+                    foreach ($uploadedDocs as $uK => $uVal) {
+                        if (!isset($formDocs[$uK])) {
+                            $formDocs[$uK] = $uVal['title'] ?? ucwords(str_replace('_', ' ', $uK));
+                        }
+                    }
                     $formUploaded = (array) ($appStudent->documents ?? []);
                     $progUpper = strtoupper(trim((string)($appStudent->program ?? '')));
                     $levelUpper = strtoupper(trim((string)($appStudent->degree_level ?? '')));
@@ -5125,8 +5161,8 @@
                             <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
                             <tr>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
-                                    <div style="background: #ffffff; border-radius: 8px; padding: 6px 10px; display: inline-block;">
-                                        <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 42px; display: block;">
+                                    <div style="background: #ffffff; border-radius: 8px; padding: 6px 12px; display: inline-block;">
+                                        <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 60px; max-width: 190px; object-fit: contain; display: block;">
                                     </div>
                                     <div style="color: #A9BCD6; font-size: 9px; padding-top: 8px;">
                                         Application date: {{ $appStudent->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
@@ -5145,19 +5181,20 @@
                         <div style="padding: 0 24px 20px 24px;">
 
                             <!-- Profile Strip -->
-                            <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                                <tr>
-                                    <td style="padding: 10px 14px; width: 68px; vertical-align: middle;">
-                                        @if(!empty($appStudent->photo_path))
-                                            <div style="width: 58px; height: 72px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: #ffffff;">
-                                                <img src="{{ $appStudent->photo_path }}" alt="Photo" style="width: 58px; height: 72px; object-fit: cover; display: block;">
-                                            </div>
-                                        @else
-                                            <div style="width: 58px; height: 72px; border: 1px dashed #6B778A; background: #F4F7FB; text-align: center; font-size: 7.5px; color: #6B778A; line-height: 1.4; padding-top: 20px; font-weight: 700; border-radius: 4px;">
-                                                AFFIX<br>PASSPORT<br>PHOTO
-                                            </div>
-                                        @endif
-                                    </td>
+                            <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -14px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); position: relative; z-index: 2;">
+                                <table style="width: 100%; border-collapse: collapse; border: none; background: transparent;">
+                                    <tr>
+                                        <td style="padding: 10px 14px; width: 68px; vertical-align: middle;">
+                                            @if(!empty($appStudent->photo_path))
+                                                <div style="width: 58px; height: 72px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: #ffffff;">
+                                                    <img src="{{ $appStudent->photo_path }}" alt="Photo" style="width: 58px; height: 72px; object-fit: cover; display: block;">
+                                                </div>
+                                            @else
+                                                <div style="width: 58px; height: 72px; border: 1.5px solid #cbd5e1; background: #F8FAFC; text-align: center; font-size: 7.5px; color: #64748b; line-height: 1.4; padding-top: 20px; font-weight: 700; border-radius: 6px;">
+                                                    AFFIX<br>PASSPORT<br>PHOTO
+                                                </div>
+                                            @endif
+                                        </td>
                                     <td style="padding: 10px 14px; vertical-align: middle;">
                                         <div style="font-size: 17px; font-weight: 800; color: #0F2A4A; line-height: 1.2;">{{ $appStudent->name }}</div>
                                         <div style="color: #6B778A; font-size: 11px; line-height: 1.6; margin-top: 3px;">
@@ -5175,6 +5212,7 @@
                                     </td>
                                 </tr>
                             </table>
+                            </div>
 
                             <!-- Allotment & Examination Schedule Bar -->
                             <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 10px 14px; margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
@@ -5496,8 +5534,8 @@
                             </table>
 
                             <!-- For Office Use Only -->
-                            <div style="border: 1px dashed #6B778A; background: #ffffff; border-radius: 8px; padding: 7px 12px; margin-top: 14px; font-size: 9.5px; color: #6B778A;">
-                                <strong style="font-size: 8.5px; letter-spacing: 0.4px; display: block; margin-bottom: 6px;">FOR OFFICE USE ONLY &bull; UNIVERSITY ADMISSIONS DIRECTORATE</strong>
+                            <div style="border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; padding: 7px 12px; margin-top: 14px; font-size: 9.5px; color: #64748b;">
+                                <strong style="font-size: 8.5px; letter-spacing: 0.4px; display: block; margin-bottom: 6px; color: #0f172a;">FOR OFFICE USE ONLY &bull; UNIVERSITY ADMISSIONS DIRECTORATE</strong>
                                 <table style="width: 100%; border-collapse: collapse;">
                                     <tr>
                                         <td style="width: 33.33%;">Application No.: <strong>{{ $appStudent->id }}</strong></td>
@@ -5519,21 +5557,108 @@
 
                     <!-- ================= ATTACHED APPLICATION DOCUMENTS & UPLOADED CERTIFICATES ================= -->
                     @php
-                        $standardSlots = [
-                            'marksheet10'   => ['title' => '10th Standard Marksheet / SSC Certificate', 'required' => true, 'desc' => 'Proof of date of birth and secondary academic marks'],
-                            'marksheet12'   => ['title' => '12th Standard / Intermediate Marksheet', 'required' => true, 'desc' => 'Proof of qualifying intermediate (10+2) marks memo'],
-                            'aadhaar'       => ['title' => 'Aadhaar Card / Government Identity Proof', 'required' => true, 'desc' => 'Official government photo identification certificate'],
-                            'photo'         => ['title' => 'Candidate Passport Photograph', 'required' => true, 'desc' => 'Recent color passport size photograph with plain background'],
-                            'tc'            => ['title' => 'Transfer Certificate (T.C.)', 'required' => false, 'desc' => 'Transfer certificate issued by previous junior college / school'],
-                            'study_conduct' => ['title' => 'Study & Conduct Certificate', 'required' => false, 'desc' => 'Bonafide / conduct certificate from last attended institution'],
-                            'btech'         => ['title' => 'Undergraduate (UG) Degree Certificate', 'required' => false, 'desc' => 'Bachelor degree marks memo or provisional certificate'],
+                        $degLevel = strtolower($appStudent->degree_level ?? ($degreeLevel ?? 'btech'));
+                        $stage3SlotsConfig = [
+                            'marksheet10' => [
+                                'title' => '10th SSC Marks Memo',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Class X secondary academic certificate',
+                            ],
+                            'marksheet12' => [
+                                'title' => '12th Intermediate / Diploma Memo',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Class XII / Intermediate (10+2) marks memo',
+                            ],
+                            'btech' => [
+                                'title' => 'B.Tech / UG Degree Memo',
+                                'levels' => ['mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Undergraduate degree marks memo or provisional certificate',
+                            ],
+                            'mtech' => [
+                                'title' => 'M.Tech / PG Memo',
+                                'levels' => ['mtech'],
+                                'required' => false,
+                                'desc' => 'Postgraduate marks memo or degree certificate',
+                            ],
+                            'pg1_cmm' => [
+                                'title' => 'PG 1 Consolidated Marks Memo (CMM)',
+                                'levels' => ['phd'],
+                                'required' => false,
+                                'desc' => 'Consolidated Marks Memo for PG 1',
+                            ],
+                            'pg1_pc' => [
+                                'title' => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
+                                'levels' => ['phd'],
+                                'required' => false,
+                                'desc' => 'Provisional Certificate / Original Degree for PG 1',
+                            ],
+                            'pg2_cmm' => [
+                                'title' => 'PG 2 Consolidated Marks Memo (CMM)',
+                                'levels' => ['phd'],
+                                'required' => false,
+                                'desc' => 'Consolidated Marks Memo for PG 2',
+                            ],
+                            'pg2_pc' => [
+                                'title' => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
+                                'levels' => ['phd'],
+                                'required' => false,
+                                'desc' => 'Provisional Certificate / Original Degree for PG 2',
+                            ],
+                            'experience' => [
+                                'title' => 'Work Experience Letter / Certificate',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Service certificate or work experience letter',
+                            ],
+                            'aadhaar' => [
+                                'title' => 'Candidate Aadhaar Card',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Government identity and native address proof',
+                            ],
+                            'photo' => [
+                                'title' => 'Passport Size Photograph',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Color passport photograph with white background',
+                            ],
+                            'tc' => [
+                                'title' => 'Transfer Certificate (TC)',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Transfer certificate issued by last attended institution',
+                            ],
+                            'study_conduct' => [
+                                'title' => 'Study & Conduct Certificate',
+                                'levels' => ['btech', 'mtech', 'phd'],
+                                'required' => false,
+                                'desc' => 'Bonafide and study conduct certificate',
+                            ],
                         ];
+
+                        $standardSlots = [];
+                        foreach ($stage3SlotsConfig as $sKey => $sDef) {
+                            if (in_array($degLevel, $sDef['levels'])) {
+                                // For experience, only show if uploaded or if PhD
+                                if ($sKey === 'experience' && empty($uploadedDocs['experience']) && $degLevel !== 'phd') {
+                                    continue;
+                                }
+                                $standardSlots[$sKey] = [
+                                    'title' => $sDef['title'],
+                                    'required' => $sDef['required'],
+                                    'desc' => $sDef['desc'],
+                                ];
+                            }
+                        }
 
                         // Merge any extra files found on disk / database
                         foreach ($uploadedDocs as $uK => $uVal) {
                             if (!isset($standardSlots[$uK])) {
                                 $standardSlots[$uK] = [
-                                    'title' => $uVal['title'] ?? ('Uploaded Document: ' . $uVal['filename']),
+                                    'title' => $uVal['title'] ?? ('Uploaded Document: ' . ($uVal['filename'] ?? $uK)),
                                     'required' => false,
                                     'desc' => 'Candidate uploaded document attachment',
                                 ];
