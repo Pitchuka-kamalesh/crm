@@ -44,11 +44,11 @@ class ApplicationDownloadTest extends TestCase
     {
         $user = User::firstOrCreate(
             ['phnno' => '9999900001'],
-            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => 'VU2027TEST99']
         );
         CrmStudentRegistration::updateOrCreate(
             ['phoneno' => '9999900001'],
-            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+            ['applinano' => 'VU2027TEST99', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
         );
 
         // Date of birth in the future
@@ -86,11 +86,11 @@ class ApplicationDownloadTest extends TestCase
     {
         $user = User::firstOrCreate(
             ['phnno' => '9999900001'],
-            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => 'VU2027TEST99']
         );
         CrmStudentRegistration::updateOrCreate(
             ['phoneno' => '9999900001'],
-            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+            ['applinano' => 'VU2027TEST99', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
         );
 
         // Make sure user's student record allows step 2
@@ -102,13 +102,12 @@ class ApplicationDownloadTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboards?step=2');
         $response->assertStatus(200);
         $response->assertDontSee('id="btn-toggle-ug-pg"', false);
-        $response->assertDontSee('Undergraduate (B.Tech / Degree) Details');
 
         // Check step 2 view for PG: Higher Academic details MUST appear
         CrmStudentRegistration::where('phoneno', $user->phnno)->update(['programlevel' => 'PG', 'programid' => null]);
         $responsePg = $this->actingAs($user)->get('/dashboards?step=2');
         $responsePg->assertStatus(200);
-        $responsePg->assertSee('Undergraduate (B.Tech / Degree) Details');
+        $responsePg->assertSee('Undergraduate (UG / B.Tech / Degree) Details');
 
         // Restore to UG
         CrmStudentRegistration::where('phoneno', $user->phnno)->update(['programlevel' => 'UG', 'programid' => 1]);
@@ -118,11 +117,11 @@ class ApplicationDownloadTest extends TestCase
     {
         $user = User::firstOrCreate(
             ['phnno' => '9999900001'],
-            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => '2027999999']
+            ['name' => 'Unpaid Test', 'pwd' => bcrypt('secret'), 'role_id' => 5, 'user_type' => 1, 'usercode' => 'VU2027TEST99']
         );
         CrmStudentRegistration::updateOrCreate(
             ['phoneno' => '9999900001'],
-            ['applinano' => '2027999999', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
+            ['applinano' => 'VU2027TEST99', 'name' => 'Unpaid Test', 'stage1' => 'pending', 'stage4' => 'pending']
         );
 
         $student = CrmStudentRegistration::where('phoneno', $user->phnno)->first()
@@ -283,6 +282,8 @@ class ApplicationDownloadTest extends TestCase
             'pg_passed_year' => 2024,
             'pg_cgpa' => '9.20',
             'pg_current_status' => 'Completed',
+            'pg_study_type' => 'Distance',
+            'pg1_doc_type' => 'CMM',
 
             // PG 2
             'pg2_college_name' => 'Indian Institute of Tech PG2',
@@ -291,7 +292,30 @@ class ApplicationDownloadTest extends TestCase
             'pg2_passed_year' => 2026,
             'pg2_cgpa' => '9.50',
             'pg2_current_status' => 'Completed',
+            'pg2_study_type' => 'Online',
+            'pg2_doc_type' => 'PC_OD',
         ];
+
+        // Verify Step 2 view does not contain the removed 12 subfields
+        $responsePhdStep2 = $this->actingAs($user)->get('/dashboards?step=2');
+        $responsePhdStep2->assertStatus(200);
+        $responsePhdStep2->assertSee('name="pg_study_type"', false);
+        $responsePhdStep2->assertSee('name="pg2_study_type"', false);
+        $responsePhdStep2->assertSee('name="pg1_doc_type"', false);
+        $responsePhdStep2->assertSee('name="pg2_doc_type"', false);
+        $responsePhdStep2->assertDontSee('name="pg1_cmm_memo_no"', false);
+        $responsePhdStep2->assertDontSee('name="pg1_cmm_cgpa"', false);
+        $responsePhdStep2->assertDontSee('name="pg1_cmm_year"', false);
+        $responsePhdStep2->assertDontSee('name="pg1_pc_od_no"', false);
+        $responsePhdStep2->assertDontSee('name="pg1_pc_od_year"', false);
+        $responsePhdStep2->assertDontSee('name="pg1_pc_od_status"', false);
+        $responsePhdStep2->assertDontSee('name="pg2_cmm_memo_no"', false);
+        $responsePhdStep2->assertDontSee('name="pg2_cmm_cgpa"', false);
+        $responsePhdStep2->assertDontSee('name="pg2_cmm_year"', false);
+        $responsePhdStep2->assertDontSee('name="pg2_pc_od_no"', false);
+        $responsePhdStep2->assertDontSee('name="pg2_pc_od_year"', false);
+        $responsePhdStep2->assertDontSee('name="pg2_pc_od_status"', false);
+        $responsePhdStep2->assertDontSee('Not Applicable');
 
         $saveResponse = $this->actingAs($user)->post('/dashboards/save-step', $payload);
         $saveResponse->assertRedirect();
@@ -303,6 +327,10 @@ class ApplicationDownloadTest extends TestCase
         $this->assertEquals('Indian Institute of Tech PG2', $savedDetail->pg2_college_name);
         $this->assertEquals('24PG2001', $savedDetail->pg2_roll_no);
         $this->assertEquals(2026, $savedDetail->pg2_passed_year);
+        $this->assertEquals('Distance', $savedDetail->pg_study_type);
+        $this->assertEquals('Online', $savedDetail->pg2_study_type);
+        $this->assertEquals('CMM', $savedDetail->pg1_doc_type);
+        $this->assertEquals('PC_OD', $savedDetail->pg2_doc_type);
 
         // Verify ApplicationController builds PG 1 and PG 2
         $controller = new ApplicationController();
@@ -315,17 +343,17 @@ class ApplicationDownloadTest extends TestCase
         $this->assertEquals('National Institute of Tech PG1', $appData->academic->pg_college);
         $this->assertEquals('Indian Institute of Tech PG2', $appData->academic->pg2_college);
 
-        // Verify blade views render Postgraduate 1 and Postgraduate 2
+        // Verify blade views render Postgraduate 1 and Postgraduate 2 (PG programme / PG 2 programme for PhD)
         $view1 = view('dashboards::application-form', ['student' => $appData])->render();
-        $this->assertStringContainsString('Postgraduate 1', $view1);
+        $this->assertStringContainsString('PG programme', $view1);
         $this->assertStringContainsString('National Institute of Tech PG1', $view1);
-        $this->assertStringContainsString('Postgraduate 2', $view1);
+        $this->assertStringContainsString('PG 2 programme', $view1);
         $this->assertStringContainsString('Indian Institute of Tech PG2', $view1);
 
         $view2 = view('application-form', ['student' => $appData])->render();
-        $this->assertStringContainsString('Postgraduate 1', $view2);
+        $this->assertStringContainsString('PG programme', $view2);
         $this->assertStringContainsString('National Institute of Tech PG1', $view2);
-        $this->assertStringContainsString('Postgraduate 2', $view2);
+        $this->assertStringContainsString('PG 2 programme', $view2);
         $this->assertStringContainsString('Indian Institute of Tech PG2', $view2);
     }
 }

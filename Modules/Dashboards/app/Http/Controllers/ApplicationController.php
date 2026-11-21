@@ -25,10 +25,14 @@ class ApplicationController extends Controller
         $student = $this->buildStudentApplicationData($id);
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
+        $logoPath = public_path('images/vignan-logo.png');
+        $logoBase64 = is_file($logoPath) ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))) : asset('images/vignan-logo.png');
+
         return view($viewName, [
             'student' => $student,
-            'logo' => asset('images/vignan-logo.png'),
+            'logo' => $logoBase64,
             'downloadUrl' => route('application.download', ['id' => $id]),
+            'autoPrint' => request()->boolean('print'),
         ]);
     }
 
@@ -37,6 +41,9 @@ class ApplicationController extends Controller
      */
     public function download(string $id): Response|View
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
+
         $student = $this->buildStudentApplicationData($id);
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
@@ -54,6 +61,9 @@ class ApplicationController extends Controller
                     ->setOptions([
                         'isHtml5ParserEnabled' => true,
                         'isRemoteEnabled' => true,
+                        'isFontSubsettingEnabled' => true,
+                        'defaultFont' => 'Helvetica',
+                        'dpi' => 96,
                         'chroot' => [public_path(), base_path()],
                     ])
                     ->setPaper('a4', 'portrait')
@@ -338,26 +348,26 @@ class ApplicationController extends Controller
 
         return (object) [
             'id' => $applino,
-            'student_id' => $studentCrmId,
+            'student_id' => $studentCrmId ?: '-',
             'name' => $crmStudent?->name ?? $user?->name ?? 'Candidate',
-            'parent_name' => $parentName,
-            'father_name' => $parentName,
-            'parent_phone' => $parentPhone,
-            'father_phone' => $parentPhone,
-            'mother_name' => $motherName,
+            'parent_name' => $parentName ?: '-',
+            'father_name' => $parentName ?: '-',
+            'parent_phone' => $parentPhone ?: '-',
+            'father_phone' => $parentPhone ?: '-',
+            'mother_name' => $motherName ?: '-',
             'email' => filter_var((string) ($crmStudent?->emailid ?? ''), FILTER_VALIDATE_EMAIL)
                 ? $crmStudent->emailid
-                : ($user?->personalmail ?: ($user?->email ?: '')),
-            'phone' => $phone,
+                : ($user?->personalmail ?: ($user?->email ?: '-')),
+            'phone' => $phone ?: '-',
             'applied_at' => $crmStudent?->log_timestamp
                 ? \Carbon\Carbon::parse($crmStudent->log_timestamp)->format('d/m/Y')
                 : now()->format('d/m/Y'),
-            'dob' => $personalInfo?->dob ?: '',
-            'gender' => $personalInfo?->gender ?: '',
-            'category' => $personalInfo?->caste_category ?: '',
-            'program' => $programName,
-            'branch' => $branchName,
-            'campus' => $campusName,
+            'dob' => $personalInfo?->dob ?: '-',
+            'gender' => $personalInfo?->gender ?: '-',
+            'category' => $personalInfo?->caste_category ?: ($personalInfo?->caste ?: '-'),
+            'program' => $programName ?: '-',
+            'branch' => $branchName ?: '-',
+            'campus' => $campusName ?: 'VFSTR, Guntur',
             'school_name' => $academicDetails?->tenth_school_name ?: '-',
             'board' => $academicDetails?->tenth_study_board ?: '-',
             'percentage' => $tenthPercentage ?: $percentage,
@@ -398,6 +408,8 @@ class ApplicationController extends Controller
                 'pg_marks_earned' => !empty($academicDetails?->pg_marks_earned) ? $academicDetails->pg_marks_earned : '-',
                 'pg_percentage' => ($pgPercentage && $pgPercentage > 0) ? number_format($pgPercentage, 2) . ' %' : ($academicDetails?->pg_cgpa ? $academicDetails->pg_cgpa . ' CGPA' : '-'),
                 'pg_status' => !empty($academicDetails?->pg_current_status) ? $academicDetails->pg_current_status : '-',
+                'pg_study_type' => !empty($academicDetails?->pg_study_type) ? $academicDetails->pg_study_type : 'Regular',
+                'pg1_doc_type' => !empty($academicDetails?->pg1_doc_type) ? $academicDetails->pg1_doc_type : 'BOTH',
 
                 // Postgraduate 2 (PG 2 / Ph.D)
                 'pg2_college' => !empty($academicDetails?->pg2_college_name) ? $academicDetails->pg2_college_name : '-',
@@ -408,7 +420,11 @@ class ApplicationController extends Controller
                 'pg2_marks_earned' => !empty($academicDetails?->pg2_marks_earned) ? $academicDetails->pg2_marks_earned : '-',
                 'pg2_percentage' => ($pg2Percentage && $pg2Percentage > 0) ? number_format($pg2Percentage, 2) . ' %' : ($academicDetails?->pg2_cgpa ? $academicDetails->pg2_cgpa . ' CGPA' : '-'),
                 'pg2_status' => !empty($academicDetails?->pg2_current_status) ? $academicDetails->pg2_current_status : '-',
+                'pg2_study_type' => !empty($academicDetails?->pg2_study_type) ? $academicDetails->pg2_study_type : 'Regular',
+                'pg2_doc_type' => !empty($academicDetails?->pg2_doc_type) ? $academicDetails->pg2_doc_type : 'BOTH',
             ],
+            'academic_year' => \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'],
+            'academic_year_short' => \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'],
             'degree_level' => $degreeLevel,
             'street' => $villageVal ?: ($personalInfo?->village ?: ''),
             'address' => $villageVal ?: ($personalInfo?->village ?: ''),

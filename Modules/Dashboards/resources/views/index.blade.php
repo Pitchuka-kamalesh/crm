@@ -2232,7 +2232,7 @@
                     </h1>
                     <span class="welcome-pill">
                         <span class="welcome-dot"></span>
-                        <span>Academic Year 2026–27</span>
+                        <span>Academic Year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}</span>
                     </span>
                 </div>
                 <p class="welcome-subtitle">
@@ -2417,19 +2417,19 @@
                                     <label class="mockup-label">Category: <span style="color:#ef4444;">*</span></label>
                                     <div class="mockup-radio-row" style="margin-top: 0.5rem;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC' || !$personalInfo) ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="OC" {{ ($personalInfo?->caste_category === 'OC') ? 'checked' : '' }} required>
                                             <span>OC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="BC" {{ ($personalInfo?->caste_category === 'BC' || $personalInfo?->caste_category === 'OBC') ? 'checked' : '' }} required>
                                             <span>BC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="SC" {{ ($personalInfo?->caste_category === 'SC') ? 'checked' : '' }} required>
                                             <span>SC</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }}>
+                                            <input type="radio" name="category" value="ST" {{ ($personalInfo?->caste_category === 'ST') ? 'checked' : '' }} required>
                                             <span>ST</span>
                                         </label>
                                     </div>
@@ -3049,8 +3049,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status, Study Type (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Year: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <input type="number" name="pg_passed_year" id="pg_passed_year" class="mockup-input" value="{{ $academicDetails?->pg_passed_year }}" placeholder="Passing Year (e.g. 2024)" min="2000" max="2030">
@@ -3064,6 +3064,14 @@
                                         <select name="pg_current_status" id="pg_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->pg_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
                                             <option value="Pursuing" {{ ($academicDetails?->pg_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Study Type: <span class="req-pg" style="color:#ef4444;">*</span></label>
+                                        <select name="pg_study_type" id="pg_study_type" class="mockup-select">
+                                            <option value="Regular" {{ ($academicDetails?->pg_study_type === 'Regular' || !$academicDetails?->pg_study_type) ? 'selected' : '' }}>Regular</option>
+                                            <option value="Distance" {{ ($academicDetails?->pg_study_type === 'Distance') ? 'selected' : '' }}>Distance</option>
+                                            <option value="Online" {{ ($academicDetails?->pg_study_type === 'Online') ? 'selected' : '' }}>Online</option>
                                         </select>
                                     </div>
                                 </div>
@@ -3106,52 +3114,19 @@
                                         </span>
                                     </div>
 
-                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg1_doc_type" value="CMM" {{ $pg1Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <input type="radio" name="pg1_doc_type" value="CMM" {{ $pg1Doc === 'CMM' ? 'checked' : '' }}>
                                             <span>PG 1 Consolidated Marks Memo (CMM)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg1_doc_type" value="PC_OD" {{ $pg1Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <input type="radio" name="pg1_doc_type" value="PC_OD" {{ $pg1Doc === 'PC_OD' ? 'checked' : '' }}>
                                             <span>PG 1 Provisional Certificate / Original Degree (PC/OD)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg1_doc_type" value="BOTH" {{ ($pg1Doc === 'BOTH' || !$academicDetails?->pg1_doc_type) ? 'checked' : '' }} onchange="togglePg1DocFields(this.value)">
+                                            <input type="radio" name="pg1_doc_type" value="BOTH" {{ ($pg1Doc === 'BOTH' || !$academicDetails?->pg1_doc_type) ? 'checked' : '' }}>
                                             <span>Both (CMM &amp; PC/OD)</span>
                                         </label>
-                                    </div>
-
-                                    <div id="pg1_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 CMM Memo / Serial No:</label>
-                                            <input type="text" name="pg1_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 CMM Marks / CGPA:</label>
-                                            <input type="text" name="pg1_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_cgpa }}" placeholder="e.g. 8.95">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 CMM Issue Year:</label>
-                                            <input type="number" name="pg1_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg1_cmm_year }}" placeholder="e.g. 2024" min="2000" max="2030">
-                                        </div>
-                                    </div>
-
-                                    <div id="pg1_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg1Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 PC / OD Certificate No:</label>
-                                            <input type="text" name="pg1_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_no }}" placeholder="Enter PC / OD Number">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 PC / OD Issue Year:</label>
-                                            <input type="number" name="pg1_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg1_pc_od_year }}" placeholder="e.g. 2024" min="2000" max="2030">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 1 PC / OD Certificate Status:</label>
-                                            <select name="pg1_pc_od_status" class="mockup-select">
-                                                <option value="Provisional" {{ ($academicDetails?->pg1_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
-                                                <option value="Original Degree" {{ ($academicDetails?->pg1_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
-                                            </select>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -3212,8 +3187,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status (3 Columns) -->
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem; align-items: start;">
+                                <!-- Row 3: Year, Hall Ticket number/Registration number, Current Status, Study Type (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem; align-items: start;">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Year:</label>
                                         <input type="number" name="pg2_passed_year" id="pg2_passed_year" class="mockup-input" value="{{ $academicDetails?->pg2_passed_year }}" placeholder="Passing Year (e.g. 2026)" min="2000" max="2030">
@@ -3227,6 +3202,14 @@
                                         <select name="pg2_current_status" id="pg2_current_status" class="mockup-select">
                                             <option value="Completed" {{ ($academicDetails?->pg2_current_status === 'Completed' || !$academicDetails) ? 'selected' : '' }}>Completed</option>
                                             <option value="Pursuing" {{ ($academicDetails?->pg2_current_status === 'Pursuing') ? 'selected' : '' }}>Pursuing</option>
+                                        </select>
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">Study Type:</label>
+                                        <select name="pg2_study_type" id="pg2_study_type" class="mockup-select">
+                                            <option value="Regular" {{ ($academicDetails?->pg2_study_type === 'Regular' || !$academicDetails?->pg2_study_type) ? 'selected' : '' }}>Regular</option>
+                                            <option value="Distance" {{ ($academicDetails?->pg2_study_type === 'Distance') ? 'selected' : '' }}>Distance</option>
+                                            <option value="Online" {{ ($academicDetails?->pg2_study_type === 'Online') ? 'selected' : '' }}>Online</option>
                                         </select>
                                     </div>
                                 </div>
@@ -3254,9 +3237,10 @@
                                     </div>
                                 </div>
 
-                                <!-- PG 2 Certificate / Memo Type: (pg2(cmm), pg2(pc/od)) (Optional) -->
+                                <!-- PG 2 Certificate / Memo Type: (pg2(cmm), pg2(pc/od)) -->
                                 @php
-                                    $pg2Doc = $academicDetails?->pg2_doc_type ?? 'NONE';
+                                    $pg2Doc = $academicDetails?->pg2_doc_type ?? 'BOTH';
+                                    if ($pg2Doc === 'NONE') { $pg2Doc = 'BOTH'; }
                                 @endphp
                                 <div style="margin-top: 0.95rem; background: #ffffff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 0.85rem;">
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -3266,56 +3250,19 @@
                                         </label>
                                     </div>
 
-                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0.65rem;">
+                                    <div class="mockup-radio-row" style="gap: 1.25rem; margin-bottom: 0;">
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="NONE" {{ ($pg2Doc === 'NONE' || !$academicDetails?->pg2_doc_type) ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
-                                            <span>Not Applicable</span>
-                                        </label>
-                                        <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="CMM" {{ $pg2Doc === 'CMM' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <input type="radio" name="pg2_doc_type" value="CMM" {{ $pg2Doc === 'CMM' ? 'checked' : '' }}>
                                             <span>PG 2 Consolidated Marks Memo (CMM)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="PC_OD" {{ $pg2Doc === 'PC_OD' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <input type="radio" name="pg2_doc_type" value="PC_OD" {{ $pg2Doc === 'PC_OD' ? 'checked' : '' }}>
                                             <span>PG 2 Provisional Certificate / Original Degree (PC/OD)</span>
                                         </label>
                                         <label class="mockup-radio-label">
-                                            <input type="radio" name="pg2_doc_type" value="BOTH" {{ $pg2Doc === 'BOTH' ? 'checked' : '' }} onchange="togglePg2DocFields(this.value)">
+                                            <input type="radio" name="pg2_doc_type" value="BOTH" {{ ($pg2Doc === 'BOTH' || !$academicDetails?->pg2_doc_type) ? 'checked' : '' }}>
                                             <span>Both (CMM &amp; PC/OD)</span>
                                         </label>
-                                    </div>
-
-                                    <div id="pg2_cmm_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['CMM', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 CMM Memo / Serial No:</label>
-                                            <input type="text" name="pg2_cmm_memo_no" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_memo_no }}" placeholder="Enter CMM Memo / Serial No">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 CMM Marks / CGPA:</label>
-                                            <input type="text" name="pg2_cmm_cgpa" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_cgpa }}" placeholder="e.g. 9.10">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 CMM Issue Year:</label>
-                                            <input type="number" name="pg2_cmm_year" class="mockup-input" value="{{ $academicDetails?->pg2_cmm_year }}" placeholder="e.g. 2026" min="2000" max="2030">
-                                        </div>
-                                    </div>
-
-                                    <div id="pg2_pc_container" class="mockup-subgrid-3" style="display: {{ in_array($pg2Doc, ['PC_OD', 'BOTH']) ? 'grid' : 'none' }}; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.45rem; background: #faf5ff; padding: 0.65rem; border-radius: 6px; border: 1px dashed #d8b4fe;">
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 PC / OD Certificate No:</label>
-                                            <input type="text" name="pg2_pc_od_no" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_no }}" placeholder="Enter PC / OD Number">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 PC / OD Issue Year:</label>
-                                            <input type="number" name="pg2_pc_od_year" class="mockup-input" value="{{ $academicDetails?->pg2_pc_od_year }}" placeholder="e.g. 2026" min="2000" max="2030">
-                                        </div>
-                                        <div class="mockup-field-group">
-                                            <label class="mockup-label">PG 2 PC / OD Certificate Status:</label>
-                                            <select name="pg2_pc_od_status" class="mockup-select">
-                                                <option value="Provisional" {{ ($academicDetails?->pg2_pc_od_status === 'Provisional' || !$academicDetails) ? 'selected' : '' }}>Provisional Certificate (PC)</option>
-                                                <option value="Original Degree" {{ ($academicDetails?->pg2_pc_od_status === 'Original Degree') ? 'selected' : '' }}>Original Degree (OD)</option>
-                                            </select>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -4087,7 +4034,7 @@
                             'pg1_cmm' => [
                                 'icon' => '📜',
                                 'title' => 'PG 1 Consolidated Marks Memo (CMM)',
-                                'sub' => 'Consolidated Marks Memo for PG 1 (At least one mandatory with PC/OD)*',
+                                'sub' => 'Consolidated Marks Memo for PG 1 (Mandatory)*',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4096,7 +4043,7 @@
                             'pg1_pc' => [
                                 'icon' => '🎓',
                                 'title' => 'PG 1 Provisional Certificate / Original Degree (PC/OD)',
-                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (At least one mandatory with CMM)*',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 1 (Mandatory)*',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4105,7 +4052,7 @@
                             'pg2_cmm' => [
                                 'icon' => '📜',
                                 'title' => 'PG 2 Consolidated Marks Memo (CMM)',
-                                'sub' => 'Consolidated Marks Memo for PG 2 (Optional)',
+                                'sub' => 'Consolidated Marks Memo for PG 2',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4113,7 +4060,7 @@
                             'pg2_pc' => [
                                 'icon' => '🎓',
                                 'title' => 'PG 2 Provisional Certificate / Original Degree (PC/OD)',
-                                'sub' => 'Provisional Certificate / Original Degree for PG 2 (Optional)',
+                                'sub' => 'Provisional Certificate / Original Degree for PG 2',
                                 'levels' => 'phd',
                                 'is_common' => false,
                                 'is_required' => false,
@@ -4180,6 +4127,20 @@
                                     $docFile = $uploadedDocs[$docKey] ?? null;
                                     $cardLevels = explode(' ', $docMeta['levels']);
                                     $isLevelMatch = in_array($degreeLevel ?? 'btech', $cardLevels);
+
+                                    $pg1DocType = $academicDetails?->pg1_doc_type ?? 'BOTH';
+                                    $pg2DocType = $academicDetails?->pg2_doc_type ?? 'BOTH';
+                                    if (($degreeLevel ?? '') === 'phd') {
+                                        if ($docKey === 'pg1_cmm' && $pg1DocType === 'PC_OD') {
+                                            $isLevelMatch = false;
+                                        } elseif ($docKey === 'pg1_pc' && $pg1DocType === 'CMM') {
+                                            $isLevelMatch = false;
+                                        } elseif ($docKey === 'pg2_cmm' && $pg2DocType === 'PC_OD') {
+                                            $isLevelMatch = false;
+                                        } elseif ($docKey === 'pg2_pc' && $pg2DocType === 'CMM') {
+                                            $isLevelMatch = false;
+                                        }
+                                    }
                                 @endphp
                                 <div class="kyc-doc-card doc-stream-item"
                                      data-doc-key="{{ $docKey }}"
@@ -4192,7 +4153,7 @@
                                         <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
                                             @if(!empty($docMeta['is_pg1_group']))
                                                 <span style="font-size: 0.68rem; font-weight: 700; background: #faf5ff; color: #7c3aed; padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid #d8b4fe;">
-                                                    Any 1 Mandatory *
+                                                    Mandatory *
                                                 </span>
                                             @endif
                                             @if($docMeta['is_common'])
@@ -4263,10 +4224,32 @@
                             const hiddenInput = document.getElementById('stage3_degree_level_input');
                             if (hiddenInput) hiddenInput.value = level;
 
+                            const pg1DocType = '{{ $academicDetails?->pg1_doc_type ?? "BOTH" }}';
+                            const pg2DocType = '{{ $academicDetails?->pg2_doc_type ?? "BOTH" }}';
+
                             // Filter cards: B.Tech shows only 10th, Inter, Aadhaar, Photo, TC, Conduct
                             document.querySelectorAll('.doc-stream-item').forEach(card => {
                                 const levels = (card.getAttribute('data-levels') || '').split(' ');
+                                const docKey = card.getAttribute('data-doc-key');
                                 if (levels.includes(level)) {
+                                    if (level === 'phd') {
+                                        if (docKey === 'pg1_cmm' && pg1DocType === 'PC_OD') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                        if (docKey === 'pg1_pc' && pg1DocType === 'CMM') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                        if (docKey === 'pg2_cmm' && pg2DocType === 'PC_OD') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                        if (docKey === 'pg2_pc' && pg2DocType === 'CMM') {
+                                            card.style.display = 'none';
+                                            return;
+                                        }
+                                    }
                                     card.style.display = 'flex';
                                 } else {
                                     card.style.display = 'none';
@@ -4321,10 +4304,11 @@
                                 form.addEventListener('submit', function(e) {
                                     const lvl = document.getElementById('stage3_degree_level_input')?.value || '{{ $degreeLevel ?? "btech" }}';
                                     if (lvl === 'phd') {
+                                        const pg1DocType = '{{ $academicDetails?->pg1_doc_type ?? "BOTH" }}';
                                         const hasCmm = Boolean({{ !empty($uploadedDocs['pg1_cmm']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_cmm')?.files?.length > 0);
                                         const hasPc = Boolean({{ !empty($uploadedDocs['pg1_pc']) ? 'true' : 'false' }}) || (document.getElementById('file-input-pg1_pc')?.files?.length > 0);
 
-                                        if (!hasCmm && !hasPc) {
+                                        if ((pg1DocType === 'CMM' || pg1DocType === 'BOTH') && !hasCmm) {
                                             e.preventDefault();
                                             const cmmCard = document.getElementById('doc-card-pg1_cmm');
                                             if (cmmCard) cmmCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -4332,7 +4316,23 @@
                                             if (input) {
                                                 input.focus();
                                                 if (typeof input.reportValidity === 'function') {
-                                                    input.setCustomValidity('Please upload at least one document for PG 1: either Consolidated Marks Memo (CMM) or Provisional Certificate / Original Degree (PC/OD).');
+                                                    input.setCustomValidity('Please upload PG 1 Consolidated Marks Memo (CMM).');
+                                                    input.reportValidity();
+                                                    input.onchange = function() { input.setCustomValidity(''); };
+                                                }
+                                            }
+                                            return false;
+                                        }
+
+                                        if ((pg1DocType === 'PC_OD' || pg1DocType === 'BOTH') && !hasPc) {
+                                            e.preventDefault();
+                                            const pcCard = document.getElementById('doc-card-pg1_pc');
+                                            if (pcCard) pcCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            const input = document.getElementById('file-input-pg1_pc');
+                                            if (input) {
+                                                input.focus();
+                                                if (typeof input.reportValidity === 'function') {
+                                                    input.setCustomValidity('Please upload PG 1 Provisional Certificate / Original Degree (PC/OD).');
                                                     input.reportValidity();
                                                     input.onchange = function() { input.setCustomValidity(''); };
                                                 }
@@ -4380,7 +4380,7 @@
                                     Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to @if(($degreeLevel ?? '') === 'phd') application form preview & download. @else exam slot booking. @endif
                                 </p>
                                 <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                                    <a href="{{ route('payu.receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
+                                    <a href="{{ route('payu.payu_receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
                                         <span>📥 Download / View Official Receipt</span>
                                         <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                     </a>
@@ -4702,6 +4702,7 @@
             @elseif(($activeStep === 6 && ($degreeLevel ?? '') !== 'phd') || ($activeStep === 5 && ($degreeLevel ?? '') === 'phd'))
                 @php
                     $appStudent = $applicationData ?? \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) ($appNo ?: ($user?->usercode ?? '0')));
+                    $student = $appStudent;
                     $formLogo = asset('images/vignan-logo.png');
                     $paid = strtolower($appStudent->payment_status ?? '') === 'completed';
                     $dobFormatted = !empty($appStudent->dob) ? \Carbon\Carbon::parse($appStudent->dob)->format('d M Y') : 'N/A';
@@ -4714,6 +4715,15 @@
                         'study_conduct' => 'Study & Conduct',
                     ];
                     $formUploaded = (array) ($appStudent->documents ?? []);
+                    $progUpper = strtoupper(trim((string)($appStudent->program ?? '')));
+                    $levelUpper = strtoupper(trim((string)($appStudent->degree_level ?? '')));
+                    $crmUpper = strtoupper(trim((string)($appStudent->student_id ?? '')));
+                    $isPhd = ($degreeLevel ?? '') === 'phd'
+                        || $levelUpper === 'PHD'
+                        || str_contains($progUpper, 'PHD')
+                        || str_contains($progUpper, 'PH.D')
+                        || str_contains($progUpper, 'DOCTOR')
+                        || str_starts_with($crmUpper, 'PHD');
                 @endphp
 
                 <div class="step-panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
@@ -4723,7 +4733,7 @@
                         <p>Review your verified application details and download the official PDF form.</p>
                     </div>
                     <div class="stage6-header-actions" style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ route('application.show', ['id' => $appStudent->id]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <a href="{{ route('application.show', ['id' => $appStudent->id, 'print' => 1]) }}" target="_blank" class="btn-step-prev" style="text-decoration: none; padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 600; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-flex; align-items: center; gap: 0.4rem;" title="Open and Print Application Form">
                             <span>🖨️ Print Form</span>
                         </a>
                         <a href="{{ route('application.download', ['id' => $appStudent->id]) }}" download class="btn-step-next" style="text-decoration: none; padding: 0.55rem 1.25rem; font-size: 0.84rem; background: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
@@ -4742,10 +4752,377 @@
 
                     <!-- EMBEDDED A4 ADMISSION APPLICATION FORM -->
                     <div class="embedded-a4-form-wrapper">
-                    <div class="embedded-a4-form" style="max-width: 820px; margin: 0 auto; background: #F4F7FB; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1B2430;">
+                    <div class="embedded-a4-form" style="max-width: 860px; margin: 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 42, 74, 0.15); border: 1px solid #cbd5e1; font-family: 'Source Sans 3', Helvetica, Arial, sans-serif; font-size: 13px; color: #1B2430;">
 
-                        <!-- Form Header Banner -->
-                        <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
+                        @php
+                            $uploadedKeys = array_keys((array)($student->uploaded_files ?? []));
+                            $hasTenth = in_array('marksheet10', $uploadedKeys);
+                            $hasInter = in_array('marksheet12', $uploadedKeys);
+                            $hasUg = in_array('btech', $uploadedKeys) || in_array('ug_cmm', $uploadedKeys);
+                            $hasPg = in_array('pg1_cmm', $uploadedKeys) || in_array('pg1_pc', $uploadedKeys) || in_array('pg', $uploadedKeys) || in_array('mtech', $uploadedKeys);
+                            $hasExp = in_array('experience', $uploadedKeys);
+                            $hasId = in_array('aadhaar', $uploadedKeys) || in_array('passport', $uploadedKeys);
+                            $hasPhoto = in_array('photo', $uploadedKeys) || !empty($student->photo_path);
+
+                            $progUpper = strtoupper(trim((string)($student->program ?? '')));
+                            $levelUpper = strtoupper(trim((string)($student->degree_level ?? '')));
+                            $crmUpper = strtoupper(trim((string)($student->student_id ?? '')));
+                            $isPhd = $levelUpper === 'PHD'
+                                || $levelUpper === 'DOCTORAL'
+                                || str_contains($progUpper, 'PHD')
+                                || str_contains($progUpper, 'PH.D')
+                                || str_contains($progUpper, 'DOCTOR')
+                                || str_starts_with($crmUpper, 'PHD');
+
+                            $isPg = !$isPhd && (
+                                $levelUpper === 'MTECH'
+                                || $levelUpper === 'PG'
+                                || str_contains($progUpper, 'M.TECH')
+                                || str_contains($progUpper, 'MTECH')
+                                || str_contains($progUpper, 'MASTER')
+                                || str_contains($progUpper, 'MBA')
+                                || str_contains($progUpper, 'MCA')
+                            );
+
+                            $isUg = !$isPhd && !$isPg;
+
+                            $campusesList = \App\Models\Campus::where('is_active', true)->orWhereNull('is_active')->orderBy('campus_id')->get();
+                            if ($campusesList->isEmpty()) {
+                                $campusesList = collect([
+                                    (object)['campus_id' => 1, 'campus_short_name' => 'Vignan Main Campus', 'campus_code' => 'VDM']
+                                ]);
+                            }
+                        @endphp
+                            @if($isPhd)
+<div class="phd-form-wrap">
+                                <style>
+                                    .phd-form-wrap {
+                                        --bg: #f3f2ef; --paper: #fff; --ink: #1d1d1f; --mute: #5d5d63; --line: #cfcdc7;
+                                        --bar: #1e3a8a; --bar-ink: #fff; --accent: #8c1c2e; --accent-ink: #fff; --field: #fafaf8; --ok: #1f6b3a;
+                                        background: var(--paper); border: 1px solid var(--line); padding: 24px 28px;
+                                        font: 400 14px/1.5 "Source Sans 3", system-ui, -apple-system, sans-serif; color: var(--ink); border-radius: 4px;
+                                    }
+                                    .phd-form-wrap header {
+                                        display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
+                                        border-bottom: 2px solid #1e3a8a; padding-bottom: 14px;
+                                    }
+                                    .phd-form-wrap .logo-box { display: flex; align-items: center; justify-content: center; }
+                                    .phd-form-wrap .logo-box img { height: 56px; display: block; }
+                                    .phd-form-wrap .brand { font: 700 20px/1.1 "Source Serif 4", Georgia, serif; margin: 0; color: var(--ink); }
+                                    .phd-form-wrap .brand small { display: block; font: 400 12px "Source Sans 3", sans-serif; color: var(--mute); margin-top: 4px; }
+                                    .phd-form-wrap h1 { font: 700 18px/1.2 "Source Serif 4", Georgia, serif; margin: 12px 0 2px; color: var(--accent); }
+                                    .phd-form-wrap .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 8px; }
+                                    .phd-form-wrap .meta label { display: flex; gap: 6px; align-items: center; font-weight: 600; font-size: 13px; }
+                                    .phd-form-wrap .photo {
+                                        width: 115px; height: 145px; border: 1px dashed var(--mute); display: grid; place-items: center;
+                                        text-align: center; font-size: 11px; color: var(--mute); overflow: hidden; position: relative;
+                                        background: var(--field); border-radius: 4px;
+                                    }
+                                    .phd-form-wrap .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+                                    .phd-form-wrap .note {
+                                        font-size: 12.5px; color: var(--mute); margin: 12px 0; background: var(--field);
+                                        border-left: 3px solid var(--accent); padding: 6px 10px;
+                                    }
+                                    .phd-form-wrap h2 {
+                                        background: var(--bar); color: var(--bar-ink); font: 700 14.5px "Source Sans 3", sans-serif;
+                                        margin: 20px 0 10px; padding: 7px 12px; display: flex; gap: 10px; border-radius: 3px;
+                                    }
+                                    .phd-form-wrap .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; }
+                                    .phd-form-wrap .full { grid-column: 1 / -1; }
+                                    .phd-form-wrap .f { display: flex; flex-direction: column; gap: 4px; }
+                                    .phd-form-wrap .f > span, .phd-form-wrap .lbl { font-weight: 600; font-size: 13px; color: var(--ink); }
+                                    .phd-form-wrap .req::after { content: " *"; color: var(--accent); }
+                                    .phd-form-wrap input[type=text], .phd-form-wrap input[type=tel], .phd-form-wrap input[type=email],
+                                    .phd-form-wrap input[type=date], .phd-form-wrap input[type=number], .phd-form-wrap select, .phd-form-wrap textarea {
+                                        width: 100%; font: inherit; color: inherit; background: var(--field); border: 1px solid var(--line);
+                                        padding: 7px 10px; border-radius: 3px; font-size: 13px; box-sizing: border-box;
+                                    }
+                                    .phd-form-wrap textarea { resize: vertical; min-height: 56px; }
+                                    .phd-form-wrap .opts { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 6px 0; }
+                                    .phd-form-wrap .chk { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink); cursor: default; }
+                                    .phd-form-wrap .chk input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+                                    .phd-form-wrap .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; }
+                                    .phd-form-wrap table { border-collapse: collapse; width: 100%; min-width: 640px; }
+                                    .phd-form-wrap th, .phd-form-wrap td { border: 1px solid var(--line); padding: 6px; text-align: left; vertical-align: middle; font-size: 12.5px; }
+                                    .phd-form-wrap th { background: var(--field); font-size: 12px; padding: 7px 6px; font-weight: 700; }
+                                    .phd-form-wrap td input, .phd-form-wrap td select { border: 0; background: transparent; padding: 4px; width: 100%; font-size: 12.5px; }
+                                    .phd-form-wrap td.rl { font-weight: 600; font-size: 12.5px; white-space: nowrap; padding: 6px 8px; background: var(--field); }
+                                    .phd-form-wrap td output { display: block; padding: 4px; font-weight: 700; color: var(--ok); }
+                                    .phd-form-wrap .decl { border: 1px solid var(--line); padding: 12px; font-size: 13px; background: var(--field); border-radius: 3px; line-height: 1.5; }
+                                    .phd-form-wrap .sign { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+                                    .phd-form-wrap .rules { margin-top: 20px; }
+                                    .phd-form-wrap .rules .in { font-size: 12.5px; line-height: 1.55; }
+                                    .phd-form-wrap .rules h3 { font-size: 13px; margin: 12px 0 4px; font-weight: 700; }
+                                    .phd-form-wrap .rules ul, .phd-form-wrap .rules ol { margin: 0; padding-left: 22px; }
+                                    .phd-form-wrap .rules li { margin: 3px 0; }
+                                    .phd-form-wrap .glance { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 8px 0 12px; text-align: center; }
+                                    .phd-form-wrap .glance div { border: 1px solid var(--line); padding: 6px 2px; background: var(--field); font-size: 11px; border-radius: 3px; }
+                                    .phd-form-wrap .glance b { display: block; font-size: 15px; color: var(--ink); }
+                                    .phd-form-wrap .office { margin-top: 20px; border: 2px dashed var(--line); padding: 10px 14px 14px; border-radius: 4px; background: #fff; }
+                                    .phd-form-wrap .office h2 { margin: 6px -14px 12px -14px; border-radius: 0; }
+                                    .phd-form-wrap .office .big td { font-weight: 700; background: var(--field); }
+                                    @media(max-width: 640px) {
+                                        .phd-form-wrap .grid { grid-template-columns: 1fr; }
+                                        .phd-form-wrap header { grid-template-columns: 1fr; }
+                                        .phd-form-wrap .sign { grid-template-columns: 1fr; }
+                                    }
+                                </style>
+
+                                <header style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px;">
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 4px;">
+                                            <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 74px; max-width: 86px; object-fit: contain;">
+                                            <div>
+                                                <p class="brand" style="margin: 0; font-size: 19px; line-height: 1.15; color: #1e3a8a;">
+                                                    Vignan’s Foundation for Science, Technology &amp; Research
+                                                    <small style="display: block; font-size: 11.5px; color: var(--mute); margin-top: 2px;">(Deemed to be University)</small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <h1 style="margin: 6px 0 2px 0; font-size: 16px; color: var(--accent); font-weight: 700;">Admission Information Form</h1>
+                                        <div style="font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">
+                                            {{ $isPhd ? 'Doctor of Philosophy (Ph.D.) Programme' : ($student->program ?: 'Undergraduate / Postgraduate Programme') }}
+                                        </div>
+                                        <div class="meta" style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;">
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Admission year:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_full'] }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">Application No.:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->id }}</span></div>
+                                            <div style="font-size: 12px; white-space: nowrap;"><span style="color: var(--mute); font-weight: 600;">CRM ID:</span> <span style="color: var(--ink); font-weight: 700; margin-left: 4px;">{{ $student->student_id }}</span></div>
+                                        </div>
+                                    </div>
+                                    <label class="photo" id="ph" style="margin: 0; align-self: start;">
+                                        @if(!empty($student->photo_path))
+                                            <img src="{{ $student->photo_path }}" alt="Candidate Photo">
+                                        @else
+                                            <span>Passport-size<br>colour photograph</span>
+                                        @endif
+                                    </label>
+                                </header>
+
+                                <h2>1 &nbsp;Personal details</h2>
+                                <div class="grid">
+                                    <label class="f full"><span class="req">Name of the candidate</span><input type="text" name="name" required style="text-transform:uppercase" value="{{ strtoupper($student->name ?: '-') }}" readonly></label>
+                                    <label class="f full"><span>Father’s / Guardian’s name</span><input type="text" name="father" style="text-transform:uppercase" value="{{ strtoupper($student->father_name ?: ($student->parent_name ?: '-')) }}" readonly></label>
+                                    <div class="f">
+                                        <span class="lbl req">Gender</span>
+                                        <div class="opts" data-group="gender">
+                                            <label class="chk"><input type="checkbox" name="gender" value="Male" {{ strtolower($student->gender ?? '') === 'male' ? 'checked' : '' }} disabled><span>Male</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Female" {{ strtolower($student->gender ?? '') === 'female' ? 'checked' : '' }} disabled><span>Female</span></label>
+                                            <label class="chk"><input type="checkbox" name="gender" value="Other" {{ !in_array(strtolower($student->gender ?? ''), ['male','female']) && !empty($student->gender) && $student->gender !== '-' ? 'checked' : '' }} disabled><span>Other</span></label>
+                                        </div>
+                                    </div>
+                                    <label class="f"><span class="req">Date of birth</span><input type="text" name="dob" value="{{ !empty($student->dob) && $student->dob !== '-' ? \Carbon\Carbon::parse($student->dob)->format('d M Y') : '-' }}" readonly></label>
+                                    <div class="f full">
+                                         <span class="lbl">Category</span>
+                                         <div class="opts">
+                                             <label class="chk"><input type="checkbox" name="cat" value="General" {{ in_array(strtoupper($student->category ?? ''), ['GENERAL', 'OC', 'OPEN']) ? 'checked' : '' }} disabled><span>General</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="OBC" {{ str_contains(strtoupper($student->category ?? ''), 'OBC') || str_contains(strtoupper($student->category ?? ''), 'BC') ? 'checked' : '' }} disabled><span>OBC</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="SC" {{ strtoupper($student->category ?? '') === 'SC' ? 'checked' : '' }} disabled><span>SC</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="ST" {{ strtoupper($student->category ?? '') === 'ST' ? 'checked' : '' }} disabled><span>ST</span></label>
+                                             <label class="chk"><input type="checkbox" name="cat" value="PwD" {{ in_array(strtoupper($student->category ?? ''), ['PWD', 'PH', 'OTHER']) ? 'checked' : '' }} disabled><span>PwD / Other</span></label>
+                                         </div>
+                                    </div>
+                                    <label class="f"><span class="req">Mobile no.</span><input type="tel" name="mobile" value="{{ $student->phone ?: '-' }}" readonly></label>
+                                    <label class="f"><span class="req">Parent’s mobile</span><input type="tel" name="pmobile" value="{{ $student->father_phone ?: ($student->parent_phone ?: '-') }}" readonly></label>
+                                    <label class="f full"><span class="req">Email ID</span><input type="email" name="email" value="{{ $student->email ?: '-' }}" readonly></label>
+                                    <label class="f full"><span>Address for communication</span><textarea name="addr" readonly>{{ $student->address ?: '-' }}</textarea></label>
+                                    <label class="f"><span>City / District</span><input type="text" name="city" value="{{ trim(($student->city !== '-' ? $student->city : '') . ($student->district !== '-' ? ', ' . $student->district : '')) ?: '-' }}" readonly></label>
+                                    <label class="f"><span>State / PIN code</span><input type="text" name="state" value="{{ trim(($student->state !== '-' ? $student->state : '') . ($student->pincode !== '-' ? ' - ' . $student->pincode : '')) ?: '-' }}" readonly></label>
+                                </div>
+
+                                <h2>2 &nbsp;Programme details</h2>
+                                <div class="grid">
+                                    <label class="f full"><span class="req">{{ $isPhd ? 'Name of the specialization in Ph.D. programme' : 'Programme & Specialization / Branch' }}</span><input type="text" name="spec" value="{{ $student->branch !== '-' ? $student->branch : ($student->program !== '-' ? $student->program : '-') }}" readonly></label>
+                                    <label class="f"><span>VSAT ID</span><input type="text" name="vsat" value="{{ $student->student_id ?: '-' }}" readonly></label>
+                                    <label class="f"><span>{{ $isPhd ? 'Research area' : 'Allotted Program' }}</span><input type="text" name="area" value="{{ $student->program !== '-' ? $student->program : ($student->branch !== '-' ? $student->branch : '-') }}" readonly></label>
+                                    <div class="f full">
+                                        <span class="lbl req">Campus preference</span>
+                                        <div class="opts">
+                                            @foreach($campusesList as $c)
+                                                @php
+                                                    $cShort = $c->campus_short_name ?: $c->campus_code;
+                                                    $isSelectedCampus = (string)($student->campus_id ?? '') === (string)$c->campus_id
+                                                        || (!empty($student->campus) && (str_contains(strtolower($student->campus), strtolower($cShort)) || str_contains(strtolower($student->campus), strtolower($c->campus_code ?? ''))))
+                                                        || ($loop->first && empty($student->campus));
+                                                @endphp
+                                                <label class="chk"><input type="checkbox" name="campus" value="{{ $cShort }}" {{ $isSelectedCampus ? 'checked' : '' }} disabled><span>{{ $cShort }}</span></label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h2>3 &nbsp;Academic qualifications</h2>
+                                <div class="lbl" style="margin-bottom:6px">School education</div>
+                                <div class="tw">
+                                    <table id="school">
+                                        <thead>
+                                            <tr><th>Examination</th><th>Board / School</th><th>Year of passing</th><th>Total marks</th><th>Marks obtained</th><th>Percentage</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="rl">SSC</td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_board !== '-' ? $student->academic->ssc_board : ($student->academic->ssc_school !== '-' ? $student->academic->ssc_school : '-') }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_year ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_marks_conducted ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->ssc_marks_earned ?: '-' }}" readonly></td>
+                                                <td><output>{{ $student->academic->ssc_percentage ?: '-' }}</output></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="rl">Intermediate</td>
+                                                <td><input type="text" value="{{ $student->academic->inter_board !== '-' ? $student->academic->inter_board : ($student->academic->inter_college !== '-' ? $student->academic->inter_college : '-') }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->inter_year ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->inter_marks_conducted ?: '-' }}" readonly></td>
+                                                <td><input type="text" value="{{ $student->academic->inter_marks_earned ?: '-' }}" readonly></td>
+                                                <td><output>{{ $student->academic->inter_percentage ?: '-' }}</output></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if(!$isUg)
+                                    <div class="lbl" style="margin:16px 0 6px">{{ $isPhd ? 'UG & PG programme details' : 'UG programme details' }}</div>
+                                    <div class="tw">
+                                        <table id="deg">
+                                            <thead>
+                                                <tr><th>Programme</th><th>Programme with specialization</th><th>College / University</th><th>Year</th><th>Division / grade points</th><th>% of marks</th><th>Mode of study</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="rl">UG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 20%)</small></td>
+                                                    <td><input type="text" value="B.Tech / Degree" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_college !== '-' ? $student->academic->ug_college : ($student->academic->ug_board !== '-' ? $student->academic->ug_board : '-') }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_year ?: '-' }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_status ?: '-' }}" readonly></td>
+                                                    <td><input type="text" value="{{ $student->academic->ug_percentage ?: '-' }}" readonly></td>
+                                                    <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
+                                                </tr>
+                                                @if($isPhd)
+                                                    <tr>
+                                                        <td class="rl">PG programme<br><small style="font-weight:400;color:var(--mute)">(weightage: 30%)</small></td>
+                                                        <td><input type="text" value="M.Tech / Master’s" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_college !== '-' ? $student->academic->pg_college : ($student->academic->pg_board !== '-' ? $student->academic->pg_board : '-') }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_year ?: '-' }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_status ?: '-' }}" readonly></td>
+                                                        <td><input type="text" value="{{ $student->academic->pg_percentage ?: '-' }}" readonly></td>
+                                                        <td><select disabled><option selected>Regular</option><option>Full-time</option><option>Part-time</option><option>Distance</option><option>Online</option></select></td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+
+                                <h2>4 &nbsp;Enclosures checklist</h2>
+                                <p class="note" style="margin-top:0">Tick the documents enclosed with this form.</p>
+                                <div class="grid" id="enc">
+                                    <label class="chk"><input type="checkbox" name="enc" value="SSC / 10th marks memo" {{ $hasTenth ? 'checked' : '' }} disabled><span>SSC / 10th marks memo</span></label>
+                                    <label class="chk"><input type="checkbox" name="enc" value="Intermediate / 10+2 marks memo" {{ $hasInter ? 'checked' : '' }} disabled><span>Intermediate / 10+2 marks memo</span></label>
+                                    @if(!$isUg)
+                                        <label class="chk"><input type="checkbox" name="enc" value="UG degree certificate & marks memos" {{ $hasUg ? 'checked' : '' }} disabled><span>UG degree certificate &amp; marks memos</span></label>
+                                        @if($isPhd)
+                                            <label class="chk"><input type="checkbox" name="enc" value="PG degree certificate & marks memos" {{ $hasPg ? 'checked' : '' }} disabled><span>PG degree certificate &amp; marks memos</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="GATE / CSIR / NET / CAT score card (if any)" disabled><span>GATE / CSIR / NET / CAT score card (if any)</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="Experience certificate(s) (if any)" {{ $hasExp ? 'checked' : '' }} disabled><span>Experience certificate(s) (if any)</span></label>
+                                            <label class="chk"><input type="checkbox" name="enc" value="Publication proofs (if any)" disabled><span>Publication proofs (if any)</span></label>
+                                        @endif
+                                    @endif
+                                    <label class="chk"><input type="checkbox" name="enc" value="Caste / category certificate (if applicable)" {{ ($student->category !== 'General' && $student->category !== 'OC' && $student->category !== '-') ? 'checked' : '' }} disabled><span>Caste / category certificate (if applicable)</span></label>
+                                    <label class="chk"><input type="checkbox" name="enc" value="Photo ID proof (Aadhaar / Passport etc.)" {{ $hasId ? 'checked' : '' }} disabled><span>Photo ID proof (Aadhaar / Passport etc.)</span></label>
+                                    <label class="chk"><input type="checkbox" name="enc" value="Passport-size photographs" {{ $hasPhoto ? 'checked' : '' }} disabled><span>Passport-size photographs</span></label>
+                                </div>
+
+                                <h2>5 &nbsp;Declaration by the candidate</h2>
+                                <div class="decl">
+                                    I hereby declare that all the information furnished in this form is true and correct to the best of my knowledge and belief. I understand that any false information or suppression of facts will lead to the cancellation of my candidature / admission. I have read the eligibility criteria and admission procedure given at the end of this form and agree to abide by the rules and regulations of VFSTR.
+                                    <label class="chk" style="margin-top:10px"><input type="checkbox" id="agree" checked disabled><span><b>I agree to the declaration</b></span></label>
+                                </div>
+                                <div class="sign">
+                                    <label class="f"><span>Place</span><input type="text" name="place" value="{{ $student->city !== '-' ? $student->city : ($student->district !== '-' ? $student->district : 'Guntur') }}" readonly></label>
+                                    <label class="f"><span>Date</span><input type="text" name="sdate" value="{{ $student->applied_at ?: now()->format('d/m/Y') }}" readonly></label>
+                                    <label class="f"><span>Signature of the candidate (type full name)</span><input type="text" name="sign" value="{{ $student->name }}" readonly></label>
+                                </div>
+
+                                @if(!$isPhd)
+                                    <section class="office" aria-label="For office use only" style="margin-top: 20px;">
+                                        <h2>6 &nbsp;For office use only – Admission &amp; Verification</h2>
+                                        <div class="tw">
+                                            <table>
+                                                <thead>
+                                                    <tr><th>Admission status</th><th>Fee payment status</th><th>Allotted programme &amp; branch</th><th>Campus &amp; quota</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="color: var(--ok); font-weight: 700;">Provisional Admission Confirmed</td>
+                                                        <td style="color: var(--ok); font-weight: 700;">Verified &amp; Accounted</td>
+                                                        <td>{{ $student->program ?: '-' }} ({{ $student->branch ?: '-' }})</td>
+                                                        <td>{{ $student->campus ?: ($campusesList->first()->campus_short_name ?? 'Vignan Main Campus') }} &bull; {{ $student->category ?: 'General' }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="grid" style="margin-top: 14px;">
+                                            <label class="f"><span>Scrutiny Officer</span><input type="text" value="Verified &amp; Approved" readonly></label>
+                                            <label class="f"><span>Finance / Accounts Officer</span><input type="text" value="Fee Receipt Verified" readonly></label>
+                                            <label class="f"><span>Dean – Admissions</span><input type="text" value="Authorized Signatory" readonly></label>
+                                        </div>
+                                    </section>
+                                @endif
+
+                                @if($isPhd)
+                                <section class="rules" aria-label="Eligibility criteria">
+                                    <h2>Eligibility criteria</h2>
+                                    <div class="in">
+                                        <h3>Engineering streams</h3><ul><li>Full-time scholar: first class in both B.Tech and M.Tech, with scholarship.</li><li>Part-time scholar: as per UGC rules, subject to written test and interview by VFSTR.</li></ul>
+                                        <h3>General qualification norms</h3><ul><li>Minimum 55% in post-graduation as per UGC rules, relaxable by 5% for SC / ST / OBC candidates.</li><li>Minimum 60% aggregate in the qualifying degree; deserving cases may be referred to RMC.</li><li>Engineering: PG degree in a relevant engineering discipline. Management: Master’s in business management. Sciences / humanities: relevant PG degree.</li></ul>
+                                        <h3>Law</h3><ul><li>LL.B. from a Bar Council of India recognised institution and regular full-time LL.M. with minimum 55%. UGC NET / SET qualified candidates preferred.</li></ul>
+                                        <h3>Pharmaceutical sciences</h3><ul><li>First class in B.Pharmacy and M.Pharmacy or Pharm.D. GPAT qualified candidates preferred.</li></ul>
+                                    </div>
+                                </section>
+
+                                <section class="rules" aria-label="Admission procedure">
+                                    <h2>Admission procedure</h2>
+                                    <div class="in">
+                                        <p>Selection into the Ph.D. programme is evaluated on the academic performance (% marks in B.Tech / UG and M.Tech / PG) and the institution last attended for Bachelor’s and Master’s degrees (maximum 20% and 30% marks respectively), previous experience (each year 1 mark, up to 5 marks), publications (2 marks per journal paper and 1 mark per conference paper, up to 5 marks), written test (15% marks) and interview (25% marks).</p>
+                                        <h3>Selection weightage at a glance</h3>
+                                        <div class="glance"><div><b>20%</b>UG degree</div><div><b>30%</b>PG degree</div><div><b>5%</b>Experience</div><div><b>5%</b>Publications</div><div><b>15%</b>Written test</div><div><b>25%</b>Interview</div><div><b>100%</b>Total</div></div>
+                                        <ol><li>Eligible candidates have to appear for a written test and interview.</li><li>All candidates are required to qualify in a written test conducted by VFSTR. Candidates who have qualified in GATE / CSIR / NET / CAT are exempted from the written test, but they should appear for the interview.</li><li>Candidates recommended for selection by the concerned department are to be approved by the Dean (R&amp;D) and Chairman, URB respectively. The approved selection list shall be sent to Dean (Admission) for further action.</li><li>Candidates will be admitted into the Ph.D. programme after payment of prescribed fees and completion of all the admission procedures.</li><li>Admitted candidates will report to the concerned department; a committee appointed by HoD will allot a Research Supervisor for each candidate on mutual consent.</li></ol>
+                                    </div>
+                                </section>
+
+                                <section class="office" aria-label="For office use only">
+                                    <h2>For office use only – Department verification</h2>
+                                    <div class="tw"><table>
+                                        <thead><tr><th>Component</th><th>Basis of scoring</th><th>Max. marks</th><th>Marks awarded</th></tr></thead>
+                                        <tbody>
+                                        <tr><td class="rl">UG degree details</td><td>Academic performance (% marks) &amp; institution last attended</td><td>20</td><td><input type="number" class="osum" min="0" max="20" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">PG degree details</td><td>Academic performance (% marks) &amp; institution last attended</td><td>30</td><td><input type="number" class="osum" min="0" max="30" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">Experience</td><td>1 mark for each year of experience</td><td>5</td><td><input type="number" class="osum" min="0" max="5" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">Publications</td><td>2 marks / journal paper &amp; 1 mark / conference paper</td><td>5</td><td><input type="number" class="osum" min="0" max="5" placeholder="____" readonly></td></tr>
+                                        <tr class="big"><td colspan="2">Total marks out of 60</td><td>60</td><td><output id="o60">0</output></td></tr>
+                                        <tr><td class="rl">Written test</td><td>Exempted for GATE / CSIR / NET / CAT qualified candidates</td><td>15</td><td><input type="number" class="osum" min="0" max="15" placeholder="____" readonly></td></tr>
+                                        <tr><td class="rl">Interview</td><td>Conducted by the department</td><td>25</td><td><input type="number" class="osum" min="0" max="25" placeholder="____" readonly></td></tr>
+                                        <tr class="big"><td colspan="2">Grand total (selection score)</td><td>100</td><td><output id="o100">0</output></td></tr>
+                                        </tbody></table></div>
+                                    <div class="opts" style="margin-top:10px">
+                                        <label class="chk"><input type="checkbox" name="sel" value="Selected" disabled><span>Selected</span></label>
+                                        <label class="chk"><input type="checkbox" name="sel" value="Not selected" disabled><span>Not selected</span></label>
+                                        <span class="lbl">Research assistantship:</span>
+                                        <label class="chk"><input type="checkbox" disabled><span>ERA</span></label><label class="chk"><input type="checkbox" disabled><span>TRA</span></label><label class="chk"><input type="checkbox" disabled><span>CAP</span></label><label class="chk"><input type="checkbox" disabled><span>CRA</span></label>
+                                        <label class="chk"><input type="checkbox" name="trk" value="Industry" disabled><span>Industry</span></label><label class="chk"><input type="checkbox" name="trk" value="Academics" disabled><span>Academics</span></label>
+                                    </div>
+                                    <label class="f" style="margin-top:10px"><span>Remarks (not selected candidates)</span><textarea readonly placeholder="Department remarks..."></textarea></label>
+                                    <div class="grid" style="margin-top:10px">
+                                        <label class="f"><span>Name of the faculty member (department coordinator)</span><input type="text" readonly></label>
+                                        <label class="f"><span>Designation</span><input type="text" readonly></label>
+                                        <label class="f"><span>Signature</span><input type="text" readonly></label>
+                                        <label class="f"><span>Date</span><input type="text" readonly></label>
+                                    </div>
+                                    <p class="note" style="margin-top:8px">Selection committee: BoR (Chairman) · Head of the Department (Member) · School Dean (Member) · Dean R&amp;D (Member)</p>
+                                </section>
+                                @endif
+                            </div>
+@else
+<!-- Form Header Banner -->
+                            <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
                             <tr>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
                                     <div style="background: #ffffff; border-radius: 8px; padding: 6px 10px; display: inline-block;">
@@ -5136,6 +5513,7 @@
                             </div>
 
                         </div>
+@endif
                     </div>
                     </div>
 
@@ -6142,7 +6520,7 @@
                         <div class="terms-card-row row-green">
                             <div class="terms-badge-pill badge-green">2</div>
                             <div class="terms-row-content">
-                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year 2026–27.
+                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}.
                             </div>
                         </div>
 

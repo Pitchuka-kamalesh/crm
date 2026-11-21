@@ -15,7 +15,7 @@ Route::get('/api/districts/{stateId}', [RegistrationController::class, 'getDistr
 Route::get('/application/{id}', [ApplicationController::class, 'show'])->name('application.show');
 Route::get('/application/{id}/download', [ApplicationController::class, 'download'])->name('application.download');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','role:5'])->group(function () {
     // Multi-step Student Onboarding
     Route::post('dashboards/accept-terms', [DashboardsController::class, 'acceptTerms'])->name('dashboards.accept-terms');
     Route::post('dashboards/save-step', [DashboardsController::class, 'saveStep'])->name('dashboards.save-step');

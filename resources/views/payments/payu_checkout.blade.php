@@ -484,19 +484,11 @@
         </div>
 
         <!-- Direct Secure Admission Fee Settlement Form (No external PayU gateway redirect; zero 504 errors) -->
-        <form action="{{ route('payu.response') }}" method="POST" id="payuGatewayForm" onsubmit="const b=document.getElementById('btnPayNow'); const o=document.getElementById('processingOverlay'); if(b){ b.disabled=true; } if(o){ o.classList.add('active'); }">
+        <form action="{{ $gatewayUrl }}" method="POST" id="payuGatewayForm" onsubmit="const b=document.getElementById('btnPayNow'); const o=document.getElementById('processingOverlay'); if(b){ b.disabled=true; } if(o){ o.classList.add('active'); }">
             @csrf
-            <input type="hidden" name="status" value="success">
-            <input type="hidden" name="txnid" value="{{ $txnid }}">
-            <input type="hidden" name="amount" value="{{ $amount }}">
-            <input type="hidden" name="udf1" value="{{ $applino }}">
-            <input type="hidden" name="udf4" value="{{ $params['udf4'] ?? 'KEDAR' }}">
-            <input type="hidden" name="udf5" value="{{ $params['udf5'] ?? '' }}">
-            <input type="hidden" name="mihpayid" value="VFSTR{{ date('His') }}{{ rand(1000, 9999) }}">
-            <input type="hidden" name="bank_ref_no" value="BANK{{ date('Ymd') }}{{ rand(1000, 9999) }}">
-            <input type="hidden" name="mode" value="Online Portal">
-            <input type="hidden" name="firstname" value="{{ $name }}">
-            <input type="hidden" name="email" value="{{ $email }}">
+    @foreach($params as $key => $value)
+        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+    @endforeach
 
             <button type="submit" id="btnPayNow" class="btn-pay-now">
                 <span class="btn-pay-main">💳 Confirm & Pay ₹{{ number_format($amount, 2) }}</span>
