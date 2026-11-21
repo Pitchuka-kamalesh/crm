@@ -115,6 +115,9 @@ return new class extends Migration
                 log_timestamp TIMESTAMP DEFAULT now()
             );
 
+            -- Ensure columns exist if table was created in an earlier migration
+            ALTER TABLE crm.student_personal_info ADD COLUMN IF NOT EXISTS terms_accepted VARCHAR(20) DEFAULT 'no';
+
             CREATE TABLE IF NOT EXISTS crm.student_academic_details (
                 crmid VARCHAR(50) PRIMARY KEY,
                 applino VARCHAR(20) NOT NULL,
@@ -147,6 +150,33 @@ return new class extends Migration
                 log_ipaddress VARCHAR(255),
                 log_timestamp TIMESTAMP DEFAULT now()
             );
+
+            -- Ensure columns exist if table was created in an earlier migration
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS tenth_school_state VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS tenth_school_district VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pu2_college_state VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pu2_college_district VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pu2_board_of_study VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS undertaking_60_pct VARCHAR(20);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS ug_college_state VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS ug_college_district VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg_college_state VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg_college_district VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg_study_type VARCHAR(50) DEFAULT 'Regular';
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg1_doc_type VARCHAR(50);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_college_name VARCHAR(255);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_university_board VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_college_city VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_college_state VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_college_district VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_roll_no VARCHAR(50);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_passed_year INT4;
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_marks_type VARCHAR(50);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_marks NUMERIC(5,2);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_percentage NUMERIC(5,2);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_current_status VARCHAR(100);
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_study_type VARCHAR(50) DEFAULT 'Regular';
+            ALTER TABLE crm.student_academic_details ADD COLUMN IF NOT EXISTS pg2_doc_type VARCHAR(50);
 
             -- 4. CRM Leads
             CREATE TABLE IF NOT EXISTS crm.leads (
@@ -193,8 +223,17 @@ return new class extends Migration
                 updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE OR REPLACE VIEW master.wapp_logs AS SELECT * FROM master.communication_logs;
-            CREATE OR REPLACE VIEW master.wapplogs AS SELECT * FROM master.communication_logs;
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'master' AND tablename = 'wapp_logs') 
+                   AND NOT EXISTS (SELECT 1 FROM pg_views WHERE schemaname = 'master' AND viewname = 'wapp_logs') THEN
+                    CREATE VIEW master.wapp_logs AS SELECT * FROM master.communication_logs;
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'master' AND tablename = 'wapplogs') 
+                   AND NOT EXISTS (SELECT 1 FROM pg_views WHERE schemaname = 'master' AND viewname = 'wapplogs') THEN
+                    CREATE VIEW master.wapplogs AS SELECT * FROM master.communication_logs;
+                END IF;
+            END $$;
 
             CREATE TABLE IF NOT EXISTS master.smslogs (
                 \"smsId\" bigserial PRIMARY KEY,
