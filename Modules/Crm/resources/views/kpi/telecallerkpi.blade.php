@@ -84,31 +84,67 @@
         }
 
         .call-activity-filters {
-            display: flex;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 0.5rem;
-            flex-wrap: wrap;
+            align-items: center;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            padding: 0.4rem 0.65rem;
+            padding: 0.45rem 0.65rem;
             border-radius: 8px;
             margin-bottom: 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
         }
         .call-activity-filter-item {
             display: flex;
             align-items: center;
             gap: 0.35rem;
+            min-width: 0;
+            width: 100%;
+        }
+        .call-activity-filter-item label {
+            flex-shrink: 0;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
         }
         .call-activity-filter-item select {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
             font-size: 0.75rem;
             font-weight: 600;
             color: #1e293b;
             background: #ffffff;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
-            padding: 0.25rem 0.5rem;
+            padding: 0.25rem 0.45rem;
             outline: none;
             cursor: pointer;
+            box-sizing: border-box;
+        }
+        .table-responsive {
+            width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        .crm-table {
+            width: 100% !important;
+            min-width: 860px !important;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+        .table-scroll-hint {
+            display: none;
+            font-size: 0.72rem;
+            color: #64748b;
+            font-weight: 600;
+            padding: 0.3rem 0.75rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         @media (max-width: 991px) {
@@ -119,6 +155,11 @@
         }
 
         @media (max-width: 768px) {
+            .table-scroll-hint {
+                display: flex !important;
+                align-items: center;
+                gap: 6px;
+            }
             .card-header-bar {
                 padding: 0.85rem 1rem !important;
                 gap: 0.65rem !important;
@@ -150,20 +191,20 @@
             }
             .call-activity-filters {
                 display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 0.45rem !important;
-                padding: 0.5rem !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 0.35rem !important;
+                padding: 0.45rem 0.5rem !important;
             }
             .call-activity-filter-item {
                 flex-direction: column !important;
-                align-items: flex-start !important;
+                align-items: stretch !important;
                 gap: 2px !important;
                 width: 100% !important;
             }
             .call-activity-filter-item select {
                 width: 100% !important;
-                padding: 0.35rem 0.45rem !important;
-                font-size: 0.75rem !important;
+                padding: 0.3rem 0.35rem !important;
+                font-size: 0.74rem !important;
             }
             #telecallerSearchInput {
                 width: 100% !important;
@@ -495,6 +536,12 @@
                             </div>
                         </div>
 
+                        <div class="table-scroll-hint">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #2563eb;">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                            <span>Scroll horizontally to view all counselor outreach columns</span>
+                        </div>
                         <div class="table-responsive">
                             <table class="crm-table" id="telecallerTable">
                                 <thead>

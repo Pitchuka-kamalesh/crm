@@ -2600,6 +2600,18 @@
                                 }
                             }
 
+                            window.addEventListener('DOMContentLoaded', function() {
+                                const cSelect = document.getElementById('geo-country-select');
+                                const sSelect = document.getElementById('geo-state-select');
+                                const dSelect = document.getElementById('geo-district-select');
+                                if (cSelect && (!cSelect.value || cSelect.value === '')) {
+                                    cSelect.value = '1';
+                                }
+                                if (cSelect && sSelect && (!sSelect.value || sSelect.value === '')) {
+                                    onCountryChange(cSelect.value);
+                                }
+                            });
+
                             function togglePg1DocFields(val) {
                                 const cmm = document.getElementById('pg1_cmm_container');
                                 const pc = document.getElementById('pg1_pc_container');
@@ -3839,6 +3851,18 @@
                                 }
                                 return true;
                             }
+
+                            window.addEventListener('DOMContentLoaded', function() {
+                                const cSelect = document.getElementById('geo-country-select');
+                                const sSelect = document.getElementById('geo-state-select');
+                                const dSelect = document.getElementById('geo-district-select');
+                                if (cSelect && (!cSelect.value || cSelect.value === '')) {
+                                    cSelect.value = '1';
+                                }
+                                if (cSelect && sSelect && (!sSelect.value || sSelect.value === '')) {
+                                    onCountryChange(cSelect.value);
+                                }
+                            });
 
                             function togglePg1DocFields(val) {
                                 const cmm = document.getElementById('pg1_cmm_container');
