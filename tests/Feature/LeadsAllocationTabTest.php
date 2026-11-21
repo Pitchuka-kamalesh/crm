@@ -655,17 +655,17 @@ class LeadsAllocationTabTest extends TestCase
         $stage4 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'not_paid');
         $this->assertEquals('Register Form completed', $stage4);
 
-        // 5. Paid, personal details not filled -> Payment Stage completed
+        // 5. Paid, personal details not filled -> Fee Payment completed
         $stage5 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'paid', 'NA');
-        $this->assertEquals('Payment Stage completed', $stage5);
+        $this->assertEquals('Fee Payment completed', $stage5);
 
         // 6. Personal details filled, academic details not filled -> Personal Details completed
-        $stage6 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'paid', 'completed', 'NA');
+        $stage6 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'completed', 'NA');
         $this->assertEquals('Personal Details completed', $stage6);
 
-        // 7. Academic details filled -> Academic Details completed
-        $stage7 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'paid', 'completed', 'completed');
-        $this->assertEquals('Academic Details completed', $stage7);
+        // 7. Academic details filled -> Academic Info completed
+        $stage7 = \App\Services\TelecallerService::determineLeadStage('2026110001', '02598', 'completed', 'completed');
+        $this->assertEquals('Academic Info completed', $stage7);
     }
 
     public function test_action_modal_and_stage_dropdown_on_leads_page()
@@ -871,6 +871,7 @@ class LeadsAllocationTabTest extends TestCase
             'crmid' => 'CRMA_TEST_990002',
             'applino' => $testAppli,
             'phoneno' => $testPhone,
+            'tenth_school_name' => 'Test High School',
         ]);
 
         $step4 = \App\Services\TelecallerService::getAllowedStagesForLead($testAppli);

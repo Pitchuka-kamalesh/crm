@@ -985,19 +985,41 @@ class TelecallerService
             ->keyBy('applinano');
 
         // 2. Personal Details Table (crm.student_personal_info)
+        // Must have actual personal details filled (e.g. gender, dob, or parent name)
         $personalSet = StudentPersonalInfo::whereIn('applino', $clean)
+            ->where(function ($q) {
+                $q->whereNotNull('gender')
+                  ->orWhereNotNull('dob')
+                  ->orWhereNotNull('parent_name');
+            })
             ->pluck('applino')
             ->mapWithKeys(fn ($v) => [(string) $v => true])
             ->all();
 
         // 3. Academic Details Table (crm.student_academic_details)
+        // Must have actual academic details filled (e.g. 10th school, pu2 college, or higher degree college)
         $academicSet = StudentAcademicDetail::whereIn('applino', $clean)
+            ->where(function ($q) {
+                $q->whereNotNull('tenth_school_name')
+                  ->orWhereNotNull('pu2_college_name')
+                  ->orWhereNotNull('ug_college_name')
+                  ->orWhereNotNull('pg_college_name');
+            })
             ->pluck('applino')
             ->mapWithKeys(fn ($v) => [(string) $v => true])
             ->all();
 
         // 4. Document Uploads Table (crm.student_uploads)
         $uploadSet = StudentUpload::whereIn('applino', $clean)
+            ->where(function ($q) {
+                $q->whereNotNull('tenth_file_name')
+                  ->orWhereNotNull('inter_file_name')
+                  ->orWhereNotNull('aadhar_file_name')
+                  ->orWhereNotNull('passport_file_name')
+                  ->orWhereNotNull('btech_file_name')
+                  ->orWhereNotNull('mtech_file_name')
+                  ->orWhereNotNull('pg1_cmm_file_name');
+            })
             ->pluck('applino')
             ->mapWithKeys(fn ($v) => [(string) $v => true])
             ->all();
