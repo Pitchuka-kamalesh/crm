@@ -248,17 +248,19 @@ class DashboardsController extends Controller
             }
         }
 
-        // Safe 7-stage fallback if database roles/menus are not yet seeded
-        if (empty($stageMeta)) {
-            $stageMeta = [
-                1 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
-                2 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
-                3 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Document upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
-                4 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
-                5 => ['menu_id' => 123, 'menu_code' => 'EXAM00002', 'title' => 'Exam Slot Booking', 'subtitle' => 'Select Date & Time Slot for V-SAT / Entrance Exam', 'icon' => '📅', 'lock_status' => 0],
-                6 => ['menu_id' => 122, 'menu_code' => 'CRMM0010', 'title' => 'Application Download', 'subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥', 'lock_status' => 0],
-                7 => ['menu_id' => 124, 'menu_code' => 'CRMM0007', 'title' => 'V-SAT Results', 'subtitle' => 'Official V-SAT Scorecard & Merit Ranking', 'icon' => '🏆', 'lock_status' => 0],
-            ];
+        // Safe 7-stage fallback if database roles/menus are missing, empty, or contain fewer than 5 steps (e.g. single STEP7)
+        $canonicalStages = [
+            1 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
+            2 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
+            3 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Document upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
+            4 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
+            5 => ['menu_id' => 123, 'menu_code' => 'EXAM00002', 'title' => 'Exam Slot Booking', 'subtitle' => 'Select Date & Time Slot for V-SAT / Entrance Exam', 'icon' => '📅', 'lock_status' => 0],
+            6 => ['menu_id' => 122, 'menu_code' => 'CRMM0010', 'title' => 'Application Download', 'subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥', 'lock_status' => 0],
+            7 => ['menu_id' => 124, 'menu_code' => 'CRMM0007', 'title' => 'V-SAT Results', 'subtitle' => 'Official V-SAT Scorecard & Merit Ranking', 'icon' => '🏆', 'lock_status' => 0],
+        ];
+
+        if (empty($stageMeta) || count($stageMeta) < 5 || !isset($stageMeta[1]) || !isset($stageMeta[2])) {
+            $stageMeta = $canonicalStages;
         }
 
         ksort($stageMeta);
@@ -372,6 +374,40 @@ class DashboardsController extends Controller
             Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
         }
 
+        if ($countries->isEmpty() || $states->isEmpty() || $districts->isEmpty()) {
+            if (class_exists(RegistrationController::class)) {
+                RegistrationController::ensureGeographicTablesExist();
+            }
+            try {
+                $countries = Country::where('lock_status', 0)->orderBy('country_name')->get();
+                $states = State::where('lock_status', 0)->orderBy('state_name')->get();
+                $districts = District::where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+            } catch (\Throwable $e2) {}
+        }
+
+        if ($countries->isEmpty()) {
+            $countries = collect([
+                (object)['country_id' => 1, 'country_code' => 'IN', 'country_name' => 'India', 'country_phonecode' => '+91'],
+                (object)['country_id' => 3, 'country_code' => 'US', 'country_name' => 'United States', 'country_phonecode' => '+1'],
+            ]);
+        }
+        if ($states->isEmpty()) {
+            $states = collect([
+                (object)['state_id' => 1, 'state_code' => 'AP', 'state_name' => 'Andhra Pradesh', 'country_id' => 1],
+                (object)['state_id' => 24, 'state_code' => 'TG', 'state_name' => 'Telangana', 'country_id' => 1],
+                (object)['state_id' => 11, 'state_code' => 'KA', 'state_name' => 'Karnataka', 'country_id' => 1],
+                (object)['state_id' => 23, 'state_code' => 'TN', 'state_name' => 'Tamil Nadu', 'country_id' => 1],
+            ]);
+        }
+        if ($districts->isEmpty()) {
+            $districts = collect([
+                (object)['DISTRICT_ID' => 1, 'DISTRICT_CODE' => 'GNT', 'DISTRICT_NAME' => 'Guntur', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
+                (object)['DISTRICT_ID' => 2, 'DISTRICT_CODE' => 'KRI', 'DISTRICT_NAME' => 'Krishna', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
+                (object)['DISTRICT_ID' => 3, 'DISTRICT_CODE' => 'VSP', 'DISTRICT_NAME' => 'Visakhapatnam', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
+                (object)['DISTRICT_ID' => 4, 'DISTRICT_CODE' => 'HYD', 'DISTRICT_NAME' => 'Hyderabad', 'STATE_ID' => 24, 'COUNTRY_ID' => 1],
+            ]);
+        }
+
         $applicationData = null;
         try {
             $applicationData = \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) $appNo);
@@ -385,19 +421,35 @@ class DashboardsController extends Controller
         $defaultCountry = $personalInfo?->country;
         if (empty($defaultCountry)) {
             $cId = $crmStudent?->countryid ?? 1;
-            $defaultCountry = Country::where('country_id', $cId)->value('country_name') ?? 'India';
+            try {
+                $defaultCountry = Country::where('country_id', $cId)->value('country_name') ?? 'India';
+            } catch (\Throwable $e) {
+                $defaultCountry = 'India';
+            }
         }
 
         $defaultState = $personalInfo?->state;
         if (empty($defaultState)) {
             $sId = $crmStudent?->stateid ?? 1;
-            $defaultState = State::where('state_id', $sId)->value('state_name') ?? 'Andhra Pradesh';
+            try {
+                $defaultState = State::where('state_id', $sId)->value('state_name') ?? 'Andhra Pradesh';
+            } catch (\Throwable $e) {
+                $defaultState = 'Andhra Pradesh';
+            }
         }
 
         $defaultDistrict = $personalInfo?->district
             ?? $academicDetails?->tenth_school_district
             ?? $academicDetails?->pu2_college_district
             ?? null;
+        if (empty($defaultDistrict)) {
+            $dId = $crmStudent?->districtid ?? 1;
+            try {
+                $defaultDistrict = District::where('DISTRICT_ID', $dId)->value('DISTRICT_NAME') ?? 'Guntur';
+            } catch (\Throwable $e) {
+                $defaultDistrict = 'Guntur';
+            }
+        }
 
         return view('dashboards::index', compact(
             'hasAcceptedTerms',

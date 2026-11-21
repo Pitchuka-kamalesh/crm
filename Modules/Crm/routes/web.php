@@ -7,7 +7,7 @@ use Modules\Crm\Http\Controllers\TelecallerKpiController;
 use Modules\Crm\Http\Controllers\LeadsKpiController;
 use Modules\Crm\Http\Controllers\DiscountCouponController;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     // CRM Navigation & Enquiries
     Route::get('/crm', [CrmController::class, 'index'])->name('crm.alias');
     Route::get('/crms', [CrmController::class, 'index'])->name('crm.index');

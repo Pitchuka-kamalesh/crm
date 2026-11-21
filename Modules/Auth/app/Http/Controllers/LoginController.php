@@ -164,7 +164,15 @@ class LoginController extends Controller
                     ->first();
             } catch (\Throwable $e) {}
 
-            $isValid = ($dbOtp !== null) || ($sessionOtp && $otp === (string)$sessionOtp && $sessionPhone === $cleanPhone) || ($otp === '123456');
+            // Allow static '123456' OTP ONLY in non-production environments when debug is enabled and login bypass is explicitly enabled
+            $isBypassOtpAllowed = !app()->environment('production')
+                && config('app.env') !== 'production'
+                && (bool) config('app.debug')
+                && (bool) config('app.is_login_bypass');
+
+            $isValid = ($dbOtp !== null)
+                || ($sessionOtp && $otp === (string)$sessionOtp && $sessionPhone === $cleanPhone)
+                || ($isBypassOtpAllowed && $otp === '123456');
 
             if (!$isValid) {
                 return back()->withInput()->withErrors([
@@ -276,11 +284,18 @@ class LoginController extends Controller
                 $passwordMatches = password_verify($password, $user->pwd) || Hash::check($password, $user->pwd);
             }
 
-            // Also support master/demo passwords or roll number for convenient initial sign-in
+            // Also support master/demo passwords or roll number for convenient initial sign-in in development
             if (!$passwordMatches) {
-                $allowedFallbacks = ['vignan123', 'admin123', '123456', $user->usercode, $cleanPhone];
-                if (in_array($password, $allowedFallbacks, true)) {
-                    $passwordMatches = true;
+                $isDevFallbackAllowed = !app()->environment('production')
+                    && config('app.env') !== 'production'
+                    && (bool) config('app.debug')
+                    && (bool) config('app.is_login_bypass');
+
+                if ($isDevFallbackAllowed) {
+                    $allowedFallbacks = ['vignan123', 'admin123', '123456', $user->usercode, $cleanPhone];
+                    if (in_array($password, $allowedFallbacks, true)) {
+                        $passwordMatches = true;
+                    }
                 }
             }
 
@@ -483,7 +498,7 @@ class LoginController extends Controller
             Log::warning('Error inserting into master.login_otp: ' . $e->getMessage());
         }
 
-        if (config('app.is_login_bypass') === true && config('app.env') === 'local') {
+        if (config('app.is_login_bypass') === true && config('app.env') === 'local' && !app()->environment('production') && (bool) config('app.debug')) {
             return $this->bypassLoginAndRedirectHome($cleanPhone);
         }
 
