@@ -1000,8 +1000,8 @@
     /* header */
     .header { width: 100%; background: #0F2A4A; border-bottom: 4px solid #1E7BD8; }
     .header td { padding: 22px 12mm 18px 12mm; }
-    .logo-box { background: #fff; border-radius: 8px; padding: 8px 10px; display: inline-block; }
-    .logo-box img { height: 46px; display: block; }
+    .logo-box { background: #fff; border-radius: 8px; padding: 6px 12px; display: inline-block; }
+    .logo-box img { height: 60px; max-width: 190px; object-fit: contain; display: block; }
     .title { color: #fff; font-size: 22px; font-weight: bold; text-align: right; letter-spacing: .5px; }
     .subtitle { color: #A9BCD6; font-size: 11px; text-align: right; line-height: 1.6; }
     .meta { color: #A9BCD6; font-size: 9px; padding-top: 8px; }
@@ -1009,11 +1009,12 @@
     .wrap { padding: 0 12mm; }
 
     /* profile strip */
-    .profile { width: 100%; background: #fff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -16px; }
+    .profile-card { background: #fff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -16px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); position: relative; z-index: 2; }
+    .profile { width: 100%; border: none; }
     .profile td { padding: 10px 12px; vertical-align: middle; }
-    .photo { width: 58px; height: 72px; border: 1px dashed #6B778A; background: #F4F7FB; text-align: center;
-             font-size: 7px; color: #6B778A; line-height: 1.5; padding-top: 22px; }
-    .photo-filled { width: 58px; height: 72px; border: 1px solid #cbd5e1; background: #fff; padding: 0; overflow: hidden; }
+    .photo { width: 58px; height: 72px; border: 1.5px solid #cbd5e1; background: #F8FAFC; text-align: center;
+             font-size: 7px; color: #64748b; line-height: 1.5; padding-top: 22px; border-radius: 6px; }
+    .photo-filled { width: 58px; height: 72px; border: 1px solid #cbd5e1; background: #fff; padding: 0; overflow: hidden; border-radius: 4px; }
     .photo-filled img { display: block; width: 58px; height: 72px; object-fit: cover; }
     .pname { font-size: 18px; font-weight: bold; }
     .pmeta { color: #6B778A; font-size: 11px; line-height: 1.7; }
@@ -1036,7 +1037,7 @@
 
     /* documents */
     .docs { width: 100%; }
-    .docs td { width: 33.33%; padding: 3px; }
+    .docs td { width: 50%; padding: 3px; }
     .chip { border-radius: 7px; padding: 6px 8px; font-size: 10px; font-weight: bold; }
     .chip small { float: right; font-weight: normal; font-size: 9px; }
     .chip.ok   { color: #1B2430; background: #E2F5EC; } .chip.ok small   { color: #12875B; }
@@ -1052,9 +1053,9 @@
     .sign { width: 100%; margin-top: 38px; }
     .sign td { width: 33.33%; text-align: center; padding: 0 12px; color: #6B778A; font-size: 10px; }
     .sign .line { border-top: 1px solid #6B778A; padding-top: 5px; }
-    .office { border: 1px dashed #6B778A; background: #fff; border-radius: 8px; padding: 8px 12px; margin-top: 18px;
-              font-size: 10px; color: #6B778A; }
-    .office b { font-size: 8.5px; letter-spacing: .4px; display: block; margin-bottom: 8px; }
+    .office { border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; padding: 8px 12px; margin-top: 18px;
+              font-size: 10px; color: #64748b; }
+    .office b { font-size: 8.5px; letter-spacing: .4px; display: block; margin-bottom: 8px; color: #0f172a; }
     .office table { width: 100%; } .office td { width: 33.33%; }
 
     .footer { position: absolute; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 8.5px; color: #6B778A; }
@@ -1117,28 +1118,30 @@
     <div class="wrap">
 
         {{-- Profile strip --}}
-        <table class="profile">
-            <tr>
-                <td style="width:70px">
-                    @if (!empty(($student->photo_path ?? null)))
-                        <div class="photo-filled"><img src="{{ ($student->photo_path ?? null) }}" width="58" height="72" style="display:block; width:58px; height:72px; object-fit:cover;" alt=""></div>
-                    @else
-                        <div class="photo">AFFIX<br>PASSPORT<br>PHOTO</div>
-                    @endif
-                </td>
-                <td>
-                    <div class="pname">{{ ($student->name ?? null) }}</div>
-                    <div class="pmeta">
-                        {{ ($student->email ?? null) }} &nbsp;|&nbsp; {{ ($student->phone ?? null) }}<br>
-                        Applicant ID: {{ !empty(($student->student_id ?? null)) ? ($student->student_id ?? null) : '____________________' }} (App #: {{ ($student->id ?? null) }})
-                    </div>
-                </td>
-                <td style="text-align:right">
-                    <span class="pill {{ $paid ? 'ok' : 'warn' }}">PAYMENT {{ strtoupper(($student->payment_status ?? null) ?? 'PENDING') }}</span><br>
-                    <span class="pill warn">PROVISIONAL SEAT ALLOTMENT</span>
-                </td>
-            </tr>
-        </table>
+        <div class="profile-card">
+            <table class="profile">
+                <tr>
+                    <td style="width:70px">
+                        @if (!empty(($student->photo_path ?? null)))
+                            <div class="photo-filled"><img src="{{ ($student->photo_path ?? null) }}" width="58" height="72" style="display:block; width:58px; height:72px; object-fit:cover;" alt=""></div>
+                        @else
+                            <div class="photo">AFFIX<br>PASSPORT<br>PHOTO</div>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="pname">{{ ($student->name ?? null) }}</div>
+                        <div class="pmeta">
+                            {{ ($student->email ?? null) }} &nbsp;|&nbsp; {{ ($student->phone ?? null) }}<br>
+                            Applicant ID: {{ !empty(($student->student_id ?? null)) ? ($student->student_id ?? null) : '____________________' }} (App #: {{ ($student->id ?? null) }})
+                        </div>
+                    </td>
+                    <td style="text-align:right">
+                        <span class="pill {{ $paid ? 'ok' : 'warn' }}">PAYMENT {{ strtoupper(($student->payment_status ?? null) ?? 'PENDING') }}</span><br>
+                        <span class="pill warn">PROVISIONAL SEAT ALLOTMENT</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         {{-- Cards --}}
         <table class="grid">
@@ -1254,20 +1257,69 @@
                 <td class="gap-l">
                     <div class="card">
                         <h3>5. Documents Verification</h3>
-                        <table class="docs">
-                            @foreach (array_chunk($docs, 2, true) as $row)
-                                <tr>
-                                    @foreach ($row as $key => $label)
-                                        @php
-                                            $mime = $uploaded[$key] ?? null;
-                                            $has  = !empty($mime);
-                                            $type = $has ? strtoupper(str_replace(['image/', 'application/'], '', $mime)) : 'Pending';
-                                        @endphp
-                                        <td><div class="chip {{ $has ? 'ok' : 'warn' }}">{{ $label }} <small>{{ $type }}</small></div></td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </table>
+                        @php
+                            $verifiedList = [];
+                            $allUploadedFiles = (array)($student->uploaded_files ?? []);
+                            $docMetaMap = [
+                                'marksheet10'   => '10th Marksheet',
+                                'marksheet12'   => '12th Marksheet',
+                                'btech'         => 'B.Tech / UG Degree Memo',
+                                'mtech'         => 'M.Tech / PG Memo',
+                                'pg1_cmm'       => 'PG 1 CMM Memo',
+                                'pg1_pc'        => 'PG 1 PC / OD',
+                                'pg2_cmm'       => 'PG 2 CMM Memo',
+                                'pg2_pc'        => 'PG 2 PC / OD',
+                                'experience'    => 'Work Experience',
+                                'aadhaar'       => 'Aadhaar Card',
+                                'photo'         => 'Candidate Photo',
+                                'tc'            => 'Transfer Cert.',
+                                'study_conduct' => 'Study & Conduct',
+                            ];
+
+                            foreach ($allUploadedFiles as $uKey => $uData) {
+                                if (!empty($uData['path']) || !empty($uData['url']) || !empty($uData['filename'])) {
+                                    $vExt = strtoupper($uData['ext'] ?? pathinfo($uData['filename'] ?? '', PATHINFO_EXTENSION) ?: 'VERIFIED');
+                                    $verifiedList[$uKey] = [
+                                        'label' => $uData['title'] ?? ($docMetaMap[$uKey] ?? ucwords(str_replace('_', ' ', $uKey))),
+                                        'ext' => $vExt,
+                                    ];
+                                }
+                            }
+
+                            // Fallback check against $uploaded array ($student->documents)
+                            foreach ($uploaded as $uKey => $uMime) {
+                                if (!empty($uMime) && !isset($verifiedList[$uKey])) {
+                                    $vExt = strtoupper(str_replace(['image/', 'application/'], '', $uMime));
+                                    $verifiedList[$uKey] = [
+                                        'label' => $docMetaMap[$uKey] ?? ucwords(str_replace('_', ' ', $uKey)),
+                                        'ext' => $vExt ?: 'VERIFIED',
+                                    ];
+                                }
+                            }
+                        @endphp
+
+                        @if(empty($verifiedList))
+                            <div style="padding: 12px; font-size: 10px; color: #64748b; font-style: italic; text-align: center;">
+                                No documents uploaded yet.
+                            </div>
+                        @else
+                            <table class="docs">
+                                @foreach (array_chunk($verifiedList, 2, true) as $row)
+                                    <tr>
+                                        @foreach ($row as $key => $item)
+                                            <td>
+                                                <div class="chip ok">
+                                                    {{ $item['label'] }} <small>{{ $item['ext'] }}</small>
+                                                </div>
+                                            </td>
+                                        @endforeach
+                                        @if(count($row) === 1)
+                                            <td></td>
+                                        @endif
+                                    </tr>
+                                @endforeach
+                            </table>
+                        @endif
                     </div>
                 </td>
             </tr>
@@ -1368,7 +1420,7 @@
                 </tr>
             </table>
 
-            <div class="wrap" style="padding:16px 12mm;">
+            <div class="wrap" style="padding:14px 12mm 24mm 12mm;">
                 {{-- Meta details card --}}
                 <div class="card" style="margin-top:10px;">
                     <h3>Attachment Details &bull; {{ $docExt }}</h3>
@@ -1389,11 +1441,11 @@
                 </div>
 
                 {{-- Document image / preview box --}}
-                <div style="margin-top:14px; background:#ffffff; border:1px solid #E3E8EF; border-radius:10px; padding:14px; text-align:center;">
+                <div style="margin-top:12px; background:#ffffff; border:1px solid #E3E8EF; border-radius:10px; padding:12px; text-align:center;">
                     @if($isImg && $imgSrc)
-                        <img src="{{ $imgSrc }}" alt="{{ $doc['title'] }}" style="max-width:100%; max-height:200mm; object-fit:contain; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                        <img src="{{ $imgSrc }}" alt="{{ $doc['title'] }}" style="max-width:100%; max-height:145mm; object-fit:contain; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                     @else
-                        <div style="padding:48px 20px; color:#475569;">
+                        <div style="padding:40px 20px; color:#475569;">
                             <div style="font-size:36px; margin-bottom:10px;">📄</div>
                             <div style="font-size:14px; font-weight:bold; color:#0F2A4A;">{{ $doc['filename'] }}</div>
                             <div style="font-size:11px; color:#64748b; margin-top:6px;">
@@ -1404,7 +1456,7 @@
                 </div>
 
                 {{-- Verification footer block --}}
-                <div class="office" style="margin-top:20px;">
+                <div class="office" style="margin-top:12px; margin-bottom:10px;">
                     <b>ADMISSION VERIFICATION RECORD</b>
                     <table><tr>
                         <td>Document: {{ $doc['title'] }}</td>
