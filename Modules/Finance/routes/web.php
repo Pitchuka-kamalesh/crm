@@ -7,7 +7,7 @@ use Modules\Finance\Http\Controllers\PayUController;
 
 // ── 1. PUBLIC: PayU Callback (surl & furl) ──
 Route::post('/payu/response', [PayUController::class, 'handleResponse'])
-    ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, AddQueuedCookiesToResponse::class, ValidateCsrfToken::class])
+    ->withoutMiddleware('web')
     ->name('payu.response');
 
 
@@ -25,8 +25,7 @@ Route::middleware(['auth','role:5'])->group(function () {
     Route::post('/payu/initiate', [PayUController::class, 'initiate'])->name('payu.initiate');
     // Route::post('/payu/cancel',   [PayUController::class, 'cancel'])->name('payu.cancel');
     // ── 2. PUBLIC: Signed URL Receipt (for post-payment redirect) ──
-Route::get('/payu/receipt', [PayUController::class, 'receipt'])
-    ->name('payu.receipt');
+    Route::get('/payu/receipt', [PayUController::class, 'receipt'])->middleware('signed:relative')->name('payu.receipt');
     // Authenticated receipt view
     Route::get('/payu/payu_receipt', [PayUController::class, 'payu_receipt'])->name('payu.payu_receipt');
 });
