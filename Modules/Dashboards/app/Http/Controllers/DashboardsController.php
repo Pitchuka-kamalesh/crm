@@ -362,14 +362,14 @@ class DashboardsController extends Controller
         }
         $progressPercent = round(($completedCount / $totalSteps) * 100);
 
-        // Load Country, State, District options from crm tables via Eloquent
+        // Load Country, State, District options with caching
         $countries = collect();
         $states = collect();
         $districts = collect();
         try {
             $countries = Country::where('lock_status', 0)->orderBy('country_name')->get();
             $states = State::where('lock_status', 0)->orderBy('state_name')->get();
-            $districts = District::where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+            $districts = District::cachedAll();
         } catch (\Throwable $e) {
             Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
         }
@@ -381,7 +381,7 @@ class DashboardsController extends Controller
             try {
                 $countries = Country::where('lock_status', 0)->orderBy('country_name')->get();
                 $states = State::where('lock_status', 0)->orderBy('state_name')->get();
-                $districts = District::where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+                $districts = District::cachedAll();
             } catch (\Throwable $e2) {}
         }
 
@@ -400,12 +400,7 @@ class DashboardsController extends Controller
             ]);
         }
         if ($districts->isEmpty()) {
-            $districts = collect([
-                (object)['DISTRICT_ID' => 1, 'DISTRICT_CODE' => 'GNT', 'DISTRICT_NAME' => 'Guntur', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
-                (object)['DISTRICT_ID' => 2, 'DISTRICT_CODE' => 'KRI', 'DISTRICT_NAME' => 'Krishna', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
-                (object)['DISTRICT_ID' => 3, 'DISTRICT_CODE' => 'VSP', 'DISTRICT_NAME' => 'Visakhapatnam', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
-                (object)['DISTRICT_ID' => 4, 'DISTRICT_CODE' => 'HYD', 'DISTRICT_NAME' => 'Hyderabad', 'STATE_ID' => 24, 'COUNTRY_ID' => 1],
-            ]);
+            $districts = District::cachedAll();
         }
 
         $applicationData = null;
@@ -444,11 +439,7 @@ class DashboardsController extends Controller
             ?? null;
         if (empty($defaultDistrict)) {
             $dId = $crmStudent?->districtid ?? 1;
-            try {
-                $defaultDistrict = District::where('DISTRICT_ID', $dId)->value('DISTRICT_NAME') ?? 'Guntur';
-            } catch (\Throwable $e) {
-                $defaultDistrict = 'Guntur';
-            }
+            $defaultDistrict = District::cachedName((int) $dId) ?? 'Guntur';
         }
 
         return view('dashboards::index', compact(
@@ -813,8 +804,7 @@ class DashboardsController extends Controller
                     }
 
                     if (is_numeric($districtInput)) {
-                        $dObj = District::where('DISTRICT_ID', (int)$districtInput)->first();
-                        $districtVal = $dObj?->DISTRICT_NAME ?? 'Guntur';
+                        $districtVal = District::cachedName((int)$districtInput) ?? 'Guntur';
                     } else {
                         $districtVal = (string)$districtInput;
                     }
@@ -896,8 +886,7 @@ class DashboardsController extends Controller
                 $resolveDistrict = function($input) {
                     if (!$input) return null;
                     if (is_numeric($input)) {
-                        $m = District::where('DISTRICT_ID', (int)$input)->first();
-                        return $m ? $m->DISTRICT_NAME : (string)$input;
+                        return District::cachedName((int)$input) ?? (string)$input;
                     }
                     return (string)$input;
                 };
