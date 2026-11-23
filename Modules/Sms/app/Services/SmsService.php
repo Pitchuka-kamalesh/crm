@@ -112,6 +112,25 @@ class SmsService
             Log::warning('[SmsService] Could not write to master.smslogs: ' . $e->getMessage());
         }
 
+        // 2. Also record in master.wapp_logs / communication_logs for unified dashboard tracking
+        try {
+            CommunicationLog::create([
+                'channel'          => 'sms',
+                'wapptophone'      => $cleanTo,
+                'wauser'           => $user ?? 'SYSTEM_USER',
+                'waregisterno'     => $registerNo ?? '',
+                'jiotraceid'       => $traceId,
+                'template_name'    => $templateId,
+                'wapptext'         => $body,
+                'var1'             => $cleanTo,
+                'status'           => $status,
+                'ipaddr'           => $ip,
+                'response_payload' => is_array($data) ? $data : ['response' => $data],
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('[SmsService] Could not write SMS communication log: ' . $e->getMessage());
+        }
+
         return [
             'success' => $success,
             'status'  => $status,
