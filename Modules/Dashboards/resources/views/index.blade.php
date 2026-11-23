@@ -1880,26 +1880,6 @@
             box-shadow: 0 0 0 3px rgba(15, 39, 68, 0.1);
         }
 
-        .geo-search-filter {
-            width: 100%;
-            background: #ffffff;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 0.3rem 0.65rem;
-            font-size: 0.76rem;
-            color: #1e293b;
-            margin-bottom: 5px;
-            box-sizing: border-box;
-            transition: all 0.15s ease;
-        }
-
-        .geo-search-filter:focus {
-            outline: none;
-            border-color: #2563eb;
-            background: #ffffff;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-        }
-
         .mockup-select {
             cursor: pointer;
             appearance: none;
@@ -2493,7 +2473,6 @@
                                 <div class="mockup-field-row-3">
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">Country: <span style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" data-target="geo-country-select" placeholder="🔍 Search Country..." oninput="filterGeoOptions(this, 'geo-country-select')">
                                         <select name="country" id="geo-country-select" class="mockup-select" onchange="onCountryChange(this.value)" required>
                                             @foreach($countries as $c)
                                                 @php
@@ -2508,7 +2487,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">State: <span style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-state-select" data-target="geo-state-select" placeholder="🔍 Search State..." oninput="filterGeoOptions(this, 'geo-state-select')">
                                         <select name="state" id="geo-state-select" class="mockup-select" onchange="onStateChange(this.value)" required>
                                             <option value="">-- Select State --</option>
                                             @foreach($states as $s)
@@ -2524,7 +2502,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">District: <span style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-district-select" data-target="geo-district-select" placeholder="🔍 Search District..." oninput="filterGeoOptions(this, 'geo-district-select')">
                                         <select name="district" id="geo-district-select" class="mockup-select" required>
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -2579,48 +2556,10 @@
                                 if (wrap) wrap.style.display = (emp || cou) ? 'block' : 'none';
                             }
 
-                            function filterGeoOptions(inputEl, selectId) {
-                                const q = (inputEl.value || '').toLowerCase().trim();
-                                const select = document.getElementById(selectId);
-                                if (!select) return;
-
-                                for (let i = 0; i < select.options.length; i++) {
-                                    const opt = select.options[i];
-                                    if (!opt.value) {
-                                        opt.hidden = false;
-                                        continue;
-                                    }
-                                    const text = (opt.textContent || '').toLowerCase();
-                                    opt.hidden = !text.includes(q);
-                                }
-                            }
-
-                            document.addEventListener('keydown', function(e) {
-                                if (e.key === 'Enter' && e.target && e.target.classList && e.target.classList.contains('geo-search-filter')) {
-                                    e.preventDefault();
-                                    const selectId = e.target.getAttribute('data-target');
-                                    if (selectId) {
-                                        const select = document.getElementById(selectId);
-                                        if (select) {
-                                            for (let i = 0; i < select.options.length; i++) {
-                                                const opt = select.options[i];
-                                                if (!opt.hidden && opt.value) {
-                                                    select.value = opt.value;
-                                                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-
                             const allStatesData = @json($states);
                             const allDistrictsData = @json($districts);
 
                             function onCountryChange(countryId) {
-                                const filterState = document.getElementById('filter-geo-state-select');
-                                if (filterState) filterState.value = '';
                                 const stateSelect = document.getElementById('geo-state-select');
                                 if (!stateSelect) return;
                                 const currentSelectedState = stateSelect.value;
@@ -2638,8 +2577,6 @@
                             }
 
                             function onStateChange(stateId) {
-                                const filterDist = document.getElementById('filter-geo-district-select');
-                                if (filterDist) filterDist.value = '';
                                 const distSelect = document.getElementById('geo-district-select');
                                 if (!distSelect) return;
                                 const currentSelectedDist = distSelect.value;
@@ -2777,7 +2714,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">State:</label>
-                                        <input type="search" class="geo-search-filter" data-target="geo-tenth-state-select" placeholder="🔍 Search State..." oninput="filterGeoOptions(this, 'geo-tenth-state-select')">
                                         <select name="tenth_school_state" id="geo-tenth-state-select" class="mockup-select" onchange="onTenthStateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach(($academicStates ?? $states) as $s)
@@ -2793,7 +2729,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">District:</label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-tenth-district-select" data-target="geo-tenth-district-select" placeholder="🔍 Search District..." oninput="filterGeoOptions(this, 'geo-tenth-district-select')">
                                         <select name="tenth_school_district" id="geo-tenth-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -2879,7 +2814,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">State: <span class="req-inter" style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" data-target="geo-inter-state-select" placeholder="🔍 Search State..." oninput="filterGeoOptions(this, 'geo-inter-state-select')">
                                         <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach(($academicStates ?? $states) as $s)
@@ -2895,7 +2829,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">District: <span class="req-inter" style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-inter-district-select" data-target="geo-inter-district-select" placeholder="🔍 Search District..." oninput="filterGeoOptions(this, 'geo-inter-district-select')">
                                         <select name="jr_district" id="geo-inter-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -2997,7 +2930,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">State: <span class="req-ug" style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" data-target="geo-ug-state-select" placeholder="🔍 Search State..." oninput="filterGeoOptions(this, 'geo-ug-state-select')">
                                         <select name="ug_college_state" id="geo-ug-state-select" class="mockup-select" onchange="onUgStateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach(($academicStates ?? $states) as $s)
@@ -3013,7 +2945,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">District: <span class="req-ug" style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-ug-district-select" data-target="geo-ug-district-select" placeholder="🔍 Search District..." oninput="filterGeoOptions(this, 'geo-ug-district-select')">
                                         <select name="ug_college_district" id="geo-ug-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -3100,7 +3031,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">State: <span class="req-pg" style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" data-target="geo-pg-state-select" placeholder="🔍 Search State..." oninput="filterGeoOptions(this, 'geo-pg-state-select')">
                                         <select name="pg_college_state" id="geo-pg-state-select" class="mockup-select" onchange="onPgStateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach(($academicStates ?? $states) as $s)
@@ -3116,7 +3046,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">District: <span class="req-pg" style="color:#ef4444;">*</span></label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-pg-district-select" data-target="geo-pg-district-select" placeholder="🔍 Search District..." oninput="filterGeoOptions(this, 'geo-pg-district-select')">
                                         <select name="pg_college_district" id="geo-pg-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -3240,7 +3169,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">State:</label>
-                                        <input type="search" class="geo-search-filter" data-target="geo-pg2-state-select" placeholder="🔍 Search State..." oninput="filterGeoOptions(this, 'geo-pg2-state-select')">
                                         <select name="pg2_college_state" id="geo-pg2-state-select" class="mockup-select" onchange="onPg2StateChange(this.value)">
                                             <option value="">-- Select State --</option>
                                             @foreach(($academicStates ?? $states) as $s)
@@ -3256,7 +3184,6 @@
                                     </div>
                                     <div class="mockup-field-group">
                                         <label class="mockup-label">District:</label>
-                                        <input type="search" class="geo-search-filter" id="filter-geo-pg2-district-select" data-target="geo-pg2-district-select" placeholder="🔍 Search District..." oninput="filterGeoOptions(this, 'geo-pg2-district-select')">
                                         <select name="pg2_college_district" id="geo-pg2-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -3434,50 +3361,10 @@
                         </div>
 
                         <script>
-                            if (typeof filterGeoOptions !== 'function') {
-                                window.filterGeoOptions = function(inputEl, selectId) {
-                                    const q = (inputEl.value || '').toLowerCase().trim();
-                                    const select = document.getElementById(selectId);
-                                    if (!select) return;
-
-                                    for (let i = 0; i < select.options.length; i++) {
-                                        const opt = select.options[i];
-                                        if (!opt.value) {
-                                            opt.hidden = false;
-                                            continue;
-                                        }
-                                        const text = (opt.textContent || '').toLowerCase();
-                                        opt.hidden = !text.includes(q);
-                                    }
-                                };
-                            }
-
-                            document.addEventListener('keydown', function(e) {
-                                if (e.key === 'Enter' && e.target && e.target.classList && e.target.classList.contains('geo-search-filter')) {
-                                    e.preventDefault();
-                                    const selectId = e.target.getAttribute('data-target');
-                                    if (selectId) {
-                                        const select = document.getElementById(selectId);
-                                        if (select) {
-                                            for (let i = 0; i < select.options.length; i++) {
-                                                const opt = select.options[i];
-                                                if (!opt.hidden && opt.value) {
-                                                    select.value = opt.value;
-                                                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-
                             const allStatesData = @json($states);
                             const allDistrictsData = @json($districts);
 
                             function populateDistrictDropdown(stateId, distSelectId, currentSelectedDist) {
-                                const filterDist = document.getElementById('filter-' + distSelectId);
-                                if (filterDist) filterDist.value = '';
                                 const distSelect = document.getElementById(distSelectId);
                                 if (!distSelect) return;
                                 const previousValue = distSelect.value;
