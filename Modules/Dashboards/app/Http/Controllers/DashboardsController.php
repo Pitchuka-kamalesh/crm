@@ -451,6 +451,33 @@ class DashboardsController extends Controller
             }
         }
 
+        // Resolve selected Country ID from 1. Personal Profile (or registration fallback)
+        $selectedCountryId = null;
+        if (!empty($personalInfo?->country)) {
+            if (is_numeric($personalInfo->country)) {
+                $selectedCountryId = (int)$personalInfo->country;
+            } else {
+                $matchedCountry = $countries->first(function ($c) use ($personalInfo) {
+                    return strcasecmp($c->country_name, $personalInfo->country) === 0;
+                });
+                if ($matchedCountry) {
+                    $selectedCountryId = (int)$matchedCountry->country_id;
+                }
+            }
+        }
+        if (!$selectedCountryId) {
+            $selectedCountryId = !empty($crmStudent?->countryid) ? (int)$crmStudent->countryid : 1;
+        }
+
+        // States filtered specifically by the Country selected in 1. Personal Profile for 2. Academic Info dropdowns
+        $academicStates = $states->filter(function ($s) use ($selectedCountryId) {
+            return isset($s->country_id) && (int)$s->country_id === (int)$selectedCountryId;
+        })->values();
+
+        if ($academicStates->isEmpty()) {
+            $academicStates = $states;
+        }
+
         return view('dashboards::index', compact(
             'hasAcceptedTerms',
             'user',
@@ -461,6 +488,8 @@ class DashboardsController extends Controller
             'defaultCountry',
             'defaultState',
             'defaultDistrict',
+            'selectedCountryId',
+            'academicStates',
             'applicationData',
             'examSchedule',
             'cleanPhone',

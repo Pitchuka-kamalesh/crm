@@ -2716,7 +2716,7 @@
                                         <label class="mockup-label">State:</label>
                                         <select name="tenth_school_state" id="geo-tenth-state-select" class="mockup-select" onchange="onTenthStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->tenth_school_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -2816,7 +2816,7 @@
                                         <label class="mockup-label">State: <span class="req-inter" style="color:#ef4444;">*</span></label>
                                         <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->pu2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -2932,7 +2932,7 @@
                                         <label class="mockup-label">State: <span class="req-ug" style="color:#ef4444;">*</span></label>
                                         <select name="ug_college_state" id="geo-ug-state-select" class="mockup-select" onchange="onUgStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->ug_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -3033,7 +3033,7 @@
                                         <label class="mockup-label">State: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <select name="pg_college_state" id="geo-pg-state-select" class="mockup-select" onchange="onPgStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->pg_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -3171,7 +3171,7 @@
                                         <label class="mockup-label">State:</label>
                                         <select name="pg2_college_state" id="geo-pg2-state-select" class="mockup-select" onchange="onPg2StateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->pg2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
