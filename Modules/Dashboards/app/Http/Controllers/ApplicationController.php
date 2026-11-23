@@ -180,7 +180,7 @@ class ApplicationController extends Controller
         
         $districtVal = $personalInfo?->district ?: ($crmStudent?->district ?? '');
         if (is_numeric($districtVal)) {
-            $resolvedDistrict = District::cachedName((int) $districtVal);
+            $resolvedDistrict = District::where('DISTRICT_ID', (int) $districtVal)->value('DISTRICT_NAME');
             $districtVal = $resolvedDistrict ?: $districtVal;
         }
 
