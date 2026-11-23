@@ -1657,6 +1657,10 @@
                     document.querySelectorAll('.custom-select-container.is-open').forEach(c => c.classList.remove('is-open'));
                     if (!isOpen) {
                         container.classList.add('is-open');
+                        const searchInput = dropdown.querySelector('.custom-select-search-input');
+                        if (searchInput) {
+                            setTimeout(() => searchInput.focus(), 50);
+                        }
                         const selectedItem = dropdown.querySelector('.is-selected');
                         if (selectedItem) {
                             selectedItem.scrollIntoView({ block: 'nearest' });
@@ -1709,6 +1713,29 @@
             if (!dropdown) return;
 
             dropdown.innerHTML = '';
+
+            // Add Search Box for searchable selects (e.g. countries, states, districts, courses, branches)
+            if (selectEl.options.length > 5) {
+                const searchWrapper = document.createElement('div');
+                searchWrapper.className = 'custom-select-search-wrap';
+                searchWrapper.style.cssText = 'padding: 6px 8px; position: sticky; top: 0; background: #ffffff; z-index: 10; border-bottom: 1px solid #e2e8f0;';
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.className = 'custom-select-search-input';
+                searchInput.placeholder = '🔍 Search...';
+                searchInput.style.cssText = 'width: 100%; box-sizing: border-box; padding: 4px 8px; font-size: 0.78rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;';
+                searchInput.addEventListener('click', (e) => e.stopPropagation());
+                searchInput.addEventListener('input', (e) => {
+                    const q = e.target.value.toLowerCase().trim();
+                    dropdown.querySelectorAll('.custom-select-option').forEach(opt => {
+                        if (opt.classList.contains('is-placeholder')) return;
+                        opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
+                    });
+                });
+                searchWrapper.appendChild(searchInput);
+                dropdown.appendChild(searchWrapper);
+            }
+
             Array.from(selectEl.options).forEach((opt) => {
                 const item = document.createElement('div');
                 item.className = 'custom-select-option';
