@@ -223,26 +223,22 @@ class WhatsAppService
             Log::error("[WhatsAppService] Exception sending to {$phone}: " . $e->getMessage());
         }
 
-        // Record in master.wapp_logs (guarantees single record per destination phone for whatsapp channel)
+        // Record each message dispatch in master.wapp_logs
         try {
-            $log = CommunicationLog::updateOrCreate(
-                [
-                    'wapptophone' => $phone,
-                    'channel'     => 'whatsapp',
-                ],
-                [
-                    'wauser'           => $user ?? 'SYSTEM_USER',
-                    'waregisterno'     => $registerNo ?? '',
-                    'jiotraceid'       => $traceId,
-                    'template_name'    => $campaign,
-                    'wapptext'         => $messageText,
-                    'var1'             => $var1,
-                    'var2'             => $var2,
-                    'status'           => $status,
-                    'ipaddr'           => $ip ?? '127.0.0.1',
-                    'response_payload' => $responseBody,
-                ]
-            );
+            $log = CommunicationLog::create([
+                'channel'          => 'whatsapp',
+                'wapptophone'      => $phone,
+                'wauser'           => $user ?? 'SYSTEM_USER',
+                'waregisterno'     => $registerNo ?? '',
+                'jiotraceid'       => $traceId,
+                'template_name'    => $campaign,
+                'wapptext'         => $messageText,
+                'var1'             => $var1,
+                'var2'             => $var2,
+                'status'           => $status,
+                'ipaddr'           => $ip ?? '127.0.0.1',
+                'response_payload' => $responseBody,
+            ]);
 
             return [
                 'success' => ($status === 'SUBMITTED'),
