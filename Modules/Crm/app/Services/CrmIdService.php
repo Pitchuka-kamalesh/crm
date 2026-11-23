@@ -356,7 +356,6 @@ class CrmIdService
                 SET crmid = sr.crmid
                 FROM crm.student_registration sr
                 WHERE cad.applino = sr.applinano
-                  AND cad.phoneno = sr.phoneno
                   AND sr.crmid IS NOT NULL
                   AND (cad.crmid IS NULL OR cad.crmid LIKE 'CRMA_%' OR cad.crmid LIKE 'CRMP_%' OR cad.crmid != sr.crmid);
             ");
@@ -367,14 +366,8 @@ class CrmIdService
                 SET crmid = sr.crmid
                 FROM crm.student_registration sr
                 WHERE cpi.applino = sr.applinano
-                  AND cpi.phoneno = sr.phoneno
                   AND sr.crmid IS NOT NULL
-                  AND (cpi.crmid IS NULL OR cpi.crmid LIKE 'CRMA_%' OR cpi.crmid LIKE 'CRMP_%' OR cpi.crmid != sr.crmid)
-                  AND NOT EXISTS (
-                      SELECT 1 FROM crm.student_personal_info dup 
-                      WHERE dup.crmid = sr.crmid 
-                        AND dup.crmid != cpi.crmid
-                  );
+                  AND (cpi.crmid IS NULL OR cpi.crmid LIKE 'CRMA_%' OR cpi.crmid LIKE 'CRMP_%' OR cpi.crmid != sr.crmid);
             ");
 
             // Fix crm.telecaller_leads
