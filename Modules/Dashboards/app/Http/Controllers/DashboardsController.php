@@ -54,6 +54,8 @@ class DashboardsController extends Controller
             $activeStep = 1;
         }
 
+        self::ensureAcademicColumns();
+
         // Resolve CRM student record from crm.student_registration
         $crmStudent = null;
         try {
@@ -248,17 +250,19 @@ class DashboardsController extends Controller
             }
         }
 
-        // Safe 7-stage fallback if database roles/menus are not yet seeded
-        if (empty($stageMeta)) {
-            $stageMeta = [
-                1 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
-                2 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
-                3 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Document upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
-                4 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
-                5 => ['menu_id' => 123, 'menu_code' => 'EXAM00002', 'title' => 'Exam Slot Booking', 'subtitle' => 'Select Date & Time Slot for V-SAT / Entrance Exam', 'icon' => '📅', 'lock_status' => 0],
-                6 => ['menu_id' => 122, 'menu_code' => 'CRMM0010', 'title' => 'Application Download', 'subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥', 'lock_status' => 0],
-                7 => ['menu_id' => 124, 'menu_code' => 'CRMM0007', 'title' => 'V-SAT Results', 'subtitle' => 'Official V-SAT Scorecard & Merit Ranking', 'icon' => '🏆', 'lock_status' => 0],
-            ];
+        // Safe 7-stage fallback if database roles/menus are missing, empty, or contain fewer than 5 steps (e.g. single STEP7)
+        $canonicalStages = [
+            1 => ['menu_id' => 110, 'menu_code' => 'CRMM0004', 'title' => 'Personal Profile', 'subtitle' => 'Candidate Bio & Contact Information', 'icon' => '👤', 'lock_status' => 0],
+            2 => ['menu_id' => 111, 'menu_code' => 'CRMM0005', 'title' => 'Academic Info', 'subtitle' => '10th SSC & Intermediate Details', 'icon' => '🎓', 'lock_status' => 0],
+            3 => ['menu_id' => 112, 'menu_code' => 'CRMM0006', 'title' => 'Document upload', 'subtitle' => 'Upload Candidate Documents & Certificates', 'icon' => '📤', 'lock_status' => 0],
+            4 => ['menu_id' => 109, 'menu_code' => 'FINA0003', 'title' => 'Fee Payment', 'subtitle' => 'Seat Confirmation & Fee Payment', 'icon' => '💳', 'lock_status' => 0],
+            5 => ['menu_id' => 123, 'menu_code' => 'EXAM00002', 'title' => 'Exam Slot Booking', 'subtitle' => 'Select Date & Time Slot for V-SAT / Entrance Exam', 'icon' => '📅', 'lock_status' => 0],
+            6 => ['menu_id' => 122, 'menu_code' => 'CRMM0010', 'title' => 'Application Download', 'subtitle' => 'Official Application PDF & Final Submission', 'icon' => '📥', 'lock_status' => 0],
+            7 => ['menu_id' => 124, 'menu_code' => 'CRMM0007', 'title' => 'V-SAT Results', 'subtitle' => 'Official V-SAT Scorecard & Merit Ranking', 'icon' => '🏆', 'lock_status' => 0],
+        ];
+
+        if (empty($stageMeta) || count($stageMeta) < 5 || !isset($stageMeta[1]) || !isset($stageMeta[2])) {
+            $stageMeta = $canonicalStages;
         }
 
         ksort($stageMeta);
@@ -372,6 +376,40 @@ class DashboardsController extends Controller
             Log::warning('Could not load geo data from crm schema: ' . $e->getMessage());
         }
 
+        if ($countries->isEmpty() || $states->isEmpty() || $districts->isEmpty()) {
+            if (class_exists(RegistrationController::class)) {
+                RegistrationController::ensureGeographicTablesExist();
+            }
+            try {
+                $countries = Country::where('lock_status', 0)->orderBy('country_name')->get();
+                $states = State::where('lock_status', 0)->orderBy('state_name')->get();
+                $districts = District::where('LOCK_STATUS', 0)->orderBy('DISTRICT_NAME')->get();
+            } catch (\Throwable $e2) {}
+        }
+
+        if ($countries->isEmpty()) {
+            $countries = collect([
+                (object)['country_id' => 1, 'country_code' => 'IN', 'country_name' => 'India', 'country_phonecode' => '+91'],
+                (object)['country_id' => 3, 'country_code' => 'US', 'country_name' => 'United States', 'country_phonecode' => '+1'],
+            ]);
+        }
+        if ($states->isEmpty()) {
+            $states = collect([
+                (object)['state_id' => 1, 'state_code' => 'AP', 'state_name' => 'Andhra Pradesh', 'country_id' => 1],
+                (object)['state_id' => 24, 'state_code' => 'TG', 'state_name' => 'Telangana', 'country_id' => 1],
+                (object)['state_id' => 11, 'state_code' => 'KA', 'state_name' => 'Karnataka', 'country_id' => 1],
+                (object)['state_id' => 23, 'state_code' => 'TN', 'state_name' => 'Tamil Nadu', 'country_id' => 1],
+            ]);
+        }
+        if ($districts->isEmpty()) {
+            $districts = collect([
+                (object)['DISTRICT_ID' => 1, 'DISTRICT_CODE' => 'GNT', 'DISTRICT_NAME' => 'Guntur', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
+                (object)['DISTRICT_ID' => 2, 'DISTRICT_CODE' => 'KRI', 'DISTRICT_NAME' => 'Krishna', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
+                (object)['DISTRICT_ID' => 3, 'DISTRICT_CODE' => 'VSP', 'DISTRICT_NAME' => 'Visakhapatnam', 'STATE_ID' => 1, 'COUNTRY_ID' => 1],
+                (object)['DISTRICT_ID' => 4, 'DISTRICT_CODE' => 'HYD', 'DISTRICT_NAME' => 'Hyderabad', 'STATE_ID' => 24, 'COUNTRY_ID' => 1],
+            ]);
+        }
+
         $applicationData = null;
         try {
             $applicationData = \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) $appNo);
@@ -385,19 +423,62 @@ class DashboardsController extends Controller
         $defaultCountry = $personalInfo?->country;
         if (empty($defaultCountry)) {
             $cId = $crmStudent?->countryid ?? 1;
-            $defaultCountry = Country::where('country_id', $cId)->value('country_name') ?? 'India';
+            try {
+                $defaultCountry = Country::where('country_id', $cId)->value('country_name') ?? 'India';
+            } catch (\Throwable $e) {
+                $defaultCountry = 'India';
+            }
         }
 
         $defaultState = $personalInfo?->state;
         if (empty($defaultState)) {
             $sId = $crmStudent?->stateid ?? 1;
-            $defaultState = State::where('state_id', $sId)->value('state_name') ?? 'Andhra Pradesh';
+            try {
+                $defaultState = State::where('state_id', $sId)->value('state_name') ?? 'Andhra Pradesh';
+            } catch (\Throwable $e) {
+                $defaultState = 'Andhra Pradesh';
+            }
         }
 
         $defaultDistrict = $personalInfo?->district
             ?? $academicDetails?->tenth_school_district
             ?? $academicDetails?->pu2_college_district
             ?? null;
+        if (empty($defaultDistrict)) {
+            $dId = $crmStudent?->districtid ?? 1;
+            try {
+                $defaultDistrict = District::where('DISTRICT_ID', $dId)->value('DISTRICT_NAME') ?? 'Guntur';
+            } catch (\Throwable $e) {
+                $defaultDistrict = 'Guntur';
+            }
+        }
+
+        // Resolve selected Country ID from 1. Personal Profile (or registration fallback)
+        $selectedCountryId = null;
+        if (!empty($personalInfo?->country)) {
+            if (is_numeric($personalInfo->country)) {
+                $selectedCountryId = (int)$personalInfo->country;
+            } else {
+                $matchedCountry = $countries->first(function ($c) use ($personalInfo) {
+                    return strcasecmp($c->country_name, $personalInfo->country) === 0;
+                });
+                if ($matchedCountry) {
+                    $selectedCountryId = (int)$matchedCountry->country_id;
+                }
+            }
+        }
+        if (!$selectedCountryId) {
+            $selectedCountryId = !empty($crmStudent?->countryid) ? (int)$crmStudent->countryid : 1;
+        }
+
+        // States filtered specifically by the Country selected in 1. Personal Profile for 2. Academic Info dropdowns
+        $academicStates = $states->filter(function ($s) use ($selectedCountryId) {
+            return isset($s->country_id) && (int)$s->country_id === (int)$selectedCountryId;
+        })->values();
+
+        if ($academicStates->isEmpty()) {
+            $academicStates = $states;
+        }
 
         return view('dashboards::index', compact(
             'hasAcceptedTerms',
@@ -409,6 +490,8 @@ class DashboardsController extends Controller
             'defaultCountry',
             'defaultState',
             'defaultDistrict',
+            'selectedCountryId',
+            'academicStates',
             'applicationData',
             'examSchedule',
             'cleanPhone',
@@ -888,10 +971,12 @@ class DashboardsController extends Controller
                     'tenth_marks_conducted' => ['nullable', 'numeric'],
                     'tenth_marks_earned' => ['nullable', 'numeric'],
                     'tenth_percentage' => ['nullable', 'numeric'],
+                    'inter_campus_location' => ['nullable', 'string', 'max:255'],
                 ];
 
                 if (!$isPhd) {
                     $validationRules['inter_college'] = ['required', 'string', 'max:255'];
+                     $validationRules['inter_group'] = ['required', 'string', 'in:MPC,BIPC,MBIPC'];
                     $validationRules['city'] = ['required', 'string', 'max:100'];
                     $validationRules['jr_state'] = ['required', 'string', 'max:100'];
                     $validationRules['jr_district'] = ['required', 'string', 'max:100'];
@@ -903,6 +988,7 @@ class DashboardsController extends Controller
                     $validationRules['pu2_percentage'] = ['required', 'numeric'];
                 } else {
                     $validationRules['inter_college'] = ['nullable', 'string', 'max:255'];
+                    $validationRules['inter_group'] = ['nullable', 'string', 'in:MPC,BIPC,MBIPC'];
                     $validationRules['city'] = ['nullable', 'string', 'max:100'];
                     $validationRules['jr_state'] = ['nullable', 'string', 'max:100'];
                     $validationRules['jr_district'] = ['nullable', 'string', 'max:100'];
@@ -942,6 +1028,7 @@ class DashboardsController extends Controller
 
                 $request->validate($validationRules, [
                     'inter_college.required' => 'College Name / Institute Name is required.',
+                    'inter_group.required' => 'Please select Intermediate Group (MPC, BIPC, or MBIPC).',
                     'city.required' => 'College City is required.',
                     'jr_state.required' => 'College State is required.',
                     'jr_district.required' => 'College District is required.',
@@ -1085,6 +1172,9 @@ class DashboardsController extends Controller
                         'tenth_marks_earned' => $tenthEarned,
                         'tenth_percentage' => $tenthPct,
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
+                        'pu2_campus_location' => $request->input('inter_campus_location') ?? $request->input('pu2_campus_location') ?? $request->input('campus_location'),
+                        'pu2_group' => $request->input('inter_group') ?? $request->input('pu2_group'),
+
                         'pu2_study_board' => $courseChoice,
                         'pu2_board_of_study' => $courseChoice,
                         'pu2_college_city' => $cityVal,
@@ -1571,6 +1661,7 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS tenth_school_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS tenth_current_status VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS pu2_board_of_study VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pu2_campus_location VARCHAR(255),
                 ADD COLUMN IF NOT EXISTS ug_college_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg_college_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg2_college_state VARCHAR(100),

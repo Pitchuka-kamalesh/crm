@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Sms\Http\Controllers\SmsController;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:1,2,3,4'])->group(function () {
     Route::get('sms', [SmsController::class, 'index'])->name('sms.index');
     Route::get('sms/index', [SmsController::class, 'index']);
     Route::post('sms/test-whatsapp', [SmsController::class, 'sendTestWhatsApp'])->name('sms.test-whatsapp');

@@ -85,7 +85,21 @@ class MenuSyncService
                     parent_menu_id = 103;
             ");
 
-            // 5. Ensure access roles for Telecaller KPI (128) and Leads KPI (129) for roles 1, 2, 3, 4
+            DB::statement("
+                INSERT INTO master.menus (
+                    menu_id, menu_code, module_id, menu_name, controller_ref, icon_name,
+                    is_collapsible, lock_status, project_id, campus_id, log_userid,
+                    log_ipaddress, log_timestamp, parent_menu_id
+                ) VALUES 
+                (130, 'KPII0007', 4, 'Error Logs KPI', 'kpi/errors', 'fa fa-exclamation-triangle', false, 0, 0, '1', '02598', '192.168.111.111', NOW(), 103)
+                ON CONFLICT (menu_id) DO UPDATE SET
+                    menu_name = 'Error Logs KPI',
+                    menu_code = 'KPII0007',
+                    controller_ref = 'kpi/errors',
+                    parent_menu_id = 103;
+            ");
+
+            // 5. Ensure access roles for Telecaller KPI (128), Leads KPI (129), and Error KPI (130) for roles 1, 2, 3, 4
             $roles = [
                 ['role_id' => 1, 'order_start' => 14],
                 ['role_id' => 2, 'order_start' => 16],
@@ -97,17 +111,19 @@ class MenuSyncService
                 $roleId = $r['role_id'];
                 $o1 = $r['order_start'];
                 $o2 = $o1 + 1;
+                $o3 = $o1 + 2;
 
-                // Delete existing role assignments for 128 and 129 (and 108 for role 4)
-                DB::statement("DELETE FROM master.menu_access_roles WHERE menu_id IN (128, 129) AND role_id = {$roleId};");
+                // Delete existing role assignments for 128, 129, and 130 (and 108 for role 4)
+                DB::statement("DELETE FROM master.menu_access_roles WHERE menu_id IN (128, 129, 130) AND role_id = {$roleId};");
                 if ($roleId === 4) {
                     DB::statement("DELETE FROM master.menu_access_roles WHERE menu_id = 108 AND role_id = 4;");
-                    // Role 4 (Telecaller) gets ONLY Telecaller KPI (128)
+                    // Role 4 (Telecaller) gets ONLY Telecaller KPI (128) and Leads KPI (129)
                     DB::statement("
                         INSERT INTO master.menu_access_roles 
                             (menu_code, menu_id, role_id, campus_id, morder, mposition, log_userid, log_ipaddress, log_timestamp)
                         VALUES 
-                            ('KPII0005', 128, {$roleId}, '1', {$o1}, 2, '02598', '192.168.111.111', NOW());
+                            ('KPII0005', 128, {$roleId}, '1', {$o1}, 2, '02598', '192.168.111.111', NOW()),
+                            ('KPII0006', 129, {$roleId}, '1', {$o2}, 2, '02598', '192.168.111.111', NOW());
                     ");
                 } else {
                     DB::statement("
@@ -115,7 +131,8 @@ class MenuSyncService
                             (menu_code, menu_id, role_id, campus_id, morder, mposition, log_userid, log_ipaddress, log_timestamp)
                         VALUES 
                             ('KPII0005', 128, {$roleId}, '1', {$o1}, 2, '02598', '192.168.111.111', NOW()),
-                            ('KPII0006', 129, {$roleId}, '1', {$o2}, 2, '02598', '192.168.111.111', NOW());
+                            ('KPII0006', 129, {$roleId}, '1', {$o2}, 2, '02598', '192.168.111.111', NOW()),
+                            ('KPII0007', 130, {$roleId}, '1', {$o3}, 2, '02598', '192.168.111.111', NOW());
                     ");
                 }
             }

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Leads\Http\Controllers\LeadsController;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:1,2,3,4'])->group(function () {
     Route::get('/leads', [LeadsController::class, 'index'])->name('leads.overview');
     Route::get('/leads/index', [LeadsController::class, 'index'])->name('leads.index');
     Route::get('/leads/allottedleads', [LeadsController::class, 'index'])->name('leads.allotted');
