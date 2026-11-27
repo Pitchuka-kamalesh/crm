@@ -152,18 +152,18 @@
 
 @if(empty($isPdf))
 <div class="toolbar" style="background:#0F2A4A; padding:8px 16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-    <div style="color:#ffffff; font-weight:800; font-size:12.5px; display:flex; align-items:center; gap:8px;">
-        <span>📄</span> Application Form &bull; {{ $student->name }} (ID: {{ $student->student_id }})
+    <div style="color:#ffffff; font-weight:800; font-size:12.5px; display:flex; align-items:center;">
+        Application Form &bull; {{ $student->name }} (ID: {{ $student->student_id }})
     </div>
     <div style="display:flex; gap:8px;">
-        <a href="{{ request('from') ?: (url()->previous() ?: route('crm.stdsearch', ['tab' => 'stdsearch'])) }}" style="background:#334155; color:#ffffff; text-decoration:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.25);">
-            ← Back
+        <a href="{{ request('from') ?: (url()->previous() ?: route('crm.stdsearch', ['tab' => 'stdsearch'])) }}" style="background:#334155; color:#ffffff; text-decoration:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; display:inline-flex; align-items:center; border:1px solid rgba(255,255,255,0.25);">
+            Back
         </a>
         <button type="button" onclick="window.print()" style="background:#ffffff; color:#0F2A4A; border:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
-            🖨️ Print Form
+            Print Form
         </button>
-        <a href="{{ $downloadUrl ?? route('application.download', $student->id) }}" style="background:#2563eb; color:#ffffff; text-decoration:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
-            📥 Download PDF
+        <a href="{{ $downloadUrl ?? route('application.download', $student->id) }}" style="background:#2563eb; color:#ffffff; text-decoration:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; display:inline-flex; align-items:center;">
+            Download PDF
         </a>
     </div>
 </div>

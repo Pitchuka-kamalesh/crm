@@ -619,27 +619,12 @@
                                         <td>
                                             <div style="text-align: center;">
                                                 @if($canPreview)
-                                                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap;">
-                                                        <a href="{{ route('application.show', ['id' => $appliDisplay, 'from' => request()->fullUrl()]) }}" 
-                                                           class="btn-action-sm btn-verify" 
-                                                           style="padding: 4px 9px; font-size: 0.76rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
-                                                           title="Preview Application Dossier">
-                                                            <span>👁️ Preview</span>
-                                                        </a>
-                                                        <a href="{{ route('application.show', ['id' => $appliDisplay, 'print' => 1, 'from' => request()->fullUrl()]) }}" 
-                                                           target="_blank" 
-                                                           class="btn-action-sm" 
-                                                           style="padding: 4px 9px; font-size: 0.76rem; border-radius: 6px; background: #0284c7; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
-                                                           title="Print Application Form">
-                                                            <span>🖨️ Print</span>
-                                                        </a>
-                                                        <a href="{{ route('application.download', ['id' => $appliDisplay]) }}" 
-                                                           class="btn-action-sm" 
-                                                           style="padding: 4px 9px; font-size: 0.76rem; border-radius: 6px; background: #059669; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
-                                                           title="Download Official PDF">
-                                                            <span>📥 Download</span>
-                                                        </a>
-                                                    </div>
+                                                    <a href="{{ route('application.show', ['id' => $appliDisplay, 'from' => request()->fullUrl()]) }}" 
+                                                       class="btn-action-sm btn-verify" 
+                                                       style="padding: 4px 14px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;"
+                                                       title="Preview Application Form">
+                                                        Preview
+                                                    </a>
                                                 @elseif(!$hasPaidRecord && ($s4 === 'na' || empty($s4)) && ($s5 === 'na' || empty($s5)))
                                                     <span class="tracking-pill pill-na">NA</span>
                                                 @elseif(!$hasPaidRecord)
