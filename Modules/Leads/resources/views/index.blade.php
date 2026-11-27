@@ -2318,33 +2318,46 @@
                             </thead>
                             <tbody>
                                 @forelse($recentUploadedFiles as $file)
+                                    @php
+                                        $fName = is_array($file) ? ($file['file_name'] ?? $file['filename'] ?? 'uploaded_leads.xlsx') : ($file->file_name ?? $file->filename ?? 'uploaded_leads.xlsx');
+                                        $fSize = is_array($file) ? ($file['file_size'] ?? $file['filesize'] ?? 'N/A') : ($file->file_size ?? $file->filesize ?? 'N/A');
+                                        $fTotal = is_array($file) ? ($file['total_records'] ?? 0) : ($file->total_records ?? 0);
+                                        $fNew = is_array($file) ? ($file['new_leads_added'] ?? $file['inserted_count'] ?? 0) : ($file->new_leads_added ?? $file->inserted_count ?? 0);
+                                        $fDup = is_array($file) ? ($file['duplicates_skipped'] ?? $file['duplicates_count'] ?? 0) : ($file->duplicates_skipped ?? $file->duplicates_count ?? 0);
+                                        $fStatus = is_array($file) ? ($file['upload_status'] ?? $file['status'] ?? 'Completed') : ($file->upload_status ?? $file->status ?? 'Completed');
+                                        $fUser = is_array($file) ? ($file['uploaded_by'] ?? '-') : ($file->uploaded_by ?? '-');
+                                        $rawTime = is_array($file) ? ($file['upload_date_time'] ?? $file['uploaded_at'] ?? null) : ($file->upload_date_time ?? $file->uploaded_at ?? null);
+                                        $fTime = $rawTime instanceof \Carbon\Carbon
+                                            ? $rawTime->format('d M Y, h:i A')
+                                            : ($rawTime ?? 'Just now');
+                                    @endphp
                                     <tr>
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 8px;">
                                                 <strong style="font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: #0f172a;">
-                                                    {{ $file['filename'] ?? 'uploaded_leads.xlsx' }}
+                                                    {{ $fName }}
                                                 </strong>
                                             </div>
                                         </td>
                                         <td>
                                             <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">
-                                                {{ $file['filesize'] ?? 'N/A' }}
+                                                {{ $fSize }}
                                             </span>
                                         </td>
                                         <td>
                                             <strong style="font-size: 0.84rem; color: #0f172a;">
-                                                {{ number_format($file['total_records'] ?? 0) }} Leads
+                                                {{ number_format($fTotal) }} Leads
                                             </strong>
                                         </td>
                                         <td>
                                             <span class="tracking-pill pill-done" style="font-weight: 700;">
-                                                ✓ {{ number_format($file['inserted_count'] ?? 0) }} New
+                                                ✓ {{ number_format($fNew) }} New
                                             </span>
                                         </td>
                                         <td>
-                                            @if(($file['duplicates_count'] ?? 0) > 0)
+                                            @if($fDup > 0)
                                                 <span class="tracking-pill pill-pending" style="font-weight: 700;">
-                                                    ⚠️ {{ number_format($file['duplicates_count']) }} Skipped
+                                                    ⚠️ {{ number_format($fDup) }} Skipped
                                                 </span>
                                             @else
                                                 <span class="tracking-pill pill-awaiting">0 Skipped</span>
@@ -2352,17 +2365,17 @@
                                         </td>
                                         <td>
                                             <span class="tracking-pill pill-done" style="font-weight: 700;">
-                                                ✓ Completed
+                                                ✓ {{ $fStatus }}
                                             </span>
                                         </td>
                                         <td>
                                             <span style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">
-                                                {{ $file['uploaded_by'] ?? '-' }}
+                                                {{ $fUser }}
                                             </span>
                                         </td>
                                         <td>
                                             <span style="font-size: 0.78rem; color: #64748b;">
-                                                {{ $file['uploaded_at'] ?? 'Just now' }}
+                                                {{ $fTime }}
                                             </span>
                                         </td>
                                     </tr>

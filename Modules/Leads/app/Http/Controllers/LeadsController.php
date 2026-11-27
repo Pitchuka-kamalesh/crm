@@ -74,11 +74,18 @@ class LeadsController extends Controller
         $recentUploadedFiles = collect();
 
         if ($activeTab === 'upload') {
-            $historyPath = storage_path('app/leads_uploads_history.json');
-            if (file_exists($historyPath)) {
-                $raw = @json_decode(file_get_contents($historyPath), true);
-                if (is_array($raw)) {
-                    $recentUploadedFiles = collect($raw);
+            try {
+                $recentUploadedFiles = \Modules\Leads\Models\LeadsUpload::query()
+                    ->orderByDesc('id')
+                    ->limit(50)
+                    ->get();
+            } catch (\Throwable $e) {
+                $historyPath = storage_path('app/leads_uploads_history.json');
+                if (file_exists($historyPath)) {
+                    $raw = @json_decode(file_get_contents($historyPath), true);
+                    if (is_array($raw)) {
+                        $recentUploadedFiles = collect($raw);
+                    }
                 }
             }
         }
@@ -1049,19 +1056,45 @@ class LeadsController extends Controller
         ];
 
         $fileSizeStr = round($file->getSize() / 1024, 1) . ' KB';
+        $uploadedAtFormatted = now()->format('d M Y, h:i A');
+
+        // 1. Record file upload in dedicated crm.leads_upload database table
+        $uploadId = null;
+        try {
+            $dbUpload = \Modules\Leads\Models\LeadsUpload::create([
+                'file_name' => $file->getClientOriginalName(),
+                'file_size' => $fileSizeStr,
+                'total_records' => $totalFound,
+                'new_leads_added' => $insertedCount,
+                'duplicates_skipped' => $totalDuplicates,
+                'upload_status' => 'Completed',
+                'uploaded_by' => $userCode,
+                'upload_date_time' => now(),
+            ]);
+            $uploadId = $dbUpload?->id;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[LeadsUpload] DB insertion failed: ' . $e->getMessage());
+        }
+
         $fileRecord = [
-            'id' => 'up_' . time(),
+            'id' => $uploadId ? (string) $uploadId : ('up_' . time()),
+            'file_name' => $file->getClientOriginalName(),
             'filename' => $file->getClientOriginalName(),
+            'file_size' => $fileSizeStr,
             'filesize' => $fileSizeStr,
             'total_records' => $totalFound,
+            'new_leads_added' => $insertedCount,
             'inserted_count' => $insertedCount,
+            'duplicates_skipped' => $totalDuplicates,
             'duplicates_count' => $totalDuplicates,
-            'status' => 'Success',
+            'upload_status' => 'Completed',
+            'status' => 'Completed',
             'uploaded_by' => $userCode,
-            'uploaded_at' => now()->format('d M Y, h:i A'),
+            'upload_date_time' => $uploadedAtFormatted,
+            'uploaded_at' => $uploadedAtFormatted,
         ];
 
-        // Record file upload in persistent history
+        // 2. Secondary backup in JSON history
         try {
             $historyPath = storage_path('app/leads_uploads_history.json');
             $history = [];
@@ -1070,7 +1103,7 @@ class LeadsController extends Controller
                 if (is_array($raw)) $history = $raw;
             }
             array_unshift($history, $fileRecord);
-            $history = array_slice($history, 0, 30);
+            $history = array_slice($history, 0, 50);
             @file_put_contents($historyPath, json_encode($history, JSON_PRETTY_PRINT));
         } catch (\Throwable $e) {}
 
