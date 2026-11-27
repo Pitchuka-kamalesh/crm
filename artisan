@@ -1,6 +1,17 @@
 #!/usr/bin/env php
 <?php
 
+// Auto-switch to Herd PHP 8.5 if invoked with an older PHP version (e.g. system PHP 8.2)
+if (PHP_VERSION_ID < 80400) {
+    $herdPhp = getenv('USERPROFILE') . '\.config\herd\bin\php85\php.exe';
+    if (file_exists($herdPhp)) {
+        $args = array_slice($argv, 1);
+        $escapedArgs = implode(' ', array_map('escapeshellarg', $args));
+        passthru('"' . $herdPhp . '" ' . escapeshellarg(__FILE__) . ($escapedArgs !== '' ? ' ' . $escapedArgs : ''), $exitCode);
+        exit($exitCode);
+    }
+}
+
 use Illuminate\Foundation\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 

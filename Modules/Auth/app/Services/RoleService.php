@@ -8,9 +8,14 @@ use Illuminate\Support\Facades\Log;
 
 class RoleService
 {
+    public static function employeeRoleId(): int
+    {
+        return 1;
+    }
+
     public static function defaultStaffRoleId(): int
     {
-        return 5;
+        return 1;
     }
 
     public static function studentRoleId(): int

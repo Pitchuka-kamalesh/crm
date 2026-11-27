@@ -220,6 +220,7 @@ class MenuService
             'kpi/studentkpi' => $safeRoute('kpi.studentkpi', ['tab' => 'studentkpi']),
             'kpi/telecallerkpi' => $safeRoute('kpi.telecallerkpi', ['tab' => 'telecallerkpi']),
             'kpi/leadskpi' => $safeRoute('kpi.leadskpi', ['tab' => 'leadskpi']),
+            'kpi/errors', 'kpi/errorlogs', 'kpi/errorkpi' => $safeRoute('kpi.errors', ['tab' => 'errorkpi']),
             'kpi/counsellerkpi' => $safeRoute('kpi.counsellerkpi', ['tab' => 'counsellerkpi']),
             'kpi/index' => $safeRoute('kpi.index', ['tab' => 'kpi']),
             'sms/index', 'sms' => $safeRoute('sms.index'),
@@ -258,6 +259,7 @@ class MenuService
             'kpi/studentkpi' => request()->routeIs('kpi.studentkpi') || $currentTab === 'studentkpi' || str_contains($currentPath, 'studentkpi'),
             'kpi/telecallerkpi' => request()->routeIs('kpi.telecallerkpi') || $currentTab === 'telecallerkpi' || str_contains($currentPath, 'telecallerkpi'),
             'kpi/leadskpi' => request()->routeIs('kpi.leadskpi') || $currentTab === 'leadskpi' || str_contains($currentPath, 'leadskpi'),
+            'kpi/errors', 'kpi/errorlogs', 'kpi/errorkpi' => request()->routeIs('kpi.errors*') || $currentTab === 'errorkpi' || str_contains($currentPath, 'kpi/errors'),
             'kpi/counsellerkpi' => request()->routeIs('kpi.counsellerkpi') || $currentTab === 'counsellerkpi' || str_contains($currentPath, 'counsellerkpi'),
             default => $currentPath === trim($controllerRef, '/'),
         };
