@@ -217,9 +217,15 @@
                         </div>
                     </td>
                     <td style="padding: {{ $isBtech ? '8px 12px' : '6px 10px' }}; vertical-align: middle; text-align: right;">
-                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 6px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
-                            PAYMENT {{ strtoupper($student->payment_status ?? 'COMPLETED') }}
-                        </span>
+                        @if(!empty($student->is_paid))
+                            <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 6px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
+                                PAYMENT {{ strtoupper($student->payment_status ?? 'COMPLETED') }}
+                            </span>
+                        @else
+                            <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 6px; color: #b45309; background: #fef3c7; border: 1px solid #fde68a;">
+                                PAYMENT PENDING
+                            </span>
+                        @endif
                     </td>
                 </tr>
             </table>
@@ -466,14 +472,20 @@
                     <div class="sec-card">
                         <div class="sec-title">4. Application Fee</div>
                         <table style="width: 100%; border-collapse: collapse; font-size: {{ $isBtech ? '10.5px' : '10px' }};">
-                            <tr><td style="width: 38%; color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Paid Amount</td><td style="font-weight: 800; border-bottom: 1px solid #E3E8EF; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }}; color: #15803d; font-size: {{ $isBtech ? '12px' : '11.5px' }};">INR {{ number_format((float) $student->payment_amount) }}</td></tr>
-                            <tr><td style="color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Payment Gateway</td><td style="font-weight: 700; color: #0f172a; border-bottom: 1px solid #E3E8EF; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">{{ $student->payment_method }}</td></tr>
-                            <tr><td style="color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Transaction Ref</td><td style="font-weight: 700; color: #0f172a; border-bottom: 1px solid #E3E8EF; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }}; font-size: 9.5px; word-break: break-all;">{{ $student->transaction_id }}</td></tr>
+                            <tr><td style="width: 38%; color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Paid Amount</td><td style="font-weight: 800; border-bottom: 1px solid #E3E8EF; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }}; color: #15803d; font-size: {{ $isBtech ? '12px' : '11.5px' }};">{{ (!empty($student->payment_amount) && $student->payment_amount > 0) ? ('INR ' . number_format((float) $student->payment_amount)) : '-' }}</td></tr>
+                            <tr><td style="color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Payment Gateway</td><td style="font-weight: 700; color: #0f172a; border-bottom: 1px solid #E3E8EF; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">{{ (!empty($student->payment_method) && $student->payment_method !== '-') ? $student->payment_method : '-' }}</td></tr>
+                            <tr><td style="color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Transaction Ref</td><td style="font-weight: 700; color: #0f172a; border-bottom: 1px solid #E3E8EF; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }}; font-size: 9.5px; word-break: break-all;">{{ (!empty($student->transaction_id) && $student->transaction_id !== '-') ? $student->transaction_id : '-' }}</td></tr>
                             <tr><td style="color: #6B778A; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">Accounts Status</td>
                                 <td style="font-weight: 700; padding: {{ $isBtech ? '3.5px 0' : '2px 0' }};">
-                                    <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2.5px 8px; border-radius: 6px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
-                                        <span class="check-icon">&#10003;</span> {{ strtoupper($student->payment_status ?? 'COMPLETED') }} &amp; VERIFIED
-                                    </span>
+                                    @if(!empty($student->is_paid))
+                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2.5px 8px; border-radius: 6px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
+                                            <span class="check-icon">&#10003;</span> {{ strtoupper($student->payment_status ?? 'COMPLETED') }} &amp; VERIFIED
+                                        </span>
+                                    @else
+                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 2.5px 8px; border-radius: 6px; color: #b45309; background: #fef3c7; border: 1px solid #fde68a;">
+                                            PAYMENT PENDING
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                         </table>

@@ -442,28 +442,20 @@
                                     <th style="white-space: nowrap;">CRM ID</th>
                                     <th style="white-space: nowrap;">Ph No</th>
                                     <th style="white-space: nowrap;">Mobile</th>
-                                    <th style="text-align: center; white-space: nowrap;">Personal Det</th>
-                                    <th style="text-align: center; white-space: nowrap;">Acad Deat</th>
-                                    <th style="text-align: center; white-space: nowrap;">Docs</th>
-                                    <th style="text-align: center; white-space: nowrap;">Payment</th>
+                                    <th style="text-align: center; white-space: nowrap;">Personal info</th>
+                                    <th style="text-align: center; white-space: nowrap;">Academic info</th>
+                                    <th style="text-align: center; white-space: nowrap;">Documents</th>
+                                    <th style="text-align: center; white-space: nowrap;">Fee</th>
+                                    <th style="text-align: center; white-space: nowrap;">Exam Slot</th>
                                     <th style="text-align: center; white-space: nowrap;">Preview</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php
                                     $renderStagePill = function(string $pillClass, string $text, string $type, string $appliNo, string $stageKey, bool $isTracking): string {
-                                        if ($type === 'done') {
-                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"/></svg>';
-                                        } elseif ($type === 'due') {
-                                            $iconSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-                                        } elseif ($type === 'na') {
-                                            $iconSvg = '';
-                                        } else {
-                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-                                        }
                                         $cursorStyle = $isTracking ? 'cursor: pointer; transition: transform 0.15s ease;' : '';
                                         $hoverAttr = $isTracking ? 'onmouseover="this.style.transform=\'scale(1.06)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="openStudentStageModal(\'' . e($appliNo) . '\', \'' . e($stageKey) . '\')" title="Click to view details"' : '';
-                                        return '<span class="tracking-pill ' . e($pillClass) . '" style="' . $cursorStyle . '" ' . $hoverAttr . '>' . $iconSvg . '<span>' . e($text) . '</span></span>';
+                                        return '<span class="tracking-pill ' . e($pillClass) . '" style="' . $cursorStyle . '" ' . $hoverAttr . '>' . e($text) . '</span>';
                                     };
                                 @endphp
                                 @forelse($allStudents as $std)
@@ -491,56 +483,39 @@
                                         $s4 = strtolower(trim((string)($std->stage4 ?? '')));
                                         $s5 = strtolower(trim((string)($std->stage5 ?? '')));
 
-                                        // 1. Personal Details (stage1)
+                                        // 1. Personal info (stage1)
                                         $isS1Done = in_array($s1, ['completed', 'paid', 'approved', 'done']) || (!empty($std->personalInfo) && !empty($std->personalInfo->gender));
-                                        if ($isS1Done) {
-                                            $st1Pill = 'pill-done'; $st1Type = 'done'; $st1Text = 'Completed';
-                                        } elseif (in_array($s1, ['pending', 'in_progress', 'draft'])) {
-                                            $st1Pill = 'pill-pending'; $st1Type = 'pending'; $st1Text = 'Pending';
-                                        } else {
-                                            $st1Pill = 'pill-na'; $st1Type = 'na'; $st1Text = 'NA';
-                                        }
+                                        $st1Pill = $isS1Done ? 'pill-done' : 'pill-na';
+                                        $st1Text = $isS1Done ? 'Completed' : 'NA';
+                                        $st1Type = $isS1Done ? 'done' : 'na';
 
-                                        // 2. Academic Details (stage2)
+                                        // 2. Academic info (stage2)
                                         $isS2Done = in_array($s2, ['completed', 'approved', 'done']) || (!empty($std->academicDetails) && (!empty($std->academicDetails->tenth_school_name) || !empty($std->academicDetails->pu2_college_name)));
-                                        if ($isS2Done) {
-                                            $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Text = 'Completed';
-                                        } elseif (in_array($s2, ['pending', 'in_progress'])) {
-                                            $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Text = 'Pending';
-                                        } else {
-                                            $st2Pill = 'pill-na'; $st2Type = 'na'; $st2Text = 'NA';
-                                        }
+                                        $st2Pill = $isS2Done ? 'pill-done' : 'pill-na';
+                                        $st2Text = $isS2Done ? 'Completed' : 'NA';
+                                        $st2Type = $isS2Done ? 'done' : 'na';
 
-                                        // 3. Document Uploads (stage3)
+                                        // 3. Documents (stage3)
                                         $isS3Done = in_array($s3, ['completed', 'approved', 'done']) || !empty($std->uploads);
-                                        if ($isS3Done) {
-                                            $st3Pill = 'pill-done'; $st3Type = 'done'; $st3Text = 'Completed';
-                                        } elseif (in_array($s3, ['pending', 'in_progress'])) {
-                                            $st3Pill = 'pill-pending'; $st3Type = 'pending'; $st3Text = 'Pending';
-                                        } else {
-                                            $st3Pill = 'pill-na'; $st3Type = 'na'; $st3Text = 'NA';
-                                        }
+                                        $st3Pill = $isS3Done ? 'pill-done' : 'pill-na';
+                                        $st3Text = $isS3Done ? 'Completed' : 'NA';
+                                        $st3Type = $isS3Done ? 'done' : 'na';
 
-                                        // 4. Payment (stage4)
+                                        // 4. Fee (stage4)
                                         $hasPaidRecord = in_array($s4, ['paid', 'completed', 'approved', 'done']) 
                                             || ($std->payDetail && ($std->payDetail->txnstatus === 'success' || (float)($std->payDetail->paidamount ?? 0) > 0))
                                             || !empty($std->receipt);
-                                        if ($hasPaidRecord) {
-                                            $st4Pill = 'pill-done'; $st4Type = 'done'; $st4Text = 'Paid';
-                                        } elseif (in_array($s4, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st4Pill = 'pill-danger'; $st4Type = 'due'; $st4Text = 'Fee Due';
-                                        } elseif (in_array($s4, ['pending', 'in_progress'])) {
-                                            $st4Pill = 'pill-pending'; $st4Type = 'pending'; $st4Text = 'Pending';
-                                        } else {
-                                            $st4Pill = 'pill-na'; $st4Type = 'na'; $st4Text = 'NA';
-                                        }
+                                        $st4Pill = $hasPaidRecord ? 'pill-done' : 'pill-na';
+                                        $st4Text = $hasPaidRecord ? 'Completed' : 'NA';
+                                        $st4Type = $hasPaidRecord ? 'done' : 'na';
 
-                                        // 5. Exam Slot Booking & Preview Availability
+                                        // 5. Exam Slot (stage5)
                                         $progLevel = strtoupper(trim((string)($std->programlevel ?? '')));
                                         $isPhd = ($progLevel === 'PHD' || str_contains($progLevel, 'DOCTOR') || str_contains(strtoupper($std->program?->program_name ?? ''), 'PHD'));
                                         $isSlotBooked = $isPhd || in_array($s5, ['completed', 'approved', 'done', 'booked', 'paid']) || !empty($std->examSchedule);
-
-                                        $canPreview = $hasPaidRecord && $isSlotBooked && ($appliDisplay !== 'NA');
+                                        $st5Pill = $isSlotBooked ? 'pill-done' : 'pill-na';
+                                        $st5Text = $isSlotBooked ? 'Completed' : 'NA';
+                                        $st5Type = $isSlotBooked ? 'done' : 'na';
 
                                         // Detailed student payload for interactive stage modal if clicked
                                         $studentPayload = [
@@ -562,7 +537,8 @@
                                                 'personal' => ['pill' => $st1Pill, 'text' => $st1Text],
                                                 'academic' => ['pill' => $st2Pill, 'text' => $st2Text],
                                                 'docs' => ['pill' => $st3Pill, 'text' => $st3Text],
-                                                'payment' => ['pill' => $st4Pill, 'text' => $st4Text],
+                                                'fee' => ['pill' => $st4Pill, 'text' => $st4Text],
+                                                'slot' => ['pill' => $st5Pill, 'text' => $st5Text],
                                             ],
                                         ];
                                     @endphp
@@ -613,31 +589,32 @@
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliDisplay, 'payment', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliDisplay, 'fee', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                @if($canPreview)
+                                                {!! $renderStagePill($st5Pill, $st5Text, $st5Type, $appliDisplay, 'slot', $isTrackingPage) !!}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="text-align: center;">
+                                                @if($appliDisplay !== 'NA')
                                                     <a href="{{ route('application.show', ['id' => $appliDisplay, 'from' => request()->fullUrl()]) }}" 
                                                        class="btn-action-sm btn-verify" 
                                                        style="padding: 4px 14px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;"
                                                        title="Preview Application Form">
                                                         Preview
                                                     </a>
-                                                @elseif(!$hasPaidRecord && ($s4 === 'na' || empty($s4)) && ($s5 === 'na' || empty($s5)))
-                                                    <span class="tracking-pill pill-na">NA</span>
-                                                @elseif(!$hasPaidRecord)
-                                                    <span class="tracking-pill pill-danger" style="white-space: nowrap;" title="Admission Fee Payment Pending">Fee Pending</span>
                                                 @else
-                                                    <span class="tracking-pill pill-pending" style="white-space: nowrap;" title="Exam Slot Booking Pending">Slot Pending</span>
+                                                    <span class="tracking-pill pill-na">NA</span>
                                                 @endif
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                                        <td colspan="10" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
                                             No student records found in Register List.
                                         </td>
                                     </tr>
@@ -696,11 +673,12 @@
                                 'CRM ID',
                                 'Ph No',
                                 'Mobile',
-                                'Personal Det',
-                                'Acad Deat',
-                                'Docs',
-                                'Payment',
-                                'Preview / Status'
+                                'Personal info',
+                                'Academic info',
+                                'Documents',
+                                'Fee',
+                                'Exam Slot',
+                                'Preview'
                             ];
 
                             const rows = Array.from(table.querySelectorAll('tbody tr.register-track-row'));
@@ -719,7 +697,7 @@
                             // Data rows
                             targetRows.forEach(row => {
                                 const cells = row.querySelectorAll('td');
-                                if (cells.length < 9) return;
+                                if (cells.length < 10) return;
 
                                 const appliNo = (cells[0].querySelector('strong')?.textContent || cells[0].textContent || '').trim();
                                 const crmId = (cells[1].textContent || '').trim();
@@ -728,8 +706,9 @@
                                 const personal = (cells[4].textContent || '').trim();
                                 const academic = (cells[5].textContent || '').trim();
                                 const docs = (cells[6].textContent || '').trim();
-                                const payment = (cells[7].textContent || '').trim();
-                                const preview = (cells[8].textContent || '').trim().replace(/\s+/g, ' ');
+                                const fee = (cells[7].textContent || '').trim();
+                                const slot = (cells[8].textContent || '').trim();
+                                const preview = (cells[9].textContent || '').trim().replace(/\s+/g, ' ');
 
                                 const rowData = [
                                     '"' + appliNo.replace(/"/g, '""') + '"',
@@ -739,7 +718,8 @@
                                     '"' + personal.replace(/"/g, '""') + '"',
                                     '"' + academic.replace(/"/g, '""') + '"',
                                     '"' + docs.replace(/"/g, '""') + '"',
-                                    '"' + payment.replace(/"/g, '""') + '"',
+                                    '"' + fee.replace(/"/g, '""') + '"',
+                                    '"' + slot.replace(/"/g, '""') + '"',
                                     '"' + preview.replace(/"/g, '""') + '"'
                                 ];
 
