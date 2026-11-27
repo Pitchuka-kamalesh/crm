@@ -4,6 +4,7 @@ namespace Modules\Auth\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 
@@ -22,7 +23,15 @@ class CheckRole
         // Same role the menus/controllers use (session role switch + roles_assigned + login.role_id)
         $activeRole = (int) $user->getActiveRoleId();
 
-        if (!in_array($activeRole, $allowed, true)) {
+        $assignedRoleIds = method_exists($user, 'getAssignedRoleIds')
+            ? array_map('intval', $user->getAssignedRoleIds())
+            : [];
+
+        $hasAccess = in_array($activeRole, $allowed, true)
+            || (!empty($assignedRoleIds) && !empty(array_intersect($assignedRoleIds, $allowed)))
+            || in_array((int)$user->role_id, $allowed, true);
+
+        if (!$hasAccess) {
             Log::warning('[CheckRole] 403', [
                 'usercode'    => $user->usercode,
                 'active_role' => $activeRole,

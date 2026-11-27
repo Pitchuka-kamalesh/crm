@@ -6,6 +6,7 @@ use Modules\Crm\Http\Controllers\StudentKpiController;
 use Modules\Crm\Http\Controllers\TelecallerKpiController;
 use Modules\Crm\Http\Controllers\LeadsKpiController;
 use Modules\Crm\Http\Controllers\DiscountCouponController;
+use Modules\Crm\Http\Controllers\ErrorKpiController;
 
 Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     // CRM Navigation & Enquiries
@@ -42,4 +43,7 @@ Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     Route::get('/kpi/studentkpi/export', [StudentKpiController::class, 'export'])->name('kpi.studentkpi.export');
     Route::get('/kpi/telecallerkpi', [TelecallerKpiController::class, 'index'])->name('kpi.telecallerkpi');
     Route::get('/kpi/leadskpi', [LeadsKpiController::class, 'index'])->name('kpi.leadskpi');
+    Route::get('/kpi/errors', [ErrorKpiController::class, 'index'])->name('kpi.errors');
+    Route::get('/kpi/errors/export', [ErrorKpiController::class, 'export'])->name('kpi.errors.export');
+    Route::post('/kpi/errors/clear', [ErrorKpiController::class, 'clearLogs'])->name('kpi.errors.clear');
 });
