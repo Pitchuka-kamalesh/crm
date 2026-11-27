@@ -25,6 +25,7 @@ use Modules\Crm\Services\KpiAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 
 class CrmController extends Controller
 {
@@ -34,7 +35,9 @@ class CrmController extends Controller
     public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
+
         $roleId = $user ? $user->getActiveRoleId() : RoleService::defaultStaffRoleId();
+
         $roleName = $user ? $user->role_label : 'CRM Official';
 
         $currentRoute = $request->route() ? $request->route()->getName() : '';
