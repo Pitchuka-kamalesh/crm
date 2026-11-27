@@ -441,7 +441,6 @@
                                     <th style="white-space: nowrap;">App No</th>
                                     <th style="white-space: nowrap;">CRM ID</th>
                                     <th style="white-space: nowrap;">Ph No</th>
-                                    <th style="white-space: nowrap;">Mobile</th>
                                     <th style="text-align: center; white-space: nowrap;">Personal info</th>
                                     <th style="text-align: center; white-space: nowrap;">Academic info</th>
                                     <th style="text-align: center; white-space: nowrap;">Documents</th>
@@ -517,6 +516,82 @@
                                         $st5Text = $isSlotBooked ? 'Completed' : 'NA';
                                         $st5Type = $isSlotBooked ? 'done' : 'na';
 
+                                        // 1. Personal Details
+                                        $perInfo = $std->personalInfo ?? $std->personal;
+                                        $personalData = [
+                                            'parentName' => $perInfo?->parent_name ?: 'N/A',
+                                            'parentPhone' => $perInfo?->parentphono ?: 'N/A',
+                                            'dob' => $perInfo?->dob ? \Carbon\Carbon::parse($perInfo->dob)->format('d/m/Y') : 'N/A',
+                                            'gender' => $perInfo?->gender ?: 'N/A',
+                                            'caste' => $perInfo?->caste_category ?: 'N/A',
+                                            'village' => $perInfo?->village ?: 'N/A',
+                                            'city' => $perInfo?->city_mandal ?: 'N/A',
+                                            'district' => $perInfo?->district ?: 'N/A',
+                                            'state' => $perInfo?->state ?: 'N/A',
+                                            'pincode' => $perInfo?->pincode ?: 'N/A',
+                                            'referredBy' => $perInfo?->referedby ?: 'N/A',
+                                        ];
+
+                                        // 2. Academic Details
+                                        $acaInfo = $std->academicDetails ?? $std->academic;
+                                        $academicData = [
+                                            'isFilled' => !empty($acaInfo),
+                                            'tenthSchool' => $acaInfo?->tenth_school_name ?: 'N/A',
+                                            'tenthBoard' => $acaInfo?->tenth_study_board ?: 'N/A',
+                                            'tenthCity' => $acaInfo?->tenth_school_city ?: 'N/A',
+                                            'tenthYear' => $acaInfo?->tenth_passed_year ?: 'N/A',
+                                            'tenthMarks' => $acaInfo?->tenth_marks_earned ?: ($acaInfo?->tenth_percentage ? $acaInfo->tenth_percentage . '%' : 'N/A'),
+                                            'interCollege' => $acaInfo?->pu2_college_name ?: 'N/A',
+                                            'interBoard' => $acaInfo?->pu2_study_board ?: 'N/A',
+                                            'interCity' => $acaInfo?->pu2_college_city ?: 'N/A',
+                                            'interYear' => $acaInfo?->pu2_passed_year ?: 'N/A',
+                                            'interMarks' => $acaInfo?->pu2_marks_earned ?: ($acaInfo?->pu2_percentage ? $acaInfo->pu2_percentage . '%' : 'N/A'),
+                                            'interStatus' => $acaInfo?->pu2_current_status ?: 'N/A',
+                                            'ugCollege' => $acaInfo?->ug_college_name ?: 'N/A',
+                                            'ugUniversity' => $acaInfo?->ug_university_board ?: 'N/A',
+                                            'ugYear' => $acaInfo?->ug_passed_year ?: 'N/A',
+                                            'ugMarks' => $acaInfo?->ug_marks_earned ?: ($acaInfo?->ug_percentage ? $acaInfo->ug_percentage . '%' : 'N/A'),
+                                        ];
+
+                                        // 3. Payment / Fee Details
+                                        $paymentData = [
+                                            'status' => $hasPaidRecord ? 'Paid & Verified' : 'Fee Due / Unpaid',
+                                            'feePayable' => number_format((float)($std->payDetail?->feepayable ?: 1200), 2),
+                                            'amountPaid' => number_format((float)($std->payDetail?->paidamount ?: ($hasPaidRecord ? 1000 : 0)), 2),
+                                            'txnId' => $std->payDetail?->txncrmid ?: ($std->payDetail?->txnpayuid ?: ($std->receipt?->receiptno ?: 'N/A')),
+                                            'payType' => $std->payDetail?->paytype ?: ($std->receipt?->paytype ?: 'Online (PayU Payment Gateway)'),
+                                            'txnDate' => $std->payDetail?->txndatetime ? \Carbon\Carbon::parse($std->payDetail->txndatetime)->format('d M Y, h:i A') : 'N/A',
+                                            'coupon' => $std->payDetail?->defcoupon ?: 'None',
+                                            'couponAmount' => number_format((float)($std->payDetail?->totalcouponamount ?: 0), 2),
+                                        ];
+
+                                        // 4. Documents Uploaded Details
+                                        $docInfo = $std->uploads;
+                                        $docsData = [
+                                            'isUploaded' => !empty($docInfo),
+                                            'tenthDoc' => $docInfo?->tenth_file_name ?: 'Not Uploaded',
+                                            'interDoc' => $docInfo?->inter_file_name ?: 'Not Uploaded',
+                                            'aadharDoc' => $docInfo?->aadhar_file_name ?: 'Not Uploaded',
+                                            'transferDoc' => $docInfo?->transfer_file_name ?: 'Not Uploaded',
+                                            'conductDoc' => $docInfo?->study_conduct_file_name ?: 'Not Uploaded',
+                                            'ugDoc' => $docInfo?->btech_file_name ?: ($docInfo?->pg_file_name ?: 'Not Uploaded'),
+                                            'uploadDate' => $docInfo?->log_timestamp ? \Carbon\Carbon::parse($docInfo->log_timestamp)->format('d M Y, h:i A') : 'Pending',
+                                        ];
+
+                                        // 5. Exam Slot Details
+                                        $slotInfo = $std->examSchedule;
+                                        $slotData = [
+                                            'isDone' => !empty($slotInfo) || $isPhd,
+                                            'isBooked' => !empty($slotInfo) || $isPhd,
+                                            'slotName' => $slotInfo?->exam_slot ?: ($isPhd ? 'Exempted (Ph.D Research Candidate)' : 'Pending Booking'),
+                                            'examDate' => $slotInfo?->examdate ? \Carbon\Carbon::parse($slotInfo->examdate)->format('d/m/Y') : ($isPhd ? 'N/A' : 'Pending'),
+                                            'examStatus' => $slotInfo ? 'Qualified' : ($isPhd ? 'Qualified' : 'Pending'),
+                                            'hallTicket' => $slotInfo ? ('HT-' . $appliDisplay) : ($isPhd ? 'Exempted' : 'Pending Schedule'),
+                                            'score' => $slotInfo ? 'Slot Confirmed' : 'Pending',
+                                            'rank' => $slotInfo ? 'Slot Confirmed' : 'Pending',
+                                            'concession' => 'Applicable per V-SAT Merit',
+                                        ];
+
                                         // Detailed student payload for interactive stage modal if clicked
                                         $studentPayload = [
                                             'appliNo' => $appliDisplay,
@@ -533,6 +608,14 @@
                                             'country' => $std->country?->country_name ?? 'India',
                                             'regDate' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y, h:i A') : 'NA',
                                             'status' => $std->std_status ?? 'Registered',
+                                            'personal' => $personalData,
+                                            'academic' => $academicData,
+                                            'payment' => $paymentData,
+                                            'fee' => $paymentData,
+                                            'docs' => $docsData,
+                                            'application' => $docsData,
+                                            'slot' => $slotData,
+                                            'vsat' => $slotData,
                                             'stages' => [
                                                 'personal' => ['pill' => $st1Pill, 'text' => $st1Text],
                                                 'academic' => ['pill' => $st2Pill, 'text' => $st2Text],
@@ -561,13 +644,6 @@
                                         <td>
                                             @if($phNoDisplay !== 'NA')
                                                 <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0f172a; white-space: nowrap;">+91 {{ $phNoDisplay }}</span>
-                                            @else
-                                                <span class="tracking-pill pill-na">NA</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($mobileDisplay !== 'NA')
-                                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #475569; white-space: nowrap;">+91 {{ $mobileDisplay }}</span>
                                             @else
                                                 <span class="tracking-pill pill-na">NA</span>
                                             @endif
@@ -614,7 +690,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="10" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
+                                        <td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;">
                                             No student records found in Register List.
                                         </td>
                                     </tr>
@@ -672,7 +748,6 @@
                                 'App No',
                                 'CRM ID',
                                 'Ph No',
-                                'Mobile',
                                 'Personal info',
                                 'Academic info',
                                 'Documents',
@@ -697,24 +772,22 @@
                             // Data rows
                             targetRows.forEach(row => {
                                 const cells = row.querySelectorAll('td');
-                                if (cells.length < 10) return;
+                                if (cells.length < 9) return;
 
                                 const appliNo = (cells[0].querySelector('strong')?.textContent || cells[0].textContent || '').trim();
                                 const crmId = (cells[1].textContent || '').trim();
                                 const phNo = (cells[2].textContent || '').trim().replace(/\s+/g, ' ');
-                                const mobile = (cells[3].textContent || '').trim().replace(/\s+/g, ' ');
-                                const personal = (cells[4].textContent || '').trim();
-                                const academic = (cells[5].textContent || '').trim();
-                                const docs = (cells[6].textContent || '').trim();
-                                const fee = (cells[7].textContent || '').trim();
-                                const slot = (cells[8].textContent || '').trim();
-                                const preview = (cells[9].textContent || '').trim().replace(/\s+/g, ' ');
+                                const personal = (cells[3].textContent || '').trim();
+                                const academic = (cells[4].textContent || '').trim();
+                                const docs = (cells[5].textContent || '').trim();
+                                const fee = (cells[6].textContent || '').trim();
+                                const slot = (cells[7].textContent || '').trim();
+                                const preview = (cells[8].textContent || '').trim().replace(/\s+/g, ' ');
 
                                 const rowData = [
                                     '"' + appliNo.replace(/"/g, '""') + '"',
                                     '"' + crmId.replace(/"/g, '""') + '"',
                                     '"' + phNo.replace(/"/g, '""') + '"',
-                                    '"' + mobile.replace(/"/g, '""') + '"',
                                     '"' + personal.replace(/"/g, '""') + '"',
                                     '"' + academic.replace(/"/g, '""') + '"',
                                     '"' + docs.replace(/"/g, '""') + '"',
@@ -837,7 +910,7 @@
                                             </div>
                                         `;
                                     }
-                                } else if (stage === 'payment') {
+                                } else if (stage === 'payment' || stage === 'fee') {
                                     if (iconEl) iconEl.textContent = '💳';
                                     if (titleEl) titleEl.textContent = 'Payment Details';
                                     if (footerNoteEl) footerNoteEl.textContent = 'Fee payment and transaction verification particulars.';
@@ -1092,12 +1165,12 @@
                                             </div>
                                         `;
                                     }
-                                } else if (stage === 'application') {
-                                    if (iconEl) iconEl.textContent = '📄';
-                                    if (titleEl) titleEl.textContent = 'Application Download Status';
-                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate application form download status verification.';
-                                    const app = student.application || {};
-                                    const isDownloaded = app.isDownloaded === true || (String(app.statusText || '').toLowerCase() === 'downloaded');
+                                } else if (stage === 'application' || stage === 'docs') {
+                                    if (iconEl) iconEl.textContent = '📁';
+                                    if (titleEl) titleEl.textContent = 'Uploaded Documents & Certificates';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate verified certificate and document uploads.';
+                                    const doc = student.docs || student.application || {};
+                                    const isUploaded = doc.isUploaded === true;
 
                                     if (body) {
                                         body.innerHTML = `
@@ -1111,116 +1184,77 @@
                                                     <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Primary Mobile</span>
-                                                    <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
+                                                    <span class="card-lbl">10th Class Memo</span>
+                                                    <span class="card-val">${doc.tenthDoc && doc.tenthDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.tenthDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Campus Applied</span>
-                                                    <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
+                                                    <span class="card-lbl">12th / Inter Memo</span>
+                                                    <span class="card-val">${doc.interDoc && doc.interDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.interDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Registration Date</span>
-                                                    <span class="card-val">${safe(app.date || student.regDate)}</span>
+                                                    <span class="card-lbl">Aadhar Card</span>
+                                                    <span class="card-val">${doc.aadharDoc && doc.aadharDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.aadharDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Application Download Status</span>
+                                                    <span class="card-lbl">Transfer Certificate</span>
+                                                    <span class="card-val">${doc.transferDoc && doc.transferDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.transferDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Upload Status</span>
                                                     <span class="card-val">
-                                                        ${isDownloaded 
-                                                            ? '<span class="badge-paid">✓ Downloaded</span>' 
-                                                            : '<span class="badge-fee-due">⏳ Not Downloaded</span>'}
+                                                        ${isUploaded 
+                                                            ? '<span class="badge-paid">✓ Uploaded & Completed</span>' 
+                                                            : '<span class="badge-fee-due">⏳ Documents Pending</span>'}
                                                     </span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Upload Date & Time</span>
+                                                    <span class="card-val">${safe(doc.uploadDate, 'Pending')}</span>
                                                 </div>
                                             </div>
                                         `;
                                     }
-                                } else if (stage === 'vsat') {
-                                    if (iconEl) iconEl.textContent = '🏆';
-                                    if (titleEl) titleEl.textContent = 'VSAT Examination & Result Details';
-                                    const vsat = student.vsat || {};
-                                    const isDone = vsat.isDone === true || (String(vsat.examStatus || '').toLowerCase() === 'qualified');
+                                } else if (stage === 'vsat' || stage === 'slot') {
+                                    if (iconEl) iconEl.textContent = '📅';
+                                    if (titleEl) titleEl.textContent = 'Exam Slot & Schedule Details';
+                                    const slot = student.slot || student.vsat || {};
+                                    const isDone = slot.isDone === true || slot.isBooked === true;
 
                                     if (footerNoteEl) {
                                         footerNoteEl.textContent = isDone 
-                                            ? 'Vignan Scholastic Aptitude Test score, rank, and scholarship concession.' 
-                                            : 'Candidate examination schedule and results are pending.';
+                                            ? 'Candidate examination slot booking and schedule particulars.' 
+                                            : 'Candidate examination schedule is pending.';
                                     }
 
                                     if (body) {
-                                        if (isDone) {
-                                            body.innerHTML = `
-                                                <div class="stage-info-grid">
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Application Number</span>
-                                                        <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Student Full Name</span>
-                                                        <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Hall Ticket Number</span>
-                                                        <span class="card-val font-mono" style="color: #4338ca; font-weight: 700;">${safe(vsat.hallTicket)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Examination Status</span>
-                                                        <span class="card-val"><span class="badge-paid">✓ Qualified</span></span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Test Score</span>
-                                                        <span class="card-val font-mono" style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">${safe(vsat.score)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">State Merit Rank</span>
-                                                        <span class="card-val font-mono" style="font-weight: 700; color: #0369a1;">${safe(vsat.rank)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card" style="grid-column: 1 / -1;">
-                                                        <span class="card-lbl">Merit Scholarship / Fee Concession</span>
-                                                        <span class="card-val" style="color: #15803d; font-weight: 700; font-size: 0.95rem;">${safe(vsat.concession)}</span>
-                                                    </div>
+                                        body.innerHTML = `
+                                            <div class="stage-info-grid">
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Number</span>
+                                                    <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
                                                 </div>
-                                            `;
-                                        } else {
-                                            body.innerHTML = `
-                                                <div class="stage-info-grid">
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Application Number</span>
-                                                        <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Student Full Name</span>
-                                                        <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Primary Mobile</span>
-                                                        <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Campus Applied</span>
-                                                        <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Examination Status</span>
-                                                        <span class="card-val"><span class="badge-fee-due">⏳ Pending</span></span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Hall Ticket Number</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending Schedule</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Test Score</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending (Exam Not Taken)</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">State Merit Rank</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending (Results Awaiting)</span>
-                                                    </div>
-                                                    <div class="stage-info-card" style="grid-column: 1 / -1;">
-                                                        <span class="card-lbl">Merit Scholarship / Fee Concession</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending VSAT Examination & Results</span>
-                                                    </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Student Full Name</span>
+                                                    <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
                                                 </div>
-                                            `;
-                                        }
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Exam Slot Selected</span>
+                                                    <span class="card-val font-mono" style="color: #4338ca; font-weight: 700;">${safe(slot.slotName, 'Pending Booking')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Examination Date</span>
+                                                    <span class="card-val font-mono">${safe(slot.examDate, 'Pending')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Booking Status</span>
+                                                    <span class="card-val">
+                                                        ${isDone 
+                                                            ? '<span class="badge-paid">✓ Booked / Confirmed</span>' 
+                                                            : '<span class="badge-fee-due">⏳ Slot Pending</span>'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        `;
                                     }
                                 }
 
