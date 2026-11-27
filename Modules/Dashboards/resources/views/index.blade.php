@@ -2238,6 +2238,9 @@
                 <p class="welcome-subtitle">
                     {{ $programName ?: 'B.Tech - Bachelor of Technology' }} @if($branchName)({{ $branchName }})@endif &bull; {{ $campusName ?: 'Vadlamudi Campus' }}
                 </p>
+                <p style="font-size: 0.78rem; color: #64748b; margin: 3px 0 0 0; line-height: 1.35;">
+                    info@vignan.ac.in &bull; 0863-2344700 / 701
+                </p>
             </div>
 
             <div class="meta-badges-cluster">
@@ -4673,18 +4676,23 @@
                                 @if($isSlotLocked)
                                     <input type="hidden" name="exam_slot" value="{{ $currentSlot }}">
                                 @endif
-                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
-                                    <span>✓</span>
-                                    <span id="slotLiveStatus">
-                                        @php
-                                            $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
-                                        @endphp
-                                        @if($isSlotLocked)
-                                            Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
-                                        @else
-                                            Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
-                                        @endif
-                                    </span>
+                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span>✓</span>
+                                        <span id="slotLiveStatus">
+                                            @php
+                                                $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
+                                            @endphp
+                                            @if($isSlotLocked)
+                                                Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                            @else
+                                                Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div style="margin-top: 4px; margin-left: 18px; font-size: 0.74rem; color: #047857; font-weight: 600;">
+                                        Exam is at university, It is a computer based test
+                                    </div>
                                 </div>
                             </div>
                         </div>
