@@ -163,19 +163,19 @@
 <div class="page-wrap">
 
     {{-- Form Header Banner --}}
-    <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 3.5px solid #1E7BD8;">
+    <table style="width: 100%; border-collapse: collapse; background: #1DA1F2; border-bottom: 3.5px solid #2E5A97;">
         <tr>
             <td style="padding: 10px 16px; vertical-align: middle; width: 50%;">
                 <div style="background: #ffffff; border-radius: 6px; padding: 4px 10px; display: inline-block;">
                     <img src="{{ $logo }}" alt="Vignan's Logo" style="height: 44px; max-width: 190px; object-fit: contain; display: block;">
                 </div>
-                <div style="color: #A9BCD6; font-size: 8.5px; padding-top: 4px; letter-spacing: 0.2px;">
+                <div style="color: #F0F9FF; font-size: 8.5px; padding-top: 4px; letter-spacing: 0.2px;">
                     Application date: {{ ($student->applied_at ?? null) ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
                 </div>
             </td>
             <td style="padding: 10px 16px; vertical-align: middle; width: 50%; text-align: right;">
                 <div style="color: #ffffff; font-size: 17px; font-weight: 800; letter-spacing: 0.5px;">APPLICATION FORM</div>
-                <div style="color: #A9BCD6; font-size: 9.5px; line-height: 1.35; margin-top: 2px;">
+                <div style="color: #F0F9FF; font-size: 9.5px; line-height: 1.35; margin-top: 2px;">
                     University Admission Application<br>
                     Please read all details carefully before signing
                 </div>

@@ -5184,19 +5184,19 @@
                             </div>
 @else
 <!-- Form Header Banner -->
-                            <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
+                            <table style="width: 100%; border-collapse: collapse; background: #1DA1F2; border-bottom: 4px solid #2E5A97;">
                             <tr>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
                                     <div style="background: #ffffff; border-radius: 8px; padding: 6px 12px; display: inline-block;">
                                         <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 56px; max-width: 220px; object-fit: contain; display: block;">
                                     </div>
-                                    <div style="color: #A9BCD6; font-size: 9px; padding-top: 8px;">
+                                    <div style="color: #F0F9FF; font-size: 9px; padding-top: 8px;">
                                         Application date: {{ $appStudent->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
                                     </div>
                                 </td>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%; text-align: right;">
                                     <div style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">APPLICATION FORM</div>
-                                    <div style="color: #A9BCD6; font-size: 11px; line-height: 1.5; margin-top: 4px;">
+                                    <div style="color: #F0F9FF; font-size: 11px; line-height: 1.5; margin-top: 4px;">
                                         University Admission Application<br>
                                         Please read all details carefully before signing
                                     </div>
