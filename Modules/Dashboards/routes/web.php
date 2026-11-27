@@ -37,11 +37,17 @@ Route::middleware(['auth','role:5'])->group(function () {
     Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 1]));
 });
 
-// Exam Slot Booking Tracking for Staff, CRM Incharge, and Dean (Roles 1, 2, 3)
-Route::middleware(['auth', 'role:1,2,3'])->group(function () {
+// Exam Slot Booking Tracking & Student Directory for Staff, CRM Incharge, and Dean (Roles 1, 2, 3, 4)
+Route::middleware(['auth', 'role:1,2,3,4'])->group(function () {
     Route::get('/exam/examslotdata', [ExamController::class, 'slotData'])->name('exam.examslotdata');
     Route::get('/exam/index', [ExamController::class, 'slotData'])->name('exam.index');
     Route::get('/exam', [ExamController::class, 'slotData']);
     Route::get('/exams', [ExamController::class, 'slotData']);
     Route::get('/examslotdata', [ExamController::class, 'slotData']);
+
+    // TotalDetails Directory & Comprehensive Excel Export (menu: EXAM00004)
+    Route::get('/exam/TotalDetails', [ExamController::class, 'totalDetails'])->name('exam.totaldetails');
+    Route::get('/exam/totaldetails', [ExamController::class, 'totalDetails']);
+    Route::get('/exam/TotalDetails/export', [ExamController::class, 'exportTotalDetails'])->name('exam.totaldetails.export');
+    Route::get('/exam/totaldetails/export', [ExamController::class, 'exportTotalDetails']);
 });

@@ -330,6 +330,7 @@ class PayUController extends Controller
                     $amountFmt = number_format($amount, 2);
                     $stageMsg = "Dear {$stdName} (App ID: {$applino}), your application fee payment of Rs. {$amountFmt} is received successfully (Txn: {$txnid})! Please log in to book your V-SAT exam slot: https://vucrm.vumoodle.in/";
 
+                    // WhatsApp payment confirmation via SmartPing
                     if (class_exists(\Modules\Sms\Services\WhatsAppService::class)) {
                         app(\Modules\Sms\Services\WhatsAppService::class)->sendStageUpdate(
                             phone: $cleanPhone,
@@ -337,15 +338,6 @@ class PayUController extends Controller
                             candidateName: $stdName,
                             applicationId: $applino,
                             ip: $request->ip()
-                        );
-                    }
-
-                    if (class_exists(\Modules\Sms\Services\SmsService::class)) {
-                        app(\Modules\Sms\Services\SmsService::class)->sendStageSms(
-                            phone: $cleanPhone,
-                            message: $stageMsg,
-                            name: $stdName,
-                            applicationNo: $applino
                         );
                     }
                 }

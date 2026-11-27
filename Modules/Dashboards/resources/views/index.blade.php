@@ -1224,7 +1224,7 @@
             align-items: center;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             html, body {
                 max-width: 100vw !important;
                 overflow-x: hidden !important;
@@ -1905,7 +1905,7 @@
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .mockup-field-row-2 {
                 grid-template-columns: 1fr;
             }
@@ -6603,7 +6603,7 @@
             }
 
             /* Mobile View Optimization */
-            @media (max-width: 640px) {
+            @media (max-width: 768px) {
                 .terms-modal-overlay {
                     padding: 0.65rem;
                     align-items: center;
