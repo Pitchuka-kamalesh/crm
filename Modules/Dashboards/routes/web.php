@@ -35,8 +35,10 @@ Route::middleware(['auth','role:5'])->group(function () {
     Route::get('/step7', fn() => redirect()->route('dashboards.index', ['step' => 7]))->name('steps.step7');
     Route::get('/step8', fn() => redirect()->route('dashboards.index', ['step' => 8]))->name('steps.step8');
     Route::get('/finance/payfee', fn() => redirect()->route('dashboards.index', ['step' => 1]));
+});
 
-    // Exam Slot Booking Tracking
+// Exam Slot Booking Tracking for Staff, CRM Incharge, and Dean (Roles 1, 2, 3)
+Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     Route::get('/exam/examslotdata', [ExamController::class, 'slotData'])->name('exam.examslotdata');
     Route::get('/exam/index', [ExamController::class, 'slotData'])->name('exam.index');
     Route::get('/exam', [ExamController::class, 'slotData']);

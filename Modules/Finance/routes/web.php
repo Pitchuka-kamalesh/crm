@@ -14,8 +14,8 @@ Route::post('/payu/response', [PayUController::class, 'handleResponse'])
     Route::get('/payu/receipt', [PayUController::class, 'receipt'])->middleware('signed:relative')->name('payu.receipt');
     // Authenticated receipt view
 
-// ── 3. AUTHENTICATED: Dashboard routes ──
-Route::middleware(['auth', 'role:1,3'])->group(function () {
+// ── 3. AUTHENTICATED: Dashboard routes (Staff, CRM Incharge, Dean) ──
+Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/finance/index', [FinanceController::class, 'index']);
     Route::get('/finance/paiddetails', [FinanceController::class, 'index'])->name('finance.paiddetails');
