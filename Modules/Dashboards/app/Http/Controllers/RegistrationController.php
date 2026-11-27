@@ -226,7 +226,7 @@ class RegistrationController extends Controller
                     'branchid'     => $branchId,
                     'ableto'       => $ableTo,
                     'std_status'   => 'Applied',
-                    'stage1'       => 'not_paid',
+                    'stage1'       => 'NA',
                     'stage2'       => 'NA',
                     'stage3'       => 'NA',
                     'stage4'       => 'NA',

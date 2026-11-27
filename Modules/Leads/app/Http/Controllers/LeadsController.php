@@ -489,7 +489,7 @@ class LeadsController extends Controller
             'programlevel' => $prog?->program_short_name ?? null,
             'campus_id' => 1,
             'std_status' => 'Interested',
-            'stage1' => 'not_paid',
+            'stage1' => 'NA',
             'stage2' => 'locked',
             'stage3' => 'locked',
             'stage4' => 'locked',
