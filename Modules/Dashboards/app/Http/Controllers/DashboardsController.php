@@ -907,6 +907,11 @@ class DashboardsController extends Controller
                         $crmUpdates['ableto'] = (bool) $request->input('hostel_required');
                     }
                     $crmStudent->update($crmUpdates);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $stageMsg = "Hello {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your Personal Profile has been saved successfully! Please log in to complete your Academic Details: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 2;
                 $msg = 'Stage 1: Personal Profile saved successfully!';
@@ -1315,6 +1320,11 @@ class DashboardsController extends Controller
                         }
                     }
                     $crmStudent->update($crmUpdates);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $stageMsg = "Hello {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your Academic Details have been saved successfully! Please log in to upload your required certificates: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 3;
                 $msg = 'Stage 2: Academic Records saved successfully!';
@@ -1441,6 +1451,11 @@ class DashboardsController extends Controller
                         }
                     }
                     $crmStudent->update($crmUpdates);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $stageMsg = "Dear {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your document uploads are saved successfully! Please log in to complete your application fee payment: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 4;
                 $msg = 'Stage 3: Document Uploads saved successfully!';
@@ -1451,6 +1466,11 @@ class DashboardsController extends Controller
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $stageMsg = "Dear {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your application fee payment is confirmed! Please log in to book your V-SAT exam slot: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 5;
                 $msg = 'Stage 4: Admission Fee Payment confirmed!';
@@ -1533,6 +1553,15 @@ class DashboardsController extends Controller
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $slotName = $request->input('exam_slot') ?? 'Slot';
+                    $dateRaw = $request->input('examdate');
+                    $dateStr = $dateRaw ? \Carbon\Carbon::parse($dateRaw)->format('d/m/Y') : '';
+                    $slotInfo = $dateStr ? "({$slotName} on {$dateStr})" : "({$slotName})";
+                    $stageMsg = "Dear {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your V-SAT 2027 exam slot {$slotInfo} is confirmed! Please log in to download your Application Form and Hall Ticket: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 6;
                 $msg = $existingExamSchedule
@@ -2006,5 +2035,49 @@ class DashboardsController extends Controller
     {
         $res = CouponService::removeAppliedCoupon();
         return response()->json($res);
+    }
+
+    /**
+     * Dispatch WhatsApp & SMS milestone notifications to candidate.
+     */
+    protected function dispatchStageNotification(?CrmStudentRegistration $student, string $message, ?Request $request = null): void
+    {
+        if (!$student) {
+            return;
+        }
+
+        try {
+            $cleanPhone = substr(preg_replace('/\D/', '', $student->phoneno ?? ''), -10);
+            if (!$cleanPhone || strlen($cleanPhone) !== 10) {
+                return;
+            }
+
+            $stdName = $student->name ?: 'Student';
+            $appNo = $student->applinano ?: '';
+            $ip = $request?->ip() ?? '127.0.0.1';
+
+            // WhatsApp Notification via SmartPing
+            if (class_exists(\Modules\Sms\Services\WhatsAppService::class)) {
+                app(\Modules\Sms\Services\WhatsAppService::class)->sendStageUpdate(
+                    phone: $cleanPhone,
+                    stageMessage: $message,
+                    candidateName: $stdName,
+                    applicationId: $appNo,
+                    ip: $ip
+                );
+            }
+
+            // SMS Notification via JioCX
+            if (class_exists(\Modules\Sms\Services\SmsService::class)) {
+                app(\Modules\Sms\Services\SmsService::class)->sendStageSms(
+                    phone: $cleanPhone,
+                    message: $message,
+                    name: $stdName,
+                    applicationNo: $appNo
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[DashboardsController] Stage notification dispatch error: ' . $e->getMessage());
+        }
     }
 }

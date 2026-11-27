@@ -174,6 +174,69 @@ class WhatsAppService
     }
 
     /**
+     * Send stage / milestone update notification via WhatsApp (SmartPing API).
+     */
+    public function sendStageUpdate(
+        string $phone,
+        string $stageMessage,
+        ?string $candidateName = null,
+        ?string $applicationId = null,
+        ?string $ip = null
+    ): array {
+        $cfg = config('services.smartping');
+        $cleanPhone = $this->cleanDestination($phone);
+
+        if (strlen($cleanPhone) !== 10) {
+            Log::warning("[WhatsAppService] Invalid phone number for WhatsApp stage update: {$phone}");
+            return [
+                'success' => false,
+                'status' => 'INVALID_PHONE',
+                'message' => 'Destination mobile must be 10 digits.',
+            ];
+        }
+
+        $apiUrl = $cfg['url'] ?? 'https://backend.api-wa.co/campaign/smartping/api/v2';
+        $apiKey = $cfg['api_key'];
+        $campaign = $cfg['otp_campaign'] ?? 'crmadminfo';
+        $userName = $cfg['user_name'] ?? 'Vignan University Tech';
+        $source = $cfg['source'] ?? 'new-landing-page form';
+
+        $templateParams = [$stageMessage];
+
+        $formattedDestination = str_starts_with($cleanPhone, '91') && strlen($cleanPhone) === 12
+            ? ('+' . $cleanPhone)
+            : ('+91' . $cleanPhone);
+
+        $payload = [
+            'apiKey' => $apiKey,
+            'campaignName' => $campaign,
+            'destination' => $formattedDestination,
+            'userName' => $userName,
+            'templateParams' => $templateParams,
+            'source' => $source,
+            'media' => (object)[],
+            'buttons' => [],
+            'carouselCards' => [],
+            'location' => (object)[],
+            'attributes' => (object)[],
+            'paramsFallbackValue' => (object)[],
+        ];
+
+        return $this->dispatchCampaign(
+            payload: $payload,
+            apiUrl: $apiUrl,
+            phone: $cleanPhone,
+            messageText: $stageMessage,
+            campaign: $campaign,
+            var1: $stageMessage,
+            var2: $applicationId,
+            user: $candidateName ?? 'Student',
+            registerNo: $applicationId,
+            ip: $ip ?? request()?->ip() ?? '127.0.0.1'
+        );
+    }
+
+    /**
      * Dispatch HTTP POST to SmartPing API and record tracker log.
      */
     protected function dispatchCampaign(

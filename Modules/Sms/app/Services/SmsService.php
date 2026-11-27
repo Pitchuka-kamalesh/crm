@@ -237,6 +237,28 @@ class SmsService
     }
 
     /**
+     * Send stage / milestone SMS notification via JioCX SMS gateway.
+     */
+    public function sendStageSms(
+        string $phone,
+        string $message,
+        ?string $name = null,
+        ?string $applicationNo = null
+    ): array {
+        $templateId = config('services.jiocx_sms.template_stage') 
+            ?: env('JIOCX_DLT_TEMPLATE_ID_STAGE') 
+            ?: config('services.jiocx_sms.template_otp', '1777179353790244153');
+
+        return $this->send(
+            to: $phone,
+            body: $message,
+            templateId: $templateId,
+            user: $name ?? 'Student',
+            registerNo: $applicationNo
+        );
+    }
+
+    /**
      * Extract trace ID from JioCX SMS response.
      */
     protected function extractTraceId(array|string $body): ?string
