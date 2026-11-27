@@ -18,6 +18,34 @@ use Illuminate\View\View;
 class ApplicationController extends Controller
 {
     /**
+     * Resolve the base64 data URI for the university logo.
+     */
+    public static function getLogoBase64(): string
+    {
+        $candidates = [
+            public_path('images/vignan_logo.jpeg'),
+            base_path('public/images/vignan_logo.jpeg'),
+            __DIR__ . '/../../../../../public/images/vignan_logo.jpeg',
+            public_path('images/vignan-banner-logo.jpg'),
+            base_path('public/images/vignan-banner-logo.jpg'),
+            __DIR__ . '/../../../../../public/images/vignan-banner-logo.jpg',
+        ];
+
+        foreach ($candidates as $filePath) {
+            if (!empty($filePath) && is_file($filePath)) {
+                $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                $mime = ($ext === 'png') ? 'image/png' : 'image/jpeg';
+                $content = @file_get_contents($filePath);
+                if (!empty($content)) {
+                    return 'data:' . $mime . ';base64,' . base64_encode($content);
+                }
+            }
+        }
+
+        return asset('images/vignan_logo.jpeg');
+    }
+
+    /**
      * Show the A4 Admission Application Form in browser with Download PDF toolbar.
      */
     public function show(string $id): View
@@ -25,8 +53,7 @@ class ApplicationController extends Controller
         $student = $this->buildStudentApplicationData($id);
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
-        $logoPath = public_path('images/vignan-logo.png');
-        $logoBase64 = is_file($logoPath) ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))) : asset('images/vignan-logo.png');
+        $logoBase64 = self::getLogoBase64();
 
         return view($viewName, [
             'student' => $student,
@@ -47,27 +74,44 @@ class ApplicationController extends Controller
         $student = $this->buildStudentApplicationData($id);
         $viewName = view()->exists('dashboards::application-form') ? 'dashboards::application-form' : 'application-form';
 
-        if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+        if (class_exists(\Dompdf\Dompdf::class)) {
             try {
-                $logoPath = public_path('images/vignan-logo.png');
-                $logoBase64 = is_file($logoPath) ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))) : asset('images/vignan-logo.png');
+                $logoBase64 = self::getLogoBase64();
 
-                $filename = 'Application_Form_' . ($student->id ?: 'VU') . '_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $student->name ?: 'Candidate') . '.pdf';
-                return \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, [
+                $html = view($viewName, [
                     'student' => $student,
                     'logo' => $logoBase64,
                     'isPdf' => true,
-                ])
-                    ->setOptions([
-                        'isHtml5ParserEnabled' => true,
-                        'isRemoteEnabled' => true,
-                        'isFontSubsettingEnabled' => true,
-                        'defaultFont' => 'Helvetica',
-                        'dpi' => 96,
-                        'chroot' => [public_path(), base_path()],
-                    ])
-                    ->setPaper('a4', 'portrait')
-                    ->download($filename);
+                ])->render();
+
+                $tempDir = storage_path('app/temp');
+                if (!is_dir($tempDir)) {
+                    @mkdir($tempDir, 0777, true);
+                }
+
+                $options = new \Dompdf\Options();
+                $options->set('isHtml5ParserEnabled', true);
+                $options->set('isRemoteEnabled', true);
+                $options->set('isFontSubsettingEnabled', true);
+                $options->set('defaultFont', 'Helvetica');
+                $options->set('dpi', 96);
+                $options->set('tempDir', $tempDir);
+                $options->set('chroot', [public_path(), base_path(), $tempDir, storage_path()]);
+
+                $dompdf = new \Dompdf\Dompdf($options);
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('a4', 'portrait');
+
+                $dompdf->render();
+
+                $renderedPdf = $dompdf->output();
+
+                $filename = 'Application_Form_' . ($student->id ?: 'VU') . '_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $student->name ?: 'Candidate') . '.pdf';
+
+                return response($renderedPdf, 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]);
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::warning('DomPDF generation error: ' . $e->getMessage());
             }
@@ -75,7 +119,7 @@ class ApplicationController extends Controller
 
         return view($viewName, [
             'student' => $student,
-            'logo' => asset('images/vignan-logo.png'),
+            'logo' => self::getLogoBase64(),
             'downloadUrl' => route('application.download', ['id' => $id]),
             'autoPrint' => false,
         ]);
@@ -381,8 +425,12 @@ class ApplicationController extends Controller
                 'ssc_marks_conducted' => !empty($academicDetails?->tenth_marks_conducted) ? $academicDetails->tenth_marks_conducted : '-',
                 'ssc_marks_earned' => !empty($academicDetails?->tenth_marks_earned) ? $academicDetails->tenth_marks_earned : '-',
                 'ssc_percentage' => ($tenthPercentage && $tenthPercentage > 0) ? number_format($tenthPercentage, 2) . ' %' : '-',
-                'inter_college' => !empty($academicDetails?->pu2_college_name) ? $academicDetails->pu2_college_name : '-',
+                
+                'inter_college' => !empty($academicDetails?->pu2_college_name) ? ($academicDetails->pu2_college_name . (!empty($academicDetails?->pu2_campus_location) ? ' (' . $academicDetails->pu2_campus_location . ')' : '')) : '-',
+                'inter_campus_location' => $academicDetails?->pu2_campus_location ?? '-',
                 'inter_board' => !empty($academicDetails?->pu2_study_board) ? $academicDetails->pu2_study_board : '-',
+                'inter_group' => !empty($academicDetails?->pu2_group) ? $academicDetails->pu2_group : '-',
+                                
                 'inter_year' => !empty($academicDetails?->pu2_passed_year) ? $academicDetails->pu2_passed_year : '-',
                 'inter_roll' => !empty($academicDetails?->pu2_roll_no) ? $academicDetails->pu2_roll_no : '-',
                 'inter_marks_conducted' => !empty($academicDetails?->pu2_marks_conducted) ? $academicDetails->pu2_marks_conducted : '-',

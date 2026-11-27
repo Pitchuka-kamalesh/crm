@@ -321,6 +321,7 @@ class LoginController extends Controller
         }
 
         $activeRoleId = $user->getActiveRoleId();
+        Log::info('User Role ID Debug', ['role_id' => $user->getActiveRoleId()]);
         session(['user.role_id' => $activeRoleId]);
 
         // Direct to role-based landing page without updating any database tables
@@ -341,7 +342,7 @@ class LoginController extends Controller
         if (empty($cleanPhone) && !$employeeByCode) {
             return response()->json([
                 'success' => false,
-                'message' => 'Please enter your registered mobile number or employee code.',
+                'message' => 'Please Enter New/Registered Mobile Number or Employee Code.',
             ], 422);
         }
         if (!$employeeByCode) {

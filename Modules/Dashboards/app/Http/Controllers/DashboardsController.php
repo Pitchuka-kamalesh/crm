@@ -54,6 +54,8 @@ class DashboardsController extends Controller
             $activeStep = 1;
         }
 
+        self::ensureAcademicColumns();
+
         // Resolve CRM student record from crm.student_registration
         $crmStudent = null;
         try {
@@ -452,6 +454,8 @@ class DashboardsController extends Controller
             'defaultCountry',
             'defaultState',
             'defaultDistrict',
+            'selectedCountryId',
+            'academicStates',
             'applicationData',
             'examSchedule',
             'cleanPhone',
@@ -929,10 +933,12 @@ class DashboardsController extends Controller
                     'tenth_marks_conducted' => ['nullable', 'numeric'],
                     'tenth_marks_earned' => ['nullable', 'numeric'],
                     'tenth_percentage' => ['nullable', 'numeric'],
+                    'inter_campus_location' => ['nullable', 'string', 'max:255'],
                 ];
 
                 if (!$isPhd) {
                     $validationRules['inter_college'] = ['required', 'string', 'max:255'];
+                     $validationRules['inter_group'] = ['required', 'string', 'in:MPC,BIPC,MBIPC'];
                     $validationRules['city'] = ['required', 'string', 'max:100'];
                     $validationRules['jr_state'] = ['required', 'string', 'max:100'];
                     $validationRules['jr_district'] = ['required', 'string', 'max:100'];
@@ -944,6 +950,7 @@ class DashboardsController extends Controller
                     $validationRules['pu2_percentage'] = ['required', 'numeric'];
                 } else {
                     $validationRules['inter_college'] = ['nullable', 'string', 'max:255'];
+                    $validationRules['inter_group'] = ['nullable', 'string', 'in:MPC,BIPC,MBIPC'];
                     $validationRules['city'] = ['nullable', 'string', 'max:100'];
                     $validationRules['jr_state'] = ['nullable', 'string', 'max:100'];
                     $validationRules['jr_district'] = ['nullable', 'string', 'max:100'];
@@ -983,6 +990,7 @@ class DashboardsController extends Controller
 
                 $request->validate($validationRules, [
                     'inter_college.required' => 'College Name / Institute Name is required.',
+                    'inter_group.required' => 'Please select Intermediate Group (MPC, BIPC, or MBIPC).',
                     'city.required' => 'College City is required.',
                     'jr_state.required' => 'College State is required.',
                     'jr_district.required' => 'College District is required.',
@@ -1126,6 +1134,9 @@ class DashboardsController extends Controller
                         'tenth_marks_earned' => $tenthEarned,
                         'tenth_percentage' => $tenthPct,
                         'pu2_college_name' => $request->input('inter_college') ?? $request->input('pu2_college_name'),
+                        'pu2_campus_location' => $request->input('inter_campus_location') ?? $request->input('pu2_campus_location') ?? $request->input('campus_location'),
+                        'pu2_group' => $request->input('inter_group') ?? $request->input('pu2_group'),
+
                         'pu2_study_board' => $courseChoice,
                         'pu2_board_of_study' => $courseChoice,
                         'pu2_college_city' => $cityVal,
@@ -1612,6 +1623,7 @@ class DashboardsController extends Controller
                 ADD COLUMN IF NOT EXISTS tenth_school_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS tenth_current_status VARCHAR(50),
                 ADD COLUMN IF NOT EXISTS pu2_board_of_study VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS pu2_campus_location VARCHAR(255),
                 ADD COLUMN IF NOT EXISTS ug_college_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg_college_state VARCHAR(100),
                 ADD COLUMN IF NOT EXISTS pg2_college_state VARCHAR(100),

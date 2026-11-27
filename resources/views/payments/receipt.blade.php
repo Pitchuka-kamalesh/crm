@@ -397,7 +397,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Admission Registration Fee (Stage 1)</td>
+                        <td>Application Fee (Stage 1)</td>
                         <td class="right">₹ {{ number_format($baseFee, 2) }}</td>
                     </tr>
                     @if($defDiscount > 0)

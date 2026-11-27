@@ -32,7 +32,7 @@ use Illuminate\View\View;
 class RegistrationController extends Controller
 {
     /**
-     * Show the Official Vignan Admission Registration Form.
+     * Show the Official Vignan Application Form.
      */
     public function show(Request $request): View
     {

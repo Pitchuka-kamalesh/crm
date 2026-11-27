@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Admission Onboarding Portal | VFSTR Vignan University</title>
+    <title>V-SAT 2027 Portal | VFSTR Vignan University</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/vignan-shield-clean.png">
 
@@ -2183,7 +2183,7 @@
                 <div class="brand-title-wrap">
                     <div style="display:flex; align-items:center; gap:0.45rem; flex-wrap:nowrap;">
                         <span class="brand-name-main">VIGNAN'S</span>
-                        <span class="brand-tag">Student Portal</span>
+                        <span class="brand-tag">V-SAT 2027 Portal</span>
                     </div>
                     <span class="brand-accred-sub">DEEMED TO BE UNIVERSITY &bull; NAAC A+</span>
                 </div>
@@ -2232,11 +2232,14 @@
                     </h1>
                     <span class="welcome-pill">
                         <span class="welcome-dot"></span>
-                        <span>Academic Year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}</span>
+                        <span>Academic Year 2027</span>
                     </span>
                 </div>
                 <p class="welcome-subtitle">
                     {{ $programName ?: 'B.Tech - Bachelor of Technology' }} @if($branchName)({{ $branchName }})@endif &bull; {{ $campusName ?: 'Vadlamudi Campus' }}
+                </p>
+                <p style="font-size: 0.78rem; color: #64748b; margin: 3px 0 0 0; line-height: 1.35;">
+                    info@vignan.ac.in &bull; 0863-2344700 / 701
                 </p>
             </div>
 
@@ -2697,11 +2700,11 @@
                                 <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
                                 <div class="mockup-field-row-2">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">College Name / Institute Name:</label>
+                                        <label class="mockup-label">School Name / Institute Name:</label>
                                         <input type="text" name="school_co_name" id="tenth_school_name" class="mockup-input" value="{{ $academicDetails?->tenth_school_name }}" placeholder="School / Institute Name">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">Board:</label>
+                                        <label class="mockup-label">10th Class Board:</label>
                                         <input type="text" name="boad_of_study" id="tenth_study_board" class="mockup-input" value="{{ $academicDetails?->tenth_study_board }}" placeholder="Board (e.g. BSEAP, CBSE, ICSE)">
                                     </div>
                                 </div>
@@ -2709,14 +2712,14 @@
                                 <!-- Row 2: City, State, District (3 Columns) -->
                                 <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">City:</label>
+                                        <label class="mockup-label">School City:</label>
                                         <input type="text" name="tenth_school_city" id="tenth_school_city" class="mockup-input" value="{{ $academicDetails?->tenth_school_city }}" placeholder="Enter City">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">State:</label>
+                                        <label class="mockup-label">School State:</label>
                                         <select name="tenth_school_state" id="geo-tenth-state-select" class="mockup-select" onchange="onTenthStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->tenth_school_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -2728,7 +2731,7 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">District:</label>
+                                        <label class="mockup-label">School District:</label>
                                         <select name="tenth_school_district" id="geo-tenth-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -2794,29 +2797,47 @@
                                 <input type="hidden" name="course_choice" value="{{ $academicDetails?->pu2_study_board ?? '' }}">
                                 <input type="hidden" name="undertaking_60_pct" id="undertaking_60_pct_input" value="{{ $academicDetails?->undertaking_60_pct ?? '' }}">
 
-                                <!-- Row 1: College Name / Institute Name & Board (2 Columns) -->
-                                <div class="mockup-field-row-2">
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">College Name / Institute Name: <span class="req-inter" style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_college" id="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name">
+                            <!-- Row 1: College Name / Institute Name, Board & Intermediate Group (3 Columns) -->
+                                    <div class="mockup-field-row-3">
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">College Name / Institute Name: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                            <input type="text" name="inter_college" id="inter_college" class="mockup-input" value="{{ $academicDetails?->pu2_college_name }}" placeholder="Enter College / Institute Name">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">Inter College Board: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                            <input type="text" name="inter_board_of_study" id="inter_board_of_study" class="mockup-input" value="{{ $academicDetails?->pu2_study_board ?? $academicDetails?->pu2_board_of_study }}" placeholder="Enter Board (e.g. BIEAP, CBSE, TSBIE)">
+                                        </div>
+                                        <div class="mockup-field-group">
+                                            <label class="mockup-label">Group / Stream: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                            <select name="inter_group" id="inter_group" class="mockup-select">
+                                                <option value="">-- Select Group --</option>
+                                                @php
+                                                    $curGroup = strtoupper(trim($academicDetails?->pu2_group ?? ''));
+                                                @endphp
+                                                <option value="MPC" {{ $curGroup === 'MPC' ? 'selected' : '' }}>MPC</option>
+                                                <option value="BIPC" {{ $curGroup === 'BIPC' ? 'selected' : '' }}>BIPC</option>
+                                                <option value="MBIPC" {{ $curGroup === 'MBIPC' ? 'selected' : '' }}>MBIPC</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="mockup-field-group">
-                                        <label class="mockup-label">Board: <span class="req-inter" style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="inter_board_of_study" id="inter_board_of_study" class="mockup-input" value="{{ $academicDetails?->pu2_study_board ?? $academicDetails?->pu2_board_of_study }}" placeholder="Enter Board (e.g. BIEAP, CBSE, TSBIE)">
-                                    </div>
-                                </div>
 
-                                <!-- Row 2: City, State, District (3 Columns) -->
-                                <div class="mockup-field-row-3" style="margin-top: 0.85rem;">
+
+
+                                <!-- Row 2: Campus Location, Campus City, Campus State, Campus District (4 Columns) -->
+                                <div class="mockup-field-row-4" style="margin-top: 0.85rem;">
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">City: <span class="req-inter" style="color:#ef4444;">*</span></label>
-                                        <input type="text" name="city" id="inter_city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter College City">
+                                        <label class="mockup-label">College Location: <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">(Ex:Ramanbhavan,1-town)</span></label>
+                                        <input type="text" name="inter_campus_location" id="inter_campus_location" class="mockup-input" value="{{ $academicDetails?->pu2_campus_location }}" placeholder="Enter Campus Location">
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">State: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">College City: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <input type="text" name="city" id="inter_city" class="mockup-input" value="{{ $academicDetails?->city ?? $academicDetails?->pu2_college_city }}" placeholder="Enter Campus City">
+                                    </div>
+                                    <div class="mockup-field-group">
+                                        <label class="mockup-label">College State: <span class="req-inter" style="color:#ef4444;">*</span></label>
                                         <select name="jr_state" id="geo-inter-state-select" class="mockup-select" onchange="onInterStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->pu2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -2828,7 +2849,7 @@
                                         </select>
                                     </div>
                                     <div class="mockup-field-group">
-                                        <label class="mockup-label">District: <span class="req-inter" style="color:#ef4444;">*</span></label>
+                                        <label class="mockup-label">College District: <span class="req-inter" style="color:#ef4444;">*</span></label>
                                         <select name="jr_district" id="geo-inter-district-select" class="mockup-select">
                                             <option value="">-- Select District --</option>
                                             @foreach($districts as $d)
@@ -2932,7 +2953,7 @@
                                         <label class="mockup-label">State: <span class="req-ug" style="color:#ef4444;">*</span></label>
                                         <select name="ug_college_state" id="geo-ug-state-select" class="mockup-select" onchange="onUgStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->ug_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -3033,7 +3054,7 @@
                                         <label class="mockup-label">State: <span class="req-pg" style="color:#ef4444;">*</span></label>
                                         <select name="pg_college_state" id="geo-pg-state-select" class="mockup-select" onchange="onPgStateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->pg_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -3171,7 +3192,7 @@
                                         <label class="mockup-label">State:</label>
                                         <select name="pg2_college_state" id="geo-pg2-state-select" class="mockup-select" onchange="onPg2StateChange(this.value)">
                                             <option value="">-- Select State --</option>
-                                            @foreach($states as $s)
+                                            @foreach(($academicStates ?? $states) as $s)
                                                 @php
                                                     $curState = $academicDetails?->pg2_college_state ?: ($personalInfo?->state ?: ($defaultState ?? 'Andhra Pradesh'));
                                                     $isStateSel = ($curState == $s->state_name || $curState == $s->state_id);
@@ -4398,10 +4419,10 @@
                                     <img src="/images/vignan-logo.png" alt="Vignan Logo" style="height: 38px; width: auto; object-fit: contain;">
                                 </div>
                                 <h3 style="font-size: 1.18rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem;">
-                                    Admission Registration Fee Paid &amp; Verified
+                                    Application Fee Paid &amp; Verified
                                 </h3>
                                 <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.45;">
-                                    Your provisional seat confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to @if(($degreeLevel ?? '') === 'phd') application form preview & download. @else exam slot booking. @endif
+                                    Your Application confirmation is successfully recorded in the university admissions ledger. You may now download your accounts-verified fee receipt below and proceed to @if(($degreeLevel ?? '') === 'phd') application form preview & download. @else exam slot booking. @endif
                                 </p>
                                 <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                                     <a href="{{ route('payu.payu_receipt') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #0f172a; color: #ffffff; padding: 0.6rem 1.35rem; border-radius: 8px; font-size: 0.84rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">
@@ -4419,7 +4440,7 @@
                                 $feeBreakdown = \App\Services\CouponService::calculateFeeBreakdown($studentAppliNo, \App\Services\CouponService::DEFAULT_ADMISSION_FEE);
                             @endphp
                             <div style="margin-bottom: 0.65rem; text-align: left;">
-                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Admission Registration Fee Payment</h4>
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Application Fee Payment</h4>
                                 <p style="font-size: 0.76rem; color: #64748b; margin: 0.1rem 0 0 0;">Pay securely to lock your provisional registration and instantly receive your verified admission receipt.</p>
                             </div>
 
@@ -4655,18 +4676,23 @@
                                 @if($isSlotLocked)
                                     <input type="hidden" name="exam_slot" value="{{ $currentSlot }}">
                                 @endif
-                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
-                                    <span>✓</span>
-                                    <span id="slotLiveStatus">
-                                        @php
-                                            $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
-                                        @endphp
-                                        @if($isSlotLocked)
-                                            Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
-                                        @else
-                                            Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
-                                        @endif
-                                    </span>
+                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span>✓</span>
+                                        <span id="slotLiveStatus">
+                                            @php
+                                                $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
+                                            @endphp
+                                            @if($isSlotLocked)
+                                                Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                            @else
+                                                Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div style="margin-top: 4px; margin-left: 18px; font-size: 0.74rem; color: #047857; font-weight: 600;">
+                                        Exam is at university, It is a computer based test
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -4727,7 +4753,7 @@
                 @php
                     $appStudent = $applicationData ?? \App\Http\Controllers\ApplicationController::buildStudentApplicationData((string) ($appNo ?: ($user?->usercode ?? '0')));
                     $student = $appStudent;
-                    $formLogo = asset('images/vignan-logo.png');
+                    $formLogo = asset('images/vignan-banner-logo.jpg');
                     $paid = strtolower($appStudent->payment_status ?? '') === 'completed';
                     $dobFormatted = !empty($appStudent->dob) ? \Carbon\Carbon::parse($appStudent->dob)->format('d M Y') : 'N/A';
                     $formDocs = [
@@ -5158,19 +5184,19 @@
                             </div>
 @else
 <!-- Form Header Banner -->
-                            <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
+                            <table style="width: 100%; border-collapse: collapse; background: #1DA1F2; border-bottom: 4px solid #2E5A97;">
                             <tr>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
                                     <div style="background: #ffffff; border-radius: 8px; padding: 6px 12px; display: inline-block;">
                                         <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 60px; max-width: 190px; object-fit: contain; display: block;">
                                     </div>
-                                    <div style="color: #A9BCD6; font-size: 9px; padding-top: 8px;">
+                                    <div style="color: #F0F9FF; font-size: 9px; padding-top: 8px;">
                                         Application date: {{ $appStudent->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
                                     </div>
                                 </td>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%; text-align: right;">
                                     <div style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">APPLICATION FORM</div>
-                                    <div style="color: #A9BCD6; font-size: 11px; line-height: 1.5; margin-top: 4px;">
+                                    <div style="color: #F0F9FF; font-size: 11px; line-height: 1.5; margin-top: 4px;">
                                         University Admission Application<br>
                                         Please read all details carefully before signing
                                     </div>
@@ -5206,9 +5232,7 @@
                                         <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 10px; margin-bottom: 4px; color: #12875B; background: #E2F5EC; border: 1px solid #a7f3d0;">
                                             PAYMENT {{ strtoupper($appStudent->payment_status ?? 'COMPLETED') }}
                                         </span><br>
-                                        <span style="display: inline-block; font-size: 8.5px; font-weight: 800; padding: 4px 10px; border-radius: 10px; color: #B25E09; background: #FDF0DC; border: 1px solid #fde68a;">
-                                            PROVISIONAL SEAT ALLOTMENT
-                                        </span>
+                                        
                                     </td>
                                 </tr>
                             </table>
@@ -5236,9 +5260,9 @@
                                 <div>
                                     <div style="font-size: 9px; font-weight: 700; color: #6B778A; text-transform: uppercase;">Booked Entrance Exam Slot</div>
                                     <div style="font-size: 11.5px; font-weight: 800; color: #0F2A4A; margin-top: 2px;">
-                                        📅 {{ $appStudent->exam_date ?: 'Stage 5 Scheduled' }}
+                                         {{ $appStudent->exam_date ?: 'Stage 5 Scheduled' }}
                                     </div>
-                                    <div style="font-size: 10px; color: #B25E09; font-weight: 700;">⏰ {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
+                                    <div style="font-size: 10px; color: #B25E09; font-weight: 700;"> {{ $appStudent->exam_slot ?: 'Session Assigned' }}</div>
                                 </div>
                                 @else
                                 <div>
@@ -5300,15 +5324,18 @@
                                 </h4>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
                                     <thead>
-                                        <tr style="background: #F8FAFC; border-bottom: 2px solid #E2E8F0; text-align: left; color: #475569; font-weight: 800;">
-                                            <th style="padding: 6px 8px; width: 18%;">Standard / Level</th>
-                                            <th style="padding: 6px 8px; width: 28%;">School / College Name</th>
-                                            <th style="padding: 6px 8px; width: 20%;">Board / University</th>
-                                            <th style="padding: 6px 8px; width: 10%; text-align: center;">Year</th>
-                                            <th style="padding: 6px 8px; width: 12%;">Roll / Hall Ticket</th>
-                                            <th style="padding: 6px 8px; width: 12%; text-align: right;">Percentage</th>
+                                       <tr style="background: #F8FAFC; border-bottom: 2px solid #E2E8F0; text-align: left; color: #475569; font-weight: 800;">
+                                        <th style="padding: 6px 8px; width: 17%;">Standard / Level</th>
+                                        <th style="padding: 6px 8px; width: 26%;">School / College Name</th>
+                                        <th style="padding: 6px 8px; width: 18%;">Board / University</th>
+                                        <th style="padding: 6px 8px; width: 13%; text-align: center; font-weight: 800; color: #0F2A4A;">Group / Stream</th>
+                                        <th style="padding: 6px 8px; width: 8%; text-align: center;">Year</th>
+                                        <th style="padding: 6px 8px; width: 10%;">Roll / Hall Ticket</th>
+                                        <th style="padding: 6px 8px; width: 8%; text-align: right;">Percentage</th>
                                         </tr>
                                     </thead>
+
+
                                     <tbody>
                                         <!-- 10th Standard -->
                                         <tr style="border-bottom: 1px solid #E3E8EF;">
@@ -5333,6 +5360,7 @@
                                                 {{ (!empty($appStudent->academic->ssc_percentage) && $appStudent->academic->ssc_percentage !== 'N/A' && $appStudent->academic->ssc_percentage !== '-') ? $appStudent->academic->ssc_percentage : '-' }}
                                             </td>
                                         </tr>
+
                                         <!-- 12th / Intermediate -->
                                         <tr style="{{ (!empty($appStudent->academic->ug_college) && $appStudent->academic->ug_college !== '-' || ($appStudent->degree_level ?? '') === 'mtech' || ($appStudent->degree_level ?? '') === 'phd') ? 'border-bottom: 1px solid #E3E8EF;' : '' }}">
                                             <td style="padding: 6px 8px; font-weight: 800; color: #0F2A4A;">
@@ -5346,6 +5374,11 @@
                                             <td style="padding: 6px 8px; color: #475569;">
                                                 {{ (!empty($appStudent->academic->inter_board) && $appStudent->academic->inter_board !== '-') ? $appStudent->academic->inter_board : '-' }}
                                             </td>
+
+                                                <td style="padding: 6px 8px; text-align: center; font-weight: 800; color: #0F2A4A;">
+                                                    {{ (!empty($appStudent->academic->inter_group) && $appStudent->academic->inter_group !== '-') ? $appStudent->academic->inter_group : '-' }}
+                                                </td>
+
                                             <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #0F2A4A;">
                                                 {{ (!empty($appStudent->academic->inter_year) && $appStudent->academic->inter_year !== '-') ? $appStudent->academic->inter_year : '-' }}
                                             </td>
@@ -5445,7 +5478,7 @@
                                         <!-- 4. PAYMENT INFORMATION -->
                                         <div style="background: #ffffff; border: 1px solid #E3E8EF; border-radius: 10px; padding: 12px 14px; height: 100%; box-sizing: border-box;">
                                             <h4 style="margin: 0 0 8px; padding: 0 0 6px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF;">
-                                                4. Admission Registration Fee
+                                                4. Application Fee
                                             </h4>
                                             <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
                                                 <tr><td style="width: 38%; color: #6B778A; padding: 4px 0;">Paid Amount</td><td style="font-weight: 800; border-bottom: 1px solid #E3E8EF; padding: 4px 0; color: #15803d; font-size: 12px;">INR {{ number_format((float) $appStudent->payment_amount) }}</td></tr>
@@ -5512,8 +5545,8 @@
                             <div style="background: #FFF8EA; border: 1px solid #F2DDB0; border-left: 4px solid #B25E09; border-radius: 10px; padding: 9px 14px; margin-top: 10px; font-size: 9.5px; line-height: 1.5; color: #1B2430;">
                                 <strong style="color: #B25E09; letter-spacing: 0.4px;">INSTRUCTIONS &amp; DECLARATION</strong>
                                 <ul style="margin: 3px 0 0; padding-left: 14px;">
-                                    <li>This is a provisional seat allotment. Original certificates must be presented at the time of campus verification.</li>
-                                    <li>Tuition fee, merit scholarships, and entrance test criteria are governed by university admissions norms.</li>
+                                   <li>This is a submitted application form for your admission to Vignan University.</li>
+                                    <li>For more details, phone: +91 863 2344700, 7799 427 427, Website: https://vignan.ac.in/admissions. For all information, discussions, and clarifications, please contact the Admissions Office at Vignan University.</li>
                                     <li>I hereby declare that all entries made in this application are authentic and true to the best of my knowledge.</li>
                                 </ul>
                             </div>
@@ -5890,11 +5923,9 @@
                     <div class="section-box stage7-banner-box" style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 1.25rem;">
                         <div class="stage7-banner-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <div style="width:44px; height:44px; border-radius:10px; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0;">
-                                    🏆
-                                </div>
+                                
                                 <div>
-                                    <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e3a8a;">V-SAT 2026 National Entrance Examination</h4>
+                                    <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e3a8a;">V-SAT University Entrance Examination</h4>
                                     <span style="font-size:0.8rem; color:#475569;">Application No: <strong>#{{ $appNo }}</strong> &bull; Candidate: <strong>{{ $displayName }}</strong></span>
                                 </div>
                             </div>
@@ -5951,11 +5982,18 @@
 
                         <!-- University Notice regarding V-SAT merit rankings -->
                         <div class="stage7-notice-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
-                            <strong style="color: #14532d; font-weight: 800; display: block; margin-bottom: 0.3rem;">University Examination &amp; Counseling Notice:</strong>
-                            <p style="margin: 0;">
-                                Candidate details for Application <strong>#{{ $appNo }}</strong> have been verified and confirmed across all onboarding stages in accordance with university admissions policy. Official V-SAT entrance scores, rank percentiles, and merit scholarship category allocations are generated and published following examination slot completion.
-                            </p>
+                            <strong style="color: #14532d; font-weight: 800; display: block; margin-bottom: 0.3rem;">Information:</strong><p style="margin: 0;">
+                           Candidate details for Application <strong>#{{ $appNo }}</strong> have been verified and confirmed across all onboarding stages in accordance with university admissions policy. Official V-SAT entrance scores, rank percentiles, and merit scholarship category allocations are generated and published following examination slot completion.
+                           </p>
                         </div>
+
+                          <div class="stage7-notice-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: #334155; line-height: 1.55;">
+                            <strong style="color: #14532d; font-weight: 800; display: block; margin-bottom: 0.3rem;">V-SAT/Exams Results &amp; Section:</strong><p style="margin: 0;">
+
+                         Official V-SAT entrance scores, rank percentiles, and other related information will be generated and published only after the results have been processed and officially released.
+                           </p>
+                        </div>
+
                     </div>
 
                     <div class="step-footer-actions">
@@ -5985,7 +6023,7 @@
                 &copy; 2026 VFSTR &bull; Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University). All rights reserved.
             </div>
             <div>
-                Student Admission Portal &bull; <a href="https://vignan.ac.in" target="_blank">Official University Site</a>
+                V-SAT 2027 Portal &bull; <a href="https://vignan.ac.in" target="_blank">Official University Site</a>
             </div>
         </div>
     </footer>
@@ -6645,7 +6683,7 @@
                         <div class="terms-card-row row-green">
                             <div class="terms-badge-pill badge-green">2</div>
                             <div class="terms-row-content">
-                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University for the academic year {{ \Modules\Crm\Models\CrmStudentRegistration::getAcademicYearInfo()['academic_year_short'] }}.
+                                I agree to abide by all the academic rules, codes of conduct, fee regulations, and attendance policies of VFSTR Vignan University.
                             </div>
                         </div>
 

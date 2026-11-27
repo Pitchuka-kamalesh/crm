@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class CouponService
 {
     /**
-     * Default Admission Registration Fee (INR).
+     * Default Application Fee (INR).
      */
     public const DEFAULT_ADMISSION_FEE = 1200.00;
 
