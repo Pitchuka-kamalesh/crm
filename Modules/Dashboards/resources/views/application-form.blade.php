@@ -156,6 +156,9 @@
         <span>📄</span> Application Form &bull; {{ $student->name }} (ID: {{ $student->student_id }})
     </div>
     <div style="display:flex; gap:8px;">
+        <a href="{{ request('from') ?: (url()->previous() ?: route('crm.stdsearch', ['tab' => 'stdsearch'])) }}" style="background:#334155; color:#ffffff; text-decoration:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.25);">
+            ← Back
+        </a>
         <button type="button" onclick="window.print()" style="background:#ffffff; color:#0F2A4A; border:none; padding:5px 14px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">
             🖨️ Print Form
         </button>

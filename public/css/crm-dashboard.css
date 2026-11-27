@@ -2065,6 +2065,12 @@ select.form-control-custom {
     border: 1px solid #fecaca;
 }
 
+.pill-na {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
 .step-sub-text {
     font-size: 0.68rem;
     color: #64748b;

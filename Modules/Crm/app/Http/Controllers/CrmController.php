@@ -151,13 +151,14 @@ class CrmController extends Controller
         try {
             $crmQuery = CrmStudentRegistration::with([
                 'program', 'branch', 'campus', 'state', 'country',
-                'personalInfo', 'academicDetails', 'payDetail'
+                'personalInfo', 'academicDetails', 'payDetail', 'uploads', 'examSchedule'
             ]);
             if ($searchQuery) {
                 $crmQuery->where(function ($q) use ($searchQuery) {
                     $q->where('name', 'like', "%{$searchQuery}%")
                         ->orWhere('applinano', 'like', "%{$searchQuery}%")
-                        ->orWhere('phoneno', 'like', "%{$searchQuery}%");
+                        ->orWhere('phoneno', 'like', "%{$searchQuery}%")
+                        ->orWhere('crmid', 'like', "%{$searchQuery}%");
                 });
             }
             if ($filterPhone) {

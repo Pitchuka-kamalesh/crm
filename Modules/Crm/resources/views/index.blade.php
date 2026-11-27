@@ -438,15 +438,15 @@
                         <table class="crm-table" id="registerListTable">
                             <thead>
                                 <tr>
-                                    <th>Application Number</th>
-                                    <th>Student Name</th>
-                                    <th>Mobile Number</th>
-                                    <th style="text-align: center;">Registration Form</th>
-                                    <th style="text-align: center;">Payment</th>
-                                    <th style="text-align: center;">Personal Details</th>
-                                    <th style="text-align: center;">Academic Details</th>
-                                    <th style="text-align: center;">Application Download</th>
-                                    <th style="text-align: center;">VSAT Result</th>
+                                    <th style="white-space: nowrap;">App No</th>
+                                    <th style="white-space: nowrap;">CRM ID</th>
+                                    <th style="white-space: nowrap;">Ph No</th>
+                                    <th style="white-space: nowrap;">Mobile</th>
+                                    <th style="text-align: center; white-space: nowrap;">Personal Det</th>
+                                    <th style="text-align: center; white-space: nowrap;">Acad Deat</th>
+                                    <th style="text-align: center; white-space: nowrap;">Docs</th>
+                                    <th style="text-align: center; white-space: nowrap;">Payment</th>
+                                    <th style="text-align: center; white-space: nowrap;">Preview</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -456,6 +456,8 @@
                                             $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"/></svg>';
                                         } elseif ($type === 'due') {
                                             $iconSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+                                        } elseif ($type === 'na') {
+                                            $iconSvg = '';
                                         } else {
                                             $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
                                         }
@@ -466,9 +468,21 @@
                                 @endphp
                                 @forelse($allStudents as $std)
                                     @php
-                                        $phone = $std->mobile ?? $std->phoneno ?? '';
-                                        $appliNo = $std->application_no ?? $std->applinano ?? 'N/A';
-                                        $name = $std->student_name ?? $std->name ?? 'Candidate';
+                                        $appliNo = trim((string)($std->application_no ?? $std->applinano ?? ''));
+                                        $appliDisplay = (!empty($appliNo) && $appliNo !== '0') ? $appliNo : 'NA';
+                                        $name = trim((string)($std->student_name ?? $std->name ?? 'Candidate'));
+
+                                        $crmId = trim((string)($std->crmid ?? ''));
+                                        if (empty($crmId) && !empty($appliNo) && $appliNo !== 'NA') {
+                                            $crmId = \Modules\Crm\Services\CrmIdService::getOrGenerateByAppli($appliNo) ?: '';
+                                        }
+                                        $crmIdDisplay = (!empty($crmId) && strtoupper($crmId) !== 'NA') ? $crmId : 'NA';
+
+                                        // Phone & Mobile
+                                        $cleanPhone = preg_replace('/\D/', '', (string)($std->phoneno ?? ''));
+                                        $cleanMobile = preg_replace('/\D/', '', (string)($std->personalInfo?->parentphono ?? ($std->mobile ?? '')));
+                                        $phNoDisplay = (!empty($cleanPhone) && strlen($cleanPhone) >= 10) ? substr($cleanPhone, -10) : 'NA';
+                                        $mobileDisplay = (!empty($cleanMobile) && strlen($cleanMobile) >= 10) ? substr($cleanMobile, -10) : 'NA';
 
                                         // Real stages from crm.student_registration
                                         $s1 = strtolower(trim((string)($std->stage1 ?? '')));
@@ -476,178 +490,163 @@
                                         $s3 = strtolower(trim((string)($std->stage3 ?? '')));
                                         $s4 = strtolower(trim((string)($std->stage4 ?? '')));
                                         $s5 = strtolower(trim((string)($std->stage5 ?? '')));
-                                        $s6 = strtolower(trim((string)($std->stage6 ?? '')));
 
-                                        // 1. Registration Form
-                                        $hasAppli = (!empty($appliNo) && $appliNo !== 'N/A');
-                                        $stdStatus = strtolower(trim((string)($std->std_status ?? '')));
-                                        if ($hasAppli || in_array($stdStatus, ['applied', 'registered', 'verified', 'admitted', 'enrolled', 'completed'])) {
-                                            $st1Pill = 'pill-done'; $st1Type = 'done'; $st1Icon = '✓'; $st1Text = 'Done';
+                                        // 1. Personal Details (stage1)
+                                        $isS1Done = in_array($s1, ['completed', 'paid', 'approved', 'done']) || (!empty($std->personalInfo) && !empty($std->personalInfo->gender));
+                                        if ($isS1Done) {
+                                            $st1Pill = 'pill-done'; $st1Type = 'done'; $st1Text = 'Completed';
+                                        } elseif (in_array($s1, ['pending', 'in_progress', 'draft'])) {
+                                            $st1Pill = 'pill-pending'; $st1Type = 'pending'; $st1Text = 'Pending';
                                         } else {
-                                            $st1Pill = 'pill-pending'; $st1Type = 'pending'; $st1Icon = '⏳'; $st1Text = 'Pending';
+                                            $st1Pill = 'pill-na'; $st1Type = 'na'; $st1Text = 'NA';
                                         }
 
-                                        // 2. Payment (stage1 fee payment)
-                                        if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
-                                            $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Icon = '✓'; $st2Text = 'Done';
-                                        } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st2Pill = 'pill-danger'; $st2Type = 'due'; $st2Icon = '✕'; $st2Text = 'Fee Due';
+                                        // 2. Academic Details (stage2)
+                                        $isS2Done = in_array($s2, ['completed', 'approved', 'done']) || (!empty($std->academicDetails) && (!empty($std->academicDetails->tenth_school_name) || !empty($std->academicDetails->pu2_college_name)));
+                                        if ($isS2Done) {
+                                            $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Text = 'Completed';
+                                        } elseif (in_array($s2, ['pending', 'in_progress'])) {
+                                            $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Text = 'Pending';
                                         } else {
-                                            $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Icon = '⏳'; $st2Text = 'Pending';
+                                            $st2Pill = 'pill-na'; $st2Type = 'na'; $st2Text = 'NA';
                                         }
 
-                                        // 3. Personal Details (stage2)
-                                        if (in_array($s2, ['completed', 'approved', 'done'])) {
-                                            $st3Pill = 'pill-done'; $st3Type = 'done'; $st3Icon = '✓'; $st3Text = 'Done';
+                                        // 3. Document Uploads (stage3)
+                                        $isS3Done = in_array($s3, ['completed', 'approved', 'done']) || !empty($std->uploads);
+                                        if ($isS3Done) {
+                                            $st3Pill = 'pill-done'; $st3Type = 'done'; $st3Text = 'Completed';
+                                        } elseif (in_array($s3, ['pending', 'in_progress'])) {
+                                            $st3Pill = 'pill-pending'; $st3Type = 'pending'; $st3Text = 'Pending';
                                         } else {
-                                            $st3Pill = 'pill-pending'; $st3Type = 'pending'; $st3Icon = '⏳'; $st3Text = 'Pending';
+                                            $st3Pill = 'pill-na'; $st3Type = 'na'; $st3Text = 'NA';
                                         }
 
-                                        // 4. Academic Details (stage3)
-                                        if (in_array($s3, ['completed', 'approved', 'done'])) {
-                                            $st4Pill = 'pill-done'; $st4Type = 'done'; $st4Icon = '✓'; $st4Text = 'Done';
+                                        // 4. Payment (stage4)
+                                        $hasPaidRecord = in_array($s4, ['paid', 'completed', 'approved', 'done']) 
+                                            || ($std->payDetail && ($std->payDetail->txnstatus === 'success' || (float)($std->payDetail->paidamount ?? 0) > 0))
+                                            || !empty($std->receipt);
+                                        if ($hasPaidRecord) {
+                                            $st4Pill = 'pill-done'; $st4Type = 'done'; $st4Text = 'Paid';
+                                        } elseif (in_array($s4, ['not_paid', 'unpaid', 'due', 'failed'])) {
+                                            $st4Pill = 'pill-danger'; $st4Type = 'due'; $st4Text = 'Fee Due';
+                                        } elseif (in_array($s4, ['pending', 'in_progress'])) {
+                                            $st4Pill = 'pill-pending'; $st4Type = 'pending'; $st4Text = 'Pending';
                                         } else {
-                                            $st4Pill = 'pill-pending'; $st4Type = 'pending'; $st4Icon = '⏳'; $st4Text = 'Pending';
+                                            $st4Pill = 'pill-na'; $st4Type = 'na'; $st4Text = 'NA';
                                         }
 
-                                        // 5. Application Download (stage4)
-                                        if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
-                                            $st5Pill = 'pill-done'; $st5Type = 'done'; $st5Icon = '✓'; $st5Text = 'Done';
-                                        } else {
-                                            $st5Pill = 'pill-pending'; $st5Type = 'pending'; $st5Icon = '⏳'; $st5Text = 'Pending';
-                                        }
+                                        // 5. Exam Slot Booking & Preview Availability
+                                        $progLevel = strtoupper(trim((string)($std->programlevel ?? '')));
+                                        $isPhd = ($progLevel === 'PHD' || str_contains($progLevel, 'DOCTOR') || str_contains(strtoupper($std->program?->program_name ?? ''), 'PHD'));
+                                        $isSlotBooked = $isPhd || in_array($s5, ['completed', 'approved', 'done', 'booked', 'paid']) || !empty($std->examSchedule);
 
-                                        // 6. VSAT Result (stage5)
-                                        $isVsatDone = in_array($s5, ['completed', 'approved', 'done', 'qualified']);
-                                        if ($isVsatDone) {
-                                            $st6Pill = 'pill-done'; $st6Type = 'done'; $st6Icon = '✓'; $st6Text = 'Done';
-                                        } else {
-                                            $st6Pill = 'pill-pending'; $st6Type = 'pending'; $st6Icon = '⏳'; $st6Text = 'Pending';
-                                        }
+                                        $canPreview = $hasPaidRecord && $isSlotBooked && ($appliDisplay !== 'NA');
 
-                                        // Detailed student payload for instant interactive stage popup
+                                        // Detailed student payload for interactive stage modal if clicked
                                         $studentPayload = [
-                                            'appliNo' => $appliNo,
+                                            'appliNo' => $appliDisplay,
                                             'name' => $name,
-                                            'phone' => $phone,
-                                            'email' => $std->emailid ?? 'N/A',
+                                            'phone' => $phNoDisplay,
+                                            'mobile' => $mobileDisplay,
+                                            'crmid' => $crmIdDisplay,
+                                            'email' => $std->emailid ?? 'NA',
                                             'campus' => $std->campus?->campus_name ?? $std->campuscode ?? 'VFSTR Vadlamudi Main Campus',
                                             'programLevel' => $std->programlevel ?? 'UG (Undergraduate)',
                                             'program' => $std->program?->program_name ?? $std->programid ?? 'B.Tech',
                                             'branch' => $std->branch?->branch_name ?? $std->branchid ?? 'Computer Science & Engineering',
                                             'state' => $std->state?->state_name ?? $std->stateid ?? 'Andhra Pradesh',
                                             'country' => $std->country?->country_name ?? 'India',
-                                            'regDate' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y, h:i A') : 'N/A',
+                                            'regDate' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y, h:i A') : 'NA',
                                             'status' => $std->std_status ?? 'Registered',
                                             'stages' => [
-                                                'registration' => ['pill' => $st1Pill, 'icon' => $st1Icon, 'text' => $st1Text],
-                                                'payment' => ['pill' => $st2Pill, 'icon' => $st2Icon, 'text' => $st2Text],
-                                                'personal' => ['pill' => $st3Pill, 'icon' => $st3Icon, 'text' => $st3Text],
-                                                'academic' => ['pill' => $st4Pill, 'icon' => $st4Icon, 'text' => $st4Text],
-                                                'application' => ['pill' => $st5Pill, 'icon' => $st5Icon, 'text' => $st5Text],
-                                                'vsat' => ['pill' => $st6Pill, 'icon' => $st6Icon, 'text' => $st6Text],
+                                                'personal' => ['pill' => $st1Pill, 'text' => $st1Text],
+                                                'academic' => ['pill' => $st2Pill, 'text' => $st2Text],
+                                                'docs' => ['pill' => $st3Pill, 'text' => $st3Text],
+                                                'payment' => ['pill' => $st4Pill, 'text' => $st4Text],
                                             ],
-                                            'personal' => [
-                                                'parentName' => $std->personalInfo?->parent_name ?? 'N/A',
-                                                'parentPhone' => $std->personalInfo?->parentphono ?? 'N/A',
-                                                'dob' => !empty($std->personalInfo?->dob) ? \Carbon\Carbon::parse($std->personalInfo->dob)->format('d M Y') : 'N/A',
-                                                'gender' => $std->personalInfo?->gender ?? $std->gender ?? 'N/A',
-                                                'caste' => $std->personalInfo?->caste_category ?? 'General / OC',
-                                                'village' => $std->personalInfo?->village ?? 'N/A',
-                                                'city' => $std->personalInfo?->city_mandal ?? 'N/A',
-                                                'district' => $std->personalInfo?->district ?? 'N/A',
-                                                'state' => $std->personalInfo?->state ?? ($std->state?->state_name ?? 'N/A'),
-                                                'pincode' => $std->personalInfo?->pincode ?? 'N/A',
-                                                'referredBy' => $std->personalInfo?->referedby ?? 'Direct / University Admissions Portal',
-                                            ],
-                                            'academic' => [
-                                                'isFilled' => !empty($std->academicDetails?->tenth_school_name) || !empty($std->academicDetails?->pu2_college_name) || in_array($s3, ['completed', 'approved', 'done']),
-                                                'tenthSchool' => $std->academicDetails?->tenth_school_name ?? 'N/A',
-                                                'tenthBoard' => $std->academicDetails?->tenth_study_board ?? 'N/A',
-                                                'tenthCity' => $std->academicDetails?->tenth_school_city ?? 'N/A',
-                                                'tenthYear' => $std->academicDetails?->tenth_passed_year ?? 'N/A',
-                                                'tenthMarks' => !empty($std->academicDetails?->tenth_cgpa) ? ($std->academicDetails->tenth_cgpa . ' CGPA') : (!empty($std->academicDetails?->tenth_marks) ? $std->academicDetails->tenth_marks : 'N/A'),
-                                                'interCollege' => $std->academicDetails?->pu2_college_name ?? 'N/A',
-                                                'interBoard' => $std->academicDetails?->pu2_study_board ?? 'N/A',
-                                                'interCity' => $std->academicDetails?->pu2_college_city ?? 'N/A',
-                                                'interYear' => $std->academicDetails?->pu2_passed_year ?? 'N/A',
-                                                'interMarks' => !empty($std->academicDetails?->pu2_cgpa) ? ($std->academicDetails->pu2_cgpa . ' CGPA') : (!empty($std->academicDetails?->pu2_marks) ? $std->academicDetails->pu2_marks : 'N/A'),
-                                                'interStatus' => $std->academicDetails?->pu2_current_status ?? 'N/A',
-                                                'ugCollege' => $std->academicDetails?->ug_college_name ?? null,
-                                                'ugUniversity' => $std->academicDetails?->ug_university_board ?? null,
-                                                'ugYear' => $std->academicDetails?->ug_passed_year ?? null,
-                                                'ugMarks' => !empty($std->academicDetails?->ug_cgpa) ? ($std->academicDetails->ug_cgpa . ' CGPA') : (!empty($std->academicDetails?->ug_marks) ? $std->academicDetails->ug_marks : null),
-                                            ],
-                                            'payment' => [
-                                                'status' => $st2Text === 'Done' ? 'Paid & Verified' : ($st2Text === 'Fee Due' ? 'Fee Due / Unpaid' : 'Pending'),
-                                                'feePayable' => number_format((float)($std->payDetail?->feepayable ?? 1200), 2),
-                                                'amountPaid' => number_format((float)($std->payDetail?->paidamount ?? ($st2Text === 'Done' ? 1200 : 0)), 2),
-                                                'txnId' => $std->payDetail?->txnid ?? ($st2Text === 'Done' ? 'TXN' . substr(md5($appliNo), 0, 10) : 'N/A'),
-                                                'payType' => $std->payDetail?->paytype ?? 'Online (PayU Payment Gateway)',
-                                                'txnDate' => !empty($std->payDetail?->txndatetime) ? \Carbon\Carbon::parse($std->payDetail->txndatetime)->format('d M Y, h:i A') : ($st2Text === 'Done' ? 'Completed & Verified' : 'Awaiting Payment'),
-                                                'coupon' => $std->payDetail?->defcoupon ?? '27EARLYB100',
-                                                'couponAmount' => number_format((float)($std->payDetail?->defcouponamount ?? 500), 2),
-                                            ],
-                                            'application' => [
-                                                'isDownloaded' => in_array($s4, ['completed', 'approved', 'done', 'downloaded']),
-                                                'statusText' => in_array($s4, ['completed', 'approved', 'done', 'downloaded']) ? 'Downloaded' : 'Not Downloaded',
-                                                'appliNo' => $appliNo,
-                                                'date' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y') : 'N/A',
-                                            ],
-                                            'vsat' => [
-                                                'isDone' => $isVsatDone,
-                                                'hallTicket' => $isVsatDone ? ('VSAT' . substr($appliNo, -6)) : 'Pending Schedule',
-                                                'examStatus' => $isVsatDone ? 'Qualified' : 'Pending',
-                                                'score' => $isVsatDone ? '86 / 120' : 'Pending (Exam Not Taken)',
-                                                'rank' => $isVsatDone ? 'State Rank: 1,280' : 'Pending (Results Awaiting)',
-                                                'concession' => $isVsatDone ? '25% Merit Tuition Fee Concession' : 'Pending VSAT Examination & Results',
-                                            ]
                                         ];
                                     @endphp
                                     <tr class="register-track-row" 
-                                        id="student-row-{{ $appliNo }}"
-                                        data-search="{{ strtolower($appliNo . ' ' . $name . ' ' . $phone) }}"
+                                        id="student-row-{{ $appliDisplay }}"
+                                        data-search="{{ strtolower($appliDisplay . ' ' . $crmIdDisplay . ' ' . $name . ' ' . $phNoDisplay . ' ' . $mobileDisplay) }}"
                                         data-student="{{ json_encode($studentPayload) }}">
                                         <td>
-                                            <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
+                                            <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliDisplay }}</strong>
                                         </td>
                                         <td>
-                                            <div style="font-weight: 700; color: #0f172a;">{{ $name }}</div>
-                                            @if(!empty($std->gender))
-                                                <div style="font-size: 0.72rem; color: #64748b;">{{ $std->gender }}</div>
+                                            @if($crmIdDisplay !== 'NA')
+                                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #1e40af; background: #eff6ff; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #bfdbfe; white-space: nowrap;">
+                                                    {{ $crmIdDisplay }}
+                                                </span>
+                                            @else
+                                                <span class="tracking-pill pill-na">NA</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0f172a;">+91 {{ $phone ?: 'N/A' }}</span>
+                                            @if($phNoDisplay !== 'NA')
+                                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0f172a; white-space: nowrap;">+91 {{ $phNoDisplay }}</span>
+                                            @else
+                                                <span class="tracking-pill pill-na">NA</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($mobileDisplay !== 'NA')
+                                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #475569; white-space: nowrap;">+91 {{ $mobileDisplay }}</span>
+                                            @else
+                                                <span class="tracking-pill pill-na">NA</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st1Pill, $st1Text, $st1Type, $appliNo, 'registration', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st1Pill, $st1Text, $st1Type, $appliDisplay, 'personal', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st2Pill, $st2Text, $st2Type, $appliNo, 'payment', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st2Pill, $st2Text, $st2Type, $appliDisplay, 'academic', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st3Pill, $st3Text, $st3Type, $appliNo, 'personal', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st3Pill, $st3Text, $st3Type, $appliDisplay, 'docs', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliNo, 'academic', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliDisplay, 'payment', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st5Pill, $st5Text, $st5Type, $appliNo, 'application', $isTrackingPage) !!}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style="text-align: center;">
-                                                {!! $renderStagePill($st6Pill, $st6Text, $st6Type, $appliNo, 'vsat', $isTrackingPage) !!}
+                                                @if($canPreview)
+                                                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap;">
+                                                        <a href="{{ route('application.show', ['id' => $appliDisplay, 'from' => request()->fullUrl()]) }}" 
+                                                           class="btn-action-sm btn-verify" 
+                                                           style="padding: 4px 9px; font-size: 0.76rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
+                                                           title="Preview Application Dossier">
+                                                            <span>👁️ Preview</span>
+                                                        </a>
+                                                        <a href="{{ route('application.show', ['id' => $appliDisplay, 'print' => 1, 'from' => request()->fullUrl()]) }}" 
+                                                           target="_blank" 
+                                                           class="btn-action-sm" 
+                                                           style="padding: 4px 9px; font-size: 0.76rem; border-radius: 6px; background: #0284c7; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
+                                                           title="Print Application Form">
+                                                            <span>🖨️ Print</span>
+                                                        </a>
+                                                        <a href="{{ route('application.download', ['id' => $appliDisplay]) }}" 
+                                                           class="btn-action-sm" 
+                                                           style="padding: 4px 9px; font-size: 0.76rem; border-radius: 6px; background: #059669; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
+                                                           title="Download Official PDF">
+                                                            <span>📥 Download</span>
+                                                        </a>
+                                                    </div>
+                                                @elseif(!$hasPaidRecord && ($s4 === 'na' || empty($s4)) && ($s5 === 'na' || empty($s5)))
+                                                    <span class="tracking-pill pill-na">NA</span>
+                                                @elseif(!$hasPaidRecord)
+                                                    <span class="tracking-pill pill-danger" style="white-space: nowrap;" title="Admission Fee Payment Pending">Fee Pending</span>
+                                                @else
+                                                    <span class="tracking-pill pill-pending" style="white-space: nowrap;" title="Exam Slot Booking Pending">Slot Pending</span>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -708,15 +707,15 @@
                             }
 
                             const headers = [
-                                'Application Number',
-                                'Student Name',
-                                'Mobile Number',
-                                'Registration Form',
+                                'App No',
+                                'CRM ID',
+                                'Ph No',
+                                'Mobile',
+                                'Personal Det',
+                                'Acad Deat',
+                                'Docs',
                                 'Payment',
-                                'Personal Details',
-                                'Academic Details',
-                                'Application Download',
-                                'VSAT Result'
+                                'Preview / Status'
                             ];
 
                             const rows = Array.from(table.querySelectorAll('tbody tr.register-track-row'));
@@ -737,30 +736,26 @@
                                 const cells = row.querySelectorAll('td');
                                 if (cells.length < 9) return;
 
-                                // 1. Application Number
                                 const appliNo = (cells[0].querySelector('strong')?.textContent || cells[0].textContent || '').trim();
-
-                                // 2. Student Name
-                                const nameEl = cells[1].querySelector('div');
-                                const name = (nameEl ? nameEl.textContent : cells[1].textContent).trim();
-
-                                // 3. Mobile Number
-                                let phone = (cells[2].textContent || '').trim().replace(/\s+/g, ' ');
-
-                                // 4 to 9. Stages
-                                const stageVals = [];
-                                for (let i = 3; i <= 8; i++) {
-                                    const pill = cells[i].querySelector('.tracking-pill');
-                                    let txt = pill ? pill.textContent : cells[i].textContent;
-                                    txt = (txt || '').replace(/^[✓⏳❌—\s]+/, '').trim();
-                                    stageVals.push(txt || 'Pending');
-                                }
+                                const crmId = (cells[1].textContent || '').trim();
+                                const phNo = (cells[2].textContent || '').trim().replace(/\s+/g, ' ');
+                                const mobile = (cells[3].textContent || '').trim().replace(/\s+/g, ' ');
+                                const personal = (cells[4].textContent || '').trim();
+                                const academic = (cells[5].textContent || '').trim();
+                                const docs = (cells[6].textContent || '').trim();
+                                const payment = (cells[7].textContent || '').trim();
+                                const preview = (cells[8].textContent || '').trim().replace(/\s+/g, ' ');
 
                                 const rowData = [
                                     '"' + appliNo.replace(/"/g, '""') + '"',
-                                    '"' + name.replace(/"/g, '""') + '"',
-                                    '"' + phone.replace(/"/g, '""') + '"',
-                                    ...stageVals.map(s => '"' + s.replace(/"/g, '""') + '"')
+                                    '"' + crmId.replace(/"/g, '""') + '"',
+                                    '"' + phNo.replace(/"/g, '""') + '"',
+                                    '"' + mobile.replace(/"/g, '""') + '"',
+                                    '"' + personal.replace(/"/g, '""') + '"',
+                                    '"' + academic.replace(/"/g, '""') + '"',
+                                    '"' + docs.replace(/"/g, '""') + '"',
+                                    '"' + payment.replace(/"/g, '""') + '"',
+                                    '"' + preview.replace(/"/g, '""') + '"'
                                 ];
 
                                 csvLines.push(rowData.join(','));
