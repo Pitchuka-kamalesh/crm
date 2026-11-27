@@ -320,7 +320,7 @@ class PayUController extends Controller
         // 4. Student stage — never auto-create an admitted student
         $studentReg = CrmStudentRegistration::where('applinano', $applino)->first();
         if ($studentReg) {
-            $studentReg->update(['stage1' => 'paid', 'stage4' => 'paid', 'log_timestamp' => now()]);
+            $studentReg->update(['stage4' => 'paid', 'log_timestamp' => now()]);
         } else {
             Log::error('[PayU] Paid but no registration', ['applino' => $applino, 'txnid' => $txnid]);
         }

@@ -5953,7 +5953,7 @@
                             <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Admission Status</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#16a34a; margin-top:0.25rem;">
-                                    {{ ($crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
+                                    {{ ($crmStudent?->stage4 === 'paid' || $crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
                                 </div>
                                 <span style="font-size:0.75rem; color:#15803d; font-weight:600;">Stage 7 of {{ count($stages) }} Verified</span>
                             </div>

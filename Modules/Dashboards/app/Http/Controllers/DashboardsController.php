@@ -85,7 +85,7 @@ class DashboardsController extends Controller
 
         if ($hasPaidRecord && $crmStudent && $crmStudent->stage4 !== 'paid') {
             try {
-                $crmStudent->update(['stage4' => 'paid', 'stage1' => 'paid']);
+                $crmStudent->update(['stage4' => 'paid']);
             } catch (\Throwable $e) {}
         }
 
@@ -103,8 +103,11 @@ class DashboardsController extends Controller
                         'name' => ($displayName && $displayName !== 'Applicant') ? $displayName : ($user?->name ?: $cleanPhone),
                         'phoneno' => $cleanPhone,
                         'emailid' => $user?->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
-                        'stage1' => $hasPaidRecord ? 'paid' : 'pending',
+                        'stage1' => 'pending',
                         'stage2' => 'pending',
+                        'stage3' => 'pending',
+                        'stage4' => $hasPaidRecord ? 'paid' : 'pending',
+                        'stage5' => 'pending',
                         'std_status' => $hasPaidRecord ? 'Admitted' : 'Registered',
                         'campuscode' => 'VAD',
                         'programlevel' => 'UG',
@@ -301,7 +304,7 @@ class DashboardsController extends Controller
             } elseif ($mCode === 'EXAM00002') {
                 $isCompleted = ($val === 'completed' || $val === 'paid' || !empty($examSchedule));
             } elseif ($mCode === 'CRMM0004') {
-                $isCompleted = ($val === 'completed' || ($personalInfo !== null && !empty($personalInfo->gender)));
+                $isCompleted = ($val === 'completed' || $val === 'paid' || ($personalInfo !== null && !empty($personalInfo->gender)));
             } elseif ($mCode === 'CRMM0005') {
                 $hasAcademicFilled = false;
                 if ($academicDetails) {
@@ -690,8 +693,11 @@ class DashboardsController extends Controller
                         'name' => $user?->name ?: $cleanPhone,
                         'phoneno' => $cleanPhone,
                         'emailid' => $user?->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
-                        'stage1' => $hasPaidRecord ? 'paid' : 'pending',
+                        'stage1' => 'pending',
                         'stage2' => 'pending',
+                        'stage3' => 'pending',
+                        'stage4' => $hasPaidRecord ? 'paid' : 'pending',
+                        'stage5' => 'pending',
                         'std_status' => $hasPaidRecord ? 'Admitted' : 'Registered',
                         'campuscode' => 'VAD',
                         'programlevel' => 'UG',
@@ -1442,7 +1448,6 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $crmStudent->update([
                         'stage4' => 'paid',
-                        'stage1' => 'paid',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
