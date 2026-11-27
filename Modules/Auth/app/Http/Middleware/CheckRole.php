@@ -5,31 +5,40 @@ namespace Modules\Auth\Http\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-
-
 use Symfony\Component\HttpFoundation\Response;
+
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string ...$roles)
+    /**
+     * Handle an incoming request.
+     */
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        $user    = Auth::user();
-        $allowed = array_map(fn ($r) => (int) trim($r), $roles);
+        $user = Auth::user();
+        $userRoleId = method_exists($user, 'getActiveRoleId') ? (string) $user->getActiveRoleId() : (string) ($user->role_id ?? '');
+        $primaryRoleId = (string) ($user->role_id ?? '');
 
-        // Same role the menus/controllers use (session role switch + roles_assigned + login.role_id)
-        $activeRole = (int) $user->getActiveRoleId();
+        // Flatten roles whether passed as comma-separated string ('role:1,2,3') or multiple args ('role:1,2')
+        $allowedRoles = [];
+        foreach ($roles as $r) {
+            foreach (explode(',', (string) $r) as $subRole) {
+                $trimmed = trim($subRole);
+                if ($trimmed !== '') {
+                    $allowedRoles[] = $trimmed;
+                }
+            }
+        }
 
-        if (!in_array($activeRole, $allowed, true)) {
-            Log::warning('[CheckRole] 403', [
-                'usercode'    => $user->usercode,
-                'active_role' => $activeRole,
-                'login_role'  => $user->role_id,
-                'allowed'     => $allowed,
-                'path'        => $request->path(),
-            ]);
+        // Super Admin (Role 1) has universal access
+        if ($primaryRoleId === '1' || $userRoleId === '1') {
+            return $next($request);
+        }
+
+        if (!in_array($userRoleId, $allowedRoles) && !in_array($primaryRoleId, $allowedRoles)) {
             abort(403, 'Unauthorized access. You do not have the required permissions.');
         }
 

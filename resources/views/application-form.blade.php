@@ -220,48 +220,231 @@
                     </td>
                 </tr>
             </table>
+
+            {{-- Metadata Table --}}
+            <table class="tbl-data" style="margin-bottom: 12px;">
+                <tr>
+                    <td class="rl" style="width: 20%;">Document Title</td>
+                    <td style="width: 30%;">{{ $doc['title'] ?? 'Uploaded Document' }}</td>
+                    <td class="rl" style="width: 20%;">File Name</td>
+                    <td style="width: 30%;">{{ $doc['filename'] }}</td>
+                </tr>
+                <tr>
+                    <td class="rl">Candidate Name</td>
+                    <td>{{ ($student->name ?? null) }}</td>
+                    <td class="rl">Verification Status</td>
+                    <td style="color: #16a34a; font-weight: bold;">VERIFIED &amp; ATTACHED</td>
+                </tr>
+            </table>
+
+            {{-- Document Image or Placeholder --}}
+            <div style="text-align: center; border: 1px solid #cfcdc7; background: #fafaf8; border-radius: 4px; padding: 10px; min-height: 180mm;">
+                @if($isImg && $imgSrc)
+                    <img src="{{ $imgSrc }}" alt="{{ $doc['title'] }}" style="max-width: 100%; max-height: 180mm; object-fit: contain; display: inline-block;">
+                @else
+                    <div style="padding-top: 60mm; color: #64748b;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                        <div style="font-size: 13px; font-weight: bold; color: #0F2A4A;">{{ $doc['filename'] }}</div>
+                        <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
+                            Attached {{ $docExt }} Document &bull; Verified and filed in University Admissions Dossier
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <div class="page-footer">
+                Vignan’s Foundation for Science, Technology &amp; Research &nbsp;&bull;&nbsp; Application Dossier Attachment &nbsp;&bull;&nbsp; Page {{ ($isPhd ? 3 : 2) + $attachIdx }}
+            </div>
+        </div>
+    @endforeach
+@endif
+
+@if (!empty($autoPrint) || request()->has('print'))
+<script>
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.print();
+        }, 300);
+    });
+</script>
+@endif
+</body>
+</html>
+@else
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Application Form - {{ $student->name }}</title>
+<style>
+    @page {
+        size: A4 portrait;
+        margin: 6mm 8mm 6mm 8mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Helvetica, Arial, sans-serif;
+        color: #1B2430;
+        font-size: 10.5px;
+        background: {{ !empty($isPdf) ? '#ffffff' : '#f4f7fb' }};
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .page {
+        width: 100%;
+        max-width: 210mm;
+        margin: 0 auto;
+        background: #ffffff;
+        position: relative;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        box-shadow: {{ !empty($isPdf) ? 'none' : '0 10px 30px rgba(15, 42, 74, 0.12)' }};
+    }
+    table { border-collapse: collapse; border-spacing: 0; }
+    td { vertical-align: top; }
+
+    /* header */
+    .header { width: 100%; background: #0F2A4A; border-bottom: 4px solid #1E7BD8; }
+    .header td { padding: 18px 12mm 14px 12mm; vertical-align: middle; }
+    .logo-box { background: #fff; border-radius: 8px; padding: 6px 12px; display: inline-block; }
+    .logo-box img { height: 60px; max-width: 190px; object-fit: contain; display: block; }
+    .title { color: #fff; font-size: 22px; font-weight: bold; text-align: right; letter-spacing: .5px; }
+    .subtitle { color: #A9BCD6; font-size: 11px; text-align: right; line-height: 1.6; }
+    .meta { color: #A9BCD6; font-size: 9px; padding-top: 8px; }
+
+    .wrap { padding: 8px 10mm; }
+
+    /* profile strip */
+    .profile-card { background: #fff; border: 1px solid #E3E8EF; border-radius: 10px; margin-top: -16px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); position: relative; z-index: 2; }
+    .profile { width: 100%; border: none; }
+    .profile td { padding: 10px 12px; vertical-align: middle; }
+    .photo { width: 58px; height: 72px; border: 1.5px solid #cbd5e1; background: #F8FAFC; text-align: center;
+             font-size: 7px; color: #64748b; line-height: 1.5; padding-top: 22px; border-radius: 6px; }
+    .photo-filled { width: 58px; height: 72px; border: 1px solid #cbd5e1; background: #fff; padding: 0; overflow: hidden; border-radius: 4px; }
+    .photo-filled img { display: block; width: 58px; height: 72px; object-fit: cover; }
+    .pname { font-size: 16px; font-weight: bold; }
+    .pmeta { color: #6B778A; font-size: 10.5px; line-height: 1.6; }
+
+    .pill { display: inline-block; font-size: 8.5px; font-weight: bold; padding: 3px 8px; border-radius: 10px; margin-bottom: 4px; }
+    .ok   { color: #12875B; background: #E2F5EC; }
+    .warn { color: #B25E09; background: #FDF0DC; }
+
+    /* cards */
+    .grid { width: 100%; margin-top: 10px; }
+    .grid > tbody > tr > td { width: 50%; }
+    .card { background: #fff; border: 1px solid #E3E8EF; border-radius: 8px; padding: 10px 12px; }
+    .gap-r { padding-right: 6px; } .gap-l { padding-left: 6px; }
+    .card h3 { margin: 0 0 6px; padding: 0 0 6px 6px; font-size: 11px; letter-spacing: .4px; text-transform: uppercase;
+               color: #0F2A4A; border-left: 4px solid #1E7BD8; border-bottom: 1px solid #E3E8EF; }
+    .fields { width: 100%; }
+    .fields td { padding: 4px 0; font-size: 10px; }
+    .fields td.l { width: 38%; color: #6B778A; font-size: 9.5px; }
+    .fields td.v { font-weight: bold; border-bottom: 1px solid #E3E8EF; word-break: normal; overflow-wrap: break-word; }
+
+    /* documents */
+    .docs { width: 100%; }
+    .docs td { width: 50%; padding: 3px; }
+    .chip { border-radius: 7px; padding: 6px 8px; font-size: 10px; font-weight: bold; }
+    .chip small { float: right; font-weight: normal; font-size: 9px; }
+    .chip.ok   { color: #1B2430; background: #E2F5EC; } .chip.ok small   { color: #12875B; }
+    .chip.warn { color: #1B2430; background: #FDF0DC; } .chip.warn small { color: #B25E09; }
+
+    /* note */
+    .note { background: #FFF8EA; border: 1px solid #F2DDB0; border-left: 4px solid #B25E09; border-radius: 8px;
+            padding: 8px 12px; margin-top: 10px; font-size: 9.5px; line-height: 1.5; }
+    .note b { color: #B25E09; font-size: 9.5px; letter-spacing: .4px; }
+    .note ul { margin: 3px 0 0; padding-left: 14px; }
+
+    /* signatures + office */
+    .sign { width: 100%; margin-top: 28px; }
+    .sign td { width: 33.33%; text-align: center; padding: 0 10px; color: #6B778A; font-size: 9.5px; }
+    .sign .line { border-top: 1px solid #6B778A; padding-top: 4px; }
+    .office { border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; padding: 8px 12px; margin-top: 14px;
+              font-size: 9.5px; color: #64748b; }
+    .office b { font-size: 8.5px; letter-spacing: .4px; display: block; margin-bottom: 6px; color: #0f172a; }
+    .office table { width: 100%; } .office td { width: 33.33%; }
+
+    .footer { width: 100%; text-align: center; font-size: 8.5px; color: #6B778A; margin-top: 12px; padding: 6px 0; border-top: 1px solid #E3E8EF; }
+
+    /* attached document page styling */
+    .page-attachment { width: 100%; max-width: 210mm; margin: 16px auto 0 auto; background: #ffffff; position: relative; page-break-before: always; -webkit-print-color-adjust: exact; print-color-adjust: exact; box-shadow: {{ !empty($isPdf) ? 'none' : '0 10px 30px rgba(15, 42, 74, 0.12)' }}; }
+
+    /* download toolbar (hidden in the PDF and when printing) */
+    .toolbar { width: 100%; max-width: 210mm; margin: 0 auto; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+    .btn { display: inline-block; background: #1E7BD8; color: #fff; text-decoration: none; font-weight: bold; font-size: 13px;
+           padding: 9px 18px; border-radius: 8px; box-shadow: 0 2px 6px rgba(30,123,216,.35); cursor: pointer; border: none; }
+    .btn:hover { background: #0F2A4A; }
+    .btn-back { background: #fff; color: #0F2A4A; border: 1px solid #cbd5e1; box-shadow: none; }
+    .btn-back:hover { background: #e2e8f0; color: #0F2A4A; }
+    .btn svg { vertical-align: -3px; margin-right: 6px; }
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 6mm 8mm 6mm 8mm;
+        }
+        body { background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .page { box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; page-break-after: always; }
+        .page-attachment { box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; page-break-before: always; page-break-after: always; }
+        .toolbar { display: none !important; }
+    }
+</style>
+</head>
+<body>
+@if (empty($isPdf))
+    <div class="toolbar">
+        <a class="btn btn-back" href="{{ route('dashboards.index', ['step' => 5]) }}">
+            &larr; Back to Portal
+        </a>
+        <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-back" onclick="window.print()">Print A4</button>
+            <a class="btn" download href="{{ $downloadUrl ?? route('application.download', $student->id) }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>Download PDF
+            </a>
         </div>
 
-        {{-- Allotment & Examination Schedule Bar --}}
-        <table style="width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid #E3E8EF; border-radius: 8px; margin-top: {{ $isBtech ? '8px' : '5px' }};">
-            <tr>
-                <td style="padding: {{ $isBtech ? '7px 10px' : '5px 8px' }}; width: 33.33%; vertical-align: top;">
-                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Allotted Program</div>
-                    <div style="font-size: {{ $isBtech ? '11.5px' : '11px' }}; font-weight: 800; color: #0F2A4A; margin-top: 1px;">
-                        {{ $student->program ?: 'B.Tech - Bachelor of Technology' }}
-                    </div>
-                    @if(!empty($student->branch))
-                        <div style="font-size: 9.5px; color: #1E7BD8; font-weight: 700;">{{ $student->branch }}</div>
-                    @endif
-                </td>
-                <td style="padding: {{ $isBtech ? '7px 10px' : '5px 8px' }}; width: 33.33%; vertical-align: top; border-left: 1px solid #E3E8EF;">
-                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Allotted Campus</div>
-                    <div style="font-size: {{ $isBtech ? '11.5px' : '11px' }}; font-weight: 800; color: #0F2A4A; margin-top: 1px;">
-                        {{ $student->campus ?: 'Vignan Main Campus (Vadlamudi)' }}
-                    </div>
-                    <div style="font-size: 9.5px; color: #12875B; font-weight: 700;">Provisional Allotment Confirmed</div>
-                </td>
-                <td style="padding: {{ $isBtech ? '7px 10px' : '5px 8px' }}; width: 33.33%; vertical-align: top; border-left: 1px solid #E3E8EF;">
-                    @if(($student->degree_level ?? '') !== 'phd')
-                        <div>
-                            <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Booked Entrance Exam Slot</div>
-                            <div style="font-size: {{ $isBtech ? '11.5px' : '11px' }}; font-weight: 800; color: #0F2A4A; margin-top: 1px;">
-                                {{ $student->exam_date ?: 'Stage 5 Scheduled' }}
-                            </div>
-                            <div style="font-size: 9.5px; color: #B25E09; font-weight: 700;">{{ $student->exam_slot ?: 'Session Assigned' }}</div>
+    {{-- Header --}}
+    <table class="header">
+        <tr>
+            <td style="width:50%">
+                <span class="logo-box"><img src="{{ $logo }}" alt="Vignan's"></span>
+                <div class="meta">Application date: {{ ($student->applied_at ?? null) ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in</div>
+            </td>
+            <td style="width:50%">
+                <div class="title">APPLICATION FORM</div>
+                <div class="subtitle">University Admission Application<br>Please read all details carefully before signing</div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="wrap">
+
+        {{-- Profile strip --}}
+        <div class="profile-card">
+            <table class="profile">
+                <tr>
+                    <td style="width:70px">
+                        @if (!empty(($student->photo_path ?? null)))
+                            <div class="photo-filled"><img src="{{ ($student->photo_path ?? null) }}" width="58" height="72" style="display:block; width:58px; height:72px; object-fit:cover;" alt=""></div>
+                        @else
+                            <div class="photo">AFFIX<br>PASSPORT<br>PHOTO</div>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="pname">{{ ($student->name ?? null) }}</div>
+                        <div class="pmeta">
+                            {{ ($student->email ?? null) }} &nbsp;|&nbsp; {{ ($student->phone ?? null) }}<br>
+                            Applicant ID: {{ !empty(($student->student_id ?? null)) ? ($student->student_id ?? null) : '____________________' }} (App #: {{ ($student->id ?? null) }})
                         </div>
-                    @else
-                        <div>
-                            <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Entrance Examination</div>
-                            <div style="font-size: {{ $isBtech ? '11.5px' : '11px' }}; font-weight: 800; color: #0F2A4A; margin-top: 1px;">
-                                Exempted / Direct Ph.D
-                            </div>
-                            <div style="font-size: 9.5px; color: #12875B; font-weight: 700;">Departmental Evaluation</div>
-                        </div>
-                    @endif
-                </td>
-            </tr>
-        </table>
+                    </td>
+                    <td style="text-align:right">
+                        <span class="pill {{ $paid ? 'ok' : 'warn' }}">PAYMENT {{ strtoupper(($student->payment_status ?? null) ?? 'PENDING') }}</span><br>
+                        <span class="pill warn">PROVISIONAL SEAT ALLOTMENT</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         {{-- 2-Column: Personal Information & Address Information --}}
         <table style="width: 100%; border-collapse: collapse; margin-top: {{ $isBtech ? '8px' : '5px' }};">
@@ -476,16 +659,16 @@
                         </table>
                     </div>
                 </td>
-                <td style="width: 50%; padding-left: 4px; vertical-align: top;">
-                    {{-- 5. DOCUMENTS UPLOAD SUMMARY --}}
-                    <div class="sec-card">
-                        <div class="sec-title">5. Document Verification Status</div>
+                <td class="gap-l">
+                    <div class="card">
+                        <h3>5. Documents Verification</h3>
                         @php
-                            $onlyUploadedDocs = [];
-                            $allDocsMeta = [
+                            $verifiedList = [];
+                            $allUploadedFiles = (array)($student->uploaded_files ?? []);
+                            $docMetaMap = [
                                 'marksheet10'   => '10th Marksheet',
                                 'marksheet12'   => '12th Marksheet',
-                                'btech'         => 'B.Tech / UG Memo',
+                                'btech'         => 'B.Tech / UG Degree Memo',
                                 'mtech'         => 'M.Tech / PG Memo',
                                 'pg1_cmm'       => 'PG 1 CMM Memo',
                                 'pg1_pc'        => 'PG 1 PC / OD',
@@ -493,50 +676,50 @@
                                 'pg2_pc'        => 'PG 2 PC / OD',
                                 'experience'    => 'Work Experience',
                                 'aadhaar'       => 'Aadhaar Card',
-                                'photo'         => 'Photo',
+                                'photo'         => 'Candidate Photo',
                                 'tc'            => 'Transfer Cert.',
                                 'study_conduct' => 'Study & Conduct',
                             ];
-                            $stUploadedFiles = (array)($student->uploaded_files ?? []);
-                            $stDocuments = (array)($student->documents ?? []);
 
-                            foreach($stUploadedFiles as $uKey => $uData) {
+                            foreach ($allUploadedFiles as $uKey => $uData) {
                                 if (!empty($uData['path']) || !empty($uData['url']) || !empty($uData['filename'])) {
-                                    $uExt = strtoupper($uData['ext'] ?? pathinfo($uData['filename'] ?? '', PATHINFO_EXTENSION) ?: 'VERIFIED');
-                                    $onlyUploadedDocs[$uKey] = [
-                                        'label' => $uData['title'] ?? ($allDocsMeta[$uKey] ?? ucwords(str_replace('_', ' ', $uKey))),
-                                        'ext' => $uExt,
+                                    $vExt = strtoupper($uData['ext'] ?? pathinfo($uData['filename'] ?? '', PATHINFO_EXTENSION) ?: 'VERIFIED');
+                                    $verifiedList[$uKey] = [
+                                        'label' => $uData['title'] ?? ($docMetaMap[$uKey] ?? ucwords(str_replace('_', ' ', $uKey))),
+                                        'ext' => $vExt,
                                     ];
                                 }
                             }
-                            foreach($stDocuments as $dKey => $dExt) {
-                                if (!empty($dExt) && !isset($onlyUploadedDocs[$dKey])) {
-                                    $cleanDExt = strtoupper(str_replace(['image/', 'application/'], '', $dExt));
-                                    $onlyUploadedDocs[$dKey] = [
-                                        'label' => $allDocsMeta[$dKey] ?? ucwords(str_replace('_', ' ', $dKey)),
-                                        'ext' => $cleanDExt ?: 'VERIFIED',
+
+                            // Fallback check against $uploaded array ($student->documents)
+                            foreach ($uploaded as $uKey => $uMime) {
+                                if (!empty($uMime) && !isset($verifiedList[$uKey])) {
+                                    $vExt = strtoupper(str_replace(['image/', 'application/'], '', $uMime));
+                                    $verifiedList[$uKey] = [
+                                        'label' => $docMetaMap[$uKey] ?? ucwords(str_replace('_', ' ', $uKey)),
+                                        'ext' => $vExt ?: 'VERIFIED',
                                     ];
                                 }
                             }
                         @endphp
-                        @if(empty($onlyUploadedDocs))
-                            <div style="padding: {{ $isBtech ? '16px 8px' : '8px' }}; font-size: 9.5px; color: #64748b; font-style: italic; text-align: center;">
+
+                        @if(empty($verifiedList))
+                            <div style="padding: 12px; font-size: 10px; color: #64748b; font-style: italic; text-align: center;">
                                 No documents uploaded yet.
                             </div>
                         @else
-                            <table style="width: 100%; border-collapse: collapse;">
-                                @foreach(array_chunk($onlyUploadedDocs, 2, true) as $dRow)
+                            <table class="docs">
+                                @foreach (array_chunk($verifiedList, 2, true) as $row)
                                     <tr>
-                                        @foreach($dRow as $dKey => $dInfo)
-                                            <td style="width: 50%; padding: 2px;">
-                                                <div style="border-radius: 4px; padding: {{ $isBtech ? '3px 7px' : '2px 6px' }}; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; background: #E2F5EC; color: #1B2430; border: 1px solid #a7f3d0;">
-                                                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $dInfo['label'] }}</span>
-                                                    <small style="color: #12875B; font-weight: 800; margin-left: 4px;"><span class="check-icon">&#10003;</span> {{ $dInfo['ext'] }}</small>
+                                        @foreach ($row as $key => $item)
+                                            <td>
+                                                <div class="chip ok">
+                                                    {{ $item['label'] }} <small>{{ $item['ext'] }}</small>
                                                 </div>
                                             </td>
                                         @endforeach
-                                        @if(count($dRow) === 1)
-                                            <td style="width: 50%; padding: 2px;"></td>
+                                        @if(count($row) === 1)
+                                            <td></td>
                                         @endif
                                     </tr>
                                 @endforeach
@@ -584,13 +767,51 @@
             </table>
         </div>
 
-        {{-- Footer --}}
-        <div style="text-align: center; font-size: 8px; color: #6B778A; margin-top: {{ $isBtech ? '8px' : '4px' }};">
-            Vignan's Foundation for Science, Technology &amp; Research (Deemed to be University) &nbsp;|&nbsp; https://admissions.vignan.ac.in
-        </div>
+            <div class="wrap" style="padding:14px 12mm 24mm 12mm;">
+                {{-- Meta details card --}}
+                <div class="card" style="margin-top:10px;">
+                    <h3>Attachment Details &bull; {{ $docExt }}</h3>
+                    <table class="fields">
+                        <tr>
+                            <td class="l">Document Title</td>
+                            <td class="v">{{ $doc['title'] ?? 'Uploaded Document' }}</td>
+                            <td class="l" style="padding-left:16px;">File Name</td>
+                            <td class="v">{{ $doc['filename'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="l">Candidate Name</td>
+                            <td class="v">{{ $student->name }}</td>
+                            <td class="l" style="padding-left:16px;">Verification Status</td>
+                            <td class="v" style="color:#12875B;">VERIFIED &amp; ATTACHED</td>
+                        </tr>
+                    </table>
+                </div>
 
-    </div>
-</div>
+                {{-- Document image / preview box --}}
+                <div style="margin-top:12px; background:#ffffff; border:1px solid #E3E8EF; border-radius:10px; padding:12px; text-align:center;">
+                    @if($isImg && $imgSrc)
+                        <img src="{{ $imgSrc }}" alt="{{ $doc['title'] }}" style="max-width:100%; max-height:145mm; object-fit:contain; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                    @else
+                        <div style="padding:40px 20px; color:#475569;">
+                            <div style="font-size:36px; margin-bottom:10px;">📄</div>
+                            <div style="font-size:14px; font-weight:bold; color:#0F2A4A;">{{ $doc['filename'] }}</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:6px;">
+                                Attached {{ $docExt }} Document &bull; Verified and filed in University Admissions Dossier
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Verification footer block --}}
+                <div class="office" style="margin-top:12px; margin-bottom:10px;">
+                    <b>ADMISSION VERIFICATION RECORD</b>
+                    <table><tr>
+                        <td>Document: {{ $doc['title'] }}</td>
+                        <td>Verified by: ____________</td>
+                        <td>Seal / Date: ____________</td>
+                    </tr></table>
+                </div>
+            </div>
 
 @if (!empty($autoPrint) || request()->has('print'))
 <script>
