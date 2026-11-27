@@ -147,6 +147,17 @@
             justify-content: center;
         }
 
+        html {
+            box-sizing: border-box;
+            max-width: 100%;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg-page);
@@ -156,6 +167,13 @@
             flex-direction: column;
             line-height: 1.5;
             position: relative;
+            max-width: 100vw;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        .brand-mobile-id {
+            display: none;
         }
 
         /* Subtle brand watermark background layer */
@@ -1207,77 +1225,132 @@
         }
 
         @media (max-width: 640px) {
+            html, body {
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+            .watermark-bg {
+                display: none !important;
+            }
             .stage-form-wrapper {
                 padding: 0.65rem 0.5rem !important;
             }
             .dash-container {
                 padding: 0.5rem 0.5rem 2rem !important;
                 gap: 0.5rem;
+                max-width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
             }
             .dash-nav {
                 position: sticky;
                 top: 0;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
             }
             .nav-inner {
-                padding: 0.6rem 0.75rem !important;
+                padding: 0.45rem 0.65rem !important;
                 height: auto !important;
-                min-height: 60px !important;
+                min-height: 52px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .brand-cluster {
-                gap: 0.45rem !important;
+                gap: 0.4rem !important;
+                min-width: 0 !important;
+                flex-shrink: 1 !important;
             }
             .brand-logo-img {
-                width: 34px !important;
-                height: 34px !important;
+                width: 32px !important;
+                height: 32px !important;
                 flex-shrink: 0 !important;
             }
+            .brand-title-wrap {
+                min-width: 0 !important;
+                line-height: 1.15 !important;
+            }
             .brand-name-main {
-                font-size: 0.98rem !important;
+                font-size: 0.95rem !important;
                 font-weight: 800 !important;
                 white-space: nowrap !important;
+                letter-spacing: -0.02em !important;
             }
             .brand-tag {
-                font-size: 0.62rem !important;
-                padding: 0.1rem 0.4rem !important;
-                white-space: nowrap !important;
+                display: none !important; /* Hide V-SAT badge on mobile so VIGNAN'S + CRM ID fits cleanly on left */
             }
             .brand-accred-sub {
                 display: none !important;
             }
+            .brand-mobile-id {
+                display: block !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                color: #2563eb !important;
+                letter-spacing: 0.01em !important;
+                margin-top: 1px !important;
+                white-space: nowrap !important;
+            }
             .user-nav-cluster {
                 gap: 0.4rem !important;
+                flex-shrink: 0 !important;
+                margin-left: auto !important;
+            }
+            .user-info-text {
+                text-align: right !important;
             }
             .user-name-title {
-                max-width: 90px !important;
+                max-width: 80px !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                font-size: 0.8rem !important;
+                font-size: 0.78rem !important;
                 font-weight: 700 !important;
             }
             .user-meta-sub {
-                font-size: 0.64rem !important;
-                font-weight: 600 !important;
-                white-space: nowrap !important;
+                display: none !important; /* Moved under VIGNAN'S on mobile */
             }
             .user-avatar-circle {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 0.8rem !important;
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.75rem !important;
                 flex-shrink: 0 !important;
             }
             .btn-nav-action {
-                padding: 0.3rem 0.45rem !important;
+                padding: 0.28rem 0.48rem !important;
                 font-size: 0.72rem !important;
                 flex-shrink: 0 !important;
             }
+            .btn-signout {
+                background: #fef2f2 !important;
+                color: #dc2626 !important;
+                border: 1px solid #fee2e2 !important;
+                border-radius: 8px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.25rem !important;
+                padding: 0.3rem 0.55rem !important;
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-signout:hover {
+                background: #fee2e2 !important;
+                color: #b91c1c !important;
+            }
             .btn-signout svg {
-                width: 15px !important;
-                height: 15px !important;
+                width: 13px !important;
+                height: 13px !important;
+                stroke: currentColor !important;
+                display: block !important;
             }
             .btn-signout span {
-                display: none;
+                display: inline-block !important;
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
             }
 
             .welcome-hero {
@@ -2186,6 +2259,9 @@
                         <span class="brand-tag">V-SAT 2027 Portal</span>
                     </div>
                     <span class="brand-accred-sub">DEEMED TO BE UNIVERSITY &bull; NAAC A+</span>
+                    @if($appNo)
+                        <span class="brand-mobile-id">ID: #{{ $appNo }}</span>
+                    @endif
                 </div>
             </a>
 

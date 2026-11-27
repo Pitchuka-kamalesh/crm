@@ -511,8 +511,26 @@
 
                                         // 5. Exam Slot (stage5)
                                         $progLevel = strtoupper(trim((string)($std->programlevel ?? '')));
-                                        $isPhd = ($progLevel === 'PHD' || str_contains($progLevel, 'DOCTOR') || str_contains(strtoupper($std->program?->program_name ?? ''), 'PHD'));
-                                        $isSlotBooked = $isPhd || in_array($s5, ['completed', 'approved', 'done', 'booked', 'paid']) || !empty($std->examSchedule);
+                                        $progShort = strtoupper(trim((string)($std->program_short_name ?? '')));
+                                        $progName = strtoupper(trim((string)($std->program?->program_name ?? '')));
+                                        $isPhd = (
+                                            $progLevel === 'PHD' ||
+                                            $progLevel === 'DOCTORAL' ||
+                                            str_contains($progLevel, 'DOCTOR') ||
+                                            str_contains($progLevel, 'PHD') ||
+                                            str_contains($progShort, 'PHD') ||
+                                            str_contains($progShort, 'PH.D') ||
+                                            str_contains($progName, 'PH.D') ||
+                                            str_contains($progName, 'PHD') ||
+                                            str_contains($progName, 'DOCTOR')
+                                        );
+
+                                        // For PhD students, exam slot booking does not exist (not applicable -> NA).
+                                        // For other students, check if stage5 is completed/booked/paid or if an exam schedule exists.
+                                        $isSlotBooked = !$isPhd && (
+                                            in_array($s5, ['completed', 'approved', 'done', 'booked', 'paid'])
+                                            || !empty($std->examSchedule)
+                                        );
                                         $st5Pill = $isSlotBooked ? 'pill-done' : 'pill-na';
                                         $st5Text = $isSlotBooked ? 'Completed' : 'NA';
                                         $st5Type = $isSlotBooked ? 'done' : 'na';
