@@ -252,17 +252,19 @@
                 <div class="topbar-page-breadcrumb">
                     <span class="breadcrumb-item breadcrumb-desktop-only">Exams</span>
                     <span class="breadcrumb-separator breadcrumb-desktop-only">/</span>
-                    <span class="breadcrumb-item breadcrumb-active">TotalDetails (All Registered Students)</span>
+                    <span class="breadcrumb-active-tag">
+                        <span class="breadcrumb-dot"></span>
+                        <span class="breadcrumb-lead-full">Total Details</span>
+                        <span class="breadcrumb-lead-mobile">Total Details</span>
+                    </span>
                 </div>
             </div>
 
             <div class="top-bar-right">
-                <span class="badge" style="background:#0F2A4A; color:#fff; font-weight:700; padding:4px 10px; border-radius:6px; font-size:0.75rem;">
-                    {{ $roleName }}
-                </span>
-                <span class="badge" style="background:#059669; color:#fff; font-weight:700; padding:4px 10px; border-radius:6px; font-size:0.75rem;">
-                    Academic Year 2027
-                </span>
+                <a href="{{ route('crm.stddata') }}" class="btn-header-action" title="Go to CRM Enquiries">
+                    <span>👥 Student Data</span>
+                </a>
+                @include('layouts.role-switcher')
             </div>
         </header>
 
@@ -732,6 +734,14 @@
                     <div class="dossier-item-label">Inter Roll No &amp; Marks</div>
                     <div class="dossier-item-value mono-code" id="m_pu2_marks"></div>
                 </div>
+                <div id="m_ug_block" style="display:none;">
+                    <div class="dossier-item-label">Undergraduate (UG) Degree</div>
+                    <div class="dossier-item-value" id="m_ug_info"></div>
+                </div>
+                <div id="m_pg_block" style="display:none;">
+                    <div class="dossier-item-label">Postgraduate (PG) Degree</div>
+                    <div class="dossier-item-value" id="m_pg_info"></div>
+                </div>
             </div>
         </div>
 
@@ -821,6 +831,20 @@
         document.getElementById('m_pu2_board').textContent = data.pu2_board || '-';
         document.getElementById('m_pu2_group').textContent = data.pu2_group || '-';
         document.getElementById('m_pu2_marks').textContent = (data.pu2_roll ? ('Roll: ' + data.pu2_roll + ' | ') : '') + (data.pu2_pct || '-');
+
+        if (data.ug_college && data.ug_college !== 'N/A' && data.ug_college !== '') {
+            document.getElementById('m_ug_block').style.display = 'block';
+            document.getElementById('m_ug_info').textContent = data.ug_college + (data.ug_board ? (' (' + data.ug_board + ')') : '') + (data.ug_pct ? (' - ' + data.ug_pct) : '');
+        } else {
+            document.getElementById('m_ug_block').style.display = 'none';
+        }
+
+        if (data.pg_college && data.pg_college !== 'N/A' && data.pg_college !== '') {
+            document.getElementById('m_pg_block').style.display = 'block';
+            document.getElementById('m_pg_info').textContent = data.pg_college + (data.pg_board ? (' (' + data.pg_board + ')') : '') + (data.pg_pct ? (' - ' + data.pg_pct) : '');
+        } else {
+            document.getElementById('m_pg_block').style.display = 'none';
+        }
 
         document.getElementById('m_fee_status').textContent = data.fee_status;
         document.getElementById('m_fee_amount').textContent = '₹' + data.fee_amount;

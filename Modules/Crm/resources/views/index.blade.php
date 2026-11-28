@@ -569,6 +569,13 @@
                                             'ugUniversity' => $acaInfo?->ug_university_board ?: 'N/A',
                                             'ugYear' => $acaInfo?->ug_passed_year ?: 'N/A',
                                             'ugMarks' => $acaInfo?->ug_marks_earned ?: ($acaInfo?->ug_percentage ? $acaInfo->ug_percentage . '%' : 'N/A'),
+                                            'ugStatus' => $acaInfo?->ug_current_status ?: 'N/A',
+                                            'pgCollege' => $acaInfo?->pg_college_name ?: 'N/A',
+                                            'pgUniversity' => $acaInfo?->pg_university_board ?: 'N/A',
+                                            'pgYear' => $acaInfo?->pg_passed_year ?: 'N/A',
+                                            'pgMarks' => $acaInfo?->pg_marks_earned ?: ($acaInfo?->pg_percentage ? $acaInfo->pg_percentage . '%' : 'N/A'),
+                                            'pgRoll' => $acaInfo?->pg_roll_no ?: 'N/A',
+                                            'pgStatus' => $acaInfo?->pg_current_status ?: 'N/A',
                                         ];
 
                                         // 3. Payment / Fee Details
@@ -1149,7 +1156,7 @@
                                                 </div>
 
                                                 ${aca.ugCollege && aca.ugCollege !== 'N/A' ? `
-                                                <!-- Undergraduate Degree Section (for PG Candidates) -->
+                                                <!-- Undergraduate Degree Section (for PG & PhD Candidates) -->
                                                 <div class="academic-card-block">
                                                     <div class="academic-card-header">
                                                         <span style="display: flex; align-items: center; gap: 8px;">
@@ -1176,6 +1183,57 @@
                                                                 <span class="card-lbl">Score / CGPA</span>
                                                                 <span class="card-val font-mono" style="color: #15803d; font-weight: 700;">${safe(aca.ugMarks)}</span>
                                                             </div>
+                                                            ${aca.ugStatus && aca.ugStatus !== 'N/A' ? `
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Result Status</span>
+                                                                <span class="card-val">${safe(aca.ugStatus)}</span>
+                                                            </div>
+                                                            ` : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                ` : ''}
+
+                                                ${aca.pgCollege && aca.pgCollege !== 'N/A' ? `
+                                                <!-- Postgraduate (PG) Degree Section (for PhD Candidates) -->
+                                                <div class="academic-card-block" style="margin-top: 1rem;">
+                                                    <div class="academic-card-header">
+                                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                                            <span>🏛️</span>
+                                                            <span>Postgraduate (PG / Master's) Degree Particulars</span>
+                                                        </span>
+                                                        <span class="badge-paid">${safe(aca.pgMarks)}</span>
+                                                    </div>
+                                                    <div style="padding: 1rem 1.15rem;">
+                                                        <div class="stage-info-grid">
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">PG College Name</span>
+                                                                <span class="card-val" style="font-weight: 700;">${safe(aca.pgCollege)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">University / Board</span>
+                                                                <span class="card-val">${safe(aca.pgUniversity)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Passing Year</span>
+                                                                <span class="card-val font-mono">${safe(aca.pgYear)}</span>
+                                                            </div>
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Score / CGPA</span>
+                                                                <span class="card-val font-mono" style="color: #15803d; font-weight: 700;">${safe(aca.pgMarks)}</span>
+                                                            </div>
+                                                            ${aca.pgRoll && aca.pgRoll !== 'N/A' ? `
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Roll / Reg Number</span>
+                                                                <span class="card-val font-mono">${safe(aca.pgRoll)}</span>
+                                                            </div>
+                                                            ` : ''}
+                                                            ${aca.pgStatus && aca.pgStatus !== 'N/A' ? `
+                                                            <div class="stage-info-card">
+                                                                <span class="card-lbl">Result Status</span>
+                                                                <span class="card-val">${safe(aca.pgStatus)}</span>
+                                                            </div>
+                                                            ` : ''}
                                                         </div>
                                                     </div>
                                                 </div>
