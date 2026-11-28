@@ -220,11 +220,10 @@ class MenuService
             
             'exam/examslotdata', 'exam/index', 'examslotdata' => $safeRoute('exam.examslotdata'),
             'exam/totaldetails', 'exam/TotalDetails', 'totaldetails' => $safeRoute('exam.totaldetails'),
-
-
             'kpi/studentkpi' => $safeRoute('kpi.studentkpi', ['tab' => 'studentkpi']),
             'kpi/telecallerkpi' => $safeRoute('kpi.telecallerkpi', ['tab' => 'telecallerkpi']),
             'kpi/leadskpi' => $safeRoute('kpi.leadskpi', ['tab' => 'leadskpi']),
+            'kpi/errors', 'kpi/errorlogs', 'kpi/errorkpi' => $safeRoute('kpi.errors', ['tab' => 'errorkpi']),
             'kpi/counsellerkpi' => $safeRoute('kpi.counsellerkpi', ['tab' => 'counsellerkpi']),
             'kpi/index' => $safeRoute('kpi.index', ['tab' => 'kpi']),
             'sms/index', 'sms' => $safeRoute('sms.index'),
@@ -259,14 +258,12 @@ class MenuService
             'leads/leads input', 'leads/leadsinput', 'leads/lead-input', 'leads/leads-input' => $currentTab === 'input' || request()->routeIs('leads.input') || str_contains($currentPath, 'leadsinput') || str_contains($currentPath, 'leads-input') || str_contains($currentPath, 'leads%20input') || str_contains($currentPath, 'leads input'),
             'finance/paiddetails' => request()->routeIs('finance.paiddetails') || str_contains($currentPath, 'paiddetails'),
             'finance/payfee' => str_contains($currentPath, 'payfee'),
-            
-           
             'exam/totaldetails', 'exam/TotalDetails', 'totaldetails' => request()->routeIs('exam.totaldetails*') || str_contains(strtolower($currentPath), 'totaldetails'),
             'exam/examslotdata', 'exam/index' => (request()->routeIs('exam.*') && !request()->routeIs('exam.totaldetails*')) || (str_contains($currentPath, 'exam') && !str_contains(strtolower($currentPath), 'totaldetails')),
-            
             'kpi/studentkpi' => request()->routeIs('kpi.studentkpi') || $currentTab === 'studentkpi' || str_contains($currentPath, 'studentkpi'),
             'kpi/telecallerkpi' => request()->routeIs('kpi.telecallerkpi') || $currentTab === 'telecallerkpi' || str_contains($currentPath, 'telecallerkpi'),
             'kpi/leadskpi' => request()->routeIs('kpi.leadskpi') || $currentTab === 'leadskpi' || str_contains($currentPath, 'leadskpi'),
+            'kpi/errors', 'kpi/errorlogs', 'kpi/errorkpi' => request()->routeIs('kpi.errors*') || $currentTab === 'errorkpi' || str_contains($currentPath, 'kpi/errors'),
             'kpi/counsellerkpi' => request()->routeIs('kpi.counsellerkpi') || $currentTab === 'counsellerkpi' || str_contains($currentPath, 'counsellerkpi'),
             default => $currentPath === trim($controllerRef, '/'),
         };

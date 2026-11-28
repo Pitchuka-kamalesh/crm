@@ -147,6 +147,17 @@
             justify-content: center;
         }
 
+        html {
+            box-sizing: border-box;
+            max-width: 100%;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg-page);
@@ -156,6 +167,13 @@
             flex-direction: column;
             line-height: 1.5;
             position: relative;
+            max-width: 100vw;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        .brand-mobile-id {
+            display: none;
         }
 
         /* Subtle brand watermark background layer */
@@ -1206,78 +1224,133 @@
             align-items: center;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
+            html, body {
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+            .watermark-bg {
+                display: none !important;
+            }
             .stage-form-wrapper {
                 padding: 0.65rem 0.5rem !important;
             }
             .dash-container {
                 padding: 0.5rem 0.5rem 2rem !important;
                 gap: 0.5rem;
+                max-width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
             }
             .dash-nav {
                 position: sticky;
                 top: 0;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
             }
             .nav-inner {
-                padding: 0.6rem 0.75rem !important;
+                padding: 0.45rem 0.65rem !important;
                 height: auto !important;
-                min-height: 60px !important;
+                min-height: 52px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .brand-cluster {
-                gap: 0.45rem !important;
+                gap: 0.4rem !important;
+                min-width: 0 !important;
+                flex-shrink: 1 !important;
             }
             .brand-logo-img {
-                width: 34px !important;
-                height: 34px !important;
+                width: 32px !important;
+                height: 32px !important;
                 flex-shrink: 0 !important;
             }
+            .brand-title-wrap {
+                min-width: 0 !important;
+                line-height: 1.15 !important;
+            }
             .brand-name-main {
-                font-size: 0.98rem !important;
+                font-size: 0.95rem !important;
                 font-weight: 800 !important;
                 white-space: nowrap !important;
+                letter-spacing: -0.02em !important;
             }
             .brand-tag {
-                font-size: 0.62rem !important;
-                padding: 0.1rem 0.4rem !important;
-                white-space: nowrap !important;
+                display: none !important; /* Hide V-SAT badge on mobile so VIGNAN'S + CRM ID fits cleanly on left */
             }
             .brand-accred-sub {
                 display: none !important;
             }
+            .brand-mobile-id {
+                display: block !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                color: #2563eb !important;
+                letter-spacing: 0.01em !important;
+                margin-top: 1px !important;
+                white-space: nowrap !important;
+            }
             .user-nav-cluster {
                 gap: 0.4rem !important;
+                flex-shrink: 0 !important;
+                margin-left: auto !important;
+            }
+            .user-info-text {
+                text-align: right !important;
             }
             .user-name-title {
-                max-width: 90px !important;
+                max-width: 80px !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                font-size: 0.8rem !important;
+                font-size: 0.78rem !important;
                 font-weight: 700 !important;
             }
             .user-meta-sub {
-                font-size: 0.64rem !important;
-                font-weight: 600 !important;
-                white-space: nowrap !important;
+                display: none !important; /* Moved under VIGNAN'S on mobile */
             }
             .user-avatar-circle {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 0.8rem !important;
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.75rem !important;
                 flex-shrink: 0 !important;
             }
             .btn-nav-action {
-                padding: 0.3rem 0.45rem !important;
+                padding: 0.28rem 0.48rem !important;
                 font-size: 0.72rem !important;
                 flex-shrink: 0 !important;
             }
+            .btn-signout {
+                background: #fef2f2 !important;
+                color: #dc2626 !important;
+                border: 1px solid #fee2e2 !important;
+                border-radius: 8px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.25rem !important;
+                padding: 0.3rem 0.55rem !important;
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-signout:hover {
+                background: #fee2e2 !important;
+                color: #b91c1c !important;
+            }
             .btn-signout svg {
-                width: 15px !important;
-                height: 15px !important;
+                width: 13px !important;
+                height: 13px !important;
+                stroke: currentColor !important;
+                display: block !important;
             }
             .btn-signout span {
-                display: none;
+                display: inline-block !important;
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
             }
 
             .welcome-hero {
@@ -1832,7 +1905,7 @@
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .mockup-field-row-2 {
                 grid-template-columns: 1fr;
             }
@@ -2186,6 +2259,9 @@
                         <span class="brand-tag">V-SAT 2027 Portal</span>
                     </div>
                     <span class="brand-accred-sub">DEEMED TO BE UNIVERSITY &bull; NAAC A+</span>
+                    @if($appNo)
+                        <span class="brand-mobile-id">ID: #{{ $appNo }}</span>
+                    @endif
                 </div>
             </a>
 
@@ -2232,11 +2308,14 @@
                     </h1>
                     <span class="welcome-pill">
                         <span class="welcome-dot"></span>
-                         <span> For any admission-related queries, please contact: Office: +91 863 2344700 | Mobile: 7799 427 427</span>
+                        <span>Academic Year 2027</span>
                     </span>
                 </div>
                 <p class="welcome-subtitle">
                     {{ $programName ?: 'B.Tech - Bachelor of Technology' }} @if($branchName)({{ $branchName }})@endif &bull; {{ $campusName ?: 'Vadlamudi Campus' }}
+                </p>
+                <p style="font-size: 0.78rem; color: #64748b; margin: 3px 0 0 0; line-height: 1.35;">
+                    info@vignan.ac.in &bull; 0863-2344700 / 701
                 </p>
             </div>
 
@@ -4673,18 +4752,23 @@
                                 @if($isSlotLocked)
                                     <input type="hidden" name="exam_slot" value="{{ $currentSlot }}">
                                 @endif
-                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;">
-                                    <span>✓</span>
-                                    <span id="slotLiveStatus">
-                                        @php
-                                            $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
-                                        @endphp
-                                        @if($isSlotLocked)
-                                            Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
-                                        @else
-                                            Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
-                                        @endif
-                                    </span>
+                                <div style="margin-top: 6px; font-size: 0.76rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 10px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span>✓</span>
+                                        <span id="slotLiveStatus">
+                                            @php
+                                                $displaySlot = str_replace(['S1 ', 'S2 '], ['Slot 1 ', 'Slot 2 '], $currentSlot);
+                                            @endphp
+                                            @if($isSlotLocked)
+                                                Confirmed slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session). Slot selection is locked.
+                                            @else
+                                                Current slot: <strong>{{ $displaySlot }}</strong> (Standard 2-hour CBT entrance test session).
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div style="margin-top: 4px; margin-left: 18px; font-size: 0.74rem; color: #047857; font-weight: 600;">
+                                        Exam is at university, It is a computer based test
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -5176,19 +5260,19 @@
                             </div>
 @else
 <!-- Form Header Banner -->
-                            <table style="width: 100%; border-collapse: collapse; background: #0F2A4A; border-bottom: 4px solid #1E7BD8;">
+                            <table style="width: 100%; border-collapse: collapse; background: #1DA1F2; border-bottom: 4px solid #2E5A97;">
                             <tr>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%;">
                                     <div style="background: #ffffff; border-radius: 8px; padding: 6px 12px; display: inline-block;">
-                                        <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 56px; max-width: 220px; object-fit: contain; display: block;">
+                                        <img src="{{ $formLogo }}" alt="Vignan's Logo" style="height: 60px; max-width: 190px; object-fit: contain; display: block;">
                                     </div>
-                                    <div style="color: #A9BCD6; font-size: 9px; padding-top: 8px;">
+                                    <div style="color: #F0F9FF; font-size: 9px; padding-top: 8px;">
                                         Application date: {{ $appStudent->applied_at ?? now()->format('d/m/Y') }} &nbsp;|&nbsp; admissions.vignan.ac.in
                                     </div>
                                 </td>
                                 <td style="padding: 18px 24px; vertical-align: top; width: 50%; text-align: right;">
                                     <div style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">APPLICATION FORM</div>
-                                    <div style="color: #A9BCD6; font-size: 11px; line-height: 1.5; margin-top: 4px;">
+                                    <div style="color: #F0F9FF; font-size: 11px; line-height: 1.5; margin-top: 4px;">
                                         University Admission Application<br>
                                         Please read all details carefully before signing
                                     </div>
@@ -5945,7 +6029,7 @@
                             <div class="stage7-metric-card" style="background:#fff; border-radius:10px; padding:0.9rem; border:1px solid #e2e8f0; text-align:center;">
                                 <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Admission Status</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#16a34a; margin-top:0.25rem;">
-                                    {{ ($crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
+                                    {{ ($crmStudent?->stage4 === 'paid' || $crmStudent?->stage1 === 'paid') ? 'Fee Verified' : 'In Progress' }}
                                 </div>
                                 <span style="font-size:0.75rem; color:#15803d; font-weight:600;">Stage 7 of {{ count($stages) }} Verified</span>
                             </div>
@@ -6519,7 +6603,7 @@
             }
 
             /* Mobile View Optimization */
-            @media (max-width: 640px) {
+            @media (max-width: 768px) {
                 .terms-modal-overlay {
                     padding: 0.65rem;
                     align-items: center;

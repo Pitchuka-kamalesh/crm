@@ -73,7 +73,7 @@ class LeadsController extends Controller
         $leadModelMap = collect();
         $recentUploadedFiles = collect();
 
-       if ($activeTab === 'upload') {
+        if ($activeTab === 'upload') {
             try {
                 $recentUploadedFiles = \Modules\Leads\Models\LeadsUpload::query()
                     ->orderByDesc('id')
@@ -496,7 +496,7 @@ class LeadsController extends Controller
             'programlevel' => $prog?->program_short_name ?? null,
             'campus_id' => 1,
             'std_status' => 'Interested',
-            'stage1' => 'not_paid',
+            'stage1' => 'NA',
             'stage2' => 'locked',
             'stage3' => 'locked',
             'stage4' => 'locked',
@@ -1055,9 +1055,7 @@ class LeadsController extends Controller
             'total_duplicates' => $totalDuplicates,
         ];
 
-
-
-                $fileSizeStr = round($file->getSize() / 1024, 1) . ' KB';
+        $fileSizeStr = round($file->getSize() / 1024, 1) . ' KB';
         $uploadedAtFormatted = now()->format('d M Y, h:i A');
 
         // 1. Record file upload in dedicated crm.leads_upload database table

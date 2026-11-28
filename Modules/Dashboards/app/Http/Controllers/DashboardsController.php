@@ -85,7 +85,7 @@ class DashboardsController extends Controller
 
         if ($hasPaidRecord && $crmStudent && $crmStudent->stage4 !== 'paid') {
             try {
-                $crmStudent->update(['stage4' => 'paid', 'stage1' => 'paid']);
+                $crmStudent->update(['stage4' => 'paid']);
             } catch (\Throwable $e) {}
         }
 
@@ -103,8 +103,11 @@ class DashboardsController extends Controller
                         'name' => ($displayName && $displayName !== 'Applicant') ? $displayName : ($user?->name ?: $cleanPhone),
                         'phoneno' => $cleanPhone,
                         'emailid' => $user?->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
-                        'stage1' => $hasPaidRecord ? 'paid' : 'pending',
-                        'stage2' => 'pending',
+                        'stage1' => 'NA',
+                        'stage2' => 'NA',
+                        'stage3' => 'NA',
+                        'stage4' => $hasPaidRecord ? 'paid' : 'NA',
+                        'stage5' => 'NA',
                         'std_status' => $hasPaidRecord ? 'Admitted' : 'Registered',
                         'campuscode' => 'VAD',
                         'programlevel' => 'UG',
@@ -301,7 +304,7 @@ class DashboardsController extends Controller
             } elseif ($mCode === 'EXAM00002') {
                 $isCompleted = ($val === 'completed' || $val === 'paid' || !empty($examSchedule));
             } elseif ($mCode === 'CRMM0004') {
-                $isCompleted = ($val === 'completed' || ($personalInfo !== null && !empty($personalInfo->gender)));
+                $isCompleted = ($val === 'completed' || $val === 'paid' || ($personalInfo !== null && !empty($personalInfo->gender)));
             } elseif ($mCode === 'CRMM0005') {
                 $hasAcademicFilled = false;
                 if ($academicDetails) {
@@ -567,8 +570,8 @@ class DashboardsController extends Controller
                         'name' => $user->name ?: $cleanPhone,
                         'phoneno' => $cleanPhone,
                         'emailid' => $user->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
-                        'stage1' => 'pending',
-                        'stage2' => 'pending',
+                        'stage1' => 'NA',
+                        'stage2' => 'NA',
                         'std_status' => 'Registered',
                         'campuscode' => 'VAD',
                         'programlevel' => 'UG',
@@ -690,8 +693,11 @@ class DashboardsController extends Controller
                         'name' => $user?->name ?: $cleanPhone,
                         'phoneno' => $cleanPhone,
                         'emailid' => $user?->personalmail ?: ($cleanPhone . '@vignan.ac.in'),
-                        'stage1' => $hasPaidRecord ? 'paid' : 'pending',
-                        'stage2' => 'pending',
+                        'stage1' => 'NA',
+                        'stage2' => 'NA',
+                        'stage3' => 'NA',
+                        'stage4' => $hasPaidRecord ? 'paid' : 'NA',
+                        'stage5' => 'NA',
                         'std_status' => $hasPaidRecord ? 'Admitted' : 'Registered',
                         'campuscode' => 'VAD',
                         'programlevel' => 'UG',
@@ -1442,10 +1448,14 @@ class DashboardsController extends Controller
                 if ($crmStudent) {
                     $crmStudent->update([
                         'stage4' => 'paid',
-                        'stage1' => 'paid',
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $stageMsg = "Dear {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your application fee payment is confirmed! Please log in to book your V-SAT exam slot: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 5;
                 $msg = 'Stage 4: Admission Fee Payment confirmed!';
@@ -1528,6 +1538,15 @@ class DashboardsController extends Controller
                         'log_ipaddress' => $request->ip(),
                         'log_timestamp' => now(),
                     ]);
+
+                    $stdName = $crmStudent->name ?: 'Student';
+                    $appNo = $crmStudent->applinano ?: '';
+                    $slotName = $request->input('exam_slot') ?? 'Slot';
+                    $dateRaw = $request->input('examdate');
+                    $dateStr = $dateRaw ? \Carbon\Carbon::parse($dateRaw)->format('d/m/Y') : '';
+                    $slotInfo = $dateStr ? "({$slotName} on {$dateStr})" : "({$slotName})";
+                    $stageMsg = "Dear {$stdName}" . ($appNo ? " (App ID: {$appNo})" : "") . ", your V-SAT 2027 exam slot {$slotInfo} is confirmed! Please log in to download your Application Form and Hall Ticket: https://vucrm.vumoodle.in/";
+                    $this->dispatchStageNotification($crmStudent, $stageMsg, $request);
                 }
                 $nextStep = 6;
                 $msg = $existingExamSchedule
@@ -2001,5 +2020,39 @@ class DashboardsController extends Controller
     {
         $res = CouponService::removeAppliedCoupon();
         return response()->json($res);
+    }
+
+    /**
+     * Dispatch WhatsApp & SMS milestone notifications to candidate.
+     */
+    protected function dispatchStageNotification(?CrmStudentRegistration $student, string $message, ?Request $request = null): void
+    {
+        if (!$student) {
+            return;
+        }
+
+        try {
+            $cleanPhone = substr(preg_replace('/\D/', '', $student->phoneno ?? ''), -10);
+            if (!$cleanPhone || strlen($cleanPhone) !== 10) {
+                return;
+            }
+
+            $stdName = $student->name ?: 'Student';
+            $appNo = $student->applinano ?: '';
+            $ip = $request?->ip() ?? '127.0.0.1';
+
+            // WhatsApp Notification via SmartPing (for Fee Payment & Exam Slot)
+            if (class_exists(\Modules\Sms\Services\WhatsAppService::class)) {
+                app(\Modules\Sms\Services\WhatsAppService::class)->sendStageUpdate(
+                    phone: $cleanPhone,
+                    stageMessage: $message,
+                    candidateName: $stdName,
+                    applicationId: $appNo,
+                    ip: $ip
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[DashboardsController] Stage notification dispatch error: ' . $e->getMessage());
+        }
     }
 }

@@ -438,37 +438,42 @@
                         <table class="crm-table" id="registerListTable">
                             <thead>
                                 <tr>
-                                    <th>Application Number</th>
-                                    <th>Student Name</th>
-                                    <th>Mobile Number</th>
-                                    <th style="text-align: center;">Registration Form</th>
-                                    <th style="text-align: center;">Personal Details</th>
-                                    <th style="text-align: center;">Academic Details</th>
-                                    <th style="text-align: center;">Payment</th>
-                                    <th style="text-align: center;">Application Download</th>
-                                    <th style="text-align: center;">Exam Slot Booked</th>
+                                    <th style="white-space: nowrap;">App No</th>
+                                    <th style="white-space: nowrap;">CRM ID</th>
+                                    <th style="white-space: nowrap;">Ph No</th>
+                                    <th style="text-align: center; white-space: nowrap;">Personal info</th>
+                                    <th style="text-align: center; white-space: nowrap;">Academic info</th>
+                                    <th style="text-align: center; white-space: nowrap;">Documents</th>
+                                    <th style="text-align: center; white-space: nowrap;">Fee</th>
+                                    <th style="text-align: center; white-space: nowrap;">Exam Slot</th>
+                                    <th style="text-align: center; white-space: nowrap;">Preview</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php
                                     $renderStagePill = function(string $pillClass, string $text, string $type, string $appliNo, string $stageKey, bool $isTracking): string {
-                                        if ($type === 'done') {
-                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="20 6 9 17 4 12"/></svg>';
-                                        } elseif ($type === 'due') {
-                                            $iconSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-                                        } else {
-                                            $iconSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-                                        }
                                         $cursorStyle = $isTracking ? 'cursor: pointer; transition: transform 0.15s ease;' : '';
                                         $hoverAttr = $isTracking ? 'onmouseover="this.style.transform=\'scale(1.06)\'" onmouseout="this.style.transform=\'scale(1)\'" onclick="openStudentStageModal(\'' . e($appliNo) . '\', \'' . e($stageKey) . '\')" title="Click to view details"' : '';
-                                        return '<span class="tracking-pill ' . e($pillClass) . '" style="' . $cursorStyle . '" ' . $hoverAttr . '>' . $iconSvg . '<span>' . e($text) . '</span></span>';
+                                        return '<span class="tracking-pill ' . e($pillClass) . '" style="' . $cursorStyle . '" ' . $hoverAttr . '>' . e($text) . '</span>';
                                     };
                                 @endphp
                                 @forelse($allStudents as $std)
                                     @php
-                                        $phone = $std->mobile ?? $std->phoneno ?? '';
-                                        $appliNo = $std->application_no ?? $std->applinano ?? 'N/A';
-                                        $name = $std->student_name ?? $std->name ?? 'Candidate';
+                                        $appliNo = trim((string)($std->application_no ?? $std->applinano ?? ''));
+                                        $appliDisplay = (!empty($appliNo) && $appliNo !== '0') ? $appliNo : 'NA';
+                                        $name = trim((string)($std->student_name ?? $std->name ?? 'Candidate'));
+
+                                        $crmId = trim((string)($std->crmid ?? ''));
+                                        if (empty($crmId) && !empty($appliNo) && $appliNo !== 'NA') {
+                                            $crmId = \Modules\Crm\Services\CrmIdService::getOrGenerateByAppli($appliNo) ?: '';
+                                        }
+                                        $crmIdDisplay = (!empty($crmId) && strtoupper($crmId) !== 'NA') ? $crmId : 'NA';
+
+                                        // Phone & Mobile
+                                        $cleanPhone = preg_replace('/\D/', '', (string)($std->phoneno ?? ''));
+                                        $cleanMobile = preg_replace('/\D/', '', (string)($std->personalInfo?->parentphono ?? ($std->mobile ?? '')));
+                                        $phNoDisplay = (!empty($cleanPhone) && strlen($cleanPhone) >= 10) ? substr($cleanPhone, -10) : 'NA';
+                                        $mobileDisplay = (!empty($cleanMobile) && strlen($cleanMobile) >= 10) ? substr($cleanMobile, -10) : 'NA';
 
                                         // Real stages from crm.student_registration
                                         $s1 = strtolower(trim((string)($std->stage1 ?? '')));
@@ -476,178 +481,228 @@
                                         $s3 = strtolower(trim((string)($std->stage3 ?? '')));
                                         $s4 = strtolower(trim((string)($std->stage4 ?? '')));
                                         $s5 = strtolower(trim((string)($std->stage5 ?? '')));
-                                        $s6 = strtolower(trim((string)($std->stage6 ?? '')));
 
-                                        // 1. Registration Form
-                                        $hasAppli = (!empty($appliNo) && $appliNo !== 'N/A');
-                                        $stdStatus = strtolower(trim((string)($std->std_status ?? '')));
-                                        if ($hasAppli || in_array($stdStatus, ['applied', 'registered', 'verified', 'admitted', 'enrolled', 'completed'])) {
-                                            $st1Pill = 'pill-done'; $st1Type = 'done'; $st1Icon = '✓'; $st1Text = 'Done';
-                                        } else {
-                                            $st1Pill = 'pill-pending'; $st1Type = 'pending'; $st1Icon = '⏳'; $st1Text = 'Pending';
-                                        }
+                                        // 1. Personal info (stage1)
+                                        $isS1Done = in_array($s1, ['completed', 'paid', 'approved', 'done']) || (!empty($std->personalInfo) && !empty($std->personalInfo->gender));
+                                        $st1Pill = $isS1Done ? 'pill-done' : 'pill-na';
+                                        $st1Text = $isS1Done ? 'Completed' : 'NA';
+                                        $st1Type = $isS1Done ? 'done' : 'na';
 
-                                        // 2. Payment (stage1 fee payment)
-                                        if (in_array($s1, ['completed', 'paid', 'approved', 'done','not_paid'])) {
-                                            $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Icon = '✓'; $st2Text = 'Done';
-                                        } elseif (in_array($s1, ['unpaid', 'due', 'failed'])) {
-                                            $st2Pill = 'pill-danger'; $st2Type = 'due'; $st2Icon = '✕'; $st2Text = 'Pending';
-                                        } else {
-                                            $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Icon = '⏳'; $st2Text = 'Pending';
-                                        }
+                                        // 2. Academic info (stage2)
+                                        $isS2Done = in_array($s2, ['completed', 'approved', 'done']) || (!empty($std->academicDetails) && (!empty($std->academicDetails->tenth_school_name) || !empty($std->academicDetails->pu2_college_name)));
+                                        $st2Pill = $isS2Done ? 'pill-done' : 'pill-na';
+                                        $st2Text = $isS2Done ? 'Completed' : 'NA';
+                                        $st2Type = $isS2Done ? 'done' : 'na';
 
-                                        // 3. Personal Details (stage2)
-                                        if (in_array($s2, ['completed', 'approved', 'done'])) {
-                                            $st3Pill = 'pill-done'; $st3Type = 'done'; $st3Icon = '✓'; $st3Text = 'Done';
-                                        } else {
-                                            $st3Pill = 'pill-pending'; $st3Type = 'pending'; $st3Icon = '⏳'; $st3Text = 'Pending';
-                                        }
+                                        // 3. Documents (stage3)
+                                        $isS3Done = in_array($s3, ['completed', 'approved', 'done']) || !empty($std->uploads);
+                                        $st3Pill = $isS3Done ? 'pill-done' : 'pill-na';
+                                        $st3Text = $isS3Done ? 'Completed' : 'NA';
+                                        $st3Type = $isS3Done ? 'done' : 'na';
 
-                                        // 4. Academic Details (stage3)
-                                        if (in_array($s3, ['completed', 'approved', 'done'])) {
-                                            $st4Pill = 'pill-done'; $st4Type = 'done'; $st4Icon = '✓'; $st4Text = 'Done';
-                                        } else {
-                                            $st4Pill = 'pill-pending'; $st4Type = 'pending'; $st4Icon = '⏳'; $st4Text = 'Pending';
-                                        }
+                                        // 4. Fee (stage4)
+                                        $hasPaidRecord = in_array($s4, ['paid', 'completed', 'approved', 'done']) 
+                                            || ($std->payDetail && ($std->payDetail->txnstatus === 'success' || (float)($std->payDetail->paidamount ?? 0) > 0))
+                                            || !empty($std->receipt);
+                                        $st4Pill = $hasPaidRecord ? 'pill-done' : 'pill-na';
+                                        $st4Text = $hasPaidRecord ? 'Completed' : 'NA';
+                                        $st4Type = $hasPaidRecord ? 'done' : 'na';
 
-                                        // 5. Application Download (stage4)
-                                        if (in_array($s6, ['completed', 'approved', 'done', 'downloaded'])) {
-                                            $st5Pill = 'pill-done'; $st5Type = 'done'; $st5Icon = '✓'; $st5Text = 'Done';
-                                        } else {
-                                            $st5Pill = 'pill-pending'; $st5Type = 'pending'; $st5Icon = '⏳'; $st5Text = 'Pending';
-                                        }
+                                        // 5. Exam Slot (stage5)
+                                        $progLevel = strtoupper(trim((string)($std->programlevel ?? '')));
+                                        $progShort = strtoupper(trim((string)($std->program_short_name ?? '')));
+                                        $progName = strtoupper(trim((string)($std->program?->program_name ?? '')));
+                                        $isPhd = (
+                                            $progLevel === 'PHD' ||
+                                            $progLevel === 'DOCTORAL' ||
+                                            str_contains($progLevel, 'DOCTOR') ||
+                                            str_contains($progLevel, 'PHD') ||
+                                            str_contains($progShort, 'PHD') ||
+                                            str_contains($progShort, 'PH.D') ||
+                                            str_contains($progName, 'PH.D') ||
+                                            str_contains($progName, 'PHD') ||
+                                            str_contains($progName, 'DOCTOR')
+                                        );
 
-                                        // 6. VSAT Result (stage5)
-                                        $isVsatDone = in_array($s5, ['completed', 'approved', 'done', 'qualified']);
-                                        if ($isVsatDone) {
-                                            $st6Pill = 'pill-done'; $st6Type = 'done'; $st6Icon = '✓'; $st6Text = 'Done';
-                                        } else {
-                                            $st6Pill = 'pill-pending'; $st6Type = 'pending'; $st6Icon = '⏳'; $st6Text = 'Pending';
-                                        }
+                                        // For PhD students, exam slot booking does not exist (not applicable -> NA).
+                                        // For other students, check if stage5 is completed/booked/paid or if an exam schedule exists.
+                                        $isSlotBooked = !$isPhd && (
+                                            in_array($s5, ['completed', 'approved', 'done', 'booked', 'paid'])
+                                            || !empty($std->examSchedule)
+                                        );
+                                        $st5Pill = $isSlotBooked ? 'pill-done' : 'pill-na';
+                                        $st5Text = $isSlotBooked ? 'Completed' : 'NA';
+                                        $st5Type = $isSlotBooked ? 'done' : 'na';
 
-                                        // Detailed student payload for instant interactive stage popup
+                                        // 1. Personal Details
+                                        $perInfo = $std->personalInfo ?? $std->personal;
+                                        $personalData = [
+                                            'parentName' => $perInfo?->parent_name ?: 'N/A',
+                                            'parentPhone' => $perInfo?->parentphono ?: 'N/A',
+                                            'dob' => $perInfo?->dob ? \Carbon\Carbon::parse($perInfo->dob)->format('d/m/Y') : 'N/A',
+                                            'gender' => $perInfo?->gender ?: 'N/A',
+                                            'caste' => $perInfo?->caste_category ?: 'N/A',
+                                            'village' => $perInfo?->village ?: 'N/A',
+                                            'city' => $perInfo?->city_mandal ?: 'N/A',
+                                            'district' => $perInfo?->district ?: 'N/A',
+                                            'state' => $perInfo?->state ?: 'N/A',
+                                            'pincode' => $perInfo?->pincode ?: 'N/A',
+                                            'referredBy' => $perInfo?->referedby ?: 'N/A',
+                                        ];
+
+                                        // 2. Academic Details
+                                        $acaInfo = $std->academicDetails ?? $std->academic;
+                                        $academicData = [
+                                            'isFilled' => !empty($acaInfo),
+                                            'tenthSchool' => $acaInfo?->tenth_school_name ?: 'N/A',
+                                            'tenthBoard' => $acaInfo?->tenth_study_board ?: 'N/A',
+                                            'tenthCity' => $acaInfo?->tenth_school_city ?: 'N/A',
+                                            'tenthYear' => $acaInfo?->tenth_passed_year ?: 'N/A',
+                                            'tenthMarks' => $acaInfo?->tenth_marks_earned ?: ($acaInfo?->tenth_percentage ? $acaInfo->tenth_percentage . '%' : 'N/A'),
+                                            'interCollege' => $acaInfo?->pu2_college_name ?: 'N/A',
+                                            'interBoard' => $acaInfo?->pu2_study_board ?: 'N/A',
+                                            'interCity' => $acaInfo?->pu2_college_city ?: 'N/A',
+                                            'interYear' => $acaInfo?->pu2_passed_year ?: 'N/A',
+                                            'interMarks' => $acaInfo?->pu2_marks_earned ?: ($acaInfo?->pu2_percentage ? $acaInfo->pu2_percentage . '%' : 'N/A'),
+                                            'interStatus' => $acaInfo?->pu2_current_status ?: 'N/A',
+                                            'ugCollege' => $acaInfo?->ug_college_name ?: 'N/A',
+                                            'ugUniversity' => $acaInfo?->ug_university_board ?: 'N/A',
+                                            'ugYear' => $acaInfo?->ug_passed_year ?: 'N/A',
+                                            'ugMarks' => $acaInfo?->ug_marks_earned ?: ($acaInfo?->ug_percentage ? $acaInfo->ug_percentage . '%' : 'N/A'),
+                                        ];
+
+                                        // 3. Payment / Fee Details
+                                        $paymentData = [
+                                            'status' => $hasPaidRecord ? 'Paid & Verified' : 'Fee Due / Unpaid',
+                                            'feePayable' => number_format((float)($std->payDetail?->feepayable ?: 1200), 2),
+                                            'amountPaid' => number_format((float)($std->payDetail?->paidamount ?: ($hasPaidRecord ? 1000 : 0)), 2),
+                                            'txnId' => $std->payDetail?->txncrmid ?: ($std->payDetail?->txnpayuid ?: ($std->receipt?->receiptno ?: 'N/A')),
+                                            'payType' => $std->payDetail?->paytype ?: ($std->receipt?->paytype ?: 'Online (PayU Payment Gateway)'),
+                                            'txnDate' => $std->payDetail?->txndatetime ? \Carbon\Carbon::parse($std->payDetail->txndatetime)->format('d M Y, h:i A') : 'N/A',
+                                            'coupon' => $std->payDetail?->defcoupon ?: 'None',
+                                            'couponAmount' => number_format((float)($std->payDetail?->totalcouponamount ?: 0), 2),
+                                        ];
+
+                                        // 4. Documents Uploaded Details
+                                        $docInfo = $std->uploads;
+                                        $docsData = [
+                                            'isUploaded' => !empty($docInfo),
+                                            'tenthDoc' => $docInfo?->tenth_file_name ?: 'Not Uploaded',
+                                            'interDoc' => $docInfo?->inter_file_name ?: 'Not Uploaded',
+                                            'aadharDoc' => $docInfo?->aadhar_file_name ?: 'Not Uploaded',
+                                            'transferDoc' => $docInfo?->transfer_file_name ?: 'Not Uploaded',
+                                            'conductDoc' => $docInfo?->study_conduct_file_name ?: 'Not Uploaded',
+                                            'ugDoc' => $docInfo?->btech_file_name ?: ($docInfo?->pg_file_name ?: 'Not Uploaded'),
+                                            'uploadDate' => $docInfo?->log_timestamp ? \Carbon\Carbon::parse($docInfo->log_timestamp)->format('d M Y, h:i A') : 'Pending',
+                                        ];
+
+                                        // 5. Exam Slot Details
+                                        $slotInfo = $std->examSchedule;
+                                        $slotData = [
+                                            'isDone' => !empty($slotInfo) || $isPhd,
+                                            'isBooked' => !empty($slotInfo) || $isPhd,
+                                            'slotName' => $slotInfo?->exam_slot ?: ($isPhd ? 'Exempted (Ph.D Research Candidate)' : 'Pending Booking'),
+                                            'examDate' => $slotInfo?->examdate ? \Carbon\Carbon::parse($slotInfo->examdate)->format('d/m/Y') : ($isPhd ? 'N/A' : 'Pending'),
+                                            'examStatus' => $slotInfo ? 'Qualified' : ($isPhd ? 'Qualified' : 'Pending'),
+                                            'hallTicket' => $slotInfo ? ('HT-' . $appliDisplay) : ($isPhd ? 'Exempted' : 'Pending Schedule'),
+                                            'score' => $slotInfo ? 'Slot Confirmed' : 'Pending',
+                                            'rank' => $slotInfo ? 'Slot Confirmed' : 'Pending',
+                                            'concession' => 'Applicable per V-SAT Merit',
+                                        ];
+
+                                        // Detailed student payload for interactive stage modal if clicked
                                         $studentPayload = [
-                                            'appliNo' => $appliNo,
+                                            'appliNo' => $appliDisplay,
                                             'name' => $name,
-                                            'phone' => $phone,
-                                            'email' => $std->emailid ?? 'N/A',
+                                            'phone' => $phNoDisplay,
+                                            'mobile' => $mobileDisplay,
+                                            'crmid' => $crmIdDisplay,
+                                            'email' => $std->emailid ?? 'NA',
                                             'campus' => $std->campus?->campus_name ?? $std->campuscode ?? 'VFSTR Vadlamudi Main Campus',
                                             'programLevel' => $std->programlevel ?? 'UG (Undergraduate)',
                                             'program' => $std->program?->program_name ?? $std->programid ?? 'B.Tech',
                                             'branch' => $std->branch?->branch_name ?? $std->branchid ?? 'Computer Science & Engineering',
                                             'state' => $std->state?->state_name ?? $std->stateid ?? 'Andhra Pradesh',
                                             'country' => $std->country?->country_name ?? 'India',
-                                            'regDate' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y, h:i A') : 'N/A',
+                                            'regDate' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y, h:i A') : 'NA',
                                             'status' => $std->std_status ?? 'Registered',
+                                            'personal' => $personalData,
+                                            'academic' => $academicData,
+                                            'payment' => $paymentData,
+                                            'fee' => $paymentData,
+                                            'docs' => $docsData,
+                                            'application' => $docsData,
+                                            'slot' => $slotData,
+                                            'vsat' => $slotData,
                                             'stages' => [
-                                                'registration' => ['pill' => $st1Pill, 'icon' => $st1Icon, 'text' => $st1Text],
-                                                'payment' => ['pill' => $st2Pill, 'icon' => $st2Icon, 'text' => $st2Text],
-                                                'personal' => ['pill' => $st3Pill, 'icon' => $st3Icon, 'text' => $st3Text],
-                                                'academic' => ['pill' => $st4Pill, 'icon' => $st4Icon, 'text' => $st4Text],
-                                                'application' => ['pill' => $st5Pill, 'icon' => $st5Icon, 'text' => $st5Text],
-                                                'vsat' => ['pill' => $st6Pill, 'icon' => $st6Icon, 'text' => $st6Text],
+                                                'personal' => ['pill' => $st1Pill, 'text' => $st1Text],
+                                                'academic' => ['pill' => $st2Pill, 'text' => $st2Text],
+                                                'docs' => ['pill' => $st3Pill, 'text' => $st3Text],
+                                                'fee' => ['pill' => $st4Pill, 'text' => $st4Text],
+                                                'slot' => ['pill' => $st5Pill, 'text' => $st5Text],
                                             ],
-                                            'personal' => [
-                                                'parentName' => $std->personalInfo?->parent_name ?? 'N/A',
-                                                'parentPhone' => $std->personalInfo?->parentphono ?? 'N/A',
-                                                'dob' => !empty($std->personalInfo?->dob) ? \Carbon\Carbon::parse($std->personalInfo->dob)->format('d M Y') : 'N/A',
-                                                'gender' => $std->personalInfo?->gender ?? $std->gender ?? 'N/A',
-                                                'caste' => $std->personalInfo?->caste_category ?? 'General / OC',
-                                                'village' => $std->personalInfo?->village ?? 'N/A',
-                                                'city' => $std->personalInfo?->city_mandal ?? 'N/A',
-                                                'district' => $std->personalInfo?->district ?? 'N/A',
-                                                'state' => $std->personalInfo?->state ?? ($std->state?->state_name ?? 'N/A'),
-                                                'pincode' => $std->personalInfo?->pincode ?? 'N/A',
-                                                'referredBy' => $std->personalInfo?->referedby ?? 'Direct / University Admissions Portal',
-                                            ],
-                                            'academic' => [
-                                                'isFilled' => !empty($std->academicDetails?->tenth_school_name) || !empty($std->academicDetails?->pu2_college_name) || in_array($s3, ['completed', 'approved', 'done']),
-                                                'tenthSchool' => $std->academicDetails?->tenth_school_name ?? 'N/A',
-                                                'tenthBoard' => $std->academicDetails?->tenth_study_board ?? 'N/A',
-                                                'tenthCity' => $std->academicDetails?->tenth_school_city ?? 'N/A',
-                                                'tenthYear' => $std->academicDetails?->tenth_passed_year ?? 'N/A',
-                                                'tenthMarks' => !empty($std->academicDetails?->tenth_cgpa) ? ($std->academicDetails->tenth_cgpa . ' CGPA') : (!empty($std->academicDetails?->tenth_marks) ? $std->academicDetails->tenth_marks : 'N/A'),
-                                                'interCollege' => $std->academicDetails?->pu2_college_name ?? 'N/A',
-                                                'interBoard' => $std->academicDetails?->pu2_study_board ?? 'N/A',
-                                                'interCity' => $std->academicDetails?->pu2_college_city ?? 'N/A',
-                                                'interYear' => $std->academicDetails?->pu2_passed_year ?? 'N/A',
-                                                'interMarks' => !empty($std->academicDetails?->pu2_cgpa) ? ($std->academicDetails->pu2_cgpa . ' CGPA') : (!empty($std->academicDetails?->pu2_marks) ? $std->academicDetails->pu2_marks : 'N/A'),
-                                                'interStatus' => $std->academicDetails?->pu2_current_status ?? 'N/A',
-                                                'ugCollege' => $std->academicDetails?->ug_college_name ?? null,
-                                                'ugUniversity' => $std->academicDetails?->ug_university_board ?? null,
-                                                'ugYear' => $std->academicDetails?->ug_passed_year ?? null,
-                                                'ugMarks' => !empty($std->academicDetails?->ug_cgpa) ? ($std->academicDetails->ug_cgpa . ' CGPA') : (!empty($std->academicDetails?->ug_marks) ? $std->academicDetails->ug_marks : null),
-                                            ],
-                                            'payment' => [
-                                                'status' => $st2Text === 'Done' ? 'Paid & Verified' : ($st2Text === 'Fee Due' ? 'Fee Due / Unpaid' : 'Pending'),
-                                                'feePayable' => number_format((float)($std->payDetail?->feepayable ?? 1200), 2),
-                                                'amountPaid' => number_format((float)($std->payDetail?->paidamount ?? ($st2Text === 'Done' ? 1200 : 0)), 2),
-                                                'txnId' => $std->payDetail?->txnid ?? ($st2Text === 'Done' ? 'TXN' . substr(md5($appliNo), 0, 10) : 'N/A'),
-                                                'payType' => $std->payDetail?->paytype ?? 'Online (PayU Payment Gateway)',
-                                                'txnDate' => !empty($std->payDetail?->txndatetime) ? \Carbon\Carbon::parse($std->payDetail->txndatetime)->format('d M Y, h:i A') : ($st2Text === 'Done' ? 'Completed & Verified' : 'Awaiting Payment'),
-                                                'coupon' => $std->payDetail?->defcoupon ?? '27EARLYB100',
-                                                'couponAmount' => number_format((float)($std->payDetail?->defcouponamount ?? 500), 2),
-                                            ],
-                                            'application' => [
-                                                'isDownloaded' => in_array($s4, ['completed', 'approved', 'done', 'downloaded']),
-                                                'statusText' => in_array($s4, ['completed', 'approved', 'done', 'downloaded']) ? 'Downloaded' : 'Not Downloaded',
-                                                'appliNo' => $appliNo,
-                                                'date' => $std->log_timestamp ? \Carbon\Carbon::parse($std->log_timestamp)->format('d M Y') : 'N/A',
-                                            ],
-                                            'vsat' => [
-                                                'isDone' => $isVsatDone,
-                                                'hallTicket' => $isVsatDone ? ('VSAT' . substr($appliNo, -6)) : 'Pending Schedule',
-                                                'examStatus' => $isVsatDone ? 'Qualified' : 'Pending',
-                                                'score' => $isVsatDone ? '86 / 120' : 'Pending (Exam Not Taken)',
-                                                'rank' => $isVsatDone ? 'State Rank: 1,280' : 'Pending (Results Awaiting)',
-                                                'concession' => $isVsatDone ? '25% Merit Tuition Fee Concession' : 'Pending VSAT Examination & Results',
-                                            ]
                                         ];
                                     @endphp
                                     <tr class="register-track-row" 
-                                        id="student-row-{{ $appliNo }}"
-                                        data-search="{{ strtolower($appliNo . ' ' . $name . ' ' . $phone) }}"
+                                        id="student-row-{{ $appliDisplay }}"
+                                        data-search="{{ strtolower($appliDisplay . ' ' . $crmIdDisplay . ' ' . $name . ' ' . $phNoDisplay . ' ' . $mobileDisplay) }}"
                                         data-student="{{ json_encode($studentPayload) }}">
                                         <td>
-                                            <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliNo }}</strong>
+                                            <strong style="color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;">{{ $appliDisplay }}</strong>
                                         </td>
                                         <td>
-                                            <div style="font-weight: 700; color: #0f172a;">{{ $name }}</div>
-                                            @if(!empty($std->gender))
-                                                <div style="font-size: 0.72rem; color: #64748b;">{{ $std->gender }}</div>
+                                            @if($crmIdDisplay !== 'NA')
+                                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #1e40af; background: #eff6ff; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #bfdbfe; white-space: nowrap;">
+                                                    {{ $crmIdDisplay }}
+                                                </span>
+                                            @else
+                                                <span class="tracking-pill pill-na">NA</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0f172a;">+91 {{ $phone ?: 'N/A' }}</span>
+                                            @if($phNoDisplay !== 'NA')
+                                                <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #0f172a; white-space: nowrap;">+91 {{ $phNoDisplay }}</span>
+                                            @else
+                                                <span class="tracking-pill pill-na">NA</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st1Pill, $st1Text, $st1Type, $appliNo, 'registration', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st1Pill, $st1Text, $st1Type, $appliDisplay, 'personal', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st2Pill, $st2Text, $st2Type, $appliNo, 'payment', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st2Pill, $st2Text, $st2Type, $appliDisplay, 'academic', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st3Pill, $st3Text, $st3Type, $appliNo, 'personal', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st3Pill, $st3Text, $st3Type, $appliDisplay, 'docs', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliNo, 'academic', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st4Pill, $st4Text, $st4Type, $appliDisplay, 'fee', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st5Pill, $st5Text, $st5Type, $appliNo, 'application', $isTrackingPage) !!}
+                                                {!! $renderStagePill($st5Pill, $st5Text, $st5Type, $appliDisplay, 'slot', $isTrackingPage) !!}
                                             </div>
                                         </td>
                                         <td>
                                             <div style="text-align: center;">
-                                                {!! $renderStagePill($st6Pill, $st6Text, $st6Type, $appliNo, 'vsat', $isTrackingPage) !!}
+                                                @if($appliDisplay !== 'NA')
+                                                    <a href="{{ route('application.show', ['id' => $appliDisplay, 'from' => request()->fullUrl()]) }}" 
+                                                       class="btn-action-sm btn-verify" 
+                                                       style="padding: 4px 14px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;"
+                                                       title="Preview Application Form">
+                                                        Preview
+                                                    </a>
+                                                @else
+                                                    <span class="tracking-pill pill-na">NA</span>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -708,15 +763,15 @@
                             }
 
                             const headers = [
-                                'Application Number',
-                                'Student Name',
-                                'Mobile Number',
-                                'Registration Form',
-                                'Payment',
-                                'Personal Details',
-                                'Academic Details',
-                                'Application Download',
-                                'VSAT Result'
+                                'App No',
+                                'CRM ID',
+                                'Ph No',
+                                'Personal info',
+                                'Academic info',
+                                'Documents',
+                                'Fee',
+                                'Exam Slot',
+                                'Preview'
                             ];
 
                             const rows = Array.from(table.querySelectorAll('tbody tr.register-track-row'));
@@ -737,30 +792,26 @@
                                 const cells = row.querySelectorAll('td');
                                 if (cells.length < 9) return;
 
-                                // 1. Application Number
                                 const appliNo = (cells[0].querySelector('strong')?.textContent || cells[0].textContent || '').trim();
-
-                                // 2. Student Name
-                                const nameEl = cells[1].querySelector('div');
-                                const name = (nameEl ? nameEl.textContent : cells[1].textContent).trim();
-
-                                // 3. Mobile Number
-                                let phone = (cells[2].textContent || '').trim().replace(/\s+/g, ' ');
-
-                                // 4 to 9. Stages
-                                const stageVals = [];
-                                for (let i = 3; i <= 8; i++) {
-                                    const pill = cells[i].querySelector('.tracking-pill');
-                                    let txt = pill ? pill.textContent : cells[i].textContent;
-                                    txt = (txt || '').replace(/^[✓⏳❌—\s]+/, '').trim();
-                                    stageVals.push(txt || 'Pending');
-                                }
+                                const crmId = (cells[1].textContent || '').trim();
+                                const phNo = (cells[2].textContent || '').trim().replace(/\s+/g, ' ');
+                                const personal = (cells[3].textContent || '').trim();
+                                const academic = (cells[4].textContent || '').trim();
+                                const docs = (cells[5].textContent || '').trim();
+                                const fee = (cells[6].textContent || '').trim();
+                                const slot = (cells[7].textContent || '').trim();
+                                const preview = (cells[8].textContent || '').trim().replace(/\s+/g, ' ');
 
                                 const rowData = [
                                     '"' + appliNo.replace(/"/g, '""') + '"',
-                                    '"' + name.replace(/"/g, '""') + '"',
-                                    '"' + phone.replace(/"/g, '""') + '"',
-                                    ...stageVals.map(s => '"' + s.replace(/"/g, '""') + '"')
+                                    '"' + crmId.replace(/"/g, '""') + '"',
+                                    '"' + phNo.replace(/"/g, '""') + '"',
+                                    '"' + personal.replace(/"/g, '""') + '"',
+                                    '"' + academic.replace(/"/g, '""') + '"',
+                                    '"' + docs.replace(/"/g, '""') + '"',
+                                    '"' + fee.replace(/"/g, '""') + '"',
+                                    '"' + slot.replace(/"/g, '""') + '"',
+                                    '"' + preview.replace(/"/g, '""') + '"'
                                 ];
 
                                 csvLines.push(rowData.join(','));
@@ -877,7 +928,7 @@
                                             </div>
                                         `;
                                     }
-                                } else if (stage === 'payment') {
+                                } else if (stage === 'payment' || stage === 'fee') {
                                     if (iconEl) iconEl.textContent = '💳';
                                     if (titleEl) titleEl.textContent = 'Payment Details';
                                     if (footerNoteEl) footerNoteEl.textContent = 'Fee payment and transaction verification particulars.';
@@ -1132,12 +1183,12 @@
                                             </div>
                                         `;
                                     }
-                                } else if (stage === 'application') {
-                                    if (iconEl) iconEl.textContent = '📄';
-                                    if (titleEl) titleEl.textContent = 'Application Download Status';
-                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate application form download status verification.';
-                                    const app = student.application || {};
-                                    const isDownloaded = app.isDownloaded === true || (String(app.statusText || '').toLowerCase() === 'downloaded');
+                                } else if (stage === 'application' || stage === 'docs') {
+                                    if (iconEl) iconEl.textContent = '📁';
+                                    if (titleEl) titleEl.textContent = 'Uploaded Documents & Certificates';
+                                    if (footerNoteEl) footerNoteEl.textContent = 'Candidate verified certificate and document uploads.';
+                                    const doc = student.docs || student.application || {};
+                                    const isUploaded = doc.isUploaded === true;
 
                                     if (body) {
                                         body.innerHTML = `
@@ -1151,116 +1202,77 @@
                                                     <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Primary Mobile</span>
-                                                    <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
+                                                    <span class="card-lbl">10th Class Memo</span>
+                                                    <span class="card-val">${doc.tenthDoc && doc.tenthDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.tenthDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Campus Applied</span>
-                                                    <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
+                                                    <span class="card-lbl">12th / Inter Memo</span>
+                                                    <span class="card-val">${doc.interDoc && doc.interDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.interDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Registration Date</span>
-                                                    <span class="card-val">${safe(app.date || student.regDate)}</span>
+                                                    <span class="card-lbl">Aadhar Card</span>
+                                                    <span class="card-val">${doc.aadharDoc && doc.aadharDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.aadharDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
                                                 </div>
                                                 <div class="stage-info-card">
-                                                    <span class="card-lbl">Application Download Status</span>
+                                                    <span class="card-lbl">Transfer Certificate</span>
+                                                    <span class="card-val">${doc.transferDoc && doc.transferDoc !== 'Not Uploaded' ? '<span class="badge-paid">✓ ' + safe(doc.transferDoc) + '</span>' : '<span style="color: #94a3b8;">Not Uploaded</span>'}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Upload Status</span>
                                                     <span class="card-val">
-                                                        ${isDownloaded 
-                                                            ? '<span class="badge-paid">✓ Downloaded</span>' 
-                                                            : '<span class="badge-fee-due">⏳ Not Downloaded</span>'}
+                                                        ${isUploaded 
+                                                            ? '<span class="badge-paid">✓ Uploaded & Completed</span>' 
+                                                            : '<span class="badge-fee-due">⏳ Documents Pending</span>'}
                                                     </span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Upload Date & Time</span>
+                                                    <span class="card-val">${safe(doc.uploadDate, 'Pending')}</span>
                                                 </div>
                                             </div>
                                         `;
                                     }
-                                } else if (stage === 'vsat') {
-                                    if (iconEl) iconEl.textContent = '🏆';
-                                    if (titleEl) titleEl.textContent = 'VSAT Examination & Result Details';
-                                    const vsat = student.vsat || {};
-                                    const isDone = vsat.isDone === true || (String(vsat.examStatus || '').toLowerCase() === 'qualified');
+                                } else if (stage === 'vsat' || stage === 'slot') {
+                                    if (iconEl) iconEl.textContent = '📅';
+                                    if (titleEl) titleEl.textContent = 'Exam Slot & Schedule Details';
+                                    const slot = student.slot || student.vsat || {};
+                                    const isDone = slot.isDone === true || slot.isBooked === true;
 
                                     if (footerNoteEl) {
                                         footerNoteEl.textContent = isDone 
-                                            ? 'Vignan Scholastic Aptitude Test score, rank, and scholarship concession.' 
-                                            : 'Candidate examination schedule and results are pending.';
+                                            ? 'Candidate examination slot booking and schedule particulars.' 
+                                            : 'Candidate examination schedule is pending.';
                                     }
 
                                     if (body) {
-                                        if (isDone) {
-                                            body.innerHTML = `
-                                                <div class="stage-info-grid">
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Application Number</span>
-                                                        <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Student Full Name</span>
-                                                        <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Hall Ticket Number</span>
-                                                        <span class="card-val font-mono" style="color: #4338ca; font-weight: 700;">${safe(vsat.hallTicket)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Examination Status</span>
-                                                        <span class="card-val"><span class="badge-paid">✓ Qualified</span></span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Test Score</span>
-                                                        <span class="card-val font-mono" style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">${safe(vsat.score)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">State Merit Rank</span>
-                                                        <span class="card-val font-mono" style="font-weight: 700; color: #0369a1;">${safe(vsat.rank)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card" style="grid-column: 1 / -1;">
-                                                        <span class="card-lbl">Merit Scholarship / Fee Concession</span>
-                                                        <span class="card-val" style="color: #15803d; font-weight: 700; font-size: 0.95rem;">${safe(vsat.concession)}</span>
-                                                    </div>
+                                        body.innerHTML = `
+                                            <div class="stage-info-grid">
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Application Number</span>
+                                                    <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
                                                 </div>
-                                            `;
-                                        } else {
-                                            body.innerHTML = `
-                                                <div class="stage-info-grid">
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Application Number</span>
-                                                        <span class="card-val font-mono" style="color: #1e40af; font-weight: 700;">${safe(student.appliNo)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Student Full Name</span>
-                                                        <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Primary Mobile</span>
-                                                        <span class="card-val font-mono">+91 ${safe(student.phone)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">Campus Applied</span>
-                                                        <span class="card-val" style="color: #4338ca; font-weight: 700;">${safe(student.campus)}</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Examination Status</span>
-                                                        <span class="card-val"><span class="badge-fee-due">⏳ Pending</span></span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Hall Ticket Number</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending Schedule</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">VSAT Test Score</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending (Exam Not Taken)</span>
-                                                    </div>
-                                                    <div class="stage-info-card">
-                                                        <span class="card-lbl">State Merit Rank</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending (Results Awaiting)</span>
-                                                    </div>
-                                                    <div class="stage-info-card" style="grid-column: 1 / -1;">
-                                                        <span class="card-lbl">Merit Scholarship / Fee Concession</span>
-                                                        <span class="card-val" style="color: #64748b;">Pending VSAT Examination & Results</span>
-                                                    </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Student Full Name</span>
+                                                    <span class="card-val" style="font-weight: 700;">${safe(student.name)}</span>
                                                 </div>
-                                            `;
-                                        }
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Exam Slot Selected</span>
+                                                    <span class="card-val font-mono" style="color: #4338ca; font-weight: 700;">${safe(slot.slotName, 'Pending Booking')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Examination Date</span>
+                                                    <span class="card-val font-mono">${safe(slot.examDate, 'Pending')}</span>
+                                                </div>
+                                                <div class="stage-info-card">
+                                                    <span class="card-lbl">Booking Status</span>
+                                                    <span class="card-val">
+                                                        ${isDone 
+                                                            ? '<span class="badge-paid">✓ Booked / Confirmed</span>' 
+                                                            : '<span class="badge-fee-due">⏳ Slot Pending</span>'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        `;
                                     }
                                 }
 

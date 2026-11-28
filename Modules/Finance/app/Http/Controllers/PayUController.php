@@ -320,7 +320,30 @@ class PayUController extends Controller
         // 4. Student stage — never auto-create an admitted student
         $studentReg = CrmStudentRegistration::where('applinano', $applino)->first();
         if ($studentReg) {
-            $studentReg->update(['stage1' => 'paid', 'stage4' => 'paid', 'log_timestamp' => now()]);
+            $studentReg->update(['stage4' => 'paid', 'log_timestamp' => now()]);
+
+            // Trigger WhatsApp & SMS payment confirmation and slot booking reminder
+            try {
+                $cleanPhone = substr(preg_replace('/\D/', '', $studentReg->phoneno ?? ''), -10);
+                if ($cleanPhone && strlen($cleanPhone) === 10) {
+                    $stdName = $studentReg->name ?: 'Student';
+                    $amountFmt = number_format($amount, 2);
+                    $stageMsg = "Dear {$stdName} (App ID: {$applino}), your application fee payment of Rs. {$amountFmt} is received successfully (Txn: {$txnid})! Please log in to book your V-SAT exam slot: https://vucrm.vumoodle.in/";
+
+                    // WhatsApp payment confirmation via SmartPing
+                    if (class_exists(\Modules\Sms\Services\WhatsAppService::class)) {
+                        app(\Modules\Sms\Services\WhatsAppService::class)->sendStageUpdate(
+                            phone: $cleanPhone,
+                            stageMessage: $stageMsg,
+                            candidateName: $stdName,
+                            applicationId: $applino,
+                            ip: $request->ip()
+                        );
+                    }
+                }
+            } catch (\Throwable $pe) {
+                Log::warning('[PayU] Payment confirmation message dispatch error: ' . $pe->getMessage());
+            }
         } else {
             Log::error('[PayU] Paid but no registration', ['applino' => $applino, 'txnid' => $txnid]);
         }

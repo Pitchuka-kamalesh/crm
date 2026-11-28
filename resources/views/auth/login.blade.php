@@ -785,36 +785,38 @@
             }
         }
 
+        .mobile-scroll-hint {
+            display: none;
+        }
+
         @media (max-width: 900px) {
             html, body {
-                height: 100%;
+                height: auto;
                 min-height: 100vh;
                 overflow-x: hidden;
                 overflow-y: auto;
             }
             body {
-                padding: 1.25rem 1rem;
+                padding: 1.25rem 1rem 2.5rem 1rem;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
                 align-items: center;
                 background-attachment: scroll;
-            }
-            .hero-section {
-                display: none !important;
             }
             .main-container {
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
                 align-items: center;
                 width: 100%;
                 max-width: 440px;
-                margin: auto;
+                margin: 0 auto;
                 padding: 0;
                 gap: 0;
             }
             .login-card-wrapper {
+                order: 1;
                 width: 100%;
                 display: flex;
                 justify-content: center;
@@ -825,6 +827,56 @@
                 padding: 2rem 1.5rem 1.4rem 1.5rem;
                 border-radius: 1.5rem;
                 box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.18);
+            }
+            .mobile-scroll-hint {
+                order: 2;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4rem;
+                color: #ffffff;
+                font-size: 0.78rem;
+                font-weight: 500;
+                letter-spacing: 0.02em;
+                margin: 1.1rem auto 0.6rem auto;
+                opacity: 0.95;
+                animation: bounceDown 1.8s infinite ease-in-out;
+                user-select: none;
+            }
+            .mobile-scroll-hint svg {
+                width: 14px;
+                height: 14px;
+                stroke-width: 2.5;
+            }
+            @keyframes bounceDown {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(4px); }
+            }
+            .hero-section {
+                display: flex !important;
+                flex-direction: column;
+                order: 3;
+                width: 100%;
+                max-width: 440px;
+                margin-top: 0.5rem;
+            }
+            .hero-title-area {
+                display: none !important;
+            }
+            .bubbles-cluster-wrap {
+                margin-top: 0 !important;
+                width: 100%;
+                text-align: center;
+            }
+            .bubbles-cluster-title {
+                justify-content: center;
+                font-size: 0.8rem !important;
+                margin-bottom: 0.75rem;
+                color: #e2e8f0;
+            }
+            .bubbles-grid {
+                justify-content: center;
+                gap: 0.75rem;
             }
             .crest-icon-box {
                 width: 56px;
@@ -1374,6 +1426,14 @@ and (max-height: 650px) {
                 </div>
 
             </div>
+        </div>
+
+        <!-- Mobile View Indicator: For more info -->
+        <div class="mobile-scroll-hint">
+            <span>For more info</span>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+            </svg>
         </div>
 
     </main>

@@ -362,6 +362,37 @@
                                 </div>
                             </div>
 
+                            <!-- 4. Inter Group Filter (Dropdown with Checkboxes) -->
+                            <div class="filter-item" style="position: relative;">
+                                <label class="filter-field-label">Inter Group</label>
+                                <div class="group-dropdown-wrap" style="position: relative;">
+                                    <button type="button" 
+                                            id="btnGroupDropdown" 
+                                            onclick="toggleGroupDropdown(event)" 
+                                            class="filter-select" 
+                                            style="min-width: 125px; height: 32px; font-size: 0.78rem; display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 0.65rem; background: #ffffff; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                        <span id="groupDropdownLabel" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95px;">All Groups</span>
+                                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
+                                    <div id="groupDropdownMenu" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; min-width: 175px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.12), 0 8px 10px -6px rgba(0,0,0,0.1); padding: 0.5rem; z-index: 100;">
+                                        <label style="display: flex; align-items: center; gap: 7px; padding: 5px 6px; font-size: 0.76rem; font-weight: 700; color: #0f172a; cursor: pointer; border-bottom: 1px solid #e2e8f0; margin-bottom: 4px;">
+                                            <input type="checkbox" id="chkGroupSelectAll" checked onchange="toggleAllGroups(this)" style="accent-color: #2563eb; width: 14px; height: 14px; cursor: pointer;">
+                                            <span>Select All</span>
+                                        </label>
+                                        @foreach($distinctGroups ?? [] as $grp)
+                                            <label style="display: flex; align-items: center; gap: 7px; padding: 4px 6px; font-size: 0.76rem; font-weight: 600; color: #334155; cursor: pointer; border-radius: 4px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                                <input type="checkbox" class="chk-group-filter" value="{{ $grp }}" checked onchange="onGroupCheckboxChange()" style="accent-color: #2563eb; width: 14px; height: 14px; cursor: pointer;">
+                                                <span>{{ $grp }}</span>
+                                            </label>
+                                        @endforeach
+                                        <label style="display: flex; align-items: center; gap: 7px; padding: 4px 6px; font-size: 0.76rem; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 4px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                            <input type="checkbox" class="chk-group-filter" value="NA" checked onchange="onGroupCheckboxChange()" style="accent-color: #2563eb; width: 14px; height: 14px; cursor: pointer;">
+                                            <span style="font-style: italic; color: #94a3b8;">NA / Unspecified</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Some Gap / Visual Separator -->
                             <div class="filter-separator" style="width: 1px; height: 24px; background: #cbd5e1; margin: 0 0.2rem; align-self: flex-end; margin-bottom: 4px;"></div>
 
@@ -412,7 +443,6 @@
                         </div>
                     </div>
                 </div>
-                </div>
 
                 <!-- Table Content -->
                 <div class="table-responsive" style="overflow-x: auto;">
@@ -424,7 +454,9 @@
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Candidate Name</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Phone No</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">CRM ID</th>
-                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Program &amp; Branch</th>
+                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Program</th>
+                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Branch</th>
+                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap; text-align: center;">Inter Group</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Scheduled Date</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Exam Slot / Timing</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap; text-align: center;">Status</th>
@@ -441,6 +473,9 @@
                                     $branchObj = $student?->branch;
                                     $progTitle = $progObj ? ($progObj->program_short_name ?: $progObj->program_name) : ($student?->programlevel ?: 'Undergraduate');
                                     $branchTitle = $branchObj ? ($branchObj->branch_short_name ?: $branchObj->branch_name) : '';
+                                    
+                                    $pu2Group = trim((string)($student?->academicDetails?->pu2_group ?? ''));
+                                    $pu2GroupDisplay = !empty($pu2Group) ? $pu2Group : 'NA';
                                     
                                     $dt = !empty($row->examdate) ? \Carbon\Carbon::parse($row->examdate) : null;
                                     $dateFormatted = $dt ? $dt->format('d M Y') : 'N/A';
@@ -462,6 +497,9 @@
                                     data-appli="{{ strtolower((string)$row->applino) }}"
                                     data-phone="{{ strtolower((string)$row->phoneno) }}"
                                     data-crmid="{{ strtolower((string)$row->crmid) }}"
+                                    data-prog="{{ strtolower($progTitle) }}"
+                                    data-branch="{{ strtolower($branchTitle) }}"
+                                    data-group="{{ strtolower($pu2GroupDisplay) }}"
                                     data-date="{{ $dateRaw }}"
                                     data-year="{{ $yearRaw }}"
                                     data-month="{{ $monthRaw }}"
@@ -496,11 +534,26 @@
                                         </span>
                                     </td>
 
-                                    <!-- Program & Branch -->
-                                    <td style="padding: 0.75rem 0.85rem; white-space: nowrap;">
-                                        <div style="font-weight: 700; color: #0f172a;">{{ $progTitle }}</div>
-                                        @if($branchTitle)
-                                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 1px;">{{ $branchTitle }}</div>
+                                    <!-- Program -->
+                                    <td style="padding: 0.75rem 0.85rem; white-space: nowrap; font-weight: 700; color: #0f172a;">
+                                        {{ $progTitle }}
+                                    </td>
+
+                                    <!-- Branch -->
+                                    <td style="padding: 0.75rem 0.85rem; white-space: nowrap; color: #334155; font-weight: 600;">
+                                        {{ $branchTitle ?: 'N/A' }}
+                                    </td>
+
+                                    <!-- Inter / PU-2 Group -->
+                                    <td style="padding: 0.75rem 0.85rem; white-space: nowrap; text-align: center;">
+                                        @if($pu2GroupDisplay !== 'NA')
+                                            <span style="display: inline-block; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                                {{ $pu2GroupDisplay }}
+                                            </span>
+                                        @else
+                                            <span style="display: inline-block; background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; font-size: 0.74rem; font-weight: 600; padding: 2px 7px; border-radius: 6px;">
+                                                NA
+                                            </span>
                                         @endif
                                     </td>
 
@@ -558,7 +611,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="11" style="text-align: center; padding: 3rem 1rem; color: #64748b;">
+                                    <td colspan="13" style="text-align: center; padding: 3rem 1rem; color: #64748b;">
                                         <div style="font-size: 1rem; font-weight: 700; color: #1e293b;">No Exam Slot Bookings Found</div>
                                         <p style="font-size: 0.82rem; margin: 0.25rem 0 0;">Candidates who complete Stage 5 slot booking will automatically appear in this ledger.</p>
                                     </td>
@@ -574,6 +627,62 @@
 
 <!-- Dynamic Filter & Print Script -->
 <script>
+    function toggleGroupDropdown(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('groupDropdownMenu');
+        if (!menu) return;
+        const isHidden = menu.style.display === 'none' || !menu.style.display;
+        menu.style.display = isHidden ? 'block' : 'none';
+    }
+
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('groupDropdownMenu');
+        const btn = document.getElementById('btnGroupDropdown');
+        if (menu && menu.style.display === 'block') {
+            if (!menu.contains(e.target) && !btn?.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        }
+    });
+
+    function toggleAllGroups(masterChk) {
+        const chks = document.querySelectorAll('.chk-group-filter');
+        chks.forEach(function(c) {
+            c.checked = masterChk.checked;
+        });
+        updateGroupDropdownLabel();
+        filterExamTable();
+    }
+
+    function onGroupCheckboxChange() {
+        const chks = Array.from(document.querySelectorAll('.chk-group-filter'));
+        const checkedCount = chks.filter(c => c.checked).length;
+        const masterChk = document.getElementById('chkGroupSelectAll');
+        if (masterChk) {
+            masterChk.checked = (checkedCount === chks.length);
+            masterChk.indeterminate = (checkedCount > 0 && checkedCount < chks.length);
+        }
+        updateGroupDropdownLabel();
+        filterExamTable();
+    }
+
+    function updateGroupDropdownLabel() {
+        const chks = Array.from(document.querySelectorAll('.chk-group-filter'));
+        const checked = chks.filter(c => c.checked);
+        const label = document.getElementById('groupDropdownLabel');
+        if (!label) return;
+
+        if (checked.length === chks.length) {
+            label.textContent = 'All Groups';
+        } else if (checked.length === 0) {
+            label.textContent = 'None Selected';
+        } else if (checked.length === 1) {
+            label.textContent = checked[0].value;
+        } else {
+            label.textContent = checked.length + ' Selected';
+        }
+    }
+
     function filterExamTable() {
         const query = (document.getElementById('examSearchInput')?.value || '').toLowerCase().trim();
         const year = document.getElementById('yearFilterSelect')?.value || '';
@@ -582,6 +691,9 @@
         const endDate = document.getElementById('endDateInput')?.value || '';
         const chkS1 = document.getElementById('chkSlot1')?.checked ?? false;
         const chkS2 = document.getElementById('chkSlot2')?.checked ?? false;
+
+        const selectedGroupChks = Array.from(document.querySelectorAll('.chk-group-filter:checked'));
+        const selectedGroups = selectedGroupChks.map(c => c.value.toLowerCase());
 
         const table = document.getElementById('examScheduleTable');
         const rows = table.querySelectorAll('tbody tr');
@@ -597,6 +709,9 @@
             const rowAppli = row.getAttribute('data-appli') || '';
             const rowPhone = row.getAttribute('data-phone') || '';
             const rowCrmid = row.getAttribute('data-crmid') || '';
+            const rowProg = row.getAttribute('data-prog') || '';
+            const rowBranch = row.getAttribute('data-branch') || '';
+            const rowGroup = (row.getAttribute('data-group') || 'na').toLowerCase();
             const rowDate = row.getAttribute('data-date') || '';
             const rowYear = row.getAttribute('data-year') || '';
             const rowMonth = row.getAttribute('data-month') || '';
@@ -607,7 +722,10 @@
                 rowName.includes(query) || 
                 rowAppli.includes(query) || 
                 rowPhone.includes(query) || 
-                rowCrmid.includes(query);
+                rowCrmid.includes(query) ||
+                rowProg.includes(query) ||
+                rowBranch.includes(query) ||
+                rowGroup.includes(query);
 
             // Year match
             let matchesYear = !year || rowYear === year;
@@ -631,7 +749,10 @@
                 matchesSlot = true; // Both checked -> all slots
             }
 
-            if (matchesQuery && matchesYear && matchesMonth && matchesStartDate && matchesEndDate && matchesSlot) {
+            // Inter Group Checkboxes Match
+            let matchesGroup = selectedGroups.includes(rowGroup);
+
+            if (matchesQuery && matchesYear && matchesMonth && matchesStartDate && matchesEndDate && matchesSlot && matchesGroup) {
                 row.style.display = '';
                 visibleCount++;
             } else {
@@ -655,6 +776,16 @@
         const chk2 = document.getElementById('chkSlot2');
         if (chk1) chk1.checked = true;
         if (chk2) chk2.checked = true;
+
+        const groupChks = document.querySelectorAll('.chk-group-filter');
+        groupChks.forEach(c => c.checked = true);
+        const masterChk = document.getElementById('chkGroupSelectAll');
+        if (masterChk) {
+            masterChk.checked = true;
+            masterChk.indeterminate = false;
+        }
+        updateGroupDropdownLabel();
+
         filterExamTable();
     }
 
@@ -662,7 +793,7 @@
         const table = document.getElementById('examScheduleTable');
         if (!table) return;
 
-        const headers = ['S.No', 'Application No', 'Candidate Name', 'Phone No', 'CRM ID', 'Program & Branch', 'Scheduled Date', 'Exam Slot / Timing', 'Status', 'Booking Details'];
+        const headers = ['S.No', 'Application No', 'Candidate Name', 'Phone No', 'CRM ID', 'Program', 'Branch', 'Inter Group', 'Scheduled Date', 'Exam Slot / Timing', 'Status', 'Booking Details'];
         const rows = [];
         
         const trs = table.querySelectorAll('tbody tr');
@@ -670,22 +801,24 @@
         trs.forEach(function(tr) {
             if (tr.style.display !== 'none' && !tr.querySelector('td[colspan]')) {
                 const cells = tr.querySelectorAll('td');
-                if (cells.length >= 10) {
+                if (cells.length >= 12) {
                     const appNo = cells[1].innerText.replace(/^[#\s]+/, '').trim();
                     const name = cells[2].innerText.replace(/\s+/g, ' ').trim();
                     const phone = cells[3].innerText.replace(/\s+/g, ' ').trim();
                     const crmId = cells[4].innerText.replace(/\s+/g, ' ').trim();
-                    const progBranch = cells[5].innerText.replace(/\s+/g, ' ').trim();
-                    const schedDate = cells[6].innerText.replace(/\s+/g, ' ').trim();
-                    const slotTiming = cells[7].innerText
+                    const prog = cells[5].innerText.replace(/\s+/g, ' ').trim();
+                    const branch = cells[6].innerText.replace(/\s+/g, ' ').trim();
+                    const interGroup = cells[7].innerText.replace(/\s+/g, ' ').trim();
+                    const schedDate = cells[8].innerText.replace(/\s+/g, ' ').trim();
+                    const slotTiming = cells[9].innerText
                         .replace(/[🌅☀️\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
                         .replace(/\s+/g, ' ')
                         .trim();
-                    const status = cells[8].innerText
+                    const status = cells[10].innerText
                         .replace(/[✓✔\u{2705}\u{2713}\u{2714}]/gu, '')
                         .replace(/\s+/g, ' ')
                         .trim();
-                    const bookingDetails = cells[9].innerText.replace(/\s+/g, ' ').trim();
+                    const bookingDetails = cells[11].innerText.replace(/\s+/g, ' ').trim();
 
                     rows.push([
                         index++,
@@ -693,7 +826,9 @@
                         name,
                         phone,
                         crmId,
-                        progBranch,
+                        prog,
+                        branch,
+                        interGroup,
                         schedDate,
                         slotTiming,
                         status,

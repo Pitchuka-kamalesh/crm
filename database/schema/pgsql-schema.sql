@@ -279,7 +279,7 @@ CREATE TABLE crm.student_registration (
     programid integer,
     branchid integer,
     ableto boolean DEFAULT true,
-    stage1 character varying(20) DEFAULT 'not_paid'::character varying,
+    stage1 character varying(20) DEFAULT 'NA'::character varying,
     stage2 character varying(20) DEFAULT 'NA'::character varying,
     stage3 character varying(20) DEFAULT 'NA'::character varying,
     stage4 character varying(20) DEFAULT 'NA'::character varying,

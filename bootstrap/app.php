@@ -45,6 +45,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->reportable(function (\Throwable $e) {
+            \Modules\Crm\Services\ErrorMonitoringService::recordException($e);
+        });
 
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) =>
