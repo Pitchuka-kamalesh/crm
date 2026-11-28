@@ -377,6 +377,31 @@
                                 <input type="date" id="endDateInput" class="filter-select" onchange="filterExamTable()" style="width: 118px; height: 32px; font-size: 0.75rem; padding: 0 0.4rem;" title="Filter bookings up to this date">
                             </div>
 
+                            <div class="filter-item" style="position: relative;">
+                                <label class="filter-field-label">Inter Group</label>
+                                <div class="group-dropdown-wrap" style="position: relative;">
+                                    <button type="button" id="btnGroupDropdown" class="btn-group-dropdown" onclick="toggleGroupDropdown(event)">
+                                        <span id="groupDropdownLabel">All Groups ({{ $distinctGroups->count() }})</span>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                                    </button>
+                                    <div id="groupDropdownMenu" class="group-dropdown-menu">
+                                        <div class="group-dropdown-actions">
+                                            <button type="button" class="btn-link-action" onclick="selectAllGroups(true)">Select All</button>
+                                            <button type="button" class="btn-link-action" onclick="selectAllGroups(false)">Clear</button>
+                                        </div>
+                                        @foreach($distinctGroups as $grp)
+                                            <label class="group-checkbox-item">
+                                                <input type="checkbox" class="cb-group-filter" value="{{ $grp }}" checked onchange="applyFilters()">
+                                                <span>{{ $grp }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
                             <!-- 6. Live Search Input -->
                             <div class="filter-item filter-item-search">
                                 <label class="filter-field-label">Search</label>
@@ -423,7 +448,12 @@
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Candidate Name</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Phone No</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">CRM ID</th>
-                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Program &amp; Branch</th>
+                                                             
+                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Program</th>
+                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Branch</th>
+                                
+                                <th style="padding: 0.75rem 0.85rem; white-space: nowrap; text-align: center;">Inter Group</th>
+
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Scheduled Date</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap;">Exam Slot / Timing</th>
                                 <th style="padding: 0.75rem 0.85rem; white-space: nowrap; text-align: center;">Status</th>
@@ -499,9 +529,20 @@
                                     <td style="padding: 0.75rem 0.85rem; white-space: nowrap;">
                                         <div style="font-weight: 700; color: #0f172a;">{{ $progTitle }}</div>
                                         @if($branchTitle)
-                                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 1px;">{{ $branchTitle }}</div>
+                                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 1px;">{{ $branchTitle ?: '-' }}</div>
                                         @endif
                                     </td>
+
+                                    
+                                    <td style="padding: 0.75rem 0.85rem; text-align: center; white-space: nowrap;">
+                                        @if($pu2GroupDisplay !== 'NA')
+                                            <span class="group-pill">{{ $pu2GroupDisplay }}</span>
+                                        @else
+                                            <span style="color: #94a3b8; font-size: 0.76rem; font-weight: 600;">NA</span>
+                                        @endif
+                                    </td>
+
+
 
                                     <!-- Exam Date -->
                                     <td style="padding: 0.75rem 0.85rem; white-space: nowrap;">

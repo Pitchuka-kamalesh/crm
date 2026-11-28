@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admission Fee Checkout | VFSTR Admissions</title>
+    <title>Application Fee Checkout | VFSTR Applications</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/vignan-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -421,7 +421,7 @@
             <img src="/images/vignan-logo.png" alt="VFSTR">
             <div>
                 <div class="brand-title">VIGNAN'S UNIVERSITY</div>
-                <div class="brand-sub">Admission Fee Settlement</div>
+                <div class="brand-sub">Application Fee Settlement</div>
             </div>
         </div>
         <span class="txn-chip">TXN: {{ $txnid }}</span>
@@ -433,7 +433,7 @@
         <div class="amount-hero">
             <div class="amount-hero-label">Total Payable Amount</div>
             <div class="amount-hero-val">₹ {{ number_format($amount, 2) }}</div>
-            <div class="amount-hero-sub">Stage 1 Admission Registration Fee</div>
+            <div class="amount-hero-sub">Stage 1 Application Registration Fee</div>
         </div>
 
         <!-- Candidate & Fee Breakdown -->
@@ -451,7 +451,7 @@
                 <span class="sr-val">+91 {{ $phone }}</span>
             </div>
             <div class="summary-row">
-                <span class="sr-label">Base Admission Fee</span>
+                <span class="sr-label">Base Application Fee</span>
                 <span class="sr-val">₹ {{ number_format($breakdown['base_fee'] ?? 1200, 2) }}</span>
             </div>
 
@@ -477,13 +477,13 @@
 
         <!-- Official Receipt Guarantee Notice -->
         <div class="receipt-notice">
-            <span class="receipt-notice-icon">🧾</span>
+            <span class="receipt-notice-icon"></span>
             <div>
-                <strong>Official Admission Fee Receipt (Form VFSTR-REC):</strong> Upon confirmation, your digitally-verified university fee receipt is instantly generated and linked permanently to your student profile.
+                <strong>Official Application Fee Receipt (Form VFSTR-REC):</strong> Upon confirmation, your digitally-verified university fee receipt is instantly generated and linked permanently to your student profile.
             </div>
         </div>
 
-        <!-- Direct Secure Admission Fee Settlement Form (No external PayU gateway redirect; zero 504 errors) -->
+        <!-- Direct Secure Application Fee Settlement Form (No external PayU gateway redirect; zero 504 errors) -->
         <form action="{{ $gatewayUrl }}" method="POST" id="payuGatewayForm" onsubmit="const b=document.getElementById('btnPayNow'); const o=document.getElementById('processingOverlay'); if(b){ b.disabled=true; } if(o){ o.classList.add('active'); }">
             @csrf
     @foreach($params as $key => $value)
@@ -556,7 +556,7 @@
 
 <div class="processing-overlay" id="processingOverlay">
     <div class="spinner-ring"></div>
-    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Processing Admission Fee Settlement...</h3>
+    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Processing Application Fee Settlement...</h3>
     <p style="font-size: 0.84rem; color: #cbd5e1;">Generating digitally-verified fee receipt and unlocking Stage 5</p>
 </div>
 

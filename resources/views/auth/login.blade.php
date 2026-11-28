@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Admission Portal | VFSTR Vignan University</title>
+    <title>V-SAT 2027 Portal | VFSTR Vignan University</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="/images/vignan-logo.png">
 
@@ -377,6 +377,23 @@
             flex-direction: column;
             align-items: center;
             gap: 0.25rem;
+        }
+
+        .card-banner-logo-box {
+            width: 100%;
+            max-width: 270px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-banner-logo-box img {
+            width: 100%;
+            height: auto;
+            max-height: 80px;
+            object-fit: contain;
+            display: block;
         }
 
         .crest-icon-box {
@@ -846,6 +863,306 @@
                 font-size: 1.22rem;
             }
         }
+        /* ==========================================
+   MOBILE WEBVIEW RESPONSIVE CSS
+   ========================================== */
+
+@media screen and (max-width: 900px) {
+
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        padding: 12px;
+
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+
+        background-attachment: scroll;
+        background-position: center;
+        background-size: cover;
+    }
+
+    .hero-section {
+        display: none !important;
+    }
+
+    .main-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: safe center;
+        width: 100%;
+        max-width: 440px;
+        height: 100%;
+        min-height: 0;
+        margin: 0 auto;
+        padding: 0;
+        gap: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
+
+    .main-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .login-card-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 440px;
+        padding: 24px 20px 18px;
+        border-radius: 24px;
+    }
+
+    .card-logo-area {
+        margin-bottom: 16px;
+        gap: 4px;
+    }
+
+    .card-banner-logo-box {
+        width: 100%;
+        max-width: 250px;
+        margin-bottom: 6px;
+    }
+
+    .card-banner-logo-box img {
+        width: 100%;
+        height: auto;
+        max-height: 75px;
+        object-fit: contain;
+    }
+
+    .card-heading {
+        font-size: 1.3rem;
+        line-height: 1.3;
+    }
+
+    .card-subtitle {
+        font-size: 0.78rem;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+        gap: 6px;
+    }
+
+    .form-label {
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    .input-control {
+        width: 100%;
+        min-width: 0;
+        min-height: 48px;
+        font-size: 16px;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .input-with-prefix {
+        padding-left: 60px;
+    }
+
+    .input-prefix {
+        left: 12px;
+        font-size: 0.8rem;
+    }
+
+    .input-control::placeholder {
+        font-size: 0.78rem;
+    }
+
+    .field-hint {
+        font-size: 0.72rem;
+        line-height: 1.4;
+        margin-top: 4px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        min-height: 48px;
+        padding: 12px 16px;
+        margin-top: 12px !important;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        touch-action: manipulation;
+    }
+
+    .otp-input-field {
+        font-size: 1.2rem !important;
+        letter-spacing: 0.2em !important;
+        text-align: center;
+    }
+
+    .status-banner,
+    .error-banner,
+    .otp-banner {
+        padding: 10px 12px !important;
+        margin-bottom: 12px !important;
+        font-size: 0.75rem !important;
+        overflow-wrap: anywhere;
+    }
+
+    .remember-row {
+        font-size: 0.75rem;
+        margin-top: 8px;
+    }
+
+    .card-footer {
+        margin-top: 16px;
+        padding-top: 12px;
+        font-size: 0.7rem;
+        line-height: 1.5;
+    }
+
+    .btn-submit:hover {
+        transform: none;
+    }
+}
+
+
+/* ==========================================
+   SMALL MOBILE DEVICES
+   ========================================== */
+
+@media screen and (max-width: 375px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .login-card {
+        padding: 20px 15px 16px;
+        border-radius: 20px;
+    }
+
+    .card-banner-logo-box {
+        max-width: 220px;
+    }
+
+    .card-heading {
+        font-size: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.74rem;
+    }
+
+    .input-control::placeholder {
+        font-size: 0.7rem;
+    }
+
+    .btn-submit {
+        font-size: 0.82rem;
+    }
+}
+
+
+/* ==========================================
+   SHORT MOBILE SCREENS / KEYBOARD OPEN
+   ========================================== */
+
+@media screen and (max-width: 900px)
+and (max-height: 650px) {
+
+    .login-card {
+        padding: 16px 18px;
+    }
+
+    .card-logo-area {
+        margin-bottom: 10px;
+    }
+
+    .card-banner-logo-box {
+        margin-bottom: 4px;
+    }
+
+    .card-banner-logo-box img {
+        max-height: 55px;
+    }
+
+    .form-group {
+        margin-bottom: 8px;
+    }
+
+    .field-hint {
+        margin-top: 3px;
+    }
+
+    .card-footer {
+        margin-top: 10px;
+        padding-top: 8px;
+    }
+
+    .status-banner,
+    .error-banner,
+    .otp-banner {
+        margin-bottom: 8px !important;
+    }
+}
+
+
+.mobile-scroll-hint {
+    display: none;
+    text-align: center;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin: 1.25rem 0 1rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    letter-spacing: 0.02em;
+    opacity: 0.95;
+}
+.mobile-scroll-hint svg {
+    width: 14px;
+    height: 14px;
+    animation: bounceDown 1.6s infinite ease-in-out;
+}
+@media (max-width: 900px) {
+    .mobile-scroll-hint {
+        display: flex !important;
+    }
+}
+
+
+
+
+/* ==========================================
+   MOBILE LANDSCAPE MODE
+   ========================================== */
+
+
     </style>
 </head>
 <body>
@@ -857,132 +1174,17 @@
         <section class="hero-section">
             <div class="hero-title-area">
                 <div class="tag-label">
-                    <span>&bull;</span> Official Student Admission Portal
+                    <span>&bull;</span> Official V-SAT 2027 Portal
                 </div>
                 <h1 class="hero-title">
-                    Vignan University <br><span class="hero-title-gradient">Student Admission Portal</span>
+                    Vignan University Admissions <br><span class="hero-title-gradient">V-SAT 2027 Portal</span>
                 </h1>
                 <p class="hero-desc">
                     Welcome prospective and enrolled candidates! Track your admission application, verify certificates, check program allotment, and complete enrollment onboarding.
                 </p>
             </div>
 
-            <!-- Admission Process & Student Services -->
-            <div class="bubbles-cluster-wrap" style="margin-top: 1.75rem;">
-                <div class="bubbles-cluster-title">
-                    <span>&bull;</span> Admission Process &amp; Student Services (Hover to view details):
-                </div>
-
-                <!-- Row 1: Online Application, Document Verification, Provisional ID -->
-                <div class="bubbles-grid">
-
-                    <!-- Bubble 1: Online Application -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-blue">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Online Application</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Online Application</span>
-                                <span class="popover-badge popover-badge-blue">&bull; Batch 2026-27</span>
-                            </div>
-                            <p class="popover-text">Track application status, chosen program tracks (MBA, MCA, BBA, BCA), personal profile, and category reservation.</p>
-                        </div>
-                    </div>
-
-                    <!-- Bubble 2: Document Verification -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-cyan">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Document Verification</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Certificate &amp; KYC</span>
-                                <span class="popover-badge popover-badge-cyan">&bull; Online KYC</span>
-                            </div>
-                            <p class="popover-text">Upload and verify educational certificates, 10th/12th memos, Transfer Certificate, Migration, and Aadhaar card.</p>
-                        </div>
-                    </div>
-
-                    <!-- Bubble 5: Provisional ID & Enrollment (Placed beside Document Verification) -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-purple">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Provisional ID</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Provisional ID &amp; Order</span>
-                                <span class="popover-badge popover-badge-purple">&bull; Official Letter</span>
-                            </div>
-                            <p class="popover-text">Download official admission allotment order, student registration number, and digital campus onboarding pass.</p>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Row 2: Fee & Receipts and Seat Allotment (Placed below with clear gap) -->
-                <div class="bubbles-grid" style="margin-top: 1.05rem;">
-
-                    <!-- Bubble 3: Fee Payment & Receipts -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-emerald">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Fee &amp; Receipts</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Fee Payment</span>
-                                <span class="popover-badge popover-badge-emerald">&bull; Instant Receipt</span>
-                            </div>
-                            <p class="popover-text">View tuition fee breakdown, scholarship concessions, online installment options, and download official receipts.</p>
-                        </div>
-                    </div>
-
-                    <!-- Bubble 4: Branch & Program Allocation -->
-                    <div class="feature-bubble">
-                        <div class="bubble-icon bubble-amber">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                        </div>
-                        <span class="bubble-label">Seat Allotment</span>
-                        <span class="bubble-badge-indicator"></span>
-
-                        <!-- Hover Popover -->
-                        <div class="bubble-popover">
-                            <div class="popover-header">
-                                <span class="popover-title">Branch &amp; Seat Allotment</span>
-                                <span class="popover-badge popover-badge-amber">&bull; Merit Order</span>
-                            </div>
-                            <p class="popover-text">Check allocated degree program, academic regulation (R25), campus induction dates, and elective specializations.</p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+                    
 
             <!-- Admission Information & Brochures -->
             <div class="bubbles-cluster-wrap" style="margin-top: 3.5rem;">
@@ -994,7 +1196,8 @@
                 <div class="bubbles-grid">
 
                     <!-- Button 1: FEE - INFO -->
-                    <a href="https://www.vignan.ac.in/fee_str.php" target="_blank" rel="noopener noreferrer" class="feature-bubble">
+
+                    <!-- <a href="https://www.vignan.ac.in/fee_str.php" target="_blank" rel="noopener noreferrer" class="feature-bubble">
                         <div class="bubble-icon bubble-teal">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1003,7 +1206,7 @@
                         <span class="bubble-label">FEE - INFO</span>
                         <span class="bubble-badge-indicator"></span>
 
-                        <!-- Hover Popover -->
+                        
                         <div class="bubble-popover">
                             <div class="popover-header">
                                 <span class="popover-title">FEE - INFO</span>
@@ -1011,7 +1214,7 @@
                             </div>
                             <p class="popover-text">Complete tuition fee structure, merit scholarships, branch concessions, hostel and examination fee guidelines.</p>
                         </div>
-                    </a>
+                    </a> -->
 
                     <!-- Button 2: V-SAT brochure -->
                     <a href="{{ asset('images/V_SAT_Poster_2027.webp') }}" target="_blank" rel="noopener noreferrer" class="feature-bubble">
@@ -1042,14 +1245,12 @@
         <div class="login-card-wrapper">
             <div class="login-card">
 
-                <!-- Card Header with Official Vignan Logo -->
+                <!-- Card Header with Given Vignan Logo & Portal Heading -->
                 <div class="card-logo-area">
-                    <div class="crest-icon-box">
-                        <img src="/images/vignan-logo.png" alt="Vignan University Crest">
+                    <div class="card-banner-logo-box">
+                        <img src="{{ asset('images/vignan-banner-logo.jpg') }}" alt="Vignan's Foundation for Science, Technology & Research">
                     </div>
-                    <div class="crest-subtext">&bull; VFSTR &bull; VIGNAN UNIVERSITY</div>
-                    <h2 class="card-heading">Student Admission <span>Portal</span></h2>
-                    <p class="card-subtitle">Enter your registered mobile number to check admission status &amp; proceed.</p>
+                    <h2 class="card-heading">V-SAT 2027 <span>Portal</span></h2>
                 </div>
 
                 <!-- Status & Error Messages -->
@@ -1075,7 +1276,7 @@
                     <!-- STEP 1 PANE: ENTER REGISTERED MOBILE NUMBER -->
                     <div id="step-phone-pane" class="step-pane step-active">
                         <div class="form-group">
-                            <label for="phone" class="form-label">Registered Mobile Number / Employee Code</label>
+                            <label for="phone" class="form-label">Enter New/Registered Mobile Number or Employee Code</label>
                             <div class="input-group">
                                 <span class="input-prefix">+91</span>
                                 <input type="tel"
@@ -1103,6 +1304,15 @@
                             </svg>
                         </button>
                     </div>
+
+                    <!-- Mobile View Indicator: For more info -->
+                        <div class="mobile-scroll-hint">
+                            <span>For more info</span>
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                            </svg>
+                        </div>
+
 
                     <!-- STEP 2 PANE: VERIFY OTP (Opens after mobile number is submitted!) -->
                     <div id="step-otp-pane" class="step-pane step-hidden">
@@ -1159,7 +1369,7 @@
 
                 <!-- Clean Minimal Card Footer -->
                 <div class="card-footer">
-                    <div>&copy; 2026 Student Admission Portal</div>
+                    <div>&copy; 2026 V-SAT 2027 Portal</div>
                     <div class="card-footer-power">VFSTR Deemed to be University</div>
                 </div>
 

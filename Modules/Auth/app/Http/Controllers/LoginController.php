@@ -164,7 +164,7 @@ class LoginController extends Controller
                     ->first();
             } catch (\Throwable $e) {}
 
-            $isValid = ($dbOtp !== null) || ($sessionOtp && $otp === (string)$sessionOtp && $sessionPhone === $cleanPhone) || ($otp === '123456');
+            $isValid = ($dbOtp !== null) || ($sessionOtp && $otp === (string)$sessionOtp && $sessionPhone === $cleanPhone) ; //|| ($otp === '123456')
 
             if (!$isValid) {
                 return back()->withInput()->withErrors([
@@ -277,12 +277,12 @@ class LoginController extends Controller
             }
 
             // Also support master/demo passwords or roll number for convenient initial sign-in
-            if (!$passwordMatches) {
-                $allowedFallbacks = ['vignan123', 'admin123', '123456', $user->usercode, $cleanPhone];
-                if (in_array($password, $allowedFallbacks, true)) {
-                    $passwordMatches = true;
-                }
-            }
+           // if (!$passwordMatches) {
+            //    $allowedFallbacks = ['vignan123', 'admin123', '123456', $user->usercode, $cleanPhone];
+             //   if (in_array($password, $allowedFallbacks, true)) {
+             //       $passwordMatches = true;
+             //   }
+           // }
 
             if (!$passwordMatches) {
                 return back()->withInput()->withErrors([
@@ -306,6 +306,7 @@ class LoginController extends Controller
         }
 
         $activeRoleId = $user->getActiveRoleId();
+        Log::info('User Role ID Debug', ['role_id' => $user->getActiveRoleId()]);
         session(['user.role_id' => $activeRoleId]);
 
         // Direct to role-based landing page without updating any database tables
@@ -326,7 +327,7 @@ class LoginController extends Controller
         if (empty($cleanPhone) && !$employeeByCode) {
             return response()->json([
                 'success' => false,
-                'message' => 'Please enter your registered mobile number or employee code.',
+                'message' => 'Please Enter New/Registered Mobile Number or Employee Code.',
             ], 422);
         }
         if (!$employeeByCode) {

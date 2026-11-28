@@ -10,10 +10,12 @@ Route::post('/payu/response', [PayUController::class, 'handleResponse'])
     ->withoutMiddleware('web')
     ->name('payu.response');
 
-
+    // ── 2. PUBLIC: Signed URL Receipt (for post-payment redirect) ──
+    Route::get('/payu/receipt', [PayUController::class, 'receipt'])->middleware('signed:relative')->name('payu.receipt');
+    // Authenticated receipt view
 
 // ── 3. AUTHENTICATED: Dashboard routes ──
-Route::middleware(['auth','role:3'])->group(function () {
+Route::middleware(['auth', 'role:2,3,6'])->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/finance/index', [FinanceController::class, 'index']);
     Route::get('/finance/paiddetails', [FinanceController::class, 'index'])->name('finance.paiddetails');
@@ -24,8 +26,6 @@ Route::middleware(['auth','role:3'])->group(function () {
 Route::middleware(['auth','role:5'])->group(function () {
     Route::post('/payu/initiate', [PayUController::class, 'initiate'])->name('payu.initiate');
     // Route::post('/payu/cancel',   [PayUController::class, 'cancel'])->name('payu.cancel');
-    // ── 2. PUBLIC: Signed URL Receipt (for post-payment redirect) ──
-    Route::get('/payu/receipt', [PayUController::class, 'receipt'])->middleware('signed:relative')->name('payu.receipt');
-    // Authenticated receipt view
+
     Route::get('/payu/payu_receipt', [PayUController::class, 'payu_receipt'])->name('payu.payu_receipt');
 });

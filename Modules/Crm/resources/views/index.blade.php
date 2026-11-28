@@ -442,11 +442,11 @@
                                     <th>Student Name</th>
                                     <th>Mobile Number</th>
                                     <th style="text-align: center;">Registration Form</th>
-                                    <th style="text-align: center;">Payment</th>
                                     <th style="text-align: center;">Personal Details</th>
                                     <th style="text-align: center;">Academic Details</th>
+                                    <th style="text-align: center;">Payment</th>
                                     <th style="text-align: center;">Application Download</th>
-                                    <th style="text-align: center;">VSAT Result</th>
+                                    <th style="text-align: center;">Exam Slot Booked</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -488,10 +488,10 @@
                                         }
 
                                         // 2. Payment (stage1 fee payment)
-                                        if (in_array($s1, ['completed', 'paid', 'approved', 'done'])) {
+                                        if (in_array($s1, ['completed', 'paid', 'approved', 'done','not_paid'])) {
                                             $st2Pill = 'pill-done'; $st2Type = 'done'; $st2Icon = '✓'; $st2Text = 'Done';
-                                        } elseif (in_array($s1, ['not_paid', 'unpaid', 'due', 'failed'])) {
-                                            $st2Pill = 'pill-danger'; $st2Type = 'due'; $st2Icon = '✕'; $st2Text = 'Fee Due';
+                                        } elseif (in_array($s1, ['unpaid', 'due', 'failed'])) {
+                                            $st2Pill = 'pill-danger'; $st2Type = 'due'; $st2Icon = '✕'; $st2Text = 'Pending';
                                         } else {
                                             $st2Pill = 'pill-pending'; $st2Type = 'pending'; $st2Icon = '⏳'; $st2Text = 'Pending';
                                         }
@@ -511,7 +511,7 @@
                                         }
 
                                         // 5. Application Download (stage4)
-                                        if (in_array($s4, ['completed', 'approved', 'done', 'downloaded'])) {
+                                        if (in_array($s6, ['completed', 'approved', 'done', 'downloaded'])) {
                                             $st5Pill = 'pill-done'; $st5Type = 'done'; $st5Icon = '✓'; $st5Text = 'Done';
                                         } else {
                                             $st5Pill = 'pill-pending'; $st5Type = 'pending'; $st5Icon = '⏳'; $st5Text = 'Pending';

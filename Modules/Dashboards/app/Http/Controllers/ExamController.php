@@ -38,6 +38,19 @@ class ExamController extends Controller
             } catch (\Throwable $e2) {}
         }
 
+
+        // Eager-load academicDetails for pu2_group extraction
+            $schedules = ExamSchedule::with(['student.program', 'student.branch', 'student.academicDetails', 'personalInfo'])
+                ->orderBy('logdatetime', 'desc')
+                ->get();
+
+            $distinctGroups = $schedules->map(function ($s) {
+                return trim((string)($s->student?->academicDetails?->pu2_group ?? ''));
+            })->filter()->unique()->sort()->values();
+
+
+
+
         // Summary Metric Counters
         $totalBookings = $schedules->count();
         $slot1Count = $schedules->filter(function ($s) {
@@ -100,5 +113,45 @@ class ExamController extends Controller
             'monthsList'
         ));
     }
+
+            public function totalDetails(Request $request): View
+            {
+                $user = Auth::user();
+                $roleId = $user ? (int) $user->getActiveRoleId() : 2;
+                $roleName = $user ? $user->role_label : 'CRM Official';
+
+                $query = CrmStudentRegistration::with([
+                    'personalInfo', 'academicDetails', 'payDetail', 'examSchedule',
+                    'program', 'branch', 'campus', 'country', 'state'
+                ]);
+
+                // Live search & filters (Program level, Inter Group, Fee Status, Slot status)
+                if ($search = trim((string)$request->input('search'))) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('applinano', 'ilike', "%{$search}%")
+                        ->orWhere('crmid', 'ilike', "%{$search}%")
+                        ->orWhere('name', 'ilike', "%{$search}%")
+                        ->orWhere('phoneno', 'like', "%{$search}%")
+                        ->orWhere('emailid', 'ilike', "%{$search}%");
+                    });
+                }
+
+                $students = $query->paginate(25)->withQueryString();
+                $totalRegistered = CrmStudentRegistration::count();
+                $totalPaid = CrmStudentRegistration::where(function ($q) {
+                    $q->where('stage4', 'paid')->orWhere('stage1', 'paid')->orWhere('std_status', 'paid');
+                })->count();
+                $totalExamBooked = ExamSchedule::count();
+                $totalPending = max(0, $totalRegistered - $totalPaid);
+                $programs = Program::orderBy('program_short_name')->get();
+                $distinctGroups = DB::table('crm.student_academic_details')->whereNotNull('pu2_group')->where('pu2_group', '!=', '')->distinct()->pluck('pu2_group')->sort()->values();
+
+                return view('dashboards::exam.totaldetails', compact(
+                    'user', 'roleId', 'roleName', 'students', 'totalRegistered', 'totalPaid', 'totalExamBooked', 'totalPending', 'programs', 'distinctGroups'
+                ));
+            }
+
+
+
 }
 
